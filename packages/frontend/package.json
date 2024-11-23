@@ -1,0 +1,45 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint && prettier --check . && eslint .",
+    "format": "eslint --fix . && prettier --write . --plugin prettier-plugin-tailwindcss .",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx,json}": [
+      "eslint --fix",
+      "prettier --write --ignore-unknown"
+    ],
+    "*.{tsx,css,html}": [
+      "prettier --write --ignore-unknown --plugin prettier-plugin-tailwindcss"
+    ]
+  },
+  "dependencies": {
+    "next": "15.0.3",
+    "react": "19.0.0-rc-66855b96-20241106",
+    "react-dom": "19.0.0-rc-66855b96-20241106"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "15.0.3",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-jest-dom": "^5.5.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-testing-library": "^7.0.0",
+    "lint-staged": "^15.2.10",
+    "postcss": "^8",
+    "prettier": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.9",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
