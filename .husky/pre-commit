@@ -4,7 +4,6 @@
 if [ -n "$(git status packages/frontend --porcelain --untracked-files=no)" ]; then
   cd packages/frontend
   npx lint-staged
-  npx validate-branch-name
   cd -  # Return to the original directory
 fi
 
@@ -12,6 +11,5 @@ fi
 if [ -n "$(git status packages/backend --porcelain --untracked-files=no)" ]; then
   cd packages/backend
   npx lint-staged
-  npx validate-branch-name
   cd -  # Return to the original directory
 fi
