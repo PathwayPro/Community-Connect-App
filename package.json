@@ -1,0 +1,33 @@
+{
+  "name": "community-connect-app",
+  "version": "0.0.1",
+  "description": "Innovative and interactive web application designed to establish a vibrant and inclusive digital space for individuals within the immigrant community",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PathwayPro/Community-Connect-App.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PathwayPro/Community-Connect-App/issues"
+  },
+  "homepage": "https://github.com/PathwayPro/Community-Connect-App/blob/dev/README.md",
+  "keywords": [
+    "Community",
+    "connections",
+    "tech",
+    "info tech",
+    "immigrants",
+    "mentorship",
+    "PathwayPro"
+  ],
+  "author": "PathwayPro",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
+    "husky": "^9.1.7"
+  }
+}

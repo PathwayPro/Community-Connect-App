@@ -97,7 +97,3 @@ Once you have made your changes, you can make a pull request from your developme
 We have a PR template for you to fill out, in order to make the code review process faster for you and easier for us.
 
 Filling out the PR template will tell us **what** and **why** you made the changes. Your code will tell us **how** those changes are made. If there are additional contexts that are not obvious through the code (i.e. specific commands to generate the code), please include those. Screenshots are also encouraged, especially if the changes are frontend related.
-
-## 🚀 Releases
-
-We use [`lerna`](https://lerna.js.org/docs/api-reference/commands) to manage our releases, package versioning, and changelogs.

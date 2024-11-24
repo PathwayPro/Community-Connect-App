@@ -10,14 +10,14 @@ To establish a secure environment within the tech community where immigrants can
 
 ## Repository Overview
 
-This monorepo houses the frontend and backend components of the **Community Connect** application, built with modern, scalable technologies and organized using [Lerna](https://lerna.js.org/) for efficient package management. The repository also employs best practices for code quality and consistency, such as linting and commit standards.
+This monorepo houses the frontend and backend components of the **Community Connect** application, built with modern, scalable technologies. The repository also employs best practices for code quality and consistency, such as linting and commit standards.
 
 ### Tech Stack
 
 - **Frontend**: Next.js + TypeScript
 - **Backend**: Nest.js + TypeScript
-- **Database**: MongoDB
-- **Monorepo Management**: Lerna
+- **Database**: PostgreSQL
+- **ORM**: Prisma
 - **Quality Tools**:
   - **Husky**: For Git hooks (e.g., pre-commit and pre-push checks)
   - **Commitlint**: To enforce consistent commit message formats
@@ -34,7 +34,6 @@ community-connect/
 │   └── backend/    # Nest.js + TypeScript application for the API
 ├── .husky/         # Husky configuration for Git hooks
 ├── commitlint.config.js # Commitlint rules for commit message formatting
-├── lerna.json      # Lerna configuration file
 ├── package.json    # Root package configuration
 └── README.md       # High-level overview of the repository
 ```
@@ -85,6 +84,7 @@ Houses the Nest.js API application that powers the backend services of the platf
   ```
 
 - Backend:
+
   ```bash
   cd packages/backend
   npm run start:dev
@@ -104,6 +104,7 @@ This repository enforces strict code quality standards through the following too
 
   - Commit messages must follow the Conventional Commits specification.
   - Example commit message:
+
     ```bash
     feat(backend): add user authentication API
     ```
