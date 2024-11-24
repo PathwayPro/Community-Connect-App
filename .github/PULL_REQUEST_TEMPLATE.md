@@ -29,5 +29,4 @@ Please put the close or fix statement in a bullet point so that it renders the i
 - [ ] I tested this pull request locally before submitting.
 - [ ] I checked that this pull request does not conflict with other requests.
 - [ ] I have made sure that this pull request follows the project's style and formatting guidelines.
-- [ ] I performed unit/integration tests to ensure this pull request is functional.
 - [ ] I have updated the documentation if necessary.
