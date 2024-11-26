@@ -18,36 +18,36 @@ Ensure you have the following installed:
 
 ### 1. Clone the Repository
 
-1.  Clone the repository:
+1. Clone the repository:
 
     ```bash
     git clone https://github.com/PathwayPro/Community-Connect-App.git
     ```
 
-2.  Navigate to the Project Directory
+2. Navigate to the Project Directory
     Change to the cloned project's directory:
 
     ```bash
     cd community-connect-app/packages/backend
     ```
 
-3.  Install Dependencies
+3. Install Dependencies
     Install the necessary dependencies:
 
-        ```bash
-        npm install
-        ```
+    ```bash
+    npm install
+    ```
 
-4.  Configure Environment Variables
+4. Configure Environment Variables
     The application requires environment variables to run. Create an .env file in the root directory:
 
     - Check the `.env.example` file for the sample structure of environmental variables
 
-5.  Start the Application
+5. Start the Application
     Run the application in development mode:
 
     ```bash
     npm run start:dev
     ```
 
-    Access the application at http://localhost:3001 (or the specified port in .env).
+    Access the application at `http://localhost:3001` (or the specified port in .env).
