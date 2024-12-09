@@ -1,11 +1,13 @@
 import type { Config } from 'tailwindcss';
 import { fontFamily } from 'tailwindcss/defaultTheme';
+
 export default {
   darkMode: ['class'],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}'
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/typography/**/*.{js,ts,jsx,tsx,mdx}'
   ],
   theme: {
     container: {
@@ -17,21 +19,28 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['var(--font-sans)', ...fontFamily.sans],
-        geist: ['var(--font-geist-sans)', ...fontFamily.sans],
-        mono: ['var(--font-geist-mono)', ...fontFamily.mono]
+        sans: ['var(--font-lato)', ...fontFamily.sans]
       },
       fontSize: {
         // Custom font sizes
-        '2xs': ['0.625rem', { lineHeight: '0.75rem' }], // 10px
-        xs: ['0.75rem', { lineHeight: '1rem' }], // 12px
-        sm: ['0.875rem', { lineHeight: '1.25rem' }], // 14px
-        base: ['1rem', { lineHeight: '1.5rem' }], // 16px
-        lg: ['1.125rem', { lineHeight: '1.75rem' }], // 18px
-        xl: ['1.25rem', { lineHeight: '1.75rem' }], // 20px
-        '2xl': ['1.5rem', { lineHeight: '2rem' }], // 24px
-        '3xl': ['1.875rem', { lineHeight: '2.25rem' }], // 30px
-        '4xl': ['2.25rem', { lineHeight: '2.5rem' }] // 36px
+        // Display
+        'display-lg': ['4rem', { lineHeight: '4.5rem' }], // 64px
+        'display-sm': ['3rem', { lineHeight: '3.5rem' }], // 48px
+
+        //Heading
+        'heading-h1': ['2.625rem', { lineHeight: '3rem' }], // 42px
+        'heading-h2': ['2.25rem', { lineHeight: '2.5rem' }], // 36px
+        'heading-h3': ['1.875rem', { lineHeight: '2.25rem' }], // 32px
+        'heading-h4': ['1.75rem', { lineHeight: '2.25rem' }], // 28px
+        'heading-h5': ['1.5rem', { lineHeight: '2rem' }], // 24px
+        'heading-h6': ['1.25rem', { lineHeight: '1.75rem' }], // 20px
+
+        // Paragraph
+        'paragraph-lg': ['1.125rem', { lineHeight: '1.75rem' }], // 18px
+        'paragraph-base': ['1rem', { lineHeight: '1.5rem' }], // 16px
+        'paragraph-sm': ['0.875rem', { lineHeight: '1.25rem' }], // 14px
+        'paragraph-xs': ['0.75rem', { lineHeight: '1rem' }], // 12px
+        'paragraph-2xs': ['0.625rem', { lineHeight: '0.75rem' }] // 10px
       },
       spacing: {
         // Custom spacing scale
@@ -51,11 +60,12 @@ export default {
       },
       fontWeight: {
         // Custom font weights
+        light: '100',
         normal: '400',
         medium: '500',
         semibold: '600',
         bold: '700',
-        extrabold: '800'
+        extrabold: '900'
       },
       lineHeight: {
         // Custom line heights

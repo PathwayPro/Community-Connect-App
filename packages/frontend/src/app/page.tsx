@@ -1,14 +1,15 @@
 import { Button } from '@/components/ui/button';
 import {
-  TextH1,
-  TextH2,
-  TextH3,
-  TextH4,
-  TextLead,
-  TextP,
-  TextLarge,
-  TextSmall,
-  TextMuted
+  Display,
+  HeadingH1,
+  HeadingH2,
+  HeadingH3,
+  HeadingH4,
+  HeadingH5,
+  HeadingH6,
+  Lead,
+  Muted,
+  Paragraph
 } from '@/components/typography/typography';
 
 export default function Home() {
@@ -17,19 +18,23 @@ export default function Home() {
       <Button>Shadcn UI Test Button</Button>
 
       <div className="container-default py-8">
-        <TextH1>Welcome to our site - H1</TextH1>
-        <TextH2>Welcome to our site - H2</TextH2>
-        <TextH3>Welcome to our site - H3</TextH3>
-        <TextH4>Welcome to our site - H4</TextH4>
-        <TextLead>
+        <Display size="lg">Display Text</Display>
+        <Display size="sm">Display Text</Display>
+        <HeadingH1>Welcome to our site - H1</HeadingH1>
+        <HeadingH2>Welcome to our site - H2</HeadingH2>
+        <HeadingH3>Welcome to our site - H3</HeadingH3>
+        <HeadingH4>Welcome to our site - H4</HeadingH4>
+        <HeadingH5>Welcome to our site - H5</HeadingH5>
+        <HeadingH6>Welcome to our site - H6</HeadingH6>
+        <Paragraph size="lg">
           This is a lead paragraph that introduces the main content.
-        </TextLead>
-        <TextP>
+        </Paragraph>
+        <Paragraph size="base">
           Regular paragraph text with consistent styling and spacing.
-        </TextP>
-        <TextLarge>Large text</TextLarge>
-        <TextSmall>Small text</TextSmall>
-        <TextMuted>Muted text</TextMuted>
+        </Paragraph>
+        <Paragraph size="sm">Small text</Paragraph>
+        <Lead>Lead text</Lead>
+        <Muted>Muted text</Muted>
       </div>
     </div>
   );
