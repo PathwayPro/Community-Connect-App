@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${lato.variable} font-lato antialiased`}>
+      <body className={`${lato.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>
