@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/ui/button';
 import {
   Display,
   HeadingH1,
@@ -10,7 +10,7 @@ import {
   Lead,
   Muted,
   Paragraph
-} from '@/components/typography/typography';
+} from '@/shared/components/typography/typography';
 
 export default function Home() {
   return (
