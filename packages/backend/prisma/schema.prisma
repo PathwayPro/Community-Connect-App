@@ -34,8 +34,8 @@ model Mentor {
     id  Int @id @default(autoincrement())
     maxMentees Int
     availability String
-    has_experience Boolean @default(false)
-    experienceDetails String
+    hasExperience Boolean @default(false)
+    experienceDetails String?
     // STATUS ENUM
     status MentorStatus @default(PENDING)
     // USER RELATIONSHIP
