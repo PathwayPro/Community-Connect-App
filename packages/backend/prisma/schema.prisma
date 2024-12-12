@@ -22,6 +22,8 @@ model users {
   role              String    @default("USER") @db.VarChar(10)
   verification_token  String?   @db.VarChar(255) // Token for email verification
   email_verified      Boolean   @default(false) // Whether the email has been verified
+    // MENTOR RELATIONSHIP
+    mentor    Mentor?
 }
 
 model Mentor {
@@ -33,7 +35,7 @@ model Mentor {
     // STATUS ENUM
     status MentorStatus @default(PENDING)
     // USER RELATIONSHIP
-    user User @relation(fields: [userId], references: [id])
+    user users @relation(fields: [userId], references: [id])
     userId Int @unique
 }
 
