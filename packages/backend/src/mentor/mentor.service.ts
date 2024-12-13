@@ -20,7 +20,7 @@ export class MentorService {
     /* - - - END AUTH EXCEPTION - - - */
 
     try {
-      const mentors = await this.prisma.user.findMany({
+      const mentors = await this.prisma.users.findMany({
         where: {
           AND: [{ role: 'MENTOR' }, { mentor: { isNot: null } }],
         },
@@ -36,7 +36,7 @@ export class MentorService {
 
   async findOneById(userId: number) {
     try {
-      const mentor = await this.prisma.user.findFirst({
+      const mentor = await this.prisma.users.findFirst({
         where: {
           AND: [
             { id: userId },
@@ -56,7 +56,7 @@ export class MentorService {
 
   async create(createMentorDto: CreateMentorDto) {
     try {
-      const mentor = await this.prisma.mentor.create({
+      const mentor = await this.prisma.mentors.create({
         data: createMentorDto,
       });
 
@@ -75,7 +75,7 @@ export class MentorService {
   async update(id: number, updateMentor: UpdateMentorDto) {
     try {
       // Validate mentor existence
-      const mentorToUpdate = await this.prisma.mentor.findUnique({
+      const mentorToUpdate = await this.prisma.mentors.findUnique({
         where: { id },
       });
       if (!mentorToUpdate) {
@@ -85,7 +85,7 @@ export class MentorService {
       }
 
       // Update mentor information
-      const updatedMentor = await this.prisma.mentor.update({
+      const updatedMentor = await this.prisma.mentors.update({
         where: { id },
         data: updateMentor,
       });

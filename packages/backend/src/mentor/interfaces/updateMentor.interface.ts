@@ -1,10 +1,9 @@
-//import { MentorStatus } from "./mentorStatus.enum";
-import { MentorStatus } from '@prisma/client';
+import { mentors_status } from '@prisma/client';
 
 export interface UpdateMentor {
-  maxMentees?: number;
+  max_mentees?: number;
   availability?: string;
-  hasExperience?: boolean;
-  experienceDetails?: string;
-  status?: MentorStatus;
+  has_experience?: boolean;
+  experience_details?: string;
+  status?: mentors_status;
 }

@@ -5,26 +5,26 @@ import {
   IsString,
   IsEnum,
 } from 'class-validator';
-import { MentorStatus } from '@prisma/client';
+import { mentors_status } from '@prisma/client';
 
 export class CreateMentorDto {
   @IsInt()
-  maxMentees: number;
+  max_mentees: number;
 
   @IsString()
   availability: string;
 
   @IsBoolean()
-  hasExperience?: boolean = false;
+  has_experience?: boolean = false;
 
   @IsString()
   @IsOptional()
-  experienceDetails?: string;
+  experience_details?: string;
 
-  @IsEnum(MentorStatus)
+  @IsEnum(mentors_status)
   @IsOptional()
-  status?: MentorStatus = 'PENDING';
+  status?: mentors_status = 'PENDING';
 
   @IsInt()
-  userId: number;
+  user_id: number;
 }

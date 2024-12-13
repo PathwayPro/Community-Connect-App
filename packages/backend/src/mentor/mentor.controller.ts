@@ -35,10 +35,10 @@ export class MentorController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateMentorDto: UpdateMentorDto) {
     const updatedMentor: UpdateMentor = {
-      maxMentees: updateMentorDto.maxMentees,
+      max_mentees: updateMentorDto.max_mentees,
       availability: updateMentorDto.availability,
-      hasExperience: updateMentorDto.hasExperience,
-      experienceDetails: updateMentorDto.experienceDetails,
+      has_experience: updateMentorDto.has_experience,
+      experience_details: updateMentorDto.experience_details,
     };
     return this.mentorService.update(+id, updatedMentor);
   }
