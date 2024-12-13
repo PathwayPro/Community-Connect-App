@@ -3,101 +3,81 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Param,
   Post,
   Put,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto } from './user.dto';
-import { JwtAuthGuard } from 'src/auth/jwtAuthGuard';
+import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Public } from '../auth/decorators/public.decorator';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { RolesGuard } from '../auth/guards';
 
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('/register')
-  async registerUser(@Body() user: CreateUserDto) {
-    try {
-      const result = await this.usersService.registerUser(user);
-      return {
-        message: 'User registered successfully.',
-        data: result,
-      };
-    } catch (error) {
-      return {
-        message: 'Failed to register user.',
-        error: error.message,
-      };
-    }
-  }
-  @Get('/count')
-  getUserCount() {
-    return this.usersService.getUserCount();
+  @Public()
+  @Post('register')
+  async registerUser(@Body() createUserDto: CreateUserDto) {
+    return await this.usersService.registerUser(createUserDto);
   }
 
-  @Get('/public-data')
+  @Public()
+  @Get('public-data')
   getUsersPublicData() {
     return this.usersService.getUsersPublicInfo();
   }
-  @Get('/public-data/:userId')
-  getUserPublicDataById(@Param('userId') userId: string) {
-    return this.usersService.getUserPublicInfoById(userId);
-  }
-  @Get('id/:userId') // Make sure the parameter is extracted correctly
-  async getUserById(@Param('userId') userId: string) {
-    try {
-      // Call the service method to get the user by ID
-      return await this.usersService.getUserById(userId);
-    } catch (error) {
-      // Handle the error if the user is not found
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException(`User with ID ${userId} not found`);
-      }
-      // For other types of errors, you might want to rethrow or handle them differently
-      throw error;
-    }
+
+  @Public()
+  @Get('public-data/:userId')
+  async getUserPublicDataById(@Param('userId') userId: string) {
+    return await this.usersService.getUserPublicInfoById(userId);
   }
 
-  @Get('email/:email') // Make sure the parameter is extracted correctly
-  async getUserByUsername(@Param('email') email: string) {
-    try {
-      // Call the service method to get the user by ID
-      return await this.usersService.getUserByUsername(email);
-    } catch (error) {
-      // Handle the error if the user is not found
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException(`User with email ${email} not found`);
-      }
-      // For other types of errors, you might want to rethrow or handle them differently
-      throw error;
-    }
-  }
-
-  @Get()
-  getUsers() {
+  @Get('all')
+  async getAllUsers() {
     return this.usersService.getUsers();
   }
 
-  // @Post()
-  // addUser(@Body() user: CreateUserDto) {
-  //   // console.log('Received user data:', user); // Log the body to check if it's being parsed correctly
-  //   return this.usersService.addUser(user);
-  // }
-  // Update a user by ID
+  @Get('id/:userId')
+  async getUserById(@Param('userId') userId: string) {
+    return await this.usersService.getUserPublicInfoById(userId);
+  }
+
+  @Get('email/:email')
+  async getUserByEmail(@Param('email') email: string) {
+    return await this.usersService.getUserByEmail(email);
+  }
+
   @Put(':id')
-  updateUser(@Param('id') id: string, @Body() user: UpdateUserDto) {
-    return this.usersService.updateUser(id, user);
+  async updateUser(
+    @GetUser('sub') currentUserId: number,
+    @Param('id', ParseIntPipe) targetUserId: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return await this.usersService.updateUser(
+      currentUserId,
+      targetUserId,
+      updateUserDto,
+    );
   }
 
   @Delete(':id')
-  DeleteUser(@Param('id') id: string) {
-    return this.usersService.deleteUser(id);
+  async deleteUser(
+    @GetUser('sub') currentUserId: number,
+    @Param('id', ParseIntPipe) targetUserId: number,
+  ) {
+    console.log('current user :', currentUserId, targetUserId);
+    return await this.usersService.deleteUser(currentUserId, targetUserId);
   }
+
   @Get('profile')
-  @UseGuards(JwtAuthGuard) // Protect this route with the JwtAuthGuard
   getProfile() {
-    return { message: 'This is a protected route, user is authenticated!' };
+    return { message: 'Profile accessed successfully' };
   }
 }

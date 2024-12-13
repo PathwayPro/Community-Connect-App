@@ -1,312 +1,306 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service'; // Adjust the path accordingly
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { PrismaService } from '../database/prisma.service';
 import {
   CreateUserDto,
+  NewUserFromDbDto,
   PublicReadUserDto,
   ReadUserDto,
   UpdateUserDto,
-} from './user.dto';
-import { NotFoundException } from '@nestjs/common';
-import { AuthService } from 'src/auth/auth.service';
-import { EmailService } from 'src/auth/email.Service';
+} from './dto/user.dto';
+import { AuthService } from '../auth/services/auth.service';
+import { EmailService } from '../auth/services/email.service';
+import {
+  findUserByEmail,
+  findUserById,
+  userEmailExists,
+} from 'src/common/utils/helper';
+import { RegisterUserResponse } from './types';
+import { RolesEnum } from 'src/auth/util';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     private prisma: PrismaService,
     private readonly authService: AuthService,
     private readonly emailService: EmailService,
   ) {}
 
-  async registerUser(user: CreateUserDto): Promise<ReadUserDto> {
-    // Validate password
-    const passwordMatching = user.password === user.confirmPassword;
-    if (!passwordMatching) {
-      throw new HttpException('Passwords do not match', HttpStatus.BAD_REQUEST);
-    }
-    const isValid = await this.authService.isValidPassword(user.password);
-    if (!isValid) {
-      throw new HttpException('Invalid password', HttpStatus.BAD_REQUEST);
-    }
-    // Check if email already exists
-    const emailExists = await this.userEmailExists(user.email);
-    console.log(`Email : ${emailExists}`);
-    if (emailExists) {
-      throw new HttpException('Email already exists', HttpStatus.CONFLICT);
-    }
+  // User Registration and Creation
+  async registerUser(user: CreateUserDto): Promise<RegisterUserResponse> {
+    await this.validateRegistration(user);
 
-    // Hash the password
-    const hashedPassword = await this.authService.hashPassword(user.password);
-    const dateTimeDob = this.convertToDateTime(user.dob);
-    const dateTimeArrival = this.convertToDateTime(user.arrival_in_canada);
-
-    // Prepare user data with hashed password
-    const userToCreate = {
-      ...user,
-      password: hashedPassword,
-      dob: dateTimeDob,
-      arrival_in_canada: dateTimeArrival,
-    };
-    // console.log(userToCreate);
-    // console.log(
-    //   'User list before adding user to database : ' +
-    //     (await this.prisma.users.findMany()),
-    // );
-
-    // Delegate user creation to UserService
-    return this.addUser(userToCreate);
-  }
-  convertToDateTime(dateString: string | Date): Date {
-    // If the input is already a Date object, return it directly
-    if (dateString instanceof Date) {
-      return dateString;
-    }
-
-    // Otherwise, convert the string to a Date object
-    return new Date(dateString);
-  }
-
-  async getUserCount() {
-    const users = await this.prisma.users.findMany();
-    const userList = users.map(
-      (user) => '\n' + user.id + ' ' + user.first_name,
+    const hashedPassword = await this.authService.hashPassword(
+      user.passwordHash,
     );
 
-    console.log('UserList: \n' + userList);
-    const count = users.length;
-    return 'User Count : ' + count;
+    const userToCreate = {
+      ...user,
+      passwordHash: hashedPassword,
+    };
+
+    const newUser = await this.createUserInDatabase(userToCreate);
+
+    await this.setupEmailVerification(newUser);
+
+    return {
+      message: 'User registered, please check your email for verification link',
+      data: this.mapToReadUserDto(newUser),
+    };
   }
 
-  // Get user by ID using Prisma
+  private async validateRegistration(user: CreateUserDto): Promise<void> {
+    if (user.passwordHash !== user.confirmPassword) {
+      throw new HttpException('Passwords do not match', HttpStatus.BAD_REQUEST);
+    }
+
+    if (!(await this.authService.isValidPassword(user.passwordHash))) {
+      throw new HttpException('Invalid password', HttpStatus.BAD_REQUEST);
+    }
+
+    if (await userEmailExists(this.prisma, user.email)) {
+      throw new HttpException('Email already exists', HttpStatus.CONFLICT);
+    }
+  }
+
+  // User Retrieval Methods
   async getUserById(userIdNumber: string): Promise<ReadUserDto> {
-    const userId = Number(userIdNumber);
-
-    const user = await this.prisma.users.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
-
+    const user = await findUserById(this.prisma, Number(userIdNumber));
     return this.mapToReadUserDto(user);
   }
 
-  // Get user by email (username) using Prisma
   async getUserByUsername(email: string): Promise<ReadUserDto> {
-    const user = await this.prisma.users.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      throw new NotFoundException(`User with email ${email} not found`);
-    }
-
+    const user = await findUserByEmail(this.prisma, email);
     return this.mapToReadUserDto(user);
   }
 
-  // Get all users using Prisma
   async getUsers(): Promise<ReadUserDto[]> {
     const users = await this.prisma.users.findMany();
-    console.log(users);
     return users.map(this.mapToReadUserDto);
   }
 
-  // Get public user info using Prisma
   async getUsersPublicInfo(): Promise<PublicReadUserDto[]> {
     const users = await this.prisma.users.findMany();
-    return users.map((user) => {
-      const publicUser = new PublicReadUserDto();
-      publicUser.first_name = user.first_name;
-      publicUser.middle_name = user.middle_name;
-      publicUser.last_name = user.last_name;
-      publicUser.email = user.email;
-      publicUser.arrival_in_canada = user.arrival_in_canada;
-      publicUser.role = user.role as 'USER' | 'ADMIN' | 'MENTOR';
-      return publicUser;
-    });
+    return users.map(this.mapToPublicReadUserDto);
   }
 
-  // Get public user info by ID
   async getUserPublicInfoById(
     userIdNumber: string,
-  ): Promise<PublicReadUserDto> {
-    const userId = Number(userIdNumber);
-    const user = await this.prisma.users.findUnique({
-      where: { id: userId },
-    });
+  ): Promise<{ message: string; data: PublicReadUserDto }> {
+    const user = await findUserById(this.prisma, Number(userIdNumber));
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
-    const publicUser = new PublicReadUserDto();
-    publicUser.first_name = user.first_name;
-    publicUser.middle_name = user.middle_name;
-    publicUser.last_name = user.last_name;
-    publicUser.email = user.email;
-    publicUser.arrival_in_canada = user.arrival_in_canada;
-    publicUser.role = user.role as 'USER' | 'ADMIN' | 'MENTOR';
-    return publicUser;
+    const publicUser = this.mapToPublicReadUserDto(user);
+    return { message: 'User found', data: publicUser };
   }
 
-  // Check if email exists using Prisma
-  async userEmailExists(email: string): Promise<boolean> {
-    const user = await this.prisma.users.findUnique({
-      where: { email },
-    });
-    if (user) {
-      console.log(`userEmailExists : ${user.email}`);
-      return true;
-    }
-    return false;
-  }
-  async getUserByEmail(email: string): Promise<PublicReadUserDto> {
+  async getUserByEmail(
+    email: string,
+  ): Promise<{ message: string; data: PublicReadUserDto }> {
     try {
-      const user = await this.prisma.users.findUnique({
-        where: { email },
-      });
+      const user = await findUserByEmail(this.prisma, email);
 
-      if (user) {
-        return this.mapToPublicReadUserDto(user);
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
 
-      // Return an empty DTO or handle null user appropriately
-      return new PublicReadUserDto();
+      const publicUser = this.mapToPublicReadUserDto(user);
+
+      return { message: 'User found', data: publicUser };
     } catch (error) {
-      console.error('Error fetching user by email:', error.message);
-      throw new Error('Failed to fetch user by email.');
+      this.logger.error(
+        `Error fetching user by email: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new HttpException(
+        'Failed to fetch user by email',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
-  // private mapToLoginUserDto(user: any): LoginUserDto {
-  //   const loginUser = new LoginUserDto();
-  //   loginUser.email = user.email;
-  //   loginUser.password_hash = user.password_hash;
-
-  //   return loginUser;
-  // }
-  // Add a user using Prisma
-  async addUser(user: CreateUserDto): Promise<ReadUserDto> {
+  // User Management Methods
+  async addUser(
+    user: CreateUserDto,
+  ): Promise<{ message: string; data: ReadUserDto }> {
     try {
-      // Step 1: Create the user in the database
-      const newUser = await this.prisma.users.create({
-        data: {
-          first_name: user.first_name,
-          middle_name: user.middle_name,
-          last_name: user.last_name,
-          email: user.email,
-          password_hash: user.password, // Assuming the password is already hashed
-          dob: user.dob,
-          show_dob: user.show_dob,
-          arrival_in_canada: user.arrival_in_canada,
-          goal_id: user.goal_id,
-          role: user.role,
-          email_verified: false, // Ensure email is not verified initially
-        },
-      });
-      console.log('User added successfully:', newUser);
+      const newUser = await this.createUserInDatabase(user);
 
-      // Step 2: Generate the verification token for the user
-      const token = this.emailService.generateVerificationToken(newUser.id);
-      console.log('Generated verification token:', token);
+      await this.setupEmailVerification(newUser);
 
-      // Step 3: Store the verification token in the user record
-      await this.prisma.users.update({
-        where: { id: newUser.id },
-        data: { verification_token: token },
-      });
-
-      // Step 4: Send the verification email with the token
-      await this.emailService.sendVerificationEmail(newUser.email, token);
-
-      // Return the user data (you can map this as per your requirements)
-      return this.mapToReadUserDto(newUser);
-    } catch (err) {
-      console.error(err);
-      throw new Error('User creation failed');
+      const newUserDto = this.mapToReadUserDto(newUser);
+      return { message: 'User added successfully', data: newUserDto };
+    } catch (error) {
+      this.logger.error(
+        `Error adding user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new HttpException(
+        'User creation failed',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
-  // Update a user using Prisma
   async updateUser(
-    userIdNumber: string,
-    user: UpdateUserDto,
-  ): Promise<ReadUserDto> {
-    const id = Number(userIdNumber);
-
+    currentUserId: number,
+    targetUserId: number,
+    updateData: UpdateUserDto,
+  ): Promise<{ message: string; data: ReadUserDto }> {
     const existingUser = await this.prisma.users.findUnique({
-      where: { id },
+      where: { id: targetUserId },
     });
 
     if (!existingUser) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException('User not found');
+    }
+
+    if (existingUser.id !== currentUserId) {
+      throw new UnauthorizedException(
+        'You are not allowed to update this user',
+      );
     }
 
     const updatedUser = await this.prisma.users.update({
-      where: { id },
+      where: { id: targetUserId },
+      data: this.prepareUpdateData(existingUser, updateData),
+    });
+
+    const updatedUserDto = this.mapToReadUserDto(updatedUser);
+    return { message: 'User updated successfully', data: updatedUserDto };
+  }
+
+  async deleteUser(
+    userId: number,
+    currentUserId: number,
+  ): Promise<{ message: string }> {
+    if (isNaN(userId)) {
+      throw new HttpException('Invalid user ID', HttpStatus.BAD_REQUEST);
+    }
+
+    try {
+      const user = await findUserById(this.prisma, userId);
+
+      if (!user) {
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      }
+
+      if (user.id !== currentUserId && user.role !== RolesEnum.ADMIN) {
+        throw new UnauthorizedException(
+          'You are not allowed to delete this user',
+        );
+      }
+
+      await this.prisma.users.delete({ where: { id: userId } });
+      return { message: `User with ID ${userId} deleted successfully` };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.logger.error(`Failed to delete user ${userId}:`, error);
+      throw new HttpException(
+        'Failed to delete user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  private convertToDateTime(dateString: string | Date): Date {
+    return dateString instanceof Date ? dateString : new Date(dateString);
+  }
+
+  private async createUserInDatabase(
+    userData: CreateUserDto,
+  ): Promise<ReadUserDto> {
+    const newUser = await this.prisma.users.create({
       data: {
-        first_name: user.first_name ?? existingUser.first_name,
-        middle_name: user.middle_name ?? existingUser.middle_name,
-        last_name: user.last_name ?? existingUser.last_name,
-        email: user.email ?? existingUser.email,
-        dob: user.dob ?? existingUser.dob,
-        show_dob: user.show_dob ?? existingUser.show_dob,
-        arrival_in_canada:
-          user.arrival_in_canada ?? existingUser.arrival_in_canada,
-        goal_id: user.goal_id ?? existingUser.goal_id,
-        role: user.role ?? existingUser.role,
+        first_name: userData.firstName,
+        middle_name: userData.middleName,
+        last_name: userData.lastName,
+        email: userData.email,
+        password_hash: userData.passwordHash,
       },
     });
 
-    return this.mapToReadUserDto(updatedUser);
+    return this.mapToReadUserDto(newUser);
   }
 
-  // Delete a user using Prisma
-  async deleteUser(userId: string): Promise<string> {
-    const id = Number(userId);
-    const existingUser = await this.prisma.users.findUnique({
-      where: { id },
+  private async setupEmailVerification(
+    user: ReadUserDto,
+  ): Promise<{ success: boolean; message: string }> {
+    const token = this.emailService.generateToken(user.id);
+
+    await this.prisma.users.update({
+      where: { id: user.id },
+      data: { verification_token: token },
     });
 
-    if (!existingUser) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+    const response = await this.emailService.sendVerificationEmail(
+      user.email,
+      token,
+    );
+
+    if (response.success) {
+      return { success: true, message: 'Email verification sent' };
+    } else {
+      return { success: false, message: 'Failed to send email verification' };
     }
-
-    await this.prisma.users.delete({
-      where: { id },
-    });
-
-    return `User with ID ${id} deleted`;
   }
 
-  // Map Prisma User to ReadUserDto
+  private prepareUpdateData(
+    existingUser: NewUserFromDbDto,
+    updateData: UpdateUserDto,
+  ): Partial<NewUserFromDbDto> {
+    return {
+      first_name: updateData.firstName ?? existingUser.first_name,
+      middle_name: updateData.middleName ?? existingUser.middle_name,
+      last_name: updateData.lastName ?? existingUser.last_name,
+      email: updateData.email ?? existingUser.email,
+      dob: updateData.dob ?? existingUser.dob,
+      show_dob: updateData.showDob ?? existingUser.show_dob,
+      goal_id: updateData.goalId ?? existingUser.goal_id,
+      arrival_in_canada:
+        updateData.arrivalInCanada ?? existingUser.arrival_in_canada,
+    };
+  }
+
   private mapToReadUserDto(user: any): ReadUserDto {
     const readUser = new ReadUserDto();
-    readUser.id = user.id;
-    readUser.first_name = user.first_name;
-    readUser.middle_name = user.middle_name;
-    readUser.last_name = user.last_name;
-    readUser.email = user.email;
-    // readUser.password_hash = user.password_hash;
-    readUser.dob = user.dob;
-    readUser.show_dob = user.show_dob;
-    readUser.arrival_in_canada = user.arrival_in_canada;
-    readUser.goal_id = user.goal_id;
-    readUser.role = user.role;
-
+    Object.assign(readUser, {
+      id: user.id,
+      firstName: user.first_name,
+      middleName: user.middle_name,
+      lastName: user.last_name,
+      email: user.email,
+      dob: user.dob,
+      showDob: user.show_dob,
+      arrivalInCanada: user.arrival_in_canada,
+      goalId: user.goal_id,
+      role: user.role as 'USER' | 'ADMIN' | 'MENTOR',
+    });
     return readUser;
   }
-  private mapToPublicReadUserDto(user: any): PublicReadUserDto {
-    const publicUser = new PublicReadUserDto();
-    publicUser.first_name = user.first_name;
-    publicUser.middle_name = user.middle_name;
-    publicUser.last_name = user.last_name;
-    publicUser.email = user.email;
-    // readUser.password_hash = user.password_hash;
-    publicUser.arrival_in_canada = user.arrival_in_canada;
-    publicUser.role = user.role;
 
+  private mapToPublicReadUserDto(user: PublicReadUserDto): PublicReadUserDto {
+    const publicUser = new PublicReadUserDto();
+    Object.assign(publicUser, {
+      firstName: user.firstName,
+      middleName: user.middleName,
+      lastName: user.lastName,
+      email: user.email,
+      arrivalInCanada: user.arrivalInCanada,
+      role: user.role as 'USER' | 'ADMIN' | 'MENTOR',
+    });
     return publicUser;
   }
 }

@@ -18,5 +18,11 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
   },
-  "include": ["src/**/*", "test/**/*", "*.json"]
+  "include": ["src/**/*", "test/**/*", "*.json"],
+  "paths": {
+    "@/*": ["src/*"],
+    "@/database": ["src/database/*"],
+    "@/users": ["src/users/*"],
+    "@/auth": ["src/auth/*"]
+  }
 }
