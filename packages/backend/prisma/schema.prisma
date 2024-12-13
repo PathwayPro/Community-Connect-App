@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum EnumRole {
+  USER
+  ADMIN
+  MENTOR
+}
+
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model users {
   id                Int       @id @default(autoincrement())
@@ -19,7 +25,9 @@ model users {
   show_dob          Boolean   @default(false)
   arrival_in_canada DateTime? @db.Date
   goal_id           Int?
-  role              String    @default("USER") @db.VarChar(10)
+  role              EnumRole    @default(USER)
   verification_token  String?   @db.VarChar(255) // Token for email verification
   email_verified      Boolean   @default(false) // Whether the email has been verified
+  refresh_token     String?   @db.VarChar(255)
+  last_logout       DateTime?
 }

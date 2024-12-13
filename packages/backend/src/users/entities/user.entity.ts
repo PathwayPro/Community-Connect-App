@@ -39,4 +39,16 @@ export class User extends BaseEntity {
     nullable: false,
   })
   role: 'USER' | 'ADMIN' | 'MENTOR';
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  verification_token?: string;
+
+  @Column({ type: 'boolean', default: false, nullable: false })
+  email_verified: boolean;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  refresh_token?: string;
+
+  @Column({ type: 'date', nullable: true })
+  last_logout?: Date;
 }
