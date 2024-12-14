@@ -37,8 +37,10 @@ export class UsersService {
 
     // Hash the password
     const hashedPassword = await this.authService.hashPassword(user.password);
-    const dateTimeDob = this.convertToDateTime(user.dob);
-    const dateTimeArrival = this.convertToDateTime(user.arrival_in_canada);
+    const dateTimeDob = user.dob ? this.convertToDateTime(user.dob) : null;
+    const dateTimeArrival = user.arrival_in_canada
+      ? this.convertToDateTime(user.arrival_in_canada)
+      : null;
 
     // Prepare user data with hashed password
     const userToCreate = {
@@ -63,6 +65,7 @@ export class UsersService {
     }
 
     // Otherwise, convert the string to a Date object
+    console.log('DATE STRING:', dateString);
     return new Date(dateString);
   }
 

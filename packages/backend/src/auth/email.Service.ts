@@ -24,6 +24,9 @@ export class EmailService {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
+      tls: {
+        rejectUnauthorized: process.env.EMAIL_CERTIFICATE_VALIDATION === 'true', // This line enables/disables certificate validation
+      },
     });
   }
 
