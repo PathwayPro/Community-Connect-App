@@ -80,3 +80,6 @@ Ensure you have the following installed:
 ---
 > **NOTE:** The Prisma service is defined in prisma/prisma.service.ts and registered in src/app.module.ts for accessibility through the application.
 ---
+
+## API Reference
+Visit [API REFERENCE](API-REFERENCE.md)
