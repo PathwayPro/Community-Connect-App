@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { databaseProviders } from './database.provider';
+import { PrismaService } from './prisma.service';
 
 @Module({
-  imports: [ConfigModule.forRoot()], // Load .env configuration
-  providers: [...databaseProviders],
-  exports: [...databaseProviders],
+  providers: [PrismaService],
+  exports: [PrismaService],
 })
 export class DatabaseModule {}

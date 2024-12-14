@@ -1,27 +1,24 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Client } from 'pg';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from './database/prisma.service';
+import { DatabaseException } from './database/exceptions/database.exception';
+import { DatabaseStatus } from './database/types';
 
 @Injectable()
 export class AppService {
-  constructor(@Inject('PG_CONNECTION') private readonly client: Client) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async checkDbConnection(): Promise<string> {
-    try {
-      // Execute a lightweight query to check if the DB is active
-      await this.client.query('SELECT 1');
+  async checkDbConnection(): Promise<DatabaseStatus> {
+    const connection = await this.prisma.checkConnection();
 
-      // Extract database name and port from the connection configuration
-      const dbName = this.client.database || 'unknown database';
-      const dbPort = this.client.port || 'unknown port';
-
-      return `Database "${dbName}" running successfully on port "${dbPort}"`;
-    } catch (error) {
-      console.error('Error checking database connection:', error.message);
-      throw new Error('Failed to connect to the database.');
+    if (connection.isConnected) {
+      return {
+        status: 'connected',
+        message: 'Database connection successful',
+      };
     }
-  }
 
-  getHello(): string {
-    return 'Welcome to the Home Page!';
+    throw new DatabaseException(
+      connection.error || 'Failed to connect to database',
+    );
   }
 }
