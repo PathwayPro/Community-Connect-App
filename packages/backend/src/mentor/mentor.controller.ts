@@ -11,15 +11,16 @@ import {
 import { MentorService } from './mentor.service';
 import { CreateMentorDto } from './dto/create-mentor.dto';
 import { UpdateMentorDto } from './dto/update-mentor.dto';
-import { UpdateMentor } from './interfaces/updateMentor.interface';
+import { FilterMentorDto } from './dto/filter-mentor.dto';
 
-@Controller('mentor')
+@Controller('mentors')
 export class MentorController {
   constructor(private readonly mentorService: MentorService) {}
 
   @Get()
-  findAll() {
-    return this.mentorService.findAll();
+  findAll(@Body() filters: FilterMentorDto) {
+    console.log('FILTERS CONTROLLER:', filters);
+    return this.mentorService.findAll(filters);
   }
 
   @Get(':id')
@@ -29,12 +30,19 @@ export class MentorController {
 
   @Post()
   create(@Body() createMentorDto: CreateMentorDto) {
-    return this.mentorService.create(createMentorDto);
+    const createMentor: CreateMentorDto = {
+      max_mentees: createMentorDto.max_mentees,
+      availability: createMentorDto.availability,
+      has_experience: createMentorDto.has_experience,
+      experience_details: createMentorDto.experience_details,
+      user_id: createMentorDto.user_id,
+    };
+    return this.mentorService.create(createMentor);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateMentorDto: UpdateMentorDto) {
-    const updatedMentor: UpdateMentor = {
+    const updatedMentor: UpdateMentorDto = {
       max_mentees: updateMentorDto.max_mentees,
       availability: updateMentorDto.availability,
       has_experience: updateMentorDto.has_experience,
@@ -45,13 +53,13 @@ export class MentorController {
 
   @Put(':id')
   updateStatus(
-    @Param('id') id: string,
+    @Param('id') userId: string,
     @Body() updateMentorDto: UpdateMentorDto,
   ) {
-    const updatedMentor: UpdateMentor = {
+    const updatedMentor: UpdateMentorDto = {
       status: updateMentorDto.status,
     };
-    return this.mentorService.update(+id, updatedMentor);
+    return this.mentorService.updateStatus(+userId, updatedMentor);
   }
 
   @Delete(':id')
