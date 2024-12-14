@@ -59,6 +59,9 @@ export class MentorService {
     try {
       const mentor = await this.prisma.mentors.findFirst({
         where: { id },
+        include: {
+          user: true,
+        },
       });
 
       if (!mentor) {
