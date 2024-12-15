@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { CreateMentorDto } from './dto/create-mentor.dto';
 import { UpdateMentorDto } from './dto/update-mentor.dto';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from 'src/database';
 import { FilterMentorDto } from './dto/filter-mentor.dto';
 import { Prisma, users_roles } from '@prisma/client';
 
