@@ -12,7 +12,9 @@ import { MentorService } from './mentor.service';
 import { CreateMentorDto } from './dto/create-mentor.dto';
 import { UpdateMentorDto } from './dto/update-mentor.dto';
 import { FilterMentorDto } from './dto/filter-mentor.dto';
+import { Public } from 'src/auth/decorators';
 
+@Public()
 @Controller('mentors')
 export class MentorController {
   constructor(private readonly mentorService: MentorService) {}
