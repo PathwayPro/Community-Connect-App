@@ -15,19 +15,47 @@ enum EnumRole {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model users {
-  id                Int       @id @default(autoincrement())
-  first_name        String    @db.VarChar(255)
-  middle_name       String?   @db.VarChar(255)
-  last_name         String    @db.VarChar(255)
-  email             String    @unique @db.VarChar(255)
-  password_hash     String    @db.VarChar(255)
-  dob               DateTime? @db.Date
-  show_dob          Boolean   @default(false)
-  arrival_in_canada DateTime? @db.Date
-  goal_id           Int?
-  role              EnumRole    @default(USER)
-  verification_token  String?   @db.VarChar(255) // Token for email verification
-  email_verified      Boolean   @default(false) // Whether the email has been verified
+  id                 Int        @id @default(autoincrement())
+  first_name         String     @db.VarChar(255)
+  middle_name        String?    @db.VarChar(255)
+  last_name          String     @db.VarChar(255)
+  email              String     @unique @db.VarChar(255)
+  password_hash      String     @db.VarChar(255)
+  dob                DateTime?  @db.Date
+  show_dob           Boolean    @default(false)
+  arrival_in_canada  DateTime?  @db.Date
+  goal_id            Int?
+  role               users_roles @default(USER)
+  verification_token String?    @db.VarChar(255) // Token for email verification
+  email_verified     Boolean    @default(false) // Whether the email has been verified
   refresh_token     String?   @db.VarChar(255)
   last_logout       DateTime?
+  // MENTOR RELATIONSHIP
+  mentor             mentors?
+}
+
+enum users_roles {
+  USER
+  MENTOR
+  ADMIN
+}
+
+model mentors {
+  id                 Int          @id @default(autoincrement())
+  max_mentees        Int
+  availability       String
+  has_experience     Boolean      @default(false)
+  experience_details String?
+  // STATUS ENUM
+  status             mentors_status @default(PENDING)
+  // USER RELATIONSHIP
+  user               users        @relation(fields: [user_id], references: [id])
+  user_id            Int          @unique
+}
+
+enum mentors_status {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
 }
