@@ -2,30 +2,37 @@ import { apiMethods } from '@/shared/api';
 import {
   LoginCredentials,
   AuthResponse,
-  AuthResponseWithUser,
   AuthResponseMessage,
-  RegisterCredentials
+  RegisterCredentials,
+  ResetPasswordCredentials,
+  ForgotPasswordCredentials,
+  UpdatePasswordCredentials,
+  AccessToken,
+  RefreshToken
 } from '@/features/auth/types';
 
 export const authApi = {
   login: (credentials: LoginCredentials) =>
-    apiMethods.post<AuthResponseWithUser>('/auth/login', credentials),
+    apiMethods.post<AuthResponse>('/auth/login', credentials),
 
   register: (credentials: RegisterCredentials) =>
-    apiMethods.post<AuthResponse>('/auth/register', credentials),
+    apiMethods.post<AuthResponse>('/users/register', credentials),
 
-  verifyEmail: (email: string) =>
-    apiMethods.post<AuthResponseMessage>('/auth/verify-email', { email }),
+  verifyEmail: (token: AccessToken) =>
+    apiMethods.get<AuthResponseMessage>(`/auth/verify-email?token=${token}`),
 
-  updatePassword: (password: string) =>
-    apiMethods.post<AuthResponseMessage>('/auth/update-password', { password }),
+  updatePassword: (credentials: UpdatePasswordCredentials) =>
+    apiMethods.post<AuthResponseMessage>('/auth/update-password', credentials),
 
-  forgotPassword: (email: string) =>
-    apiMethods.post<AuthResponseMessage>('/auth/forgot-password', { email }),
+  forgotPassword: (credentials: ForgotPasswordCredentials) =>
+    apiMethods.post<AuthResponseMessage>('/auth/forgot-password', credentials),
+
+  resetPassword: (credentials: ResetPasswordCredentials) =>
+    apiMethods.post<AuthResponseMessage>('/auth/reset-password', credentials),
 
   logout: () => apiMethods.post<AuthResponseMessage>('/auth/logout'),
 
-  refreshToken: (refreshToken: string) =>
+  refreshToken: (refreshToken: RefreshToken) =>
     apiMethods.post<AuthResponse>('/auth/refresh', { refreshToken }),
 
   signInWithGoogle: () => apiMethods.get<AuthResponse>('/auth/google/callback')

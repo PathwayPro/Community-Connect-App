@@ -87,11 +87,7 @@ export function Paragraph({
   size?: 'lg' | 'base' | 'sm' | 'xs' | '2xs';
 }) {
   return (
-    <p
-      className={`text-paragraph-${size} [&:not(:first-child)]:mt-6 ${className ?? ''}`}
-    >
-      {children}
-    </p>
+    <p className={`text-paragraph-${size} ${className ?? ''}`}>{children}</p>
   );
 }
 

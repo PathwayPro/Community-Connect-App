@@ -2,9 +2,19 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/shared/hooks/use-toast';
 import { authApi } from '@/features/auth/api';
-import { LoginCredentials, RegisterCredentials } from '@/features/auth/types';
+import {
+  AccessToken,
+  ForgotPasswordCredentials,
+  LoginCredentials,
+  RefreshToken,
+  RegisterCredentials,
+  ResetPasswordCredentials,
+  UpdatePasswordCredentials
+} from '@/features/auth/types';
 import { useAuthContext } from '../providers/auth-context';
-
+import { userApi } from '@/features/user-profile/api/user-api';
+import Cookies from 'js-cookie';
+import AlertDialogUI from '@/shared/components/notification/alert-dialog';
 export function useAuth() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -13,18 +23,47 @@ export function useAuth() {
   const login = async (credentials: LoginCredentials) => {
     try {
       setIsLoading(true);
+      console.log('login data in hook:', credentials);
       const response = await authApi.login(credentials);
-      toast({
-        title: 'Login successful!',
-        description: 'Welcome back to the app!'
+
+      console.log('login response in hook:', response);
+
+      if (!response.tokens) {
+        throw new Error('No tokens received from login request');
+      }
+
+      const accessToken = response.tokens.accessToken;
+      const refreshToken = response.tokens.refreshToken;
+
+      console.log('accessToken', accessToken);
+
+      Cookies.set('accessToken', accessToken, {
+        secure: true,
+        sameSite: 'strict'
       });
-      setUser(response.data.user);
+      Cookies.set('refreshToken', refreshToken, {
+        secure: true,
+        sameSite: 'strict'
+      });
 
-      router.push('/dashboard');
-      router.refresh();
+      if (accessToken && refreshToken) {
+        const responseUserData = await userApi.getUserProfile();
 
-      return response;
+        console.log('responseUserData', responseUserData);
+
+        if (responseUserData.status === 200) {
+          toast({
+            title: 'Login successful!',
+            description: 'Welcome back to the app!'
+          });
+
+          setUser(responseUserData.data);
+          router.push('/dashboard');
+          router.refresh();
+        }
+      }
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         title: 'Login Failed!',
         description: 'Please check your credentials and try again.'
@@ -39,14 +78,16 @@ export function useAuth() {
     try {
       setIsLoading(true);
       const response = await authApi.register(credentials);
-      toast({
-        title: 'Registration successful!',
-        description:
-          'Welcome to the app!, Please check your email for a verification link.'
-      });
-      router.push('/dashboard');
-      router.refresh();
-      return response;
+
+      if (response.status === 200) {
+        toast({
+          title: 'Registration successful!',
+          description:
+            'Welcome to the app!, Please check your email for a verification link.'
+        });
+        router.push('/auth/login');
+        router.refresh();
+      }
     } catch (error) {
       toast({
         title: 'Registration Failed!',
@@ -63,15 +104,19 @@ export function useAuth() {
     return response;
   };
 
-  const verifyEmail = async (email: string) => {
+  const verifyEmail = async (credentials: AccessToken) => {
     try {
       setIsLoading(true);
-      const response = await authApi.verifyEmail(email);
-      toast({
-        title: 'Email verification successful!',
-        description: 'Your email has been verified.'
-      });
-      return response;
+      const response = await authApi.verifyEmail(credentials);
+
+      if (response.status === 200) {
+        toast({
+          title: 'Email verification successful!',
+          description: 'Your email has been verified.'
+        });
+        router.push('/auth/login');
+        router.refresh();
+      }
     } catch (error) {
       toast({
         title: 'Failed to verify email',
@@ -83,15 +128,19 @@ export function useAuth() {
     }
   };
 
-  const updatePassword = async (password: string) => {
+  const updatePassword = async (credentials: UpdatePasswordCredentials) => {
     try {
       setIsLoading(true);
-      const response = await authApi.updatePassword(password);
-      toast({
-        title: 'Password updated successfully!',
-        description: 'Your password has been updated.'
-      });
-      return response;
+      const response = await authApi.updatePassword(credentials);
+
+      if (response.status === 200) {
+        toast({
+          title: 'Password updated successfully!',
+          description: 'Your password has been updated.'
+        });
+        router.push('/auth/login');
+        router.refresh();
+      }
     } catch (error) {
       toast({
         title: 'Failed to update password',
@@ -103,18 +152,31 @@ export function useAuth() {
     }
   };
 
-  const forgotPassword = async (email: string) => {
+  const forgotPassword = async (credentials: ForgotPasswordCredentials) => {
     try {
       setIsLoading(true);
-      const response = await authApi.forgotPassword(email);
-      toast({
-        title: 'Password reset instructions sent to your email',
-        description: 'Please check your email for a reset link.'
-      });
+      const response = await authApi.forgotPassword(credentials);
+
       return response;
     } catch (error) {
       toast({
         title: 'Failed to process forgot password request',
+        description: 'Please try again.'
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetPassword = async (credentials: ResetPasswordCredentials) => {
+    try {
+      setIsLoading(true);
+      const response = await authApi.resetPassword(credentials);
+      return response;
+    } catch (error) {
+      toast({
+        title: 'Failed to reset password',
         description: 'Please try again.'
       });
       throw error;
@@ -144,10 +206,10 @@ export function useAuth() {
     }
   };
 
-  const refreshToken = async (refreshToken: string) => {
+  const refreshToken = async (credentials: RefreshToken) => {
     try {
       setIsLoading(true);
-      const response = await authApi.refreshToken(refreshToken);
+      const response = await authApi.refreshToken(credentials);
       return response;
     } catch (error) {
       toast({
@@ -166,6 +228,7 @@ export function useAuth() {
     verifyEmail,
     updatePassword,
     forgotPassword,
+    resetPassword,
     logout,
     refreshToken,
     isLoading,
