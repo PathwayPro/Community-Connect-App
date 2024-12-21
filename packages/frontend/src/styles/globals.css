@@ -14,19 +14,19 @@ body {
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
+    --primary: 228, 41%, 36%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 35 57% 57%;
+    --secondary-foreground: 0 0% 98%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 355 90% 60%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
+    --ring: 228 41% 31%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -43,13 +43,13 @@ body {
     --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
     --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 35 47% 47%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
     --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 355 90% 60%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
@@ -75,23 +75,31 @@ body {
     }
   }
   h1 {
-    @apply text-4xl font-bold tracking-tight lg:text-5xl;
+    @apply text-heading-h1 font-bold leading-display-sm tracking-tight text-neutral-dark-600;
   }
 
   h2 {
-    @apply text-3xl font-semibold tracking-tight;
+    @apply text-heading-h2 font-semibold leading-heading-h1 tracking-tight text-neutral-dark-600;
   }
 
   h3 {
-    @apply text-2xl font-semibold tracking-tight;
+    @apply text-heading-h3 font-semibold leading-heading-h2 tracking-tight text-neutral-dark-600;
   }
 
   h4 {
-    @apply text-xl font-semibold tracking-tight;
+    @apply text-heading-h4 font-semibold leading-heading-h3 tracking-tight text-neutral-dark-600;
+  }
+
+  h5 {
+    @apply text-heading-h5 font-semibold leading-heading-h4 tracking-tight text-neutral-dark-600;
+  }
+
+  h6 {
+    @apply text-heading-h6 font-semibold leading-heading-h5 tracking-tight text-neutral-dark-600;
   }
 
   p {
-    @apply leading-7 [&:not(:first-child)]:mt-6;
+    @apply text-paragraph-base leading-heading-h6 tracking-tight text-neutral-dark-600;
   }
 
   /* Prose styles for content areas */

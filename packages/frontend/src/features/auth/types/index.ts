@@ -7,17 +7,26 @@ export type LoginCredentials = {
 
 export type RegisterCredentials = {
   email: string;
-  password: string;
-  name: string;
+  passwordHash: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
 };
 
 export type AuthResponse = {
-  accessToken: string;
-  refreshToken: string;
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+  };
+  message: string;
 };
 
-export type AuthResponseWithUser = AuthResponse & {
-  user: UserProfile;
+export type AccessToken = {
+  token: string;
+};
+
+export type RefreshToken = {
+  refreshToken: string;
 };
 
 export interface AuthContextType {
@@ -29,6 +38,20 @@ export interface AuthContextType {
   logoutContext: () => void;
 }
 
+export type ForgotPasswordCredentials = {
+  email: string;
+};
+
+export type ResetPasswordCredentials = {
+  passwordHash: string;
+  confirmPassword: string;
+};
+
 export type AuthResponseMessage = {
   message: string;
+};
+
+export type UpdatePasswordCredentials = {
+  passwordHash: string;
+  confirmPassword: string;
 };
