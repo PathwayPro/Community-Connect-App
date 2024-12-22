@@ -32,10 +32,15 @@ export class AuthService {
 
       const user = await this.prisma.users.findUnique({ where: { email } });
 
-      if (!user || !user.email_verified) {
-        throw new UnauthorizedException(
-          'Invalid credentials or unverified email',
-        );
+      if (!user) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      if (user.email_verified === false) {
+        return {
+          message: 'Email not verified',
+          tokens: null,
+        };
       }
 
       const isPasswordValid = await this.verifyPassword({
@@ -226,7 +231,7 @@ export class AuthService {
     try {
       const token = await this.generateResetToken(generateResetTokenDto);
 
-      const response = await this.emailService.sendVerificationEmail(
+      const response = await this.emailService.sendPasswordResetEmail(
         generateResetTokenDto.email,
         token,
       );
@@ -313,14 +318,15 @@ export class AuthService {
       const user = await this.prisma.users.findFirst({
         where: {
           id: decodedMessage.userId,
-          email_verified: false,
         },
       });
 
       if (!user) {
-        throw new UnauthorizedException(
-          'User not found or email already verified',
-        );
+        throw new UnauthorizedException('User not found');
+      }
+
+      if (user.email_verified === true) {
+        throw new UnauthorizedException('Email already verified');
       }
 
       // Update user verification status
@@ -331,6 +337,8 @@ export class AuthService {
           verification_token: null,
         },
       });
+
+      console.log('decodedMessage', decodedMessage);
 
       return {
         message: 'Email verified successfully',

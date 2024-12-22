@@ -5,8 +5,8 @@ interface TokenData {
   refreshToken: string;
 }
 
-const ACCESS_TOKEN_KEY = 'cc_access_token';
-const REFRESH_TOKEN_KEY = 'cc_refresh_token';
+const ACCESS_TOKEN_KEY = 'accessToken';
+const REFRESH_TOKEN_KEY = 'refreshToken';
 
 const cookieOptions = {
   secure: true,
