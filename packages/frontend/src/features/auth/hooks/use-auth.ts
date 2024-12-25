@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from '@/shared/hooks/use-toast';
+import { useToast } from '@/shared/hooks/use-toast';
 import { authApi } from '@/features/auth/api';
 import {
   AccessToken,
@@ -14,11 +14,11 @@ import {
 import { useAuthContext } from '../providers/auth-context';
 import { userApi } from '@/features/user-profile/api/user-api';
 import Cookies from 'js-cookie';
-import AlertDialogUI from '@/shared/components/notification/alert-dialog';
 export function useAuth() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const { setUser } = useAuthContext();
+  const { loginContext, logoutContext } = useAuthContext();
+  const { toast } = useToast();
 
   const login = async (credentials: LoginCredentials) => {
     try {
@@ -28,12 +28,12 @@ export function useAuth() {
 
       console.log('login response in hook:', response);
 
-      if (!response.tokens) {
+      if (!response.data.tokens) {
         throw new Error('No tokens received from login request');
       }
 
-      const accessToken = response.tokens.accessToken;
-      const refreshToken = response.tokens.refreshToken;
+      const accessToken = response.data.tokens.accessToken;
+      const refreshToken = response.data.tokens.refreshToken;
 
       console.log('accessToken', accessToken);
 
@@ -51,14 +51,14 @@ export function useAuth() {
 
         console.log('responseUserData', responseUserData);
 
-        if (responseUserData.status === 200) {
+        if (responseUserData) {
           toast({
             title: 'Login successful!',
             description: 'Welcome back to the app!'
           });
 
-          setUser(responseUserData.data);
-          router.push('/dashboard');
+          loginContext(responseUserData.data);
+          router.push('/profile');
           router.refresh();
         }
       }
@@ -79,7 +79,7 @@ export function useAuth() {
       setIsLoading(true);
       const response = await authApi.register(credentials);
 
-      if (response.status === 200) {
+      if (response.data.success) {
         toast({
           title: 'Registration successful!',
           description:
@@ -97,11 +97,6 @@ export function useAuth() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const signInWithGoogle = async () => {
-    const response = await authApi.signInWithGoogle();
-    return response;
   };
 
   const verifyEmail = async (credentials: AccessToken) => {
@@ -188,13 +183,18 @@ export function useAuth() {
   const logout = async () => {
     try {
       setIsLoading(true);
-      await authApi.logout();
-      toast({
-        title: 'Logged out successfully!',
-        description: 'See you soon!'
-      });
-      router.push('/login');
-      router.refresh();
+      const response = await authApi.logout();
+
+      if (response.message === 'Logout successful') {
+        logoutContext();
+        toast({
+          title: 'Logged out successfully!',
+          description: 'See you soon!'
+        });
+
+        router.push('/auth/login');
+        router.refresh();
+      }
     } catch (error) {
       toast({
         title: 'Logout Failed!',
@@ -231,7 +231,6 @@ export function useAuth() {
     resetPassword,
     logout,
     refreshToken,
-    isLoading,
-    signInWithGoogle
+    isLoading
   };
 }

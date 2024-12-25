@@ -14,11 +14,16 @@ export type RegisterCredentials = {
 };
 
 export type AuthResponse = {
-  tokens: {
-    accessToken: string;
-    refreshToken: string;
+  success: boolean;
+  data: {
+    tokens: {
+      accessToken: string;
+      refreshToken: string;
+    };
   };
   message: string;
+  timestamp: string;
+  path: string;
 };
 
 export type AccessToken = {
