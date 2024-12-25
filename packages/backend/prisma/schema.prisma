@@ -15,23 +15,31 @@ enum EnumRole {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model users {
-  id                 Int        @id @default(autoincrement())
-  first_name         String     @db.VarChar(255)
-  middle_name        String?    @db.VarChar(255)
-  last_name          String     @db.VarChar(255)
-  email              String     @unique @db.VarChar(255)
-  password_hash      String     @db.VarChar(255)
-  dob                DateTime?  @db.Date
-  show_dob           Boolean    @default(false)
-  arrival_in_canada  DateTime?  @db.Date
-  goal_id            Int?
-  role               users_roles @default(USER)
-  verification_token String?    @db.VarChar(255) // Token for email verification
-  email_verified     Boolean    @default(false) // Whether the email has been verified
-  refresh_token     String?   @db.VarChar(255)
-  last_logout       DateTime?
+  id                   Int                          @id @default(autoincrement())
+  first_name           String                       @db.VarChar(255)
+  middle_name          String?                      @db.VarChar(255)
+  last_name            String                       @db.VarChar(255)
+  email                String                       @unique @db.VarChar(255)
+  password_hash        String                       @db.VarChar(255)
+  dob                  DateTime?                    @db.Date
+  show_dob             Boolean                      @default(false)
+  arrival_in_canada    DateTime?                    @db.Date
+  goal_id              Int?
+  role                 users_roles                  @default(USER)
+  verification_token   String?                      @db.VarChar(255) // Token for email verification
+  email_verified       Boolean                      @default(false) // Whether the email has been verified
+  refresh_token        String?                      @db.VarChar(255)
+  last_logout          DateTime?
   // MENTOR RELATIONSHIP
-  mentor             mentors?
+  mentor               mentors?
+  // EVENTS MANAGERS RELATIONSHIP
+  event_manager        EventsManagers[]
+  // EVENTS SUBSCRIPTIONS RELATIONSHIP
+  subscriptions        EventsSubscriptions[]
+  subscription_updates EventsSubscriptionsUpdates[]
+  //EVENTS INVITATIONS RELATIONSHIP
+  event_inviter        EventsInvitations[]          @relation(name: "EventInvitationInviter")
+  event_invitee        EventsInvitations[]          @relation(name: "EventInvitationInvitee")
 }
 
 enum users_roles {
@@ -41,16 +49,16 @@ enum users_roles {
 }
 
 model mentors {
-  id                 Int          @id @default(autoincrement())
+  id                 Int            @id @default(autoincrement())
   max_mentees        Int
   availability       String
-  has_experience     Boolean      @default(false)
+  has_experience     Boolean        @default(false)
   experience_details String?
   // STATUS ENUM
   status             mentors_status @default(PENDING)
   // USER RELATIONSHIP
-  user               users        @relation(fields: [user_id], references: [id])
-  user_id            Int          @unique
+  user               users          @relation(fields: [user_id], references: [id])
+  user_id            Int            @unique
 }
 
 enum mentors_status {
@@ -58,4 +66,126 @@ enum mentors_status {
   APPROVED
   REJECTED
   SUSPENDED
+}
+
+// EVENTS FLOW
+model Events {
+  id                    Int                   @id @default(autoincrement())
+  title                 String
+  subtitle              String?
+  description           String
+  location              String?
+  link                  String?
+  image                 String?
+  price                 Decimal               @default(0) @db.Decimal(10, 2)
+  type                  EventsTypes           @default(PUBLIC)
+  requires_confirmation Boolean               @default(false) // IF SUBSCRIPTIONS ARE ACCEPTED DIRECTLY OR IF THEY REQUIRE AN APPROVAL AFTER REVIEW
+  accept_subscriptions  Boolean               @default(true) // IF USERS CAN STILL SUBSCRIBE TO THE EVENT OR IS FULL
+  created_at            DateTime              @default(now())
+  updated_at            DateTime              @default(now())
+  // RELATIONSHIPS
+  category              EventsCategories      @relation(fields: [category_id], references: [id])
+  category_id           Int
+  dates                 EventsDates[]
+  speakers              eventsSpeakers[]
+  managers              EventsManagers[]
+  subscriptions         EventsSubscriptions[]
+  invitations           EventsInvitations[]
+}
+
+enum EventsTypes {
+  PUBLIC // THESE EVENTS WILL SHOW UP IN REGULAR SEARCH WITHOUT PERMISSIONS REQUIRED
+  PRIVATE  // THESE EVENTS ONLY SHOW UP IN SEARCHES FROM ADMINS, MENTOR (MANAGERS) AND INVITED USERS
+}
+
+model EventsCategories {
+  id     Int      @id @default(autoincrement())
+  name   String
+  events Events[]
+}
+
+model EventsDates {
+  id                   Int                  @id @default(autoincrement())
+  event                Events               @relation(fields: [event_id], references: [id])
+  event_id             Int
+  start                DateTime             @default(now())
+  end                  DateTime             @default(now())
+  status               EventsDatesStatus    @default(READY)
+  events_dates_updates EventsDatesUpdates[]
+}
+
+model EventsDatesUpdates {
+  id            Int               @id @default(autoincrement())
+  event_date    EventsDates       @relation(fields: [event_date_id], references: [id])
+  event_date_id Int
+  prev_status   EventsDatesStatus
+  new_status    EventsDatesStatus
+  message       String
+}
+
+enum EventsDatesStatus {
+  READY
+  IN_PROGRESS
+  RESCHEDULED
+  CANCELED
+}
+
+model eventsSpeakers {
+  id          Int    @id @default(autoincrement())
+  event       Events @relation(fields: [event_id], references: [id])
+  event_id    Int
+  name        String
+  description String
+}
+
+model EventsManagers {
+  id         Int     @id @default(autoincrement())
+  user       users   @relation(fields: [user_id], references: [id])
+  user_id    Int
+  event      Events  @relation(fields: [event_id], references: [id])
+  event_id   Int
+  is_speaker Boolean @default(false)
+}
+
+model EventsSubscriptions {
+  id         Int                          @id @default(autoincrement())
+  user       users                        @relation(fields: [user_id], references: [id])
+  user_id    Int
+  event      Events                       @relation(fields: [event_id], references: [id])
+  event_id   Int
+  status     EventsSubscriptionsStatus    @default(PENDING)
+  created_at DateTime                     @default(now())
+  updated_at DateTime                     @default(now())
+  updates    EventsSubscriptionsUpdates[]
+}
+
+model EventsSubscriptionsUpdates {
+  id              Int                       @id @default(autoincrement())
+  subscription    EventsSubscriptions       @relation(fields: [subscription_id], references: [id])
+  subscription_id Int
+  prev_status     EventsSubscriptionsStatus
+  new_status      EventsSubscriptionsStatus
+  message         String
+  created_at      DateTime                  @default(now())
+  updater         users                     @relation(fields: [updated_by], references: [id])
+  updated_by      Int
+}
+
+enum EventsSubscriptionsStatus {
+  PENDING
+  IN_PROGRESS
+  APPROVED
+  REJECTED
+}
+
+model EventsInvitations {
+  id         Int      @id @default(autoincrement())
+  inviter    users    @relation(name: "EventInvitationInviter", fields: [inviter_id], references: [id])
+  inviter_id Int
+  invitee    users    @relation(name: "EventInvitationInvitee", fields: [invitee_id], references: [id])
+  invitee_id Int
+  event      Events   @relation(fields: [event_id], references: [id])
+  event_id   Int
+  message    String
+  created_at DateTime @default(now())
 }
