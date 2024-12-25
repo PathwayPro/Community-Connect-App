@@ -10,6 +10,7 @@ import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from 'src/users/users.module';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UsersModule } from 'src/users/users.module';
     JwtAuthGuard,
     JwtRefreshGuard,
     JwtStrategy,
+    GoogleStrategy,
   ],
   exports: [AuthService, JwtModule, EmailService],
   controllers: [AuthController],
