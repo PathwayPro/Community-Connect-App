@@ -7,7 +7,8 @@ const publicPaths = [
   '/auth/register',
   '/auth/verify-email',
   '/auth/forgot-password',
-  '/auth/reset-password'
+  '/auth/reset-password',
+  '/auth/oauth'
 ];
 
 // Define paths that should redirect to home if already authenticated
@@ -15,7 +16,8 @@ const authOnlyPaths = [
   '/auth/login',
   '/auth/register',
   '/auth/forgot-password',
-  '/auth/reset-password'
+  '/auth/reset-password',
+  '/auth/oauth'
 ];
 
 export async function middleware(request: NextRequest) {
