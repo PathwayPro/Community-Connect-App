@@ -26,5 +26,6 @@ export class CreateMentorDto {
   status?: mentors_status = 'PENDING';
 
   @IsInt()
-  user_id: number;
+  @IsOptional()
+  user_id?: number;
 }
