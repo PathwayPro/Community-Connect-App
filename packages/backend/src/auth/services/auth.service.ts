@@ -12,10 +12,12 @@ import {
 } from '../dto/auth.dto';
 import { AuthResponse, GoogleUser, LoginResponse, Tokens } from '../types';
 import * as crypto from 'crypto';
+import { users_roles } from '@prisma/client';
 
 interface JwtPayload {
   sub: number;
   email: string;
+  roles: users_roles;
 }
 
 @Injectable()
@@ -53,7 +55,11 @@ export class AuthService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const payload: JwtPayload = { sub: user.id, email: user.email };
+      const payload: JwtPayload = {
+        sub: user.id,
+        email: user.email,
+        roles: user.role,
+      };
       const tokens = await this.getTokens(payload);
 
       return { tokens, message: 'Login successful' };
@@ -122,7 +128,11 @@ export class AuthService {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
-      const payload: JwtPayload = { sub: userId, email: user.email };
+      const payload: JwtPayload = {
+        sub: userId,
+        email: user.email,
+        roles: user.role,
+      };
 
       const tokens = await this.getTokens(payload);
 
