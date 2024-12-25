@@ -11,13 +11,7 @@ import {
   ResendVerificationEmailDto,
 } from '../dto/auth.dto';
 import { LoginResponse, Tokens } from '../types';
-import { users_roles } from '@prisma/client';
-
-interface JwtPayload {
-  sub: number;
-  email: string;
-  roles: users_roles;
-}
+import { JwtPayload } from '../util/JwtPayload.interface';
 
 @Injectable()
 export class AuthService {
