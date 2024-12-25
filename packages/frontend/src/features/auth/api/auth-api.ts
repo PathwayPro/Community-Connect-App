@@ -33,7 +33,5 @@ export const authApi = {
   logout: () => apiMethods.post<AuthResponseMessage>('/auth/logout'),
 
   refreshToken: (refreshToken: RefreshToken) =>
-    apiMethods.post<AuthResponse>('/auth/refresh', { refreshToken }),
-
-  signInWithGoogle: () => apiMethods.get<AuthResponse>('/auth/google/callback')
+    apiMethods.post<AuthResponse>('/auth/refresh', { refreshToken })
 };
