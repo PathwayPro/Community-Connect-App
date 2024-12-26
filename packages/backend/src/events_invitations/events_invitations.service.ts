@@ -9,12 +9,14 @@ import { FilterEventsInvitationDto } from './dto/filter-events_invitation.dto';
 import { DeleteEventsInvitationDto } from './dto/delete-events_invitation.dto';
 import { PrismaService } from 'src/database';
 import { Prisma } from '@prisma/client';
+import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
 
 @Injectable()
 export class EventsInvitationsService {
   constructor(private prisma: PrismaService) {}
 
   getFormattedFilters(
+    user: JwtPayload,
     filters: FilterEventsInvitationDto,
   ): Prisma.EventsInvitationsWhereInput {
     const formattedFilters: Prisma.EventsInvitationsWhereInput = {};
@@ -22,9 +24,22 @@ export class EventsInvitationsService {
     if (filters?.inviter_id) {
       formattedFilters.inviter_id = filters.inviter_id;
     }
-    if (filters?.invitee_id) {
+    // USERS CAN ONLY SEE WHEN THEY ARE INVITEES
+    if (user.roles === 'USER') {
+      formattedFilters.invitee_id = user.sub;
+    } else if (filters?.invitee_id) {
       formattedFilters.invitee_id = filters.invitee_id;
     }
+
+    // MENTORS CAN FILTER EVERYTHING, BUT ONLY GET RESULTS RELATED TO THEM
+    if (user.roles === 'MENTOR') {
+      formattedFilters.OR = [
+        { inviter_id: user.sub },
+        { invitee_id: user.sub },
+      ];
+    }
+
+    // EVENT, DATE FROM, DATE TO ARE THE SAME FOR EVERY ROLE
     if (filters?.event_id) {
       formattedFilters.event_id = filters.event_id;
     }
@@ -116,9 +131,10 @@ export class EventsInvitationsService {
     }
   }
 
-  async findAll(filters: FilterEventsInvitationDto) {
+  async findAll(user: JwtPayload, filters: FilterEventsInvitationDto) {
     const appliedFilters: Prisma.EventsInvitationsWhereInput =
-      this.getFormattedFilters(filters);
+      this.getFormattedFilters(user, filters);
+
     console.log('APPLIED FILTERS:', appliedFilters);
 
     try {
@@ -136,8 +152,32 @@ export class EventsInvitationsService {
     }
   }
 
-  async remove(deleteEventsInvitationDto: DeleteEventsInvitationDto) {
+  async remove(
+    user: JwtPayload,
+    deleteEventsInvitationDto: DeleteEventsInvitationDto,
+  ) {
     try {
+      // USERS CAN ONLY DELETE THEIR INVITATIONS
+      if (
+        user.roles === 'USER' &&
+        deleteEventsInvitationDto.invitee_id !== user.sub
+      ) {
+        throw new BadRequestException(
+          'You are not authorized to delete this invitation.',
+        );
+      }
+
+      // MENTORS CAN ONLY DELETE THEIR RELATED INVITATIONS
+      if (
+        user.roles === 'MENTOR' &&
+        deleteEventsInvitationDto.invitee_id !== user.sub &&
+        deleteEventsInvitationDto.inviter_id !== user.sub
+      ) {
+        throw new BadRequestException(
+          'You are not authorized to delete this invitation.',
+        );
+      }
+
       const deletedInvitation = await this.prisma.eventsInvitations.deleteMany({
         where: {
           inviter_id: deleteEventsInvitationDto.inviter_id,
