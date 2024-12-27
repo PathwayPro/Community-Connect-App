@@ -33,17 +33,17 @@ const AuthCarousel = () => {
   useEffect(() => {
     if (!api) return;
 
+    // Update current slide when carousel changes
     api.on('select', () => {
       setCurrentSlide(api.selectedScrollSnap());
     });
 
-    // Auto-slide timer
+    // Continuous auto-slide timer with wrap-around
     const autoSlideInterval = setInterval(() => {
       const nextSlide = (currentSlide + 1) % slides.length;
       api.scrollTo(nextSlide);
-    }, 10000);
+    }, 5000);
 
-    // Cleanup interval on unmount or when api changes
     return () => clearInterval(autoSlideInterval);
   }, [api, currentSlide]);
 
@@ -54,7 +54,7 @@ const AuthCarousel = () => {
           <CarouselItem key={index}>
             <Card className="h-full w-full rounded-2xl border-none bg-primary-5">
               <CardContent className="flex h-[80vh] flex-col items-center p-6">
-                <h1 className="mt-4 text-center text-display-sm font-semibold">
+                <h1 className="mt-4 text-start text-display-sm font-medium">
                   {slide.title}
                 </h1>
                 <div className="relative h-full w-full">

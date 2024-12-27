@@ -12,6 +12,9 @@ import {
 
 import { UserProfile } from '@/features/user-profile/types';
 import { AuthContextType } from '../types';
+import { authApi } from '../api/auth-api';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -20,7 +23,6 @@ const USER_STORAGE_KEY = 'user_data';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
   // Initialize user data from localStorage on mount
   useEffect(() => {
     try {
@@ -37,12 +39,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginContext = useCallback((userData: UserProfile) => {
     setUser(userData);
+
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
   }, []);
 
-  const logoutContext = useCallback(() => {
+  const logoutContext = useCallback(async () => {
     setUser(null);
     localStorage.removeItem(USER_STORAGE_KEY);
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
+
+    return 'Logout successful';
   }, []);
 
   const value = useMemo(

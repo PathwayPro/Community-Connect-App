@@ -28,3 +28,16 @@ export type EmailOptions = {
   text: string;
   html: string;
 };
+
+export type AuthResponse = {
+  message: string;
+  tokens: Tokens;
+};
+
+export type GoogleUser = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  picture: string;
+  accessToken: string;
+};

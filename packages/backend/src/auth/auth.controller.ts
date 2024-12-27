@@ -6,6 +6,8 @@ import {
   HttpStatus,
   Post,
   Query,
+  Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService, EmailService } from './services';
@@ -18,7 +20,9 @@ import {
   ResetPasswordDto,
 } from './dto';
 import { GetUser } from './decorators';
-import { LoginResponse } from './types';
+import { GoogleUser, LoginResponse } from './types';
+import { AuthGuard } from '@nestjs/passport';
+import { Request, Response } from 'express';
 
 @Controller('auth')
 @UseGuards(JwtAuthGuard)
@@ -37,7 +41,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@GetUser('userId') userId: number): Promise<{ message: string }> {
+  logout(@GetUser('sub') userId: number): Promise<{ message: string }> {
     return this.authService.logoutUser(userId);
   }
 
@@ -74,5 +78,40 @@ export class AuthController {
     @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<{ message: string }> {
     return this.authService.resetPassword(userId, resetPasswordDto);
+  }
+
+  @Public()
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {
+    // Guard will redirect to google
+  }
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    try {
+      const authResponse = await this.authService.handleGoogleAuth(
+        (req as any).user as GoogleUser,
+      );
+
+      const redirectUrl = new URL(`${process.env.FRONTEND_URL}/auth/oauth`);
+      redirectUrl.searchParams.append(
+        'accessToken',
+        authResponse.tokens.accessToken,
+      );
+      redirectUrl.searchParams.append(
+        'refreshToken',
+        authResponse.tokens.refreshToken,
+      );
+
+      return res.redirect(redirectUrl.toString());
+    } catch (error) {
+      console.log(error);
+      return res.redirect(
+        `${process.env.FRONTEND_URL}/signin?error=google_auth_failed`,
+      );
+    }
   }
 }
