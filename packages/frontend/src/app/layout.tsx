@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import '@/styles/globals.css';
 import { lato } from '../config/fonts/fonts';
-import { AuthProvider } from '@/features/auth/providers/auth-context';
-import { Toaster } from 'sonner';
-import { ThemeProvider } from '@/styles/theme-provider';
+import { RootLayoutClient } from '@/shared/components/layout';
 
 export const metadata: Metadata = {
   title: 'Community Connect App',
@@ -18,12 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${lato.variable} font-sans antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <AuthProvider>
-            {children}
-            <Toaster />
-          </AuthProvider>
-        </ThemeProvider>
+        <RootLayoutClient>{children}</RootLayoutClient>
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/shared/hooks/use-toast';
+import { useAuthContext } from '../providers/auth-context';
 import { authApi } from '@/features/auth/api';
 import {
   AccessToken,
@@ -11,14 +11,20 @@ import {
   ResetPasswordCredentials,
   UpdatePasswordCredentials
 } from '@/features/auth/types';
-import { useAuthContext } from '../providers/auth-context';
 import { userApi } from '@/features/user-profile/api/user-api';
 import Cookies from 'js-cookie';
+import { DialogState, ApiError } from '@/shared/types';
+
 export function useAuth() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { loginContext, logoutContext } = useAuthContext();
-  const { toast } = useToast();
+  const [dialogState, setDialogState] = useState<DialogState>({
+    isOpen: false,
+    title: '',
+    description: ''
+  });
+  const [error, setError] = useState<string | null>(null);
 
   const login = async (credentials: LoginCredentials) => {
     try {
@@ -51,8 +57,9 @@ export function useAuth() {
 
         console.log('responseUserData', responseUserData);
 
-        if (responseUserData) {
-          toast({
+        if (responseUserData.success) {
+          setDialogState({
+            isOpen: true,
             title: 'Login successful!',
             description: 'Welcome back to the app!'
           });
@@ -64,7 +71,8 @@ export function useAuth() {
       }
     } catch (error) {
       console.error('Login error:', error);
-      toast({
+      setDialogState({
+        isOpen: true,
         title: 'Login Failed!',
         description: 'Please check your credentials and try again.'
       });
@@ -79,19 +87,29 @@ export function useAuth() {
       setIsLoading(true);
       const response = await authApi.register(credentials);
 
-      if (response.data.success) {
-        toast({
+      console.log('register response in hook:', response);
+
+      if (response.success) {
+        setDialogState({
+          isOpen: true,
           title: 'Registration successful!',
           description:
-            'Welcome to the app!, Please check your email for a verification link.'
+            'Welcome to the app! Please check your email for a verification link.'
         });
-        router.push('/auth/login');
-        router.refresh();
+
+        setTimeout(() => {
+          setDialogState((prev) => ({ ...prev, isOpen: false }));
+          router.push('/auth/login');
+          router.refresh();
+        }, 3000);
       }
     } catch (error) {
-      toast({
+      console.log('error in register', error);
+      const apiError = error as ApiError;
+      setDialogState({
+        isOpen: true,
         title: 'Registration Failed!',
-        description: 'Please try again.'
+        description: apiError.response?.data?.message || 'Please try again.'
       });
       throw error;
     } finally {
@@ -99,25 +117,36 @@ export function useAuth() {
     }
   };
 
-  const verifyEmail = async (credentials: AccessToken) => {
+  const verifyEmail = async (token: AccessToken) => {
     try {
       setIsLoading(true);
-      const response = await authApi.verifyEmail(credentials);
+      const response = await authApi.verifyEmail(token);
 
-      if (response.status === 200) {
-        toast({
-          title: 'Email verification successful!',
-          description: 'Your email has been verified.'
+      if (response.success) {
+        setDialogState({
+          isOpen: true,
+          title: 'Email verified successfully!',
+          description:
+            'Your email has been verified. You will be redirected to login.'
         });
-        router.push('/auth/login');
-        router.refresh();
+
+        setTimeout(() => {
+          router.push('/auth/login');
+          router.refresh();
+        }, 300000);
       }
     } catch (error) {
-      toast({
-        title: 'Failed to verify email',
-        description: 'Please try again.'
+      const apiError = error as ApiError;
+      setError(apiError.response?.data?.message || 'Please try again.');
+      setDialogState({
+        isOpen: true,
+        title: 'Verification Failed!',
+        description: apiError.response?.data?.message || 'Please try again.'
       });
-      throw error;
+      setTimeout(() => {
+        router.push('/auth/login');
+        router.refresh();
+      }, 300000);
     } finally {
       setIsLoading(false);
     }
@@ -128,18 +157,24 @@ export function useAuth() {
       setIsLoading(true);
       const response = await authApi.updatePassword(credentials);
 
-      if (response.status === 200) {
-        toast({
+      if (response.success) {
+        setDialogState({
+          isOpen: true,
           title: 'Password updated successfully!',
-          description: 'Your password has been updated.'
+          description:
+            'You have successfully reset your password. You can now login using the new password. '
         });
-        router.push('/auth/login');
-        router.refresh();
+        setTimeout(() => {
+          router.push('/auth/login');
+          router.refresh();
+        }, 3000);
       }
     } catch (error) {
-      toast({
+      const apiError = error as ApiError;
+      setDialogState({
+        isOpen: true,
         title: 'Failed to update password',
-        description: 'Please try again.'
+        description: apiError.response?.data?.message || 'Please try again.'
       });
       throw error;
     } finally {
@@ -152,11 +187,24 @@ export function useAuth() {
       setIsLoading(true);
       const response = await authApi.forgotPassword(credentials);
 
-      return response;
+      if (response.success) {
+        setDialogState({
+          isOpen: true,
+          title: 'Email Sent!',
+          description:
+            'A password reset link has been sent to your registered Email ID.'
+        });
+        setTimeout(() => {
+          router.push('/auth/login');
+          router.refresh();
+        }, 3000);
+      }
     } catch (error) {
-      toast({
+      const apiError = error as ApiError;
+      setDialogState({
+        isOpen: true,
         title: 'Failed to process forgot password request',
-        description: 'Please try again.'
+        description: apiError.response?.data?.message || 'Please try again.'
       });
       throw error;
     } finally {
@@ -170,9 +218,11 @@ export function useAuth() {
       const response = await authApi.resetPassword(credentials);
       return response;
     } catch (error) {
-      toast({
+      const apiError = error as ApiError;
+      setDialogState({
+        isOpen: true,
         title: 'Failed to reset password',
-        description: 'Please try again.'
+        description: apiError.response?.data?.message || 'Please try again.'
       });
       throw error;
     } finally {
@@ -187,7 +237,8 @@ export function useAuth() {
 
       if (response.message === 'Logout successful') {
         logoutContext();
-        toast({
+        setDialogState({
+          isOpen: true,
           title: 'Logged out successfully!',
           description: 'See you soon!'
         });
@@ -196,9 +247,11 @@ export function useAuth() {
         router.refresh();
       }
     } catch (error) {
-      toast({
+      const apiError = error as ApiError;
+      setDialogState({
+        isOpen: true,
         title: 'Logout Failed!',
-        description: 'Please try again.'
+        description: apiError.response?.data?.message || 'Please try again.'
       });
       throw error;
     } finally {
@@ -212,9 +265,11 @@ export function useAuth() {
       const response = await authApi.refreshToken(credentials);
       return response;
     } catch (error) {
-      toast({
+      const apiError = error as ApiError;
+      setDialogState({
+        isOpen: true,
         title: 'Refresh Token Failed!',
-        description: 'Please try again.'
+        description: apiError.response?.data?.message || 'Please try again.'
       });
       throw error;
     } finally {
@@ -231,6 +286,11 @@ export function useAuth() {
     resetPassword,
     logout,
     refreshToken,
-    isLoading
+    isLoading,
+    setIsLoading,
+    dialogState,
+    setDialogState,
+    error,
+    setError
   };
 }

@@ -52,10 +52,6 @@ export type ResetPasswordCredentials = {
   confirmPassword: string;
 };
 
-export type AuthResponseMessage = {
-  message: string;
-};
-
 export type UpdatePasswordCredentials = {
   passwordHash: string;
   confirmPassword: string;
