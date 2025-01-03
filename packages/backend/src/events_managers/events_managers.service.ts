@@ -10,6 +10,7 @@ import { DeleteEventsManagerDto } from './dto/delete-events_manager.dto';
 import { FilterEventsManagerDto } from './dto/filter-events_manager.dto';
 import { PrismaService } from 'src/database';
 import { Prisma } from '@prisma/client';
+import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
 
 @Injectable()
 export class EventsManagersService {
@@ -57,7 +58,7 @@ export class EventsManagersService {
       throw new NotFoundException(`There is no event with ID: ${event_id}.`);
     }
 
-    // VALIDATION: IS MANAGER
+    // VALIDATION: MANAGER ALREADY EXIST
     const isManager = await this.prisma.eventsManagers.findFirst({
       where: { user_id: user_id, event_id: event_id },
     });
@@ -68,6 +69,17 @@ export class EventsManagersService {
     }
 
     return { user, event, isManager };
+  }
+
+  async isEventManager(user_id: number, event_id: number): Promise<boolean> {
+    try {
+      const isManager = await this.prisma.eventsManagers.findFirst({
+        where: { user_id: user_id, event_id: event_id },
+      });
+      return isManager ? true : false;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   async create(createEventsManagerDto: CreateEventsManagerDto) {
@@ -117,8 +129,24 @@ export class EventsManagersService {
     }
   }
 
-  async updateIsSpeaker(updateEventsManagerDto: UpdateEventsManagerDto) {
+  async updateIsSpeaker(
+    logged_user: JwtPayload,
+    updateEventsManagerDto: UpdateEventsManagerDto,
+  ) {
     try {
+      // VALIDATE USER HAS MANAGEMENT PERMISSIONS: ADMIN || MENTOR AS MANAGER
+      const canEdit =
+        logged_user.roles === 'ADMIN' ||
+        (await this.isEventManager(
+          logged_user.sub,
+          updateEventsManagerDto.event_id,
+        ));
+      if (!canEdit) {
+        throw new BadRequestException(
+          `You are not allowed to manage this event.`,
+        );
+      }
+
       // VALIDATE USER, EVENT, IS_MANAGER
       const currentManager = await this.validateExistences(
         updateEventsManagerDto.user_id,
@@ -127,16 +155,14 @@ export class EventsManagersService {
       );
       if (!currentManager.isManager) {
         throw new BadRequestException(
-          `This user is not a manager for this event.`,
+          `The user is not a manager for this event. You can register them as managers or add an external speaker.`,
         );
       }
 
       // IF IS MANAGER, UPDATE CURRENT SPEKAER STATUS
       const updatedIsSpeaker = await this.prisma.eventsManagers.update({
         where: { id: currentManager.isManager.id },
-        data: {
-          is_speaker: !currentManager.isManager.is_speaker,
-        },
+        data: { is_speaker: !currentManager.isManager.is_speaker },
       });
 
       if (!updatedIsSpeaker) {

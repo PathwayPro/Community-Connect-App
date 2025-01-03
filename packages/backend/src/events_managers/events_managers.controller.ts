@@ -59,10 +59,12 @@ export class EventsManagersController {
   ) {
     const updateSpeaker: UpdateEventsManagerDto = {
       user_id:
-        user.roles === 'MENTOR' ? user.sub : updateEventsManagerDto.user_id,
+        user.roles === 'ADMIN' && updateEventsManagerDto.user_id
+          ? updateEventsManagerDto.user_id
+          : user.sub,
       event_id: updateEventsManagerDto.event_id,
     };
-    return this.eventsManagersService.updateIsSpeaker(updateSpeaker);
+    return this.eventsManagersService.updateIsSpeaker(user, updateSpeaker);
   }
 
   @Delete()
