@@ -26,7 +26,7 @@ export class EventsInvitationsController {
       event_id: createEventsInvitationDto.event_id,
       message: createEventsInvitationDto.message,
     };
-    return this.eventsInvitationsService.create(newInvitation);
+    return this.eventsInvitationsService.create(user, newInvitation);
   }
 
   @Get()

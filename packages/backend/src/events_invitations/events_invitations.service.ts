@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateEventsInvitationDto } from './dto/create-events_invitation.dto';
 import { FilterEventsInvitationDto } from './dto/filter-events_invitation.dto';
@@ -10,10 +11,14 @@ import { DeleteEventsInvitationDto } from './dto/delete-events_invitation.dto';
 import { PrismaService } from 'src/database';
 import { Prisma } from '@prisma/client';
 import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
+import { EventsManagersService } from '../events_managers/events_managers.service';
 
 @Injectable()
 export class EventsInvitationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly managers: EventsManagersService,
+  ) {}
 
   getFormattedFilters(
     user: JwtPayload,
@@ -112,8 +117,24 @@ export class EventsInvitationsService {
     return { inviter, invitee, event };
   }
 
-  async create(createEventsInvitationDto: CreateEventsInvitationDto) {
+  async create(
+    user: JwtPayload,
+    createEventsInvitationDto: CreateEventsInvitationDto,
+  ) {
     try {
+      // MENTORS CAN ONLY INVITE FOR THEIR MANAGED EVENTS
+      if (
+        user.roles === 'MENTOR' &&
+        !(await this.managers.isEventManager(
+          user.sub,
+          createEventsInvitationDto.event_id,
+        ))
+      ) {
+        throw new UnauthorizedException(
+          'You are not authorized to invite for this event.',
+        );
+      }
+
       // VALIDATE EXISTENCES AND GET DATA
       const invitationData = await this.validateInvitation(
         createEventsInvitationDto,
@@ -134,8 +155,6 @@ export class EventsInvitationsService {
   async findAll(user: JwtPayload, filters: FilterEventsInvitationDto) {
     const appliedFilters: Prisma.EventsInvitationsWhereInput =
       this.getFormattedFilters(user, filters);
-
-    console.log('APPLIED FILTERS:', appliedFilters);
 
     try {
       const invitations = await this.prisma.eventsInvitations.findMany({
