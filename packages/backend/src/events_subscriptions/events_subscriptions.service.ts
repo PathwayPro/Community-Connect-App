@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateEventsSubscriptionDto } from './dto/create-events_subscription.dto';
 import { FilterEventsSubscriptionDto } from './dto/filter-events_subscription.dto';
@@ -10,14 +11,25 @@ import { DeleteEventsSubscriptionDto } from './dto/delete-events_subscription.dt
 import { UpdateEventsSubscriptionStatusDto } from './dto/update-events_subscription_status.dto';
 import { PrismaService } from 'src/database';
 import { Prisma } from '@prisma/client';
+import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
+import { EventsManagersService } from '../events_managers/events_managers.service';
 
 @Injectable()
 export class EventsSubscriptionsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly managers: EventsManagersService,
+  ) {}
 
   getFormattedFilters(
+    user: JwtPayload,
     filters: FilterEventsSubscriptionDto,
   ): Prisma.EventsSubscriptionsWhereInput {
+    // DESCRIPTION:
+    //    USER: Will only fetch their own subscriptions (user_id = user.sub)
+    //    ADMIN: Can use any filter without limitations
+    //    MENTOR: Can fetch their own subscriptions AND those in events they manage
+
     const formattedFilters: Prisma.EventsSubscriptionsWhereInput = {};
 
     if (filters?.user_id) {
@@ -30,7 +42,17 @@ export class EventsSubscriptionsService {
       formattedFilters.status = filters.status;
     }
 
-    return formattedFilters;
+    const mentorFormattedFilters: Prisma.EventsSubscriptionsWhereInput =
+      user.roles !== 'MENTOR'
+        ? {}
+        : {
+            OR: [
+              { event: { managers: { some: { user_id: user.sub } } } },
+              { user_id: user.sub },
+            ],
+          };
+
+    return { AND: [formattedFilters, mentorFormattedFilters] };
   }
 
   async validateSubscription(
@@ -43,7 +65,7 @@ export class EventsSubscriptionsService {
     });
     if (!user) {
       throw new NotFoundException(
-        `There is no user user with ID: ${createEventsSubscriptionDto.user_id}.`,
+        `There is no user with ID: ${createEventsSubscriptionDto.user_id}.`,
       );
     }
 
@@ -65,17 +87,44 @@ export class EventsSubscriptionsService {
       },
     });
     if (subscription && isNewSubscription) {
-      throw new BadRequestException(
-        `There is already a subscription 
+      throw new BadRequestException(`
+          There is already a subscription 
           from ${user.first_name} ${user.last_name} 
           for the event ${event.title}
           created on ${subscription.created_at}
           with status ${subscription.status}
-          `,
-      );
+        `);
     }
 
     return { user, event, subscription };
+  }
+
+  async canSubscribe(
+    user_id: number,
+    event_id: number,
+    event_type: 'PUBLIC' | 'PRIVATE',
+    accept_subscriptions: boolean,
+  ) {
+    // THE EVENT HAS TO BE ACCEPTING NEW SUBSCRIPTIONS
+    if (!accept_subscriptions) {
+      throw new BadRequestException(
+        'This event is not taking new subscriptions any more.',
+      );
+    }
+
+    // IF THE EVENT IS PRIVATE THE SUBSCRIBER MUST BE INVITED
+    if (event_type === 'PRIVATE') {
+      const invitation = await this.prisma.eventsInvitations.findFirst({
+        where: { event_id, invitee_id: user_id },
+      });
+      if (!invitation) {
+        throw new BadRequestException(
+          'You can only subscribe to this event with an invitation.',
+        );
+      }
+    }
+
+    return true;
   }
 
   async create(createEventsSubscriptionDto: CreateEventsSubscriptionDto) {
@@ -85,8 +134,27 @@ export class EventsSubscriptionsService {
         createEventsSubscriptionDto,
       );
 
+      // VALIDATE IF THE USER CAN SUBSCRIBE TO THAT EVENT
+      const canSubscribe = await this.canSubscribe(
+        createEventsSubscriptionDto.user_id,
+        subscriptionData.event.id,
+        subscriptionData.event.type,
+        subscriptionData.event.accept_subscriptions,
+      );
+      if (!canSubscribe) {
+        throw new BadRequestException("You can't subscribe to this event");
+      }
+
+      const newSubscriptionData: CreateEventsSubscriptionDto = {
+        user_id: createEventsSubscriptionDto.user_id,
+        event_id: createEventsSubscriptionDto.event_id,
+        status: subscriptionData.event.requires_confirmation
+          ? 'PENDING'
+          : 'APPROVED',
+      };
+
       const newSubscription = await this.prisma.eventsSubscriptions.create({
-        data: createEventsSubscriptionDto,
+        data: newSubscriptionData,
       });
 
       return { newSubscription, ...subscriptionData };
@@ -97,10 +165,9 @@ export class EventsSubscriptionsService {
     }
   }
 
-  async findAll(filters: FilterEventsSubscriptionDto) {
+  async findAll(user: JwtPayload, filters: FilterEventsSubscriptionDto) {
     const appliedFilters: Prisma.EventsSubscriptionsWhereInput =
-      this.getFormattedFilters(filters);
-    console.log('APPLIED FILTERS:', appliedFilters);
+      this.getFormattedFilters(user, filters);
 
     try {
       const subscriptions = await this.prisma.eventsSubscriptions.findMany({
@@ -111,14 +178,41 @@ export class EventsSubscriptionsService {
           updates: true,
         },
       });
+
       return subscriptions;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
   }
 
-  async remove(deleteEventsSubscriptionDto: DeleteEventsSubscriptionDto) {
+  async remove(
+    user: JwtPayload,
+    deleteEventsSubscriptionDto: DeleteEventsSubscriptionDto,
+  ) {
     try {
+      const canDelete =
+        // ANYONE CAN DELETE THEIR OWN SUBSCRIPTIONS (USER, MENTOR, ADMIN)
+        user.sub === deleteEventsSubscriptionDto.user_id
+          ? true
+          : // ADMIN CAN DELETE ANY SUBSCRIPTION
+            user.roles === 'ADMIN'
+            ? true
+            : // MENTOR CAN DELETE THEIR OWN SUBSCRIPTIONS AND THOSE IN EVENTS THEY MANAGE
+              user.roles === 'MENTOR' &&
+                (await this.managers.isEventManager(
+                  user.sub,
+                  deleteEventsSubscriptionDto.event_id,
+                ))
+              ? true
+              : // OTHERWISE IS NOT AUTHORIZED TO DELETE
+                false;
+
+      if (!canDelete) {
+        throw new UnauthorizedException(
+          'You are not authorized to delete this subscription.',
+        );
+      }
+
       const deletedSubscription =
         await this.prisma.eventsSubscriptions.deleteMany({
           where: {
@@ -133,15 +227,37 @@ export class EventsSubscriptionsService {
   }
 
   async updateStatus(
+    user: JwtPayload,
     updateEventsSubscriptionStatusDto: UpdateEventsSubscriptionStatusDto,
   ) {
+    // TO-DO: MENTORS CAN ONLY UPDATE STATUS OF THEIR MANAGED EVENTS, NOT ON THEIR APPLICATIONS (isEventManager)
+
     try {
+      const canUpdateStatus =
+        // ADMIN CAN UPDATE ANY SUBSCRIPTION STATUS
+        user.roles === 'ADMIN'
+          ? true
+          : // MENTOR CAN UPDATE SUBSCRIPTIONS STATUS IN EVENTS THEY MANAGE
+            user.roles === 'MENTOR' &&
+              (await this.managers.isEventManager(
+                user.sub,
+                updateEventsSubscriptionStatusDto.event_id,
+              ))
+            ? true
+            : // OTHERWISE IS NOT AUTHORIZED TO UPDATE SUBSCRIPTION STATUS
+              false;
+
+      if (!canUpdateStatus) {
+        throw new UnauthorizedException(
+          'You are not authorized to update this subscription status.',
+        );
+      }
+
       // VALIDATE SUBSCRIPTION, USER AND EVENT
       const currentSubscription = await this.validateSubscription(
         updateEventsSubscriptionStatusDto,
         false,
       );
-
       if (!currentSubscription) {
         throw new BadRequestException(
           `There is no subscription from ${currentSubscription.user.first_name} ${currentSubscription.user.last_name} for the event ${currentSubscription.event.title}`,

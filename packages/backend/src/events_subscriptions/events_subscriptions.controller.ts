@@ -1,12 +1,22 @@
-import { Controller, Get, Post, Body, Delete, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Delete,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { EventsSubscriptionsService } from './events_subscriptions.service';
 import { CreateEventsSubscriptionDto } from './dto/create-events_subscription.dto';
 import { UpdateEventsSubscriptionStatusDto } from './dto/update-events_subscription_status.dto';
 import { FilterEventsSubscriptionDto } from './dto/filter-events_subscription.dto';
 import { DeleteEventsSubscriptionDto } from './dto/delete-events_subscription.dto';
-import { Public } from 'src/auth/decorators';
+import { Roles, GetUser } from 'src/auth/decorators';
+import { JwtAuthGuard, RolesGuard } from 'src/auth/guards';
+import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
 
-@Public()
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('events-subscriptions')
 export class EventsSubscriptionsController {
   constructor(
@@ -14,28 +24,37 @@ export class EventsSubscriptionsController {
   ) {}
 
   @Post()
-  create(@Body() createEventsSubscriptionDto: CreateEventsSubscriptionDto) {
+  @Roles('ADMIN', 'MENTOR', 'USER')
+  create(
+    @GetUser() user: JwtPayload,
+    @Body() createEventsSubscriptionDto: CreateEventsSubscriptionDto,
+  ) {
     const newSubscription: CreateEventsSubscriptionDto = {
-      user_id: createEventsSubscriptionDto.user_id,
+      user_id: user.sub,
       event_id: createEventsSubscriptionDto.event_id,
-      status: createEventsSubscriptionDto.status || 'PENDING',
     };
     return this.eventsSubscriptionsService.create(newSubscription);
   }
 
   @Get()
-  findAll(@Body() filters: FilterEventsSubscriptionDto) {
+  @Roles('ADMIN', 'MENTOR', 'USER')
+  findAll(
+    @GetUser() user: JwtPayload,
+    @Body() filters: FilterEventsSubscriptionDto,
+  ) {
     const searchFilters: FilterEventsSubscriptionDto = {
-      user_id: filters.user_id,
+      user_id: user.roles === 'USER' ? user.sub : filters.user_id,
       event_id: filters.event_id,
       status: filters.status,
     };
 
-    return this.eventsSubscriptionsService.findAll(searchFilters);
+    return this.eventsSubscriptionsService.findAll(user, searchFilters);
   }
 
   @Put()
+  @Roles('ADMIN', 'MENTOR')
   updateStatus(
+    @GetUser() user: JwtPayload,
     @Body()
     updateEventsSubscriptionStatusDto: UpdateEventsSubscriptionStatusDto,
   ) {
@@ -44,20 +63,26 @@ export class EventsSubscriptionsController {
       event_id: updateEventsSubscriptionStatusDto.event_id,
       new_status: updateEventsSubscriptionStatusDto.new_status,
       message: updateEventsSubscriptionStatusDto.message,
-      updated_by: updateEventsSubscriptionStatusDto.updated_by,
+      updated_by: user.sub,
     };
 
     return this.eventsSubscriptionsService.updateStatus(
+      user,
       updateSubscriptionStatus,
     );
   }
 
   @Delete()
-  remove(@Body() deleteEventsSubscriptionDto: DeleteEventsSubscriptionDto) {
+  @Roles('ADMIN', 'MENTOR', 'USER')
+  remove(
+    @GetUser() user: JwtPayload,
+    @Body() deleteEventsSubscriptionDto: DeleteEventsSubscriptionDto,
+  ) {
     const deleteSubscription: DeleteEventsSubscriptionDto = {
-      user_id: deleteEventsSubscriptionDto.user_id,
+      user_id:
+        user.roles === 'USER' ? user.sub : deleteEventsSubscriptionDto.user_id,
       event_id: deleteEventsSubscriptionDto.event_id,
     };
-    return this.eventsSubscriptionsService.remove(deleteSubscription);
+    return this.eventsSubscriptionsService.remove(user, deleteSubscription);
   }
 }
