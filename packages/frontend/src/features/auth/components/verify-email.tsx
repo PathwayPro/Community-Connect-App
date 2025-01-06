@@ -1,9 +1,10 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/use-auth';
+import { AccessToken } from '../types';
 
 interface VerifyEmailProps {
-  token: string;
+  token: AccessToken;
 }
 
 export const VerifyEmail = ({ token }: VerifyEmailProps) => {
@@ -14,17 +15,14 @@ export const VerifyEmail = ({ token }: VerifyEmailProps) => {
   useEffect(() => {
     const verifyEmailToken = async () => {
       try {
-        const response = await verifyEmail(token);
-
-        console.log('response from verify email here', response);
-
-        router.push('/auth/login');
+        await verifyEmail(token);
+        router.replace('/auth/login');
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'Verification failed';
         setError(errorMessage);
         setTimeout(() => {
-          router.push('/auth/login');
+          router.replace('/auth/login');
         }, 10000);
       }
     };

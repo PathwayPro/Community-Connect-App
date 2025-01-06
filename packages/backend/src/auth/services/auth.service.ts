@@ -10,8 +10,15 @@ import {
   VerifyPasswordDto,
   ResendVerificationEmailDto,
 } from '../dto/auth.dto';
-import { LoginResponse, Tokens } from '../types';
-import { JwtPayload } from '../util/JwtPayload.interface';
+import { AuthResponse, GoogleUser, LoginResponse, Tokens } from '../types';
+import * as crypto from 'crypto';
+import { users_roles } from '@prisma/client';
+
+interface JwtPayload {
+  sub: number;
+  email: string;
+  roles: users_roles;
+}
 
 @Injectable()
 export class AuthService {
@@ -272,7 +279,7 @@ export class AuthService {
     }
   }
 
-  async logoutUser(userId: number): Promise<{ message: string }> {
+  async logoutUser(userId: number) {
     try {
       const user = await this.prisma.users.findUnique({
         where: { id: userId },
@@ -371,5 +378,66 @@ export class AuthService {
     }
 
     return { message: 'Verification email sent successfully' };
+  }
+
+  async handleGoogleAuth(googleUser: GoogleUser): Promise<AuthResponse> {
+    let data: AuthResponse;
+    try {
+      const existingUser = await this.prisma.users.findUnique({
+        where: { email: googleUser.email },
+      });
+
+      if (existingUser) {
+        const tokens = await this.getTokens({
+          sub: existingUser.id,
+          email: existingUser.email,
+          roles: existingUser.role,
+        });
+
+        await this.updateRefreshToken(existingUser.id, tokens.refreshToken);
+
+        data = {
+          message: 'Google authentication successful',
+          tokens: {
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+          },
+        };
+
+        return data;
+      } else {
+        const hashedPassword = await this.hashPassword(
+          crypto.randomBytes(32).toString('hex'),
+        );
+        const newUser = await this.prisma.users.create({
+          data: {
+            email: googleUser.email,
+            first_name: googleUser.firstName,
+            last_name: googleUser.lastName,
+            password_hash: hashedPassword,
+          },
+        });
+
+        const tokens = await this.getTokens({
+          sub: newUser.id,
+          email: newUser.email,
+          roles: existingUser.role,
+        });
+        await this.updateRefreshToken(newUser.id, tokens.refreshToken);
+
+        data = {
+          message: 'Google authentication successful',
+          tokens: {
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+          },
+        };
+
+        return data;
+      }
+    } catch (error) {
+      this.logger.error(`Google authentication error: ${error.message}`);
+      throw new UnauthorizedException('Failed to authenticate with Google');
+    }
   }
 }

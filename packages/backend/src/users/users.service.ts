@@ -21,7 +21,6 @@ import {
   findUserById,
   userEmailExists,
 } from 'src/common/utils/helper';
-import { RegisterUserResponse } from './types';
 import { RolesEnum } from 'src/auth/util';
 
 @Injectable()
@@ -35,7 +34,7 @@ export class UsersService {
   ) {}
 
   // User Registration and Creation
-  async registerUser(user: CreateUserDto): Promise<RegisterUserResponse> {
+  async registerUser(user: CreateUserDto) {
     await this.validateRegistration(user);
 
     const hashedPassword = await this.authService.hashPassword(
@@ -51,9 +50,11 @@ export class UsersService {
 
     await this.setupEmailVerification(newUser);
 
+    const data = this.mapToReadUserDto(newUser);
+
     return {
       message: 'User registered, please check your email for verification link',
-      data: this.mapToReadUserDto(newUser),
+      ...data,
     };
   }
 

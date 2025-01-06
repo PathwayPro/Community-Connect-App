@@ -80,9 +80,4 @@ export class UsersController {
     console.log('current user :', currentUserId, targetUserId);
     return await this.usersService.deleteUser(currentUserId, targetUserId);
   }
-
-  @Get('profile')
-  getProfile() {
-    return { message: 'Profile accessed successfully' };
-  }
 }

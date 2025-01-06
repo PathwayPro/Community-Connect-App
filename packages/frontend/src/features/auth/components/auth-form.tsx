@@ -34,7 +34,7 @@ type AuthFormValues = LoginFormValues & {
 
 export function AuthForm() {
   const pathname = usePathname();
-  const { login, register, signInWithGoogle } = useAuth();
+  const { login, register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -78,14 +78,7 @@ export function AuthForm() {
 
     console.log('google sign in');
 
-    try {
-      // Handle Google sign-in
-      await signInWithGoogle();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
+    window.location.href = process.env.NEXT_PUBLIC_API_URL + '/auth/google';
   };
 
   return (
