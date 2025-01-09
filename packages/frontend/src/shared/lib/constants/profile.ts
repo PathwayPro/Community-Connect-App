@@ -1,17 +1,17 @@
 export const goalsOptions = [
-  { label: 'Career Growth', value: 'career-growth' },
-  { label: 'Job Security', value: 'job-security' },
-  { label: 'Work-Life Balance', value: 'work-life-balance' },
-  { label: 'Financial Stability', value: 'financial-stability' },
-  { label: 'Personal Development', value: 'personal-development' }
+  { label: 'Career Growth', value: '1' },
+  { label: 'Job Security', value: '2' },
+  { label: 'Work-Life Balance', value: '3' },
+  { label: 'Financial Stability', value: '4' },
+  { label: 'Personal Development', value: '5' }
 ];
 
-export const yearsInCanadaOptions = [
-  { label: 'Less than 1 year', value: 'less-than-1-year' },
-  { label: '1 to 3 years', value: '1-to-3-years' },
-  { label: '3 to 5 years', value: '3-to-5-years' },
-  { label: '5 to 10 years', value: '5-to-10-years' },
-  { label: 'More than 10 years', value: 'more-than-10-years' }
+export const arrivalInCanadaOptions = [
+  { label: 'Less than 1 year', value: '1' },
+  { label: '1 to 3 years', value: '2' },
+  { label: '3 to 5 years', value: '3' },
+  { label: '5 to 10 years', value: '4' },
+  { label: 'More than 10 years', value: '5' }
 ];
 
 export const provinceData = [

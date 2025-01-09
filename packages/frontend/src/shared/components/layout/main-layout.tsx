@@ -8,7 +8,7 @@ interface MainLayoutProps {
 const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <div className="flex w-full">
-      <Sidebar isOpen={true} />
+      <Sidebar />
       <main className="flex-1">
         <MainNav />
         <div className="h-full justify-center bg-neutral-light-200 p-8">

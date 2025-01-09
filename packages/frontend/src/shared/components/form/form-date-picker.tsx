@@ -1,34 +1,30 @@
 import { Icons } from '@/features/auth/components/icons';
 import { cn } from '@/shared/lib/utils';
-import { useFormContext } from 'react-hook-form';
+import { FieldValues, useFormContext, Control, Path } from 'react-hook-form';
 import {
   FormField,
   FormItem,
   FormLabel,
   FormControl
 } from '@/shared/components/ui/form';
-import { Control } from 'react-hook-form';
-import { useState } from 'react';
 import { DateTimePicker } from '../date-picker/date-picker';
 
-interface FormDatePickerProps {
-  name: string;
+interface FormDatePickerProps<T extends FieldValues> {
+  name: Path<T>;
   label: string;
   customError?: string;
-  control?: Control<any>;
+  control?: Control<T>;
   required?: boolean;
 }
 
-export const FormDatePicker = ({
+export const FormDatePicker = <T extends FieldValues>({
   name,
   label,
   customError,
   control: controlProp,
   required = false
-}: FormDatePickerProps) => {
-  const [date, setDate] = useState<Date | undefined>(undefined);
-
-  const formContext = useFormContext();
+}: FormDatePickerProps<T>) => {
+  const formContext = useFormContext<T>();
   const control = controlProp || formContext?.control;
 
   if (!control) {
@@ -37,9 +33,6 @@ export const FormDatePicker = ({
     );
     return null;
   }
-
-  const errors = formContext?.formState?.errors || {};
-  const inputError = errors[name];
 
   return (
     <FormField
@@ -66,8 +59,8 @@ export const FormDatePicker = ({
                     'h-[103px] max-h-[103px] w-full bg-neutral-light-100',
                     showError && 'border-error-500 focus-visible:ring-error-100'
                   )}
-                  value={date}
-                  onChange={setDate}
+                  value={field.value}
+                  onChange={field.onChange}
                   hideTime
                 />
               </div>

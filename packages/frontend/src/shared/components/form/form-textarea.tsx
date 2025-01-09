@@ -1,28 +1,27 @@
 import { Icons } from '@/features/auth/components/icons';
 import { cn } from '@/shared/lib/utils';
-import { useFormContext } from 'react-hook-form';
 import {
   FormField,
   FormItem,
   FormLabel,
   FormControl
 } from '@/shared/components/ui/form';
-import { Control } from 'react-hook-form';
+import { FieldValues, useFormContext, Control, Path } from 'react-hook-form';
 import { Textarea } from '../ui/textarea';
 import { SharedIcons } from '../icons';
 
-interface FormTextareaProps {
-  name: string;
+interface FormTextareaProps<T extends FieldValues> {
+  name: Path<T>;
   label: string;
   placeholder: string;
   customError?: string;
-  control?: Control<any>;
+  control?: Control<T>;
   required?: boolean;
   maxLength?: number;
   showCount?: boolean;
 }
 
-export const FormTextarea = ({
+export const FormTextarea = <T extends FieldValues>({
   name,
   label,
   placeholder,
@@ -31,8 +30,8 @@ export const FormTextarea = ({
   required = false,
   maxLength = 400,
   showCount = true
-}: FormTextareaProps) => {
-  const formContext = useFormContext();
+}: FormTextareaProps<T>) => {
+  const formContext = useFormContext<T>();
   const control = controlProp || formContext?.control;
 
   if (!control) {
@@ -41,9 +40,6 @@ export const FormTextarea = ({
     );
     return null;
   }
-
-  const errors = formContext?.formState?.errors || {};
-  const inputError = errors[name];
 
   return (
     <FormField
@@ -82,22 +78,26 @@ export const FormTextarea = ({
                     }
                   }}
                 />
-                {showCount && (
-                  <div className="flex items-center justify-end gap-2 text-neutral-dark-400">
-                    <SharedIcons.info className="h-4 w-4" />
-                    <p className="text-paragraph-xs">
-                      {charCount}/{maxLength} characters
-                    </p>
-                  </div>
-                )}
+                <div className="flex items-center justify-between gap-2">
+                  {showError && (
+                    <div className="flex items-center gap-2 text-error-500">
+                      <Icons.informationCircle className="h-4 w-4" />
+                      <p className="text-paragraph-sm text-error-500">
+                        {customError}
+                      </p>
+                    </div>
+                  )}
+                  {showCount && (
+                    <div className="flex items-center justify-end gap-2 text-neutral-dark-400">
+                      <SharedIcons.info className="h-4 w-4" />
+                      <p className="text-paragraph-xs">
+                        {charCount}/{maxLength} characters
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </FormControl>
-            {showError && (
-              <div className="flex items-center gap-2 text-error-500">
-                <Icons.informationCircle className="h-4 w-4" />
-                <p className="text-paragraph-sm">{customError}</p>
-              </div>
-            )}
           </FormItem>
         );
       }}

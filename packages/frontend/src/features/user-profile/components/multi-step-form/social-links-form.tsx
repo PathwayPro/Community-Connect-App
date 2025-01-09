@@ -13,7 +13,7 @@ export const SocialLinksForm = () => {
   return (
     <div className="flex w-full flex-col gap-4">
       <FormInput
-        name="linkedin"
+        name="linkedinLink"
         label="LinkedIn"
         hasLabelInput={true}
         leftLabel="https://"
@@ -21,28 +21,28 @@ export const SocialLinksForm = () => {
         customError="LinkedIn profile URL is required"
       />
       <FormInput
-        name="twitter"
+        name="twitterLink"
         label="Twitter"
         hasLabelInput={true}
         leftLabel="https://"
         placeholder="Enter your Twitter profile URL"
       />
       <FormInput
-        name="github"
+        name="githubLink"
         label="GitHub"
         hasLabelInput={true}
         leftLabel="https://"
         placeholder="Enter your GitHub profile URL"
       />
       <FormInput
-        name="portfolio"
+        name="portfolioLink"
         label="Portfolio"
         hasLabelInput={true}
         leftLabel="https://"
         placeholder="Enter your portfolio URL"
       />
       <FormInput
-        name="others"
+        name="otherLinks"
         label="Other Links (Behance, Dribble, Instagram etc.)"
         hasLabelInput={true}
         leftLabel="https://"

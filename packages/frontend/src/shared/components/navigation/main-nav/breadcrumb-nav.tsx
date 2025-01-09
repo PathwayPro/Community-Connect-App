@@ -12,8 +12,8 @@ import { usePathname } from 'next/navigation';
 
 const BreadcrumbNav = () => {
   const pathname = usePathname();
-
   const pathSegments = pathname.split('/').filter(Boolean);
+
   const breadcrumbItems = pathSegments.map((path) => ({
     label: path.charAt(0).toUpperCase() + path.slice(1).toLowerCase(),
     path: path.toLowerCase()
@@ -21,14 +21,14 @@ const BreadcrumbNav = () => {
 
   return (
     <Breadcrumb>
-      <BreadcrumbList className="flex">
-        <BreadcrumbItem className="inline-flex">
+      <BreadcrumbList>
+        <BreadcrumbItem>
           <BreadcrumbLink href="/home">Home</BreadcrumbLink>
+          {breadcrumbItems.length > 0 && <BreadcrumbSeparator />}
         </BreadcrumbItem>
-        <BreadcrumbSeparator />
 
         {breadcrumbItems.map((item, index) => (
-          <BreadcrumbItem key={item.path} className="inline-flex">
+          <BreadcrumbItem key={item.path}>
             {index === breadcrumbItems.length - 1 ? (
               <BreadcrumbPage>{item.label}</BreadcrumbPage>
             ) : (
@@ -38,7 +38,7 @@ const BreadcrumbNav = () => {
                 >
                   {item.label}
                 </BreadcrumbLink>
-                {index < breadcrumbItems.length - 1 && <BreadcrumbSeparator />}
+                <BreadcrumbSeparator />
               </>
             )}
           </BreadcrumbItem>

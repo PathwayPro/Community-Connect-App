@@ -9,7 +9,6 @@ import {
 import { PrismaService } from '../database/prisma.service';
 import {
   CreateUserDto,
-  NewUserFromDbDto,
   PublicReadUserDto,
   ReadUserDto,
   UpdateUserDto,
@@ -157,27 +156,68 @@ export class UsersService {
     targetUserId: number,
     updateData: UpdateUserDto,
   ): Promise<{ message: string; data: ReadUserDto }> {
-    const existingUser = await this.prisma.users.findUnique({
-      where: { id: targetUserId },
-    });
+    try {
+      const existingUser = await this.prisma.users.findUnique({
+        where: { id: targetUserId },
+      });
 
-    if (!existingUser) {
-      throw new NotFoundException('User not found');
-    }
+      if (!existingUser) {
+        throw new NotFoundException('User not found');
+      }
 
-    if (existingUser.id !== currentUserId) {
-      throw new UnauthorizedException(
-        'You are not allowed to update this user',
+      // Only allow users to update their own profile unless they're an admin
+      if (
+        existingUser.id !== currentUserId &&
+        existingUser.role !== RolesEnum.ADMIN
+      ) {
+        throw new UnauthorizedException(
+          'You are not allowed to update this user',
+        );
+      }
+
+      const updatedUser = await this.prisma.users.update({
+        where: { id: targetUserId },
+        data: {
+          first_name: updateData.firstName,
+          last_name: updateData.lastName,
+          province: updateData.province,
+          city: updateData.city,
+          dob: updateData.dob ? updateData.dob : undefined,
+          languages: updateData.languages,
+          profession: updateData.profession,
+          experience: updateData.experience,
+          bio: updateData.bio,
+          picture_upload_link: updateData.pictureUploadLink,
+          arrival_in_canada: updateData.arrivalInCanada,
+          goal_id: updateData.goalId ? updateData.goalId : undefined,
+          linkedin_link: updateData.linkedinLink,
+          github_link: updateData.githubLink,
+          twitter_link: updateData.twitterLink,
+          portfolio_link: updateData.portfolioLink,
+          other_links: updateData.otherLinks,
+          additional_links: updateData.additionalLinks,
+        },
+      });
+
+      const updatedUserDto = this.mapToReadUserDto(updatedUser);
+      return { message: 'User updated successfully', data: updatedUserDto };
+    } catch (error) {
+      this.logger.error(
+        `Error updating user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+
+      if (
+        error instanceof NotFoundException ||
+        error instanceof UnauthorizedException
+      ) {
+        throw error;
+      }
+
+      throw new HttpException(
+        'Failed to update user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-
-    const updatedUser = await this.prisma.users.update({
-      where: { id: targetUserId },
-      data: this.prepareUpdateData(existingUser, updateData),
-    });
-
-    const updatedUserDto = this.mapToReadUserDto(updatedUser);
-    return { message: 'User updated successfully', data: updatedUserDto };
   }
 
   async deleteUser(
@@ -258,23 +298,6 @@ export class UsersService {
     }
   }
 
-  private prepareUpdateData(
-    existingUser: NewUserFromDbDto,
-    updateData: UpdateUserDto,
-  ): Partial<NewUserFromDbDto> {
-    return {
-      first_name: updateData.firstName ?? existingUser.first_name,
-      middle_name: updateData.middleName ?? existingUser.middle_name,
-      last_name: updateData.lastName ?? existingUser.last_name,
-      email: updateData.email ?? existingUser.email,
-      dob: updateData.dob ?? existingUser.dob,
-      show_dob: updateData.showDob ?? existingUser.show_dob,
-      goal_id: updateData.goalId ?? existingUser.goal_id,
-      arrival_in_canada:
-        updateData.arrivalInCanada ?? existingUser.arrival_in_canada,
-    };
-  }
-
   private mapToReadUserDto(user: any): ReadUserDto {
     const readUser = new ReadUserDto();
     Object.assign(readUser, {
@@ -288,6 +311,20 @@ export class UsersService {
       arrivalInCanada: user.arrival_in_canada,
       goalId: user.goal_id,
       role: user.role as 'USER' | 'ADMIN' | 'MENTOR',
+      province: user.province,
+      city: user.city,
+      languages: user.languages,
+      profession: user.profession,
+      experience: user.experience,
+      bio: user.bio,
+      pictureUploadLink: user.picture_upload_link,
+      resumeUploadLink: user.resume_upload_link,
+      linkedinLink: user.linkedin_link,
+      githubLink: user.github_link,
+      twitterLink: user.twitter_link,
+      portfolioLink: user.portfolio_link,
+      otherLinks: user.other_links,
+      additionalLinks: user.additional_links,
     });
     return readUser;
   }

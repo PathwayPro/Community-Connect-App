@@ -3,17 +3,16 @@ import { cn } from '@/shared/lib/utils';
 import { Input } from '../ui/input';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { LabelInput } from '@/shared/components/ui/label-input';
-import { useFormContext } from 'react-hook-form';
+import { FieldValues, useFormContext, Control, Path } from 'react-hook-form';
 import {
   FormField,
   FormItem,
   FormLabel,
   FormControl
 } from '@/shared/components/ui/form';
-import { Control } from 'react-hook-form';
 
-interface FormInputProps {
-  name: string;
+interface FormInputProps<T extends FieldValues> {
+  name: Path<T>;
   label: string;
   placeholder: string;
   customError?: string;
@@ -23,11 +22,11 @@ interface FormInputProps {
   rightIcon?: string;
   leftLabel?: string;
   rightLabel?: string;
-  control?: Control<any>;
+  control?: Control<T>;
   required?: boolean;
 }
 
-export const FormInput = ({
+export const FormInput = <T extends FieldValues>({
   name,
   label,
   placeholder,
@@ -40,8 +39,8 @@ export const FormInput = ({
   rightLabel,
   control: controlProp,
   required = false
-}: FormInputProps) => {
-  const formContext = useFormContext();
+}: FormInputProps<T>) => {
+  const formContext = useFormContext<T>();
   const control = controlProp || formContext?.control;
 
   if (!control) {
@@ -55,7 +54,7 @@ export const FormInput = ({
   const inputError = errors[name];
 
   return (
-    <FormField
+    <FormField<T>
       control={control}
       name={name}
       render={({ field }) => (

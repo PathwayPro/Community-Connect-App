@@ -14,16 +14,13 @@ import { cn } from '@/shared/lib/utils';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/use-auth';
 
-interface SidebarProps {
-  isOpen: boolean;
-}
-
-export const Sidebar = ({ isOpen }: SidebarProps) => {
+export const Sidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { logout } = useAuth();
+  const pathname = usePathname();
 
   const isPathActive = (path: string) => {
-    return usePathname().startsWith(path);
+    return pathname.startsWith(path);
   };
 
   const toggleSidebar = () => {
@@ -79,6 +76,7 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
         linkClassName={linkClassName}
         showText={isSidebarOpen}
         isPathActive={isPathActive}
+        onExpandSidebar={toggleSidebar}
       />
 
       <Separator className="my-6" />
@@ -93,7 +91,7 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
 
       {/* Logout */}
       <div className="mt-auto text-white">
-        <Link href="#" onClick={logout} className={linkClassName}>
+        <Link href="#" onClick={handleLogout} className={linkClassName}>
           <SharedIcons.logout
             className={cn('h-6 w-6', isSidebarOpen && 'ml-4')}
           />

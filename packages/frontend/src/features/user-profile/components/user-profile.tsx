@@ -13,8 +13,14 @@ import {
 } from '@/shared/components/ui/card';
 import { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Button } from '@/shared/components/ui/button';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { IconButton } from '@/shared/components/ui/icon-button';
+import { UserProfileFormData, userProfileSchema } from '../lib/validations';
+import { useAuthContext } from '@/features/auth/providers';
+import { toast } from 'sonner';
+import React from 'react';
+import { userApi } from '../api/user-api';
+import { useRouter } from 'next/navigation';
 
 function getStepContent(step: number) {
   switch (step) {
@@ -31,51 +37,105 @@ function getStepContent(step: number) {
   }
 }
 
-// Add interface for form data
-interface UserProfileFormData {
-  personalInfo: {
-    name: string;
-    email: string;
-    // ... other personal info fields
-  };
-  socialLinks: {
-    linkedin?: string;
-    github?: string;
-    // ... other social links
-  };
-  resume?: File;
-  goals: {
-    // ... goal related fields
-  };
-}
-
 const UserProfile = () => {
   const [activeStep, setActiveStep] = useState(1);
+  const router = useRouter();
+
+  const { user } = useAuthContext();
+
   const methods = useForm<UserProfileFormData>({
-    mode: 'onChange'
+    mode: 'onChange',
+    resolver: zodResolver(userProfileSchema),
+    defaultValues: React.useMemo(
+      () => ({
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+        province: user?.province || '',
+        city: user?.city || '',
+        dob: user?.dob ? new Date(user.dob) : new Date(),
+        languages: user?.languages || '',
+        profession: user?.profession || '',
+        experience: user?.experience || '',
+        bio: user?.bio || '',
+        pictureUploadLink: user?.pictureUploadLink || '',
+        arrivalInCanada: user?.arrivalInCanada || '',
+        goalId: user?.goalId || '',
+        linkedinLink: user?.linkedinLink || '',
+        githubLink: user?.githubLink || '',
+        twitterLink: user?.twitterLink || '',
+        portfolioLink: user?.portfolioLink || '',
+        otherLinks: user?.otherLinks || '',
+        additionalLinks: user?.additionalLinks || []
+      }),
+      [user]
+    )
   });
+
+  // Add form state logging for debugging
+  React.useEffect(() => {
+    console.log('Form Values:', methods.getValues());
+    console.log('Form Errors:', methods.formState.errors);
+  }, [methods]);
+
   const {
     handleSubmit,
     formState: { isSubmitting }
   } = methods;
 
-  const handleNext = () => {
-    setActiveStep((prevStep) => prevStep + 1);
-  };
+  const handleNext = React.useCallback(async () => {
+    const fieldsToValidate = {
+      1: ['firstName', 'lastName', 'province', 'city', 'dob'],
+      2: ['languages', 'profession', 'experience'],
+      3: ['pictureUploadLink'],
+      4: ['bio']
+    }[activeStep];
 
-  const handleBack = () => {
+    const isValid = await methods.trigger(
+      fieldsToValidate as (keyof UserProfileFormData)[]
+    );
+
+    if (isValid) {
+      setActiveStep((prevStep) => prevStep + 1);
+    }
+  }, [activeStep, methods]);
+
+  const handleBack = React.useCallback(() => {
     setActiveStep((prevStep) => prevStep - 1);
-  };
+  }, []);
 
   const onSubmit = async (data: UserProfileFormData) => {
+    // Only proceed if we're on the last step
+    if (activeStep !== 4) {
+      handleNext();
+      return;
+    }
+
+    // Ensure type conversion before submission
+    const modifiedData = {
+      ...data,
+      dob: data.dob ? new Date(data.dob) : undefined
+    };
+
     try {
-      // Handle form submission
-      console.log('saved form data :', data);
-      //   await saveUserProfile(data);
-      // Show success notification
+      console.log('Submitting data:', modifiedData);
+
+      const response = await userApi.updateUserProfile(
+        modifiedData,
+        Number(user?.id)
+      );
+
+      if (response.success !== true) {
+        console.error('Server response:', response);
+        throw new Error(response.message || 'Failed to update profile');
+      }
+
+      const result = response.data;
+      console.log('Submit success:', result);
+      toast.success('Profile updated successfully');
+      router.push('/profile');
     } catch (error) {
-      // Handle error
-      console.error('Failed to update profile:', error);
+      console.error('Submit error:', error);
+      toast.error('Failed to update profile. Please try again.');
     }
   };
 
@@ -106,21 +166,19 @@ const UserProfile = () => {
                 disabled={activeStep === 1}
                 label="Previous"
               />
-              {activeStep === 4 ? (
-                <IconButton
-                  className="w-[180px]"
-                  type="submit"
-                  disabled={isSubmitting}
-                  label={isSubmitting ? 'Saving...' : 'Finish'}
-                />
-              ) : (
-                <IconButton
-                  className="w-[180px]"
-                  rightIcon="arrowRight"
-                  onClick={handleNext}
-                  label="Next"
-                />
-              )}
+              <IconButton
+                className="w-[180px]"
+                type="submit"
+                disabled={isSubmitting}
+                rightIcon={activeStep === 4 ? undefined : 'arrowRight'}
+                label={
+                  activeStep === 4
+                    ? isSubmitting
+                      ? 'Saving...'
+                      : 'Finish'
+                    : 'Next'
+                }
+              />
             </div>
           </form>
         </FormProvider>

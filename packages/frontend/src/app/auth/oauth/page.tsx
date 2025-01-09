@@ -80,8 +80,8 @@ export const OAuthHandler = () => {
   if (!isProcessing) return null;
 
   return (
-    <div className="flex items-center justify-center">
-      <div className="flex flex-col items-center gap-3 text-center">
+    <div className="flex h-full w-full items-center justify-center">
+      <div className="flex min-h-[100%] w-full flex-col items-center gap-3 text-center">
         <div className="mb-8">
           <Icons.logo className="mx-auto h-[100px] w-[100px]" />
         </div>
