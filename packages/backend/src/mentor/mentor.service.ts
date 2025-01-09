@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
-  UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateMentorDto } from './dto/create-mentor.dto';
@@ -16,12 +15,6 @@ export class MentorService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(filters: FilterMentorDto = null) {
-    /* ONLY TO SHOW EXCEPTION BEFORE MIDDLEWARE/INTERCEPTOR IMPLEMENTATION */
-    const authorizedAcces = true;
-    if (!authorizedAcces)
-      throw new UnauthorizedException('Unauthorized access');
-    /* - - - END AUTH EXCEPTION - - - */
-
     // filters:
     //    max_mentees > X,
     //    has_experience: true | false
@@ -80,10 +73,35 @@ export class MentorService {
     }
   }
 
-  async create(createMentorDto: CreateMentorDto) {
+  async findOneByUserId(user_id: number) {
+    try {
+      const mentor = await this.prisma.mentors.findFirst({
+        where: { user_id },
+        include: {
+          user: true,
+        },
+      });
+
+      if (!mentor) {
+        throw new NotFoundException(
+          `There is no mentor application for this user (USER ID: ${user_id}).`,
+        );
+      }
+
+      return mentor;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException(error.message);
+      }
+    }
+  }
+
+  async create(user_id: number, createMentorDto: CreateMentorDto) {
     try {
       const mentor = await this.prisma.mentors.create({
-        data: createMentorDto,
+        data: { ...createMentorDto, user_id },
       });
 
       return mentor;
@@ -98,22 +116,22 @@ export class MentorService {
     }
   }
 
-  async update(id: number, updateMentor: UpdateMentorDto) {
+  async update(user_id: number, updateMentor: UpdateMentorDto) {
     try {
       // Validate mentor existence
-      const mentorToUpdate = await this.findOneById(id);
+      const mentorToUpdate = await this.findOneByUserId(user_id);
 
       if (mentorToUpdate) {
         // Update mentor information
         const updatedMentor = await this.prisma.mentors.update({
-          where: { id },
+          where: { id: mentorToUpdate.id },
           data: updateMentor,
         });
 
         return updatedMentor;
       } else {
         throw new NotFoundException(
-          `Mentor application with ID: ${id} not found.`,
+          `Mentor application user with ID: ${user_id} not found.`,
         );
       }
     } catch (error) {
@@ -121,21 +139,23 @@ export class MentorService {
     }
   }
 
-  async updateStatus(id: number, updateMentor: UpdateMentorDto) {
+  async updateStatus(
+    mentorApplicationId: number,
+    updateMentor: UpdateMentorDto,
+  ) {
     try {
       // Validate mentor existence
-      const mentorToUpdate = await this.findOneById(id);
+      const mentorToUpdate = await this.findOneById(mentorApplicationId);
 
       if (mentorToUpdate) {
         // Update mentor status
         const updatedMentor = await this.prisma.mentors.update({
-          where: { id },
+          where: { id: mentorApplicationId },
           data: updateMentor,
         });
 
         // Update user role according to status
         if (updatedMentor) {
-          console.log('LLEGA AL UPDATE USER');
           const userId = updatedMentor.user_id;
           const userRole: users_roles =
             updatedMentor.status === 'APPROVED' ? 'MENTOR' : 'USER';
@@ -151,16 +171,18 @@ export class MentorService {
           return updatedUser;
         } else {
           throw new InternalServerErrorException(
-            `There was an error updating the mentor application with ID: ${id}`,
+            `There was an error updating the mentor application with ID: ${mentorApplicationId}`,
           );
         }
       } else {
         throw new NotFoundException(
-          `Mentor application with ID: ${id} not found.`,
+          `Mentor application with ID: ${mentorApplicationId} not found.`,
         );
       }
     } catch (error) {
-      throw new BadRequestException('Error updating mentor: ' + error.message);
+      throw new BadRequestException(
+        'Error updating mentor application status: ' + error.message,
+      );
     }
   }
 

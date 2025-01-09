@@ -15,6 +15,7 @@ import { EventsModule } from './events/events.module';
 import { EventsCategoriesModule } from './events_categories/events_categories.module';
 import { EventsSubscriptionsModule } from './events_subscriptions/events_subscriptions.module';
 import { EventsInvitationsModule } from './events_invitations/events_invitations.module';
+import { EventsManagersModule } from './events_managers/events_managers.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { EventsInvitationsModule } from './events_invitations/events_invitations
     EventsCategoriesModule,
     EventsSubscriptionsModule,
     EventsInvitationsModule,
+    EventsManagersModule,
   ],
   controllers: [AppController],
   providers: [

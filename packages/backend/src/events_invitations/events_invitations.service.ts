@@ -3,18 +3,25 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateEventsInvitationDto } from './dto/create-events_invitation.dto';
 import { FilterEventsInvitationDto } from './dto/filter-events_invitation.dto';
 import { DeleteEventsInvitationDto } from './dto/delete-events_invitation.dto';
 import { PrismaService } from 'src/database';
 import { Prisma } from '@prisma/client';
+import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
+import { EventsManagersService } from '../events_managers/events_managers.service';
 
 @Injectable()
 export class EventsInvitationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly managers: EventsManagersService,
+  ) {}
 
   getFormattedFilters(
+    user: JwtPayload,
     filters: FilterEventsInvitationDto,
   ): Prisma.EventsInvitationsWhereInput {
     const formattedFilters: Prisma.EventsInvitationsWhereInput = {};
@@ -22,9 +29,22 @@ export class EventsInvitationsService {
     if (filters?.inviter_id) {
       formattedFilters.inviter_id = filters.inviter_id;
     }
-    if (filters?.invitee_id) {
+    // USERS CAN ONLY SEE WHEN THEY ARE INVITEES
+    if (user.roles === 'USER') {
+      formattedFilters.invitee_id = user.sub;
+    } else if (filters?.invitee_id) {
       formattedFilters.invitee_id = filters.invitee_id;
     }
+
+    // MENTORS CAN FILTER EVERYTHING, BUT ONLY GET RESULTS RELATED TO THEM
+    if (user.roles === 'MENTOR') {
+      formattedFilters.OR = [
+        { inviter_id: user.sub },
+        { invitee_id: user.sub },
+      ];
+    }
+
+    // EVENT, DATE FROM, DATE TO ARE THE SAME FOR EVERY ROLE
     if (filters?.event_id) {
       formattedFilters.event_id = filters.event_id;
     }
@@ -97,8 +117,24 @@ export class EventsInvitationsService {
     return { inviter, invitee, event };
   }
 
-  async create(createEventsInvitationDto: CreateEventsInvitationDto) {
+  async create(
+    user: JwtPayload,
+    createEventsInvitationDto: CreateEventsInvitationDto,
+  ) {
     try {
+      // MENTORS CAN ONLY INVITE FOR THEIR MANAGED EVENTS
+      if (
+        user.roles === 'MENTOR' &&
+        !(await this.managers.isEventManager(
+          user.sub,
+          createEventsInvitationDto.event_id,
+        ))
+      ) {
+        throw new UnauthorizedException(
+          'You are not authorized to invite for this event.',
+        );
+      }
+
       // VALIDATE EXISTENCES AND GET DATA
       const invitationData = await this.validateInvitation(
         createEventsInvitationDto,
@@ -116,10 +152,9 @@ export class EventsInvitationsService {
     }
   }
 
-  async findAll(filters: FilterEventsInvitationDto) {
+  async findAll(user: JwtPayload, filters: FilterEventsInvitationDto) {
     const appliedFilters: Prisma.EventsInvitationsWhereInput =
-      this.getFormattedFilters(filters);
-    console.log('APPLIED FILTERS:', appliedFilters);
+      this.getFormattedFilters(user, filters);
 
     try {
       const invitations = await this.prisma.eventsInvitations.findMany({
@@ -136,8 +171,32 @@ export class EventsInvitationsService {
     }
   }
 
-  async remove(deleteEventsInvitationDto: DeleteEventsInvitationDto) {
+  async remove(
+    user: JwtPayload,
+    deleteEventsInvitationDto: DeleteEventsInvitationDto,
+  ) {
     try {
+      // USERS CAN ONLY DELETE THEIR INVITATIONS
+      if (
+        user.roles === 'USER' &&
+        deleteEventsInvitationDto.invitee_id !== user.sub
+      ) {
+        throw new BadRequestException(
+          'You are not authorized to delete this invitation.',
+        );
+      }
+
+      // MENTORS CAN ONLY DELETE THEIR RELATED INVITATIONS
+      if (
+        user.roles === 'MENTOR' &&
+        deleteEventsInvitationDto.invitee_id !== user.sub &&
+        deleteEventsInvitationDto.inviter_id !== user.sub
+      ) {
+        throw new BadRequestException(
+          'You are not authorized to delete this invitation.',
+        );
+      }
+
       const deletedInvitation = await this.prisma.eventsInvitations.deleteMany({
         where: {
           inviter_id: deleteEventsInvitationDto.inviter_id,
