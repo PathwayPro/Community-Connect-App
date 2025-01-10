@@ -1,34 +1,58 @@
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+'use client';
+
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect } from 'react';
 import { useAuth } from '../hooks/use-auth';
 import { AccessToken } from '../types';
+import AlertDialogUI from '@/shared/components/notification/alert-dialog';
+import { Button } from '@/shared/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 interface VerifyEmailProps {
   token: AccessToken;
 }
 
 export const VerifyEmail = ({ token }: VerifyEmailProps) => {
+  const { verifyEmail, dialogState, setDialogState, error, setError } =
+    useAuth();
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const { verifyEmail } = useAuth();
 
   useEffect(() => {
+    let isVerifying = true;
+
     const verifyEmailToken = async () => {
+      if (!isVerifying) return;
+
       try {
         await verifyEmail(token);
-        router.replace('/auth/login');
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Verification failed';
-        setError(errorMessage);
-        setTimeout(() => {
-          router.replace('/auth/login');
-        }, 10000);
+        if (isVerifying) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Verification failed';
+          setError(errorMessage);
+        }
       }
     };
 
     verifyEmailToken();
-  }, [token, router, verifyEmail]);
+
+    return () => {
+      isVerifying = false;
+    };
+  }, []);
+
+  if (dialogState.isOpen) {
+    return (
+      <AlertDialogUI
+        title={dialogState.title}
+        description={dialogState.description}
+        open={dialogState.isOpen}
+        onOpenChange={(open) =>
+          setDialogState((prev) => ({ ...prev, isOpen: open }))
+        }
+      />
+    );
+  }
 
   if (error) {
     return (
@@ -37,6 +61,13 @@ export const VerifyEmail = ({ token }: VerifyEmailProps) => {
           Verification Failed
         </h1>
         <p className="text-muted-foreground">{error}</p>
+        <Button
+          variant="outline"
+          className="mt-6 w-[200px]"
+          onClick={() => router.push('/auth/login')}
+        >
+          Go to Login
+        </Button>
       </div>
     );
   }

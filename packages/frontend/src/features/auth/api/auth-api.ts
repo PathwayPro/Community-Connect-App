@@ -2,7 +2,6 @@ import { apiMethods } from '@/shared/api';
 import {
   LoginCredentials,
   AuthResponse,
-  AuthResponseMessage,
   RegisterCredentials,
   ResetPasswordCredentials,
   ForgotPasswordCredentials,
@@ -19,18 +18,18 @@ export const authApi = {
     apiMethods.post<AuthResponse>('/users/register', credentials),
 
   verifyEmail: (token: AccessToken) =>
-    apiMethods.get<AuthResponseMessage>(`/auth/verify-email?token=${token}`),
+    apiMethods.get<AuthResponse>(`/auth/verify-email?token=${token}`),
 
   updatePassword: (credentials: UpdatePasswordCredentials) =>
-    apiMethods.post<AuthResponseMessage>('/auth/update-password', credentials),
+    apiMethods.post<AuthResponse>('/auth/update-password', credentials),
 
   forgotPassword: (credentials: ForgotPasswordCredentials) =>
-    apiMethods.post<AuthResponseMessage>('/auth/forgot-password', credentials),
+    apiMethods.post<AuthResponse>('/auth/forgot-password', credentials),
 
   resetPassword: (credentials: ResetPasswordCredentials) =>
-    apiMethods.post<AuthResponseMessage>('/auth/reset-password', credentials),
+    apiMethods.post<AuthResponse>('/auth/reset-password', credentials),
 
-  logout: () => apiMethods.post<AuthResponseMessage>('/auth/logout'),
+  logout: () => apiMethods.post<AuthResponse>('/auth/logout'),
 
   refreshToken: (refreshToken: RefreshToken) =>
     apiMethods.post<AuthResponse>('/auth/refresh', { refreshToken })

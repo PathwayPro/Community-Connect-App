@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/shared/components/ui/button';
@@ -24,21 +24,22 @@ import Link from 'next/link';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { cn } from '@/shared/lib/utils';
 import AlertDialogUI from '@/shared/components/notification/alert-dialog';
-import { useToast } from '@/shared/hooks/use-toast';
 
 type RetrievePasswordFormValues = ForgotPasswordFormValues &
   ResetPasswordFormValues;
 
 export function ForgotPasswordForm() {
   const pathname = usePathname();
-  const { forgotPassword, resetPassword } = useAuth();
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    forgotPassword,
+    resetPassword,
+    dialogState,
+    setDialogState,
+    isLoading
+  } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showAlertDialog, setShowAlertDialog] = useState(false);
   const isForgotPasswordPage = pathname === '/auth/forgot-password';
-  const { toast } = useToast();
 
   const form = useForm<RetrievePasswordFormValues>({
     resolver: zodResolver(
@@ -51,47 +52,23 @@ export function ForgotPasswordForm() {
   });
 
   const onSubmit = async (data: RetrievePasswordFormValues) => {
-    setIsLoading(true);
-
-    try {
-      console.log('forgot password data :', data);
-      if (isForgotPasswordPage) {
-        const response = await forgotPassword(data as ForgotPasswordFormValues);
-        console.log('forgot password response :', response);
-
-        if (response.message === 'Password reset email sent successfully.') {
-          setShowAlertDialog(true);
-        } else {
-          toast({
-            title: 'Forgot Password Error',
-            description:
-              response.message || 'Something went wrong! Please try again.'
-          });
-        }
-
-        setTimeout(() => {
-          form.reset();
-          setShowAlertDialog(false);
-          router.push('/auth/login');
-        }, 3000);
-      } else {
-        await resetPassword(data as ResetPasswordFormValues);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+    if (isForgotPasswordPage) {
+      await forgotPassword(data as ForgotPasswordFormValues);
+    } else {
+      await resetPassword(data as ResetPasswordFormValues);
     }
   };
 
   return (
     <div className="w-full max-w-md space-y-6 bg-white dark:bg-slate-900">
-      {showAlertDialog && (
+      {dialogState.isOpen && (
         <AlertDialogUI
-          title="Email Sent!"
-          description="A password reset link has been sent to your registered Email ID."
-          open={showAlertDialog}
-          onOpenChange={setShowAlertDialog}
+          title={dialogState.title}
+          description={dialogState.description}
+          open={dialogState.isOpen}
+          onOpenChange={(open) =>
+            setDialogState((prev) => ({ ...prev, isOpen: open }))
+          }
         />
       )}
       <Icons.logo className="mx-auto h-[84px] w-[84px]" />

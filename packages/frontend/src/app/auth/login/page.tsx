@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
-import { AuthForm } from '@/features/auth/components/auth-form';
-import AuthCarousel from '@/features/auth/components/auth-carousel';
+import { AuthForm } from '@/features/auth/components';
+import { AuthCarousel } from '@/features/auth/components';
 import { Separator } from '@/shared/components/ui/separator';
 export const metadata: Metadata = {
   title: 'Login | Your App Name',

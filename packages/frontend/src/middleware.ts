@@ -31,7 +31,12 @@ export async function middleware(request: NextRequest) {
 
   // Create URLs for redirects
   const signInPage = new URL('/auth/login', request.url);
-  const homePage = new URL('/', request.url);
+  const homePage = new URL('/dashboard', request.url);
+
+  // Redirect root path to dashboard
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/home', request.url));
+  }
 
   // Special handling for verify-email with token
   if (pathname.startsWith('/auth/verify-email') && !isAuthenticated) {
