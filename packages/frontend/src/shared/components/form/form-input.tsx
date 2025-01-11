@@ -24,6 +24,7 @@ interface FormInputProps<T extends FieldValues> {
   rightLabel?: string;
   control?: Control<T>;
   required?: boolean;
+  type?: string;
 }
 
 export const FormInput = <T extends FieldValues>({
@@ -38,7 +39,8 @@ export const FormInput = <T extends FieldValues>({
   leftLabel,
   rightLabel,
   control: controlProp,
-  required = false
+  required = false,
+  type
 }: FormInputProps<T>) => {
   const formContext = useFormContext<T>();
   const control = controlProp || formContext?.control;
@@ -73,6 +75,7 @@ export const FormInput = <T extends FieldValues>({
                 placeholder={placeholder}
                 leftIcon={leftIcon}
                 rightIcon={rightIcon}
+                type={type}
                 className={cn(
                   'w-full bg-neutral-light-100',
                   inputError && 'border-red-500 focus-visible:ring-red-100'
@@ -84,6 +87,7 @@ export const FormInput = <T extends FieldValues>({
                 placeholder={placeholder}
                 leftLabel={leftLabel}
                 rightLabel={rightLabel}
+                type={type}
                 className={cn(
                   'w-full bg-neutral-light-100',
                   inputError && 'border-red-500 focus-visible:ring-red-100'
@@ -93,6 +97,7 @@ export const FormInput = <T extends FieldValues>({
             ) : (
               <Input
                 placeholder={placeholder}
+                type={type}
                 className={cn(
                   'w-full bg-neutral-light-100',
                   inputError && 'border-red-500 focus-visible:ring-red-100'

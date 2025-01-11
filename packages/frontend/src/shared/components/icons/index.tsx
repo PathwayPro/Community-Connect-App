@@ -18,7 +18,9 @@ import {
   Trash2Icon,
   RefreshCcw,
   InfoIcon,
-  PlusCircleIcon
+  PlusCircleIcon,
+  TrendingUpIcon,
+  TrendingDownIcon
 } from 'lucide-react';
 
 export const SharedIcons = {
@@ -280,5 +282,7 @@ export const SharedIcons = {
         />
       </g>
     </svg>
-  )
+  ),
+  arrowTrendingUp: TrendingUpIcon,
+  arrowTrendingDown: TrendingDownIcon
 };
