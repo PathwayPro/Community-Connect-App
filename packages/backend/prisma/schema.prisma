@@ -42,6 +42,8 @@ model users {
   event_invitee        EventsInvitations[]          @relation(name: "EventInvitationInvitee")
   // NEWS RELATIONSHIP
   news News[]
+  //RESOURCES RELATIONSHIP
+  resources Resources[]
 }
 
 enum users_roles {
@@ -200,6 +202,17 @@ model News {
   keywords    String?
   content    String
   published Boolean @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  user users @relation(fields: [user_id], references: [id])
+  user_id Int
+}
+
+// RESOURCES
+model Resources {
+  id         Int      @id @default(autoincrement())
+  title    String
+  link    String
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
   user users @relation(fields: [user_id], references: [id])
