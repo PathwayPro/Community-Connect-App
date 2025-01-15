@@ -8,7 +8,7 @@ const GeneralUsersData = {
     arrival_in_canada: undefined,
     goal_id: 0,
     verification_token: "",
-    email_verified: false,
+    email_verified: true,
     refresh_token: "",
     last_logout: new Date()
 };

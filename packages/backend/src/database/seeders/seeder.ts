@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UsersData, MentorsData } from './data/users.seed';
 import { EventsCategoriesData, EventsData, EventsInvitationsData, EventsManagersData, EventsSubscriptionsData, EventsSubscriptionsUpdatesData } from './data/events.seed';
 import { NewsData } from './data/news.seed';
+import { ResourcesData } from './data/resources.seed';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -11,41 +12,45 @@ const emptyTables = async () => {
         // DELETING IN ORDER TO PREVENT FK ERRORS
         console.log('\n\n 1. DELETING DATA (IN ORDER) TO PREVENT FK ERRORS:\n');
 
+        // RESOURCES
+        const resourcesStatus = (await prisma.resources.deleteMany({})) ? 'OK' : 'ERROR';
+        console.log(`     1.1 RESOURCES (${resourcesStatus}!)`);
+
         // NEWS
         const newsStatus = (await prisma.news.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     1.1 NEWS (${newsStatus}!)`);
+        console.log(`     1.2 NEWS (${newsStatus}!)`);
         
         // EVENTS SUBSCRIPTIONS UPDATES
         const eventsSubscriptionsUpdatesStatus = (await prisma.eventsSubscriptionsUpdates.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     1.2 EVENTS SUBSCRIPTIONS UPDATES (${eventsSubscriptionsUpdatesStatus}!)`);
+        console.log(`     1.3 EVENTS SUBSCRIPTIONS UPDATES (${eventsSubscriptionsUpdatesStatus}!)`);
         
         // EVENTS SUBSCRIPTIONS UPDATES
         const eventsSubscriptionsStatus = (await prisma.eventsSubscriptions.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     1.3 EVENTS SUBSCRIPTIONS (${eventsSubscriptionsStatus}!)`);
+        console.log(`     1.4 EVENTS SUBSCRIPTIONS (${eventsSubscriptionsStatus}!)`);
 
         // EVENTS INVITATIONS
         const eventsInvitationsStatus = (await prisma.eventsInvitations.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     1.4 EVENTS INVITATIONS (${eventsInvitationsStatus}!)`);
+        console.log(`     1.5 EVENTS INVITATIONS (${eventsInvitationsStatus}!)`);
 
         // EVENTS MANAGERS
         const eventsManagersStatus = (await prisma.eventsManagers.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     1.5 EVENTS MANAGERS (${eventsManagersStatus}!)`);
+        console.log(`     1.6 EVENTS MANAGERS (${eventsManagersStatus}!)`);
 
         // EVENTS
         const eventsStatus = (await prisma.events.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     1.6 EVENTS (${eventsStatus}!)`);
+        console.log(`     1.7 EVENTS (${eventsStatus}!)`);
 
         // EVENTS CATEGORIES
         const eventsCategoriesStatus = (await prisma.eventsCategories.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     1.7 EVENTS CATEGORIES (${eventsCategoriesStatus}!)`);
+        console.log(`     1.8 EVENTS CATEGORIES (${eventsCategoriesStatus}!)`);
 
         // MENTORS
         const mentorsStatus = (await prisma.mentors.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     1.8 MENTORS (${mentorsStatus}!)`);
+        console.log(`     1.9 MENTORS (${mentorsStatus}!)`);
 
         // USERS
         const usersStatus = (await prisma.users.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     1.9 USERS (${usersStatus}!)`);
+        console.log(`     1.10 USERS (${usersStatus}!)`);
 
 
     }catch(error){
@@ -177,6 +182,20 @@ const seedNews = async () => {
 
     return true;
 }
+const seedResources = async () => {
+    try{
+        console.log(`\n\n\n 10. SEEDING TABLE RESOURCES:   (${ResourcesData.length} records)\n`)
+        for(const r of ResourcesData){
+            (await prisma.resources.create({data: r})) ? 
+            console.log(`     RESOURCE ID: ${r.id} created - - - - - - - > OK! `) :
+            console.log(`     RESOURCE ID: ${r.id} created - - - - - - - > ERROR! `);
+        }
+    }catch(error){
+        throw new InternalServerErrorException('There was an error seeding resources:', error)
+    }
+
+    return true;
+}
 
 const seedAll = async () => {
     console.log('\n\n         - - - - - - - - - - - - - - \n       | R U N N I N G   S E E D E R | \n         - - - - - - - - - - - - - - \n\n')
@@ -191,6 +210,7 @@ const seedAll = async () => {
     await seedEventsSubscriptions()
     await seedEventsSubscriptionsUpdates()
     await seedNews()
+    await seedResources()
 }
 
 seedAll();
