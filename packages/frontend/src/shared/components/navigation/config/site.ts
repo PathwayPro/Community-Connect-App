@@ -25,12 +25,12 @@ export const MainSiteNav = [
     icon: 'mentors',
     subItems: [
       {
-        name: 'Become a Mentor',
-        href: '/mentorship/mentor'
+        name: 'Apply',
+        href: '/mentorship/apply'
       },
       {
-        name: 'Become a Mentee',
-        href: '/mentorship/mentee'
+        name: 'Dashboard',
+        href: '/mentorship/dashboard'
       }
     ]
   }
