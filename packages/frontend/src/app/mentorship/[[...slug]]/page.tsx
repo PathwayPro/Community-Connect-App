@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import MentorForm from '@/features/mentorship/components/mentor-form';
 import MenteeForm from '@/features/mentorship/components/mentee-form';
+import MentorshipApply from '@/features/mentorship/components/mentorship-apply';
 
 interface MentorshipPageProps {
   params: {
@@ -11,7 +12,6 @@ interface MentorshipPageProps {
 }
 
 export default function MentorshipPage({ params }: MentorshipPageProps) {
-  // Handle different routes based on slug
   const renderContent = () => {
     // If no slug, render main mentorship page
     if (!params.slug?.length) {
@@ -22,13 +22,24 @@ export default function MentorshipPage({ params }: MentorshipPageProps) {
       );
     }
 
-    // Handle specific routes
+    // Handle first level routes
     switch (params.slug[0]) {
-      case 'mentor':
-        return <MentorForm />;
+      case 'dashboard':
+        return <MentorshipDashboard />;
 
-      case 'mentee':
-        return <MenteeForm />;
+      case 'apply':
+        // Handle apply subroutes for mentor/mentee
+        if (params.slug[1]) {
+          switch (params.slug[1]) {
+            case 'mentor':
+              return <MentorForm />;
+            case 'mentee':
+              return <MenteeForm />;
+            default:
+              notFound();
+          }
+        }
+        return <MentorshipApply />;
 
       default:
         notFound();
