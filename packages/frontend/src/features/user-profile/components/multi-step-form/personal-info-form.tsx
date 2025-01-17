@@ -99,7 +99,7 @@ export const PersonalInfoForm = () => {
         />
         <FormInput
           name="languages"
-          label="Languages Spoken"
+          label="Languages Spoken (comma separated)"
           placeholder="Enter your languages spoken"
           customError="Languages spoken is required"
         />

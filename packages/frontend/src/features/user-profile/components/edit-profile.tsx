@@ -37,7 +37,7 @@ function getStepContent(step: number) {
   }
 }
 
-const UserProfile = () => {
+export const EditProfile = () => {
   const [activeStep, setActiveStep] = useState(1);
   const router = useRouter();
 
@@ -186,5 +186,3 @@ const UserProfile = () => {
     </Card>
   );
 };
-
-export default UserProfile;
