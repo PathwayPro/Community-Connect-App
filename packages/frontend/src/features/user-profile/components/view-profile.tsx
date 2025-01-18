@@ -173,7 +173,8 @@ export const ViewProfile = () => {
           <>
             <div className="space-y-3">
               <Separator />
-              <p className="paragraph-lg text-center text-muted-foreground">
+
+              <p className="paragraph-lg pt-3 text-center text-muted-foreground">
                 {profileData.bio.value}
               </p>
             </div>
