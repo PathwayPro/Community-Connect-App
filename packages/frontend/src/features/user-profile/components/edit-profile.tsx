@@ -16,11 +16,12 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { UserProfileFormData, userProfileSchema } from '../lib/validations';
-import { useAuthContext } from '@/features/auth/providers';
 import { toast } from 'sonner';
 import React from 'react';
 import { userApi } from '../api/user-api';
 import { useRouter } from 'next/navigation';
+import { useUserStore } from '../store';
+import { useFetchProfile } from '../hooks/use-fetch-profile';
 
 function getStepContent(step: number) {
   switch (step) {
@@ -40,13 +41,13 @@ function getStepContent(step: number) {
 export const EditProfile = () => {
   const [activeStep, setActiveStep] = useState(1);
   const router = useRouter();
-
-  const { user } = useAuthContext();
+  const { user } = useUserStore();
+  const { isLoading, error } = useFetchProfile();
 
   const methods = useForm<UserProfileFormData>({
     mode: 'onChange',
     resolver: zodResolver(userProfileSchema),
-    defaultValues: React.useMemo(
+    values: React.useMemo(
       () => ({
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
@@ -138,6 +139,26 @@ export const EditProfile = () => {
       toast.error('Failed to update profile. Please try again.');
     }
   };
+
+  if (isLoading) {
+    return (
+      <Card className="flex w-[840px] flex-col rounded-[24px]">
+        <CardContent className="flex items-center justify-center p-8">
+          Loading profile...
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="flex w-[840px] flex-col rounded-[24px]">
+        <CardContent className="flex items-center justify-center p-8">
+          Error loading profile: {error.message}
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="flex w-[840px] flex-col rounded-[24px]">

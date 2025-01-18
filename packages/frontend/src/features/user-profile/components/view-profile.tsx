@@ -1,12 +1,13 @@
 'use client';
 
-import { useAuthContext } from '@/features/auth/providers/auth-context';
-import { Card } from '@/shared/components/ui/card';
+import { Card, CardContent } from '@/shared/components/ui/card';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { Separator } from '@/shared/components/ui/separator';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useUserStore } from '../store';
+import { useFetchProfile } from '../hooks/use-fetch-profile';
 
 interface StatItemProps {
   label: string;
@@ -58,7 +59,8 @@ const InfoGroup = ({ title, items }: InfoGroupProps) => (
 
 export const ViewProfile = () => {
   const router = useRouter();
-  const { user } = useAuthContext();
+  const { user } = useUserStore();
+  const { isLoading, error } = useFetchProfile();
 
   // view profile data builder
   const profileData = {
@@ -119,6 +121,26 @@ export const ViewProfile = () => {
       })) || [])
     ].filter((link) => link.value) // Remove empty links
   };
+
+  if (isLoading) {
+    return (
+      <Card className="flex w-[840px] flex-col rounded-[24px]">
+        <CardContent className="flex items-center justify-center p-8">
+          Loading profile...
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="flex w-[840px] flex-col rounded-[24px]">
+        <CardContent className="flex items-center justify-center p-8">
+          Error loading profile: {error.message}
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-4xl">

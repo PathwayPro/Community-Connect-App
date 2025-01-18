@@ -32,8 +32,6 @@ export interface UserProfile {
 
 export interface UserResponse {
   success: boolean;
-  message: string;
+  message?: string;
   data: UserProfile;
-  timestamp: string;
-  path: string;
 }

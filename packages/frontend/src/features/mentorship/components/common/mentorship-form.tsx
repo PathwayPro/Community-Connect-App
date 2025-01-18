@@ -18,6 +18,15 @@ import { useRouter, usePathname } from 'next/navigation';
 import { mentorSchema } from '../../lib/validations';
 import { userApi } from '@/features/user-profile/api/user-api';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from '@/shared/components/ui/dialog';
+import { ScrollArea } from '@/shared/components/ui/scroll-area';
+import { Checkbox } from '@/shared/components/ui/checkbox';
+import { Button } from '@/shared/components/ui/button';
 
 interface MentorshipFormProps {
   title: string;
@@ -86,7 +95,7 @@ const MentorshipForm = ({ title }: MentorshipFormProps) => {
         Number(user?.id)
       );
 
-      if (response.success !== true) {
+      if (response.success === false) {
         console.error('Server response:', response);
         throw new Error(response.message || 'Failed to update profile');
       }
@@ -101,6 +110,21 @@ const MentorshipForm = ({ title }: MentorshipFormProps) => {
     }
   };
 
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [hasAgreed, setHasAgreed] = React.useState(false);
+
+  const agreementContent = `
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+    1. First Agreement Point
+    2. Second Agreement Point
+    3. Third Agreement Point
+
+    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    
+    // Add more agreement content as needed
+  `;
+
   return (
     <Card className="flex w-[840px] flex-col rounded-[24px]">
       <CardHeader className="justify-center p-8">
@@ -112,17 +136,53 @@ const MentorshipForm = ({ title }: MentorshipFormProps) => {
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <BaseForm isMentor={isMentor} />
-            <div className="flex w-full justify-between pt-5">
+            <div className="flex w-full flex-col gap-4 pt-5">
+              <Button
+                variant="link"
+                onClick={() => setIsModalOpen(true)}
+                type="button"
+              >
+                View Application Agreement to Proceed
+              </Button>
               <IconButton
                 className="w-full"
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !hasAgreed}
                 rightIcon={'arrowRight'}
                 label={isSubmitting ? 'Saving...' : 'Submit Application'}
               />
             </div>
           </form>
         </FormProvider>
+
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Application Agreement</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="h-[300px] w-full rounded-md border p-4">
+              <div className="whitespace-pre-line">{agreementContent}</div>
+            </ScrollArea>
+            <div className="flex flex-col gap-4 pt-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="agreement"
+                  checked={hasAgreed}
+                  onCheckedChange={(checked) =>
+                    setHasAgreed(checked as boolean)
+                  }
+                />
+                <label
+                  htmlFor="agreement"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  I agree to the terms and conditions
+                </label>
+              </div>
+              <Button onClick={() => setIsModalOpen(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
