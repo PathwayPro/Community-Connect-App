@@ -3,11 +3,7 @@
 import { ViewProfile } from '@/features/user-profile/components';
 
 export const ProfilePage = () => {
-  return (
-    <div className="flex w-full flex-col items-center">
-      <ViewProfile />
-    </div>
-  );
+  return <ViewProfile />;
 };
 
 export default ProfilePage;

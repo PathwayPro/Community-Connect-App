@@ -121,7 +121,7 @@ export const ViewProfile = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-4xl">
       <Card className="space-y-8 p-6">
         {/* Edit Profile Button */}
         <div className="flex justify-end">
