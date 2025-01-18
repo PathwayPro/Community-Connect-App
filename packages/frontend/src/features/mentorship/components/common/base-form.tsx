@@ -5,8 +5,45 @@ import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
 import React from 'react';
 import { MentorSchema } from '../../lib/validations';
+import { FormMultiSelect } from '@/shared/components/form/form-multiselect';
 
-export const BaseForm = () => {
+const interestsOptions = [
+  { value: 'frontend', label: 'Frontend Development' },
+  { value: 'backend', label: 'Backend Development' },
+  { value: 'fullstack', label: 'Full-Stack Development' },
+  { value: 'mobile', label: 'Mobile App Development (iOS/Android)' },
+  { value: 'game', label: 'Game Development' },
+  { value: 'cybersecurity', label: 'Cybersecurity' },
+  { value: 'data_analytics', label: 'Data and Analytics' },
+  { value: 'product_management', label: 'Product Management' },
+  { value: 'project_management', label: 'Program/Project Management' },
+  { value: 'agile_coaching', label: 'Agile Coaching' },
+  { value: 'ai', label: 'Artificial Intelligence' },
+  { value: 'qa_testing', label: 'Quality Assurance and Testing' },
+  { value: 'vc_investments', label: 'Venture Capital/Investments' },
+  { value: 'startup_advisory', label: 'Startup Advisory' },
+  { value: 'networking_it', label: 'Networking and IT' },
+  { value: 'leadership', label: 'Leadership' },
+  { value: 'career_transition', label: 'Career Transition' },
+  { value: 'career_coaching', label: 'Career Coaching' },
+  { value: 'other', label: 'Others' }
+];
+
+const daysOptions = [
+  { value: 'monday', label: 'Monday' },
+  { value: 'tuesday', label: 'Tuesday' },
+  { value: 'wednesday', label: 'Wednesday' },
+  { value: 'thursday', label: 'Thursday' },
+  { value: 'friday', label: 'Friday' },
+  { value: 'saturday', label: 'Saturday' },
+  { value: 'sunday', label: 'Sunday' }
+];
+
+interface BaseFormProps {
+  isMentor: boolean;
+}
+
+export const BaseForm = ({ isMentor }: BaseFormProps) => {
   const { setValue, watch } = useFormContext<MentorSchema>();
 
   // Watch values for debugging
@@ -68,40 +105,51 @@ export const BaseForm = () => {
           required
         />
       </div>
-      <div className="flex w-full gap-4">
-        <FormInput
-          name="profession"
-          label="Profession"
-          placeholder="Enter your profession"
-          customError="Profession is required"
-          required
-        />
-        <FormInput
-          name="experience"
-          label="Years of Experience"
-          type="number"
-          placeholder="Enter your years of experience"
-          customError="Years of experience is required"
-          required
-        />
-      </div>
-      <div className="flex w-full gap-4">
-        <FormInput
-          name="max_mentees"
-          label="Max Mentees"
-          type="number"
-          placeholder="Enter your max mentees"
-          customError="Max mentees is required"
-          required
-        />
-        <FormInput
-          name="availability"
-          label="Availability"
-          placeholder="Enter your availability"
-          customError="Availability is required"
-          required
-        />
-      </div>
+      {isMentor && (
+        <>
+          <div className="flex w-full gap-4">
+            <FormInput
+              name="profession"
+              label="Profession"
+              placeholder="Enter your profession"
+              customError="Profession is required"
+              required
+            />
+            <FormInput
+              name="experience"
+              label="Years of Experience"
+              type="number"
+              placeholder="Enter your years of experience"
+              customError="Years of experience is required"
+              required
+            />
+          </div>
+          <div className="flex w-full gap-4">
+            <FormInput
+              name="max_mentees"
+              label="Max Mentees"
+              type="number"
+              placeholder="Enter your max mentees"
+              customError="Max mentees is required"
+              required
+            />
+            <FormMultiSelect
+              name="availability"
+              label="Availability"
+              options={daysOptions}
+              placeholder="Select your availability"
+              maxCount={2}
+            />
+          </div>
+        </>
+      )}
+      <FormMultiSelect
+        name="interests"
+        label="Interests"
+        options={interestsOptions}
+        placeholder="Select your areas of interest"
+        maxCount={5}
+      />
       <FormTextarea
         name="bio"
         label="Bio"

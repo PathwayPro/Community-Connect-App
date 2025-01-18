@@ -39,9 +39,9 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect mentorship to mentorship/dashboard
-  if (pathname === '/mentorship') {
-    return NextResponse.redirect(new URL('/mentorship/dashboard', request.url));
-  }
+  // if (pathname === '/mentorship') {
+  //   return NextResponse.redirect(new URL('/mentorship/dashboard', request.url));
+  // }
 
   // Special handling for verify-email with token
   if (pathname.startsWith('/auth/verify-email') && !isAuthenticated) {

@@ -14,7 +14,7 @@ import { UserProfileFormData } from '@/features/user-profile/lib/validations';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuthContext } from '@/features/auth/providers/auth-context';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { mentorSchema } from '../../lib/validations';
 import { userApi } from '@/features/user-profile/api/user-api';
 import { toast } from 'sonner';
@@ -24,6 +24,8 @@ interface MentorshipFormProps {
 }
 
 const MentorshipForm = ({ title }: MentorshipFormProps) => {
+  const pathname = usePathname();
+  const isMentor = pathname === '/mentorship/mentor';
   const router = useRouter();
 
   const { user } = useAuthContext();
@@ -109,7 +111,7 @@ const MentorshipForm = ({ title }: MentorshipFormProps) => {
       <CardContent className="flex flex-col justify-center gap-4">
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <BaseForm />
+            <BaseForm isMentor={isMentor} />
             <div className="flex w-full justify-between pt-5">
               <IconButton
                 className="w-full"

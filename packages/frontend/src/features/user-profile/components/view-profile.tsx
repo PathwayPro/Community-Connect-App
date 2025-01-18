@@ -4,7 +4,6 @@ import { useAuthContext } from '@/features/auth/providers/auth-context';
 import { Card } from '@/shared/components/ui/card';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { Separator } from '@/shared/components/ui/separator';
-import { Icon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -122,102 +121,114 @@ export const ViewProfile = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-4xl space-y-8 p-6">
-      {/* Header with Edit Button */}
-      <div className="flex justify-end">
-        <IconButton
-          leftIcon="pencilSquare"
-          label="Edit Profile"
-          className="w-[180px]"
-          onClick={() => router.push('/profile/update')}
-        />
-      </div>
-
-      {/* Avatar and Name Section */}
-      <div className="flex flex-col items-center space-y-4">
-        <div className="relative h-40 w-40 overflow-hidden rounded-full bg-warning-500">
-          <Image
-            src={profileData.avatar}
-            alt="Profile-avatar"
-            width={160}
-            height={160}
-            priority
-            className="h-full w-full object-cover"
+    <div className="container mx-auto max-w-4xl p-6">
+      <Card className="space-y-8 p-6">
+        {/* Edit Profile Button */}
+        <div className="flex justify-end">
+          <IconButton
+            leftIcon="pencilSquare"
+            label="Edit Profile"
+            className="w-[180px]"
+            onClick={() => router.push('/profile/update')}
           />
         </div>
-        <h3 className="font-bold">{profileData.name}</h3>
-      </div>
 
-      {/* Stats Section */}
-      <div className="flex items-center justify-center gap-8">
-        <StatItem
-          label="Mentees Tutored"
-          value={profileData.stats.menteesTutored}
-        />
-        <Separator orientation="vertical" className="h-12" />
-        <StatItem
-          label="Group Sessions"
-          value={profileData.stats.groupSessions}
-        />
-        <Separator orientation="vertical" className="h-12" />
-        <StatItem
-          label="Personal Sessions"
-          value={profileData.stats.personalSessions}
-        />
-      </div>
+        {/* Avatar Card */}
+        {/* <Card className="space-y-6 p-6"> */}
+        {/* Avatar and Name Section */}
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative h-40 w-40 overflow-hidden rounded-full bg-warning-500">
+            <Image
+              src={profileData.avatar}
+              alt="Profile-avatar"
+              width={160}
+              height={160}
+              priority
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <h3 className="font-bold">{profileData.name}</h3>
+        </div>
 
-      {/* Information Cards */}
-      <Card className="space-y-6 p-6">
+        {/* Stats Section */}
+        <div className="flex items-center justify-center gap-8">
+          <StatItem
+            label="Mentees Tutored"
+            value={profileData.stats.menteesTutored}
+          />
+          <Separator orientation="vertical" className="h-12" />
+          <StatItem
+            label="Group Sessions"
+            value={profileData.stats.groupSessions}
+          />
+          <Separator orientation="vertical" className="h-12" />
+          <StatItem
+            label="Personal Sessions"
+            value={profileData.stats.personalSessions}
+          />
+        </div>
+
         {/* Bio */}
         {profileData.bio && (
-          <div className="space-y-3">
-            <h5 className="font-semibold text-primary">Bio</h5>
-            <p className="paragraph-lg text-justify text-muted-foreground">
-              {profileData.bio.value}
-            </p>
-          </div>
-        )}
-        {/* Personal Information */}
-        {profileData.personalInfo.length > 0 && (
           <>
-            <InfoGroup
-              title="Personal Information"
-              items={profileData.personalInfo}
-            />
-            <Separator />
+            <div className="space-y-3">
+              <Separator />
+              <p className="paragraph-lg text-center text-muted-foreground">
+                {profileData.bio.value}
+              </p>
+            </div>
           </>
         )}
-        {/* Contact Details */}
-        {profileData.contactDetails.length > 0 && (
-          <>
-            <InfoGroup
-              title="Contact Details"
-              items={profileData.contactDetails}
-            />
-            <Separator />
-          </>
-        )}
-        {/* Professional Information */}
-        {profileData.professionalInfo.length > 0 && (
-          <InfoGroup
-            title="Professional Information"
-            items={profileData.professionalInfo}
-          />
-        )}
-        {/* Links */}
-        {profileData.links.length > 0 && (
-          <>
-            <Separator />
-            <InfoGroup title="Links" items={profileData.links} />
-          </>
-        )}
+        {/* </Card> */}
+
+        {/* Information Cards */}
+        <div className="space-y-6">
+          {/* Personal Information */}
+          {profileData.personalInfo.length > 0 && (
+            <Card className="bg-neutral-light-200 p-6">
+              <InfoGroup
+                title="Personal Information"
+                items={profileData.personalInfo}
+              />
+            </Card>
+          )}
+
+          {/* Contact Details */}
+          {profileData.contactDetails.length > 0 && (
+            <Card className="bg-neutral-light-200 p-6">
+              <InfoGroup
+                title="Contact Details"
+                items={profileData.contactDetails}
+              />
+            </Card>
+          )}
+
+          {/* Professional Information */}
+          {profileData.professionalInfo.length > 0 && (
+            <Card className="bg-neutral-light-200 p-6">
+              <InfoGroup
+                title="Professional Information"
+                items={profileData.professionalInfo}
+              />
+            </Card>
+          )}
+
+          {/* Links */}
+          {profileData.links.length > 0 && (
+            <Card className="bg-neutral-light-200 p-6">
+              <InfoGroup title="Links" items={profileData.links} />
+            </Card>
+          )}
+        </div>
+
+        {/* View Resume Button */}
+        <IconButton
+          leftIcon="fileIcon"
+          label="View Resume"
+          className="w-full"
+          onClick={() => alert('Download Resume')}
+        />
       </Card>
-      <IconButton
-        leftIcon="fileIcon"
-        label="View Resume"
-        className="w-full"
-        onClick={() => alert('Download Resume')}
-      />
     </div>
   );
 };

@@ -17,7 +17,7 @@ export default function MentorshipPage({ params }: MentorshipPageProps) {
     if (!params.slug?.length) {
       return (
         <div className="flex w-full justify-center">
-          <MentorshipDashboard />
+          <MentorshipApply />
         </div>
       );
     }
@@ -27,20 +27,11 @@ export default function MentorshipPage({ params }: MentorshipPageProps) {
       case 'dashboard':
         return <MentorshipDashboard />;
 
-      case 'apply':
-        // Handle apply subroutes for mentor/mentee
-        if (params.slug[1]) {
-          switch (params.slug[1]) {
-            case 'mentor':
-              return <MentorForm />;
-            case 'mentee':
-              return <MenteeForm />;
-            default:
-              notFound();
-          }
-        }
-        return <MentorshipApply />;
+      case 'mentor':
+        return <MentorForm />;
 
+      case 'mentee':
+        return <MenteeForm />;
       default:
         notFound();
     }
