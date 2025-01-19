@@ -19,6 +19,7 @@ import { EventsManagersModule } from './events_managers/events_managers.module';
 import { NewsModule } from './news/news.module';
 import { ResourcesModule } from './resources/resources.module';
 import { FilesModule } from './files/files.module';
+import { GoalsModule } from './goals/goals.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { FilesModule } from './files/files.module';
     NewsModule,
     ResourcesModule,
     FilesModule,
+    GoalsModule,
   ],
   controllers: [AppController],
   providers: [
