@@ -6,15 +6,29 @@ const GeneralUsersData = {
     dob: undefined,
     show_dob: false,
     arrival_in_canada: undefined,
-    goal_id: 0,
+    goal_id: undefined,
     verification_token: "",
     email_verified: true,
     refresh_token: "",
-    last_logout: new Date()
+    last_logout: new Date(),
+    province: "",
+    city: "",
+    profession: "",
+    experience: "",
+    bio: "",
+    languages: "",
+    picture_upload_link: "",
+    resume_upload_link: "",
+    linkedin_link: "",
+    github_link: "",
+    twitter_link: "",
+    portfolio_link: "",
+    other_links: "",
+    additional_links: []
 };
 
 export const UsersData:users[] = [
-    {id: 1,first_name: "U test",last_name: "User1",email: "user1@sv.com",role:"USER",...GeneralUsersData},
+    {id: 1, first_name: "U test", last_name: "User1", email: "user1@sv.com", role: "USER", ...GeneralUsersData},
     {id: 3,first_name: "U test",last_name: "User2",email: "user2@sv.com",role:"USER",...GeneralUsersData},
     {id: 7,first_name: "U-M test",last_name: "User w Mentor",email: "um@sv.com",role:"USER",...GeneralUsersData},
     {id: 8,first_name: "M test",last_name: "Mentor1",email: "mentor1@sv.com",role:"MENTOR",...GeneralUsersData},
