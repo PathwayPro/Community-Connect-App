@@ -20,6 +20,7 @@ import { NewsModule } from './news/news.module';
 import { ResourcesModule } from './resources/resources.module';
 import { FilesModule } from './files/files.module';
 import { GoalsModule } from './goals/goals.module';
+import { InterestsModule } from './interests/interests.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { GoalsModule } from './goals/goals.module';
     ResourcesModule,
     FilesModule,
     GoalsModule,
+    InterestsModule,
   ],
   controllers: [AppController],
   providers: [
