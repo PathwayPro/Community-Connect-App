@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, UseInterceptors, UploadedFile, Get, Param, Res } from '@nestjs/common';
+import { Controller, Post, UseGuards, UseInterceptors, UploadedFile, Get, Param, Res } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
 import { Roles, Public } from 'src/auth/decorators';
@@ -16,7 +16,6 @@ export class FilesController {
   @UseInterceptors(FileInterceptor('file'))
   @Post('/profile-picture')
   uploadProfilePicture(@UploadedFile() file: Express.Multer.File) {
-    console.log('FILE EN CONTROLLER:',file)
     return this.filesService.upload(FileValidationEnum.PROFILE_PICTURE, file);
   }
 

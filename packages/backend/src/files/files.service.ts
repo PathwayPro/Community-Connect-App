@@ -64,7 +64,6 @@ export class FilesService {
 
   async upload(validation: FileValidationEnum, file: Express.Multer.File): Promise<UploadedFile> {
     try {
-      console.log('FILE:',file)
       // // VALIDATE FILE
       const { allowedMimeTypes, maxSizeInBytes } = this.fileValidations[validation]; 
 
