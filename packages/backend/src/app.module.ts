@@ -18,6 +18,7 @@ import { EventsInvitationsModule } from './events_invitations/events_invitations
 import { EventsManagersModule } from './events_managers/events_managers.module';
 import { NewsModule } from './news/news.module';
 import { ResourcesModule } from './resources/resources.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { ResourcesModule } from './resources/resources.module';
     EventsManagersModule,
     NewsModule,
     ResourcesModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [
