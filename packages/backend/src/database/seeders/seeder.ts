@@ -68,7 +68,7 @@ const emptyTables = async () => {
 
 
     }catch(error){
-        throw new InternalServerErrorException('| - - - - - > An error ocurred deleting records.')
+        throw new InternalServerErrorException('| - - - - - > An error ocurred deleting records.', error)
     }
 }
 
@@ -83,8 +83,6 @@ const seedGoals = async () => {
     }catch(error){
         throw new InternalServerErrorException('There was an error seeding goals:', error)
     }
-
-    return true;
 }
 const seedUsers = async () => {
     try{
@@ -109,8 +107,6 @@ const seedMentors = async () => {
     }catch(error){
         throw new InternalServerErrorException('There was an error seeding mentors:', error)
     }
-
-    return true;
 }
 const seedEventsCategories = async () => {
     try{
@@ -123,8 +119,6 @@ const seedEventsCategories = async () => {
     }catch(error){
         throw new InternalServerErrorException('There was an error seeding events categories:', error)
     }
-
-    return true;
 }
 const seedEvents = async () => {
     try{
@@ -137,8 +131,6 @@ const seedEvents = async () => {
     }catch(error){
         throw new InternalServerErrorException('There was an error seeding events:', error)
     }
-
-    return true;
 }
 const seedEventsManagers = async () => {
     try{
@@ -151,8 +143,6 @@ const seedEventsManagers = async () => {
     }catch(error){
         throw new InternalServerErrorException('There was an error seeding events managers:', error)
     }
-
-    return true;
 }
 const seedEventsInvitations = async () => {
     try{
@@ -165,8 +155,6 @@ const seedEventsInvitations = async () => {
     }catch(error){
         throw new InternalServerErrorException('There was an error seeding events invitations:', error)
     }
-
-    return true;
 }
 const seedEventsSubscriptions = async () => {
     try{
@@ -179,8 +167,6 @@ const seedEventsSubscriptions = async () => {
     }catch(error){
         throw new InternalServerErrorException('There was an error seeding events subscriptions:', error)
     }
-
-    return true;
 }
 const seedEventsSubscriptionsUpdates = async () => {
     try{
@@ -193,8 +179,6 @@ const seedEventsSubscriptionsUpdates = async () => {
     }catch(error){
         throw new InternalServerErrorException('There was an error seeding events subscriptions updates:', error)
     }
-
-    return true;
 }
 const seedNews = async () => {
     try{
@@ -207,8 +191,6 @@ const seedNews = async () => {
     }catch(error){
         throw new InternalServerErrorException('There was an error seeding news:', error)
     }
-
-    return true;
 }
 const seedResources = async () => {
     try{
@@ -221,8 +203,6 @@ const seedResources = async () => {
     }catch(error){
         throw new InternalServerErrorException('There was an error seeding resources:', error)
     }
-
-    return true;
 }
 const seedInterests = async () => {
     try{
@@ -235,8 +215,6 @@ const seedInterests = async () => {
     }catch(error){
         throw new InternalServerErrorException('There was an error seeding interests:', error)
     }
-
-    return true;
 }
 const seedUsersInterests = async () => {
     try{
@@ -249,8 +227,6 @@ const seedUsersInterests = async () => {
     }catch(error){
         throw new InternalServerErrorException('There was an error seeding users-interests:', error)
     }
-
-    return true;
 }
 
 const seedAll = async () => {

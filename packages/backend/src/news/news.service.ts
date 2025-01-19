@@ -1,10 +1,9 @@
-import { BadRequestException, InternalServerErrorException, NotFoundException, Injectable } from '@nestjs/common';
+import { InternalServerErrorException, NotFoundException, Injectable } from '@nestjs/common';
 import { CreateNewsDto } from './dto/create-news.dto';
 import { UpdateNewsDto } from './dto/update-news.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import { FilterNewsDto } from './dto/filter-news.dto';
 import { Prisma } from '@prisma/client';
-import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
 
 @Injectable()
 export class NewsService {

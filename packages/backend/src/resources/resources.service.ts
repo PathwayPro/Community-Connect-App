@@ -1,4 +1,4 @@
-import { BadRequestException, InternalServerErrorException, NotFoundException, UnauthorizedException, Injectable } from '@nestjs/common';
+import { InternalServerErrorException, NotFoundException, UnauthorizedException, Injectable } from '@nestjs/common';
 import { CreateResourceDto } from './dto/create-resource.dto';
 import { UpdateResourceDto } from './dto/update-resource.dto';
 import { JwtPayload } from 'src/auth/util/JwtPayload.interface';

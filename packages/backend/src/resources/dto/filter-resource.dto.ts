@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import {IsDateString, IsInt, IsOptional, IsString, IsUrl} from 'class-validator';
+import {IsDateString, IsInt, IsOptional, IsString} from 'class-validator';
 
 export class FilterResourceDto {
     @IsString()

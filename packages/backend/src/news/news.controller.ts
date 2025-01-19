@@ -5,7 +5,6 @@ import { UpdateNewsDto } from './dto/update-news.dto';
 import { Roles, GetUser, Public } from 'src/auth/decorators';
 import { JwtAuthGuard, RolesGuard } from 'src/auth/guards';
 import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
-import { News } from '@prisma/client';
 import { FilterNewsDto } from './dto/filter-news.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
