@@ -1,9 +1,8 @@
 import { Controller, Post, Body, UseGuards, UseInterceptors, UploadedFile, Get, Param, Res } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
-import { Roles, GetUser, Public } from 'src/auth/decorators';
+import { Roles, Public } from 'src/auth/decorators';
 import { JwtAuthGuard, RolesGuard } from 'src/auth/guards';
-import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
 import { FileValidationEnum } from './util/files-validation.enum';
 import { Response } from 'express';
 import * as path from 'path';
@@ -14,28 +13,32 @@ export class FilesController {
   constructor(private readonly filesService: FilesService) { }
 
   @Roles('ADMIN', 'MENTOR', 'USER')
+  @UseInterceptors(FileInterceptor('file'))
   @Post('/profile-picture')
-  uploadProfilePicture(@GetUser() user: JwtPayload, @Body() file: Express.Multer.File) {
-    return this.filesService.upload(user, FileValidationEnum.PROFILE_PICTURE, file);
+  uploadProfilePicture(@UploadedFile() file: Express.Multer.File) {
+    console.log('FILE EN CONTROLLER:',file)
+    return this.filesService.upload(FileValidationEnum.PROFILE_PICTURE, file);
   }
 
   @Roles('ADMIN', 'MENTOR')
   @UseInterceptors(FileInterceptor('file'))
   @Post('/resources')
-  uploadResources(@GetUser() user: JwtPayload, @UploadedFile() file: Express.Multer.File) {
-    return this.filesService.upload(user, FileValidationEnum.RESOURCES, file);
+  uploadResources(@UploadedFile() file: Express.Multer.File) {
+    return this.filesService.upload(FileValidationEnum.RESOURCES, file);
   }
 
   @Roles('ADMIN', 'MENTOR')
+  @UseInterceptors(FileInterceptor('file'))
   @Post('/events')
-  uploadEvents(@GetUser() user: JwtPayload, @Body() file: Express.Multer.File) {
-    return this.filesService.upload(user, FileValidationEnum.EVENTS, file);
+  uploadEvents(@UploadedFile() file: Express.Multer.File) {
+    return this.filesService.upload(FileValidationEnum.EVENTS, file);
   }
 
   @Roles('ADMIN')
+  @UseInterceptors(FileInterceptor('file'))
   @Post('/news')
-  uploadNews(@GetUser() user: JwtPayload, @Body() file: Express.Multer.File) {
-    return this.filesService.upload(user, FileValidationEnum.NEWS, file);
+  uploadNews(@UploadedFile() file: Express.Multer.File) {
+    return this.filesService.upload(FileValidationEnum.NEWS, file);
   }
 
   @Public()

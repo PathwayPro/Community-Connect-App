@@ -4,7 +4,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as uuid from 'uuid';
 import { FileValidationEnum } from './util/files-validation.enum';
-import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
 import { UploadedFile } from './util/uploaded-file.interface';
 import { FileValidations } from './util/file-validations.interface';
 
@@ -23,7 +22,7 @@ export class FilesService {
     ];
     const commonVideoTypes: string[] = ['video/mp4', 'video/webm'];
 
-    const fileValidations: Record<string, FileValidations> = {
+    this.fileValidations = {
       'PROFILE_PICTURE': {
         allowedMimeTypes: commonImageTypes,
         maxSizeInBytes: 2 * 1024 * 1024 // 2MB
@@ -43,6 +42,8 @@ export class FilesService {
     };
    }
 
+   private fileValidations: Record<FileValidationEnum, FileValidations>;
+
   private fileDirectory(validation: FileValidationEnum): string {
     const publicDir = this.configService.get<string>('UPLOAD_DIR_ROOT')
     switch (validation) {
@@ -61,8 +62,21 @@ export class FilesService {
 
   
 
-  async upload(user: JwtPayload, validation: FileValidationEnum, file: Express.Multer.File): Promise<UploadedFile> {
+  async upload(validation: FileValidationEnum, file: Express.Multer.File): Promise<UploadedFile> {
     try {
+      console.log('FILE:',file)
+      // // VALIDATE FILE
+      const { allowedMimeTypes, maxSizeInBytes } = this.fileValidations[validation]; 
+
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        console.log('FILE MIMETYPE:', file.mimetype)
+        throw new BadRequestException(`Invalid file type. Allowed types: ${allowedMimeTypes.join(', ')}`);
+      }
+
+      if (file.size > maxSizeInBytes) {
+        throw new BadRequestException(`File size exceeds the limit of ${maxSizeInBytes / (1024 * 1024)} MB.`);
+      }
+
       // DEFINE DIRECTORY FOR THE FILE ACCORDING TO ITS USAGE
       const uploadDir = this.fileDirectory(validation);
 
