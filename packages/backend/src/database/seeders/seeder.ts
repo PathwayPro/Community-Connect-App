@@ -11,60 +11,60 @@ const prisma = new PrismaClient();
 
 const emptyTables = async () => {
     try {
-        // DELETING IN ORDER TO PREVENT FK ERRORS
-        console.log('\n\n 1. DELETING DATA (IN ORDER) TO PREVENT FK ERRORS:\n');
+    // DELETING IN ORDER TO PREVENT FK ERRORS
+    console.log('\n\n 1. DELETING DATA (IN ORDER) TO PREVENT FK ERRORS:\n');
 
-        // USERS-INTERESTS
-        const usersInterestsStatus = (await prisma.usersInterests.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     - USERS INTERESTS (${usersInterestsStatus}!)`);
-        
-        // INTERESTS
-        const interestsStatus = (await prisma.interests.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     - INTERESTS (${interestsStatus}!)`);
-        
-        // RESOURCES
-        const resourcesStatus = (await prisma.resources.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     - RESOURCES (${resourcesStatus}!)`);
+    // USERS-INTERESTS
+    const usersInterestsStatus = (await prisma.usersInterests.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - USERS INTERESTS (${usersInterestsStatus}!)`);
+    
+    // INTERESTS
+    const interestsStatus = (await prisma.interests.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - INTERESTS (${interestsStatus}!)`);
+    
+    // RESOURCES
+    const resourcesStatus = (await prisma.resources.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - RESOURCES (${resourcesStatus}!)`);
 
-        // NEWS
-        const newsStatus = (await prisma.news.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     - NEWS (${newsStatus}!)`);
-        
-        // EVENTS SUBSCRIPTIONS UPDATES
-        const eventsSubscriptionsUpdatesStatus = (await prisma.eventsSubscriptionsUpdates.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     - EVENTS SUBSCRIPTIONS UPDATES (${eventsSubscriptionsUpdatesStatus}!)`);
-        
-        // EVENTS SUBSCRIPTIONS UPDATES
-        const eventsSubscriptionsStatus = (await prisma.eventsSubscriptions.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     - EVENTS SUBSCRIPTIONS (${eventsSubscriptionsStatus}!)`);
+    // NEWS
+    const newsStatus = (await prisma.news.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - NEWS (${newsStatus}!)`);
+    
+    // EVENTS SUBSCRIPTIONS UPDATES
+    const eventsSubscriptionsUpdatesStatus = (await prisma.eventsSubscriptionsUpdates.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - EVENTS SUBSCRIPTIONS UPDATES (${eventsSubscriptionsUpdatesStatus}!)`);
+    
+    // EVENTS SUBSCRIPTIONS UPDATES
+    const eventsSubscriptionsStatus = (await prisma.eventsSubscriptions.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - EVENTS SUBSCRIPTIONS (${eventsSubscriptionsStatus}!)`);
 
-        // EVENTS INVITATIONS
-        const eventsInvitationsStatus = (await prisma.eventsInvitations.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     - EVENTS INVITATIONS (${eventsInvitationsStatus}!)`);
+    // EVENTS INVITATIONS
+    const eventsInvitationsStatus = (await prisma.eventsInvitations.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - EVENTS INVITATIONS (${eventsInvitationsStatus}!)`);
 
-        // EVENTS MANAGERS
-        const eventsManagersStatus = (await prisma.eventsManagers.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     - EVENTS MANAGERS (${eventsManagersStatus}!)`);
+    // EVENTS MANAGERS
+    const eventsManagersStatus = (await prisma.eventsManagers.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - EVENTS MANAGERS (${eventsManagersStatus}!)`);
 
-        // EVENTS
-        const eventsStatus = (await prisma.events.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     - EVENTS (${eventsStatus}!)`);
+    // EVENTS
+    const eventsStatus = (await prisma.events.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - EVENTS (${eventsStatus}!)`);
 
-        // EVENTS CATEGORIES
-        const eventsCategoriesStatus = (await prisma.eventsCategories.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     - EVENTS CATEGORIES (${eventsCategoriesStatus}!)`);
+    // EVENTS CATEGORIES
+    const eventsCategoriesStatus = (await prisma.eventsCategories.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - EVENTS CATEGORIES (${eventsCategoriesStatus}!)`);
 
-        // MENTORS
-        const mentorsStatus = (await prisma.mentors.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     - MENTORS (${mentorsStatus}!)`);
+    // MENTORS
+    const mentorsStatus = (await prisma.mentors.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - MENTORS (${mentorsStatus}!)`);
 
-        // USERS
-        const usersStatus = (await prisma.users.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     - USERS (${usersStatus}!)`);
+    // USERS
+    const usersStatus = (await prisma.users.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - USERS (${usersStatus}!)`);
 
-        // GOALS
-        const goalsStatus = (await prisma.usersGoals.deleteMany({})) ? 'OK' : 'ERROR';
-        console.log(`     - GOALS (${goalsStatus}!)`);
+    // GOALS
+    const goalsStatus = (await prisma.usersGoals.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - GOALS (${goalsStatus}!)`);
 
 
     }catch(error){
@@ -76,8 +76,9 @@ const seedGoals = async () => {
     try{
         console.log(`\n\n\n 2. SEEDING TABLE GOALS:   (${GoalsData.length} records)\n`)
         for(const g of GoalsData){
-            (await prisma.usersGoals.create({data: g})) ? 
-            console.log(`     GOAL ID: ${g.id} created - - - - - - - > OK! `) :
+            if(await prisma.usersGoals.create({data: g})) 
+            console.log(`     GOAL ID: ${g.id} created - - - - - - - > OK! `)
+        else
             console.log(`     GOAL ID: ${g.id} created - - - - - - - > ERROR! `);
         }
     }catch(error){
@@ -88,8 +89,9 @@ const seedUsers = async () => {
     try{
         console.log(`\n\n\n 3. SEEDING TABLE USERS:   (${UsersData.length} records)\n`)
         for(const user of UsersData){
-            (await prisma.users.create({data: user})) ?  
-            console.log(`     USER ID: ${user.id} created - - - - - - - > OK! `) :
+            if(await prisma.users.create({data: user}))  
+            console.log(`     USER ID: ${user.id} created - - - - - - - > OK! `) 
+        else
             console.log(`     USER ID: ${user.id} created - - - - - - - > ERROR! `);
         }
     }catch(error){
@@ -100,8 +102,9 @@ const seedMentors = async () => {
     try{
         console.log(`\n\n\n 4. SEEDING TABLE MENTORS:   (${MentorsData.length} records)\n`)
         for(const mentor of MentorsData){
-            (await prisma.mentors.create({data: mentor})) ? 
-            console.log(`     MENTOR ID: ${mentor.id} created - - - - - - - > OK! `) :
+            if(await prisma.mentors.create({data: mentor})) 
+            console.log(`     MENTOR ID: ${mentor.id} created - - - - - - - > OK! `)
+            else
             console.log(`     MENTOR ID: ${mentor.id} created - - - - - - - > ERROR! `);
         }
     }catch(error){
@@ -112,8 +115,9 @@ const seedEventsCategories = async () => {
     try{
         console.log(`\n\n\n 5. SEEDING TABLE EVENTS CATEGORIES:   (${EventsCategoriesData.length} records)\n`)
         for(const category of EventsCategoriesData){
-            (await prisma.eventsCategories.create({data: category})) ? 
-            console.log(`     EVENT CATEGORY ID: ${category.id} created - - - - - - - > OK! `) :
+            if(await prisma.eventsCategories.create({data: category})) 
+            console.log(`     EVENT CATEGORY ID: ${category.id} created - - - - - - - > OK! `)
+        else
             console.log(`     EVENT CATEGORY  ID: ${category.id} created - - - - - - - > ERROR! `);
         }
     }catch(error){
@@ -124,8 +128,9 @@ const seedEvents = async () => {
     try{
         console.log(`\n\n\n 6. SEEDING TABLE EVENTS:   (${EventsData.length} records)\n`)
         for(const ev of EventsData){
-            (await prisma.events.create({data: ev})) ? 
-            console.log(`     EVENT ID: ${ev.id} created - - - - - - - > OK! `) :
+            if(await prisma.events.create({data: ev})) 
+            console.log(`     EVENT ID: ${ev.id} created - - - - - - - > OK! `) 
+        else
             console.log(`     EVENT ID: ${ev.id} created - - - - - - - > ERROR! `);
         }
     }catch(error){
@@ -136,8 +141,9 @@ const seedEventsManagers = async () => {
     try{
         console.log(`\n\n\n 7. SEEDING TABLE EVENTS MANAGERS:   (${EventsManagersData.length} records)\n`)
         for(const em of EventsManagersData){
-            (await prisma.eventsManagers.create({data: em})) ? 
-            console.log(`     EVENT MANAGER ID: ${em.id} created - - - - - - - > OK! `) :
+            if(await prisma.eventsManagers.create({data: em})) 
+            console.log(`     EVENT MANAGER ID: ${em.id} created - - - - - - - > OK! `) 
+        else
             console.log(`     EVENT MANAGER ID: ${em.id} created - - - - - - - > ERROR! `);
         }
     }catch(error){
@@ -148,8 +154,9 @@ const seedEventsInvitations = async () => {
     try{
         console.log(`\n\n\n 8. SEEDING TABLE EVENTS INVITATIONS:   (${EventsInvitationsData.length} records)\n`)
         for(const ei of EventsInvitationsData){
-            (await prisma.eventsInvitations.create({data: ei})) ? 
-            console.log(`     EVENT INVITATION ID: ${ei.id} created - - - - - - - > OK! `) :
+            if(await prisma.eventsInvitations.create({data: ei})) 
+            console.log(`     EVENT INVITATION ID: ${ei.id} created - - - - - - - > OK! `)
+        else
             console.log(`     EVENT INVITATION ID: ${ei.id} created - - - - - - - > ERROR! `);
         }
     }catch(error){
@@ -160,8 +167,9 @@ const seedEventsSubscriptions = async () => {
     try{
         console.log(`\n\n\n 9. SEEDING TABLE EVENTS SUBSCRIPTIONS:   (${EventsSubscriptionsData.length} records)\n`)
         for(const es of EventsSubscriptionsData){
-            (await prisma.eventsSubscriptions.create({data: es})) ? 
-            console.log(`     EVENT SUBSCRIPTION ID: ${es.id} created - - - - - - - > OK! `) :
+            if(await prisma.eventsSubscriptions.create({data: es})) 
+            console.log(`     EVENT SUBSCRIPTION ID: ${es.id} created - - - - - - - > OK! `)
+        else
             console.log(`     EVENT SUBSCRIPTION ID: ${es.id} created - - - - - - - > ERROR! `);
         }
     }catch(error){
@@ -172,8 +180,9 @@ const seedEventsSubscriptionsUpdates = async () => {
     try{
         console.log(`\n\n\n 10. SEEDING TABLE EVENTS SUBSCRIPTIONS UPDATES:   (${EventsSubscriptionsUpdatesData.length} records)\n`)
         for(const esu of EventsSubscriptionsUpdatesData){
-            (await prisma.eventsSubscriptionsUpdates.create({data: esu})) ? 
-            console.log(`     EVENT SUBSCRIPTION UPDATE ID: ${esu.id} created - - - - - - - > OK! `) :
+            if(await prisma.eventsSubscriptionsUpdates.create({data: esu})) 
+            console.log(`     EVENT SUBSCRIPTION UPDATE ID: ${esu.id} created - - - - - - - > OK! `)
+        else
             console.log(`     EVENT SUBSCRIPTION UPDATE ID: ${esu.id} created - - - - - - - > ERROR! `);
         }
     }catch(error){
@@ -184,8 +193,9 @@ const seedNews = async () => {
     try{
         console.log(`\n\n\n 11. SEEDING TABLE NEWS:   (${NewsData.length} records)\n`)
         for(const n of NewsData){
-            (await prisma.news.create({data: n})) ? 
-            console.log(`     NEWS ID: ${n.id} created - - - - - - - > OK! `) :
+            if(await prisma.news.create({data: n})) 
+            console.log(`     NEWS ID: ${n.id} created - - - - - - - > OK! `)
+        else
             console.log(`     NEWS ID: ${n.id} created - - - - - - - > ERROR! `);
         }
     }catch(error){
@@ -196,8 +206,9 @@ const seedResources = async () => {
     try{
         console.log(`\n\n\n 12. SEEDING TABLE RESOURCES:   (${ResourcesData.length} records)\n`)
         for(const r of ResourcesData){
-            (await prisma.resources.create({data: r})) ? 
-            console.log(`     RESOURCE ID: ${r.id} created - - - - - - - > OK! `) :
+            if(await prisma.resources.create({data: r})) 
+            console.log(`     RESOURCE ID: ${r.id} created - - - - - - - > OK! `) 
+        else
             console.log(`     RESOURCE ID: ${r.id} created - - - - - - - > ERROR! `);
         }
     }catch(error){
@@ -208,8 +219,9 @@ const seedInterests = async () => {
     try{
         console.log(`\n\n\n 13. SEEDING TABLE INTERESTS:   (${InterestsData.length} records)\n`)
         for(const i of InterestsData){
-            (await prisma.interests.create({data: i})) ? 
-            console.log(`     INTEREST ID: ${i.id} created - - - - - - - > OK! `) :
+            if(await prisma.interests.create({data: i})) 
+            console.log(`     INTEREST ID: ${i.id} created - - - - - - - > OK! `) 
+        else
             console.log(`     INTEREST ID: ${i.id} created - - - - - - - > ERROR! `);
         }
     }catch(error){
@@ -220,8 +232,9 @@ const seedUsersInterests = async () => {
     try{
         console.log(`\n\n\n 14. SEEDING TABLE USERS-INTERESTS:   (${UsersInterestsData.length} records)\n`)
         for(const ui of UsersInterestsData){
-            (await prisma.usersInterests.create({data: ui})) ? 
-            console.log(`     USERS-INTERESTS ID: ${ui} created - - - - - - - > OK! `) :
+            if(await prisma.usersInterests.create({data: ui})) 
+            console.log(`     USERS-INTERESTS ID: ${ui} created - - - - - - - > OK! `) 
+        else
             console.log(`     USERS-INTERESTS ID: ${ui} created - - - - - - - > ERROR! `);
         }
     }catch(error){
