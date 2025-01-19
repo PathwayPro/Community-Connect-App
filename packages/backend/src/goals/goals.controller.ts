@@ -33,8 +33,8 @@ export class GoalsController {
   @Patch(':id')
   @Roles('ADMIN')
   update(@Param('id') id: string, @Body() updateGoalDto: UpdateGoalDto) {
-    const category: UpdateGoalDto = {name: updateGoalDto.name};
-    return this.goalsService.update(+id, category);
+    const goal: UpdateGoalDto = {name: updateGoalDto.name};
+    return this.goalsService.update(+id, goal);
   }
 
   @Delete(':id')
