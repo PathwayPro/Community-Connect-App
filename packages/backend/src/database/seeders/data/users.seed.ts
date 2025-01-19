@@ -1,4 +1,4 @@
-import { mentors, users } from "@prisma/client";
+import { mentors, users, UsersInterests } from "@prisma/client";
 
 const GeneralUsersData = {
     middle_name: "Password123!",
@@ -42,3 +42,31 @@ export const MentorsData:mentors[] = [
     {id: 2,max_mentees: 50,availability: "Tuesday to Saturday, anytime",has_experience: true,experience_details: "Some experience details...",status: "APPROVED",user_id: 8},
     {id: 5,max_mentees: 50,availability: "EDITED: Monday to Friday after 3PM MST",has_experience: true,experience_details: "Some details about a experience",status: "APPROVED",user_id: 9},
 ];
+
+export const UsersInterestsData:UsersInterests[] = [
+    {user_id: 1,interest_id: 1},
+    {user_id: 1,interest_id: 2},
+    {user_id: 1,interest_id: 3},
+    {user_id: 1,interest_id: 4},
+    {user_id: 1,interest_id: 5},
+    {user_id: 1,interest_id: 6},
+    {user_id: 1,interest_id: 7},
+    {user_id: 1,interest_id: 8},
+    {user_id: 1,interest_id: 9},
+    {user_id: 1,interest_id: 10},
+    {user_id: 1,interest_id: 11},
+    {user_id: 1,interest_id: 12},
+    {user_id: 1,interest_id: 13},
+    {user_id: 1,interest_id: 14},
+    {user_id: 3,interest_id: 15},
+    {user_id: 3,interest_id: 16},
+    {user_id: 3,interest_id: 17},
+    {user_id: 3,interest_id: 18},
+    {user_id: 3,interest_id: 1},
+    {user_id: 3,interest_id: 2},
+    {user_id: 3,interest_id: 3},
+    {user_id: 3,interest_id: 4},
+    {user_id: 3,interest_id: 5},
+    {user_id: 3,interest_id: 6},
+    {user_id: 3,interest_id: 7},
+]
