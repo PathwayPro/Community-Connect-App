@@ -121,6 +121,7 @@ export class EmailService {
   }
 
   public verifyToken(token: string): { message: string; userId: number } {
+    console.log('token here first', token);
     try {
       const decoded = jwt.verify(token, this.config.jwtSecret) as {
         userId: number;

@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
-import AuthCarousel from '@/features/auth/components/auth-carousel';
+import { AuthCarousel } from '@/features/auth/components';
 import { Separator } from '@/shared/components/ui/separator';
-import { ForgotPasswordForm } from '@/features/auth/components/forgot-password-form';
+import { ForgotPasswordForm } from '@/features/auth/components';
+
 export const metadata: Metadata = {
   title: 'Reset Password | Community Connect',
   description: 'Reset Password'

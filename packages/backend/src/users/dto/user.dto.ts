@@ -7,6 +7,7 @@ import {
   IsNumber,
   IsDate,
   IsNotEmpty,
+  IsArray,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -108,28 +109,76 @@ export class UpdateUserDto {
   lastName?: string;
 
   @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  // @IsOptional()
-  // @IsString()
-  // password_hash?: string;
-
-  @IsOptional()
-  @IsDate() // Ensure dob is a valid Date object
-  dob?: Date;
+  @IsString()
+  dob?: string;
 
   @IsOptional()
   @IsBoolean()
   showDob?: boolean;
 
   @IsOptional()
-  @IsDate() // Ensure arrival_in_canada is a valid Date object
-  arrivalInCanada?: Date;
+  @IsString()
+  arrivalInCanada?: string;
 
   @IsOptional()
-  @IsNumber()
-  goalId?: number;
+  @IsString()
+  goalId?: string;
+
+  @IsOptional()
+  @IsString()
+  province?: string;
+
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @IsOptional()
+  @IsString()
+  profession?: string;
+
+  @IsOptional()
+  @IsString()
+  experience?: string;
+
+  @IsOptional()
+  @IsString()
+  bio?: string;
+
+  @IsOptional()
+  @IsString()
+  pictureUploadLink?: string;
+
+  @IsOptional()
+  @IsString()
+  resumeUploadLink?: string;
+
+  @IsOptional()
+  @IsString()
+  linkedinLink?: string;
+
+  @IsOptional()
+  @IsString()
+  githubLink?: string;
+
+  @IsOptional()
+  @IsString()
+  twitterLink?: string;
+
+  @IsOptional()
+  @IsString()
+  portfolioLink?: string;
+
+  @IsOptional()
+  @IsString()
+  otherLinks?: string;
+
+  @IsOptional()
+  @IsArray()
+  additionalLinks?: string[];
+
+  @IsOptional()
+  @IsString()
+  languages?: string;
 }
 
 export class DeleteUserDto {
@@ -205,8 +254,8 @@ export class NewUserFromDbDto {
   show_dob?: boolean;
 
   @IsOptional()
-  @IsDate()
-  arrival_in_canada?: Date;
+  @IsNumber()
+  arrival_in_canada?: number;
 
   @IsOptional()
   @IsNumber()

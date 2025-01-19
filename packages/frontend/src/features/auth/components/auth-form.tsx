@@ -24,6 +24,7 @@ import {
 import Link from 'next/link';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { cn } from '@/shared/lib/utils';
+import AlertDialogUI from '@/shared/components/notification/alert-dialog';
 
 type AuthFormValues = LoginFormValues & {
   firstName?: string;
@@ -34,8 +35,14 @@ type AuthFormValues = LoginFormValues & {
 
 export function AuthForm() {
   const pathname = usePathname();
-  const { login, register } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    login,
+    register,
+    dialogState,
+    setDialogState,
+    isLoading,
+    setIsLoading
+  } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const isRegisterPage = pathname === '/auth/register';
@@ -55,21 +62,19 @@ export function AuthForm() {
   });
 
   const onSubmit = async (data: AuthFormValues) => {
-    setIsLoading(true);
-
     console.log('auth data :', data);
 
     try {
       if (isRegisterPage) {
         await register(data as RegisterFormValues);
+        form.reset();
       } else {
         console.log('login data :', data);
         await login(data as LoginFormValues);
+        form.reset();
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -83,6 +88,16 @@ export function AuthForm() {
 
   return (
     <div className="w-full max-w-md space-y-6 bg-white dark:bg-slate-900">
+      {dialogState.isOpen && (
+        <AlertDialogUI
+          title={dialogState.title}
+          description={dialogState.description}
+          open={dialogState.isOpen}
+          onOpenChange={(open) =>
+            setDialogState((prev) => ({ ...prev, isOpen: open }))
+          }
+        />
+      )}
       <Icons.logo className="mx-auto h-[84px] w-[84px]" />
       <div className="space-y-2 text-center">
         <h2>{isRegisterPage ? 'Create an account' : 'Welcome back'}</h2>

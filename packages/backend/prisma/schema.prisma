@@ -21,10 +21,10 @@ model users {
   last_name            String                       @db.VarChar(255)
   email                String                       @unique @db.VarChar(255)
   password_hash        String                       @db.VarChar(255)
-  dob                  DateTime?                    @db.Date
+  dob                  String?                      @db.VarChar(255)
   show_dob             Boolean                      @default(false)
-  arrival_in_canada    DateTime?                    @db.Date
-  goal_id              Int?
+  arrival_in_canada    String?                      @db.VarChar(255)
+  goal_id              String?                      @db.VarChar(255)
   role                 users_roles                  @default(USER)
   verification_token   String?                      @db.VarChar(255) // Token for email verification
   email_verified       Boolean                      @default(false) // Whether the email has been verified
@@ -44,6 +44,20 @@ model users {
   news News[]
   //RESOURCES RELATIONSHIP
   resources Resources[]
+  languages            String?
+  profession           String?
+  experience           String?
+  bio                  String?
+  picture_upload_link  String?
+  resume_upload_link   String?
+  linkedin_link        String?
+  github_link          String?
+  twitter_link         String?
+  portfolio_link       String?
+  other_links          String?
+  additional_links     String[]
+  province             String?
+  city                 String?
 }
 
 enum users_roles {

@@ -12,8 +12,6 @@ import {
 
 import { UserProfile } from '@/features/user-profile/types';
 import { AuthContextType } from '../types';
-import { authApi } from '../api/auth-api';
-import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

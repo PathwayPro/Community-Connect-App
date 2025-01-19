@@ -26,7 +26,7 @@ const slides: CarouselSlide[] = [
   }
 ];
 
-const AuthCarousel = () => {
+export const AuthCarousel = () => {
   const [api, setApi] = useState<CarouselApi>();
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -89,5 +89,3 @@ const AuthCarousel = () => {
     </Carousel>
   );
 };
-
-export default AuthCarousel;

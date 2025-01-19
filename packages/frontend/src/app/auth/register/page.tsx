@@ -1,5 +1,5 @@
-import AuthCarousel from '@/features/auth/components/auth-carousel';
-import { AuthForm } from '@/features/auth/components/auth-form';
+import { AuthCarousel } from '@/features/auth/components';
+import { AuthForm } from '@/features/auth/components';
 import { Separator } from '@/shared/components/ui/separator';
 import { Metadata } from 'next';
 

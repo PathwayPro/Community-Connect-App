@@ -12,13 +12,7 @@ import {
 } from '../dto/auth.dto';
 import { AuthResponse, GoogleUser, LoginResponse, Tokens } from '../types';
 import * as crypto from 'crypto';
-import { users_roles } from '@prisma/client';
-
-interface JwtPayload {
-  sub: number;
-  email: string;
-  roles: users_roles;
-}
+import { JwtPayload } from '../types';
 
 @Injectable()
 export class AuthService {
@@ -317,7 +311,10 @@ export class AuthService {
   ): Promise<{ message: string; userId: number }> {
     try {
       // Verify and extract userId from token
+      console.log('token here original', token);
       const decodedMessage = this.emailService.verifyToken(token);
+
+      console.log('decodedMessage here', decodedMessage);
 
       if (!decodedMessage.userId) {
         throw new UnauthorizedException(
@@ -349,7 +346,7 @@ export class AuthService {
         },
       });
 
-      console.log('decodedMessage', decodedMessage);
+      console.log('email verified successfully final', decodedMessage);
 
       return {
         message: 'Email verified successfully',

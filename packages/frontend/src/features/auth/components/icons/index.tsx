@@ -1,4 +1,4 @@
-import { Loader2, User } from 'lucide-react';
+import { Loader2, SearchIcon, User } from 'lucide-react';
 
 export const Icons = {
   spinner: Loader2,
@@ -344,5 +344,6 @@ export const Icons = {
         fill="#22C55E"
       />
     </svg>
-  )
+  ),
+  search: SearchIcon
 };
