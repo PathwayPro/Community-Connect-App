@@ -122,7 +122,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  goalId?: string;
+  goalId?: number;
 
   @IsOptional()
   @IsString()
