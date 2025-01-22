@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
 import { useUserStore } from '../store';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 
 interface UseFetchProfileResult {
   isLoading: boolean;
@@ -12,6 +13,7 @@ export const useFetchProfile = (): UseFetchProfileResult => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { fetchUserProfile } = useUserStore();
+  const { showAlert } = useAlertDialog();
 
   const fetchProfile = async () => {
     try {
@@ -19,9 +21,15 @@ export const useFetchProfile = (): UseFetchProfileResult => {
       setError(null);
       await fetchUserProfile();
     } catch (err) {
-      setError(
-        err instanceof Error ? err : new Error('Failed to fetch profile')
-      );
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to fetch profile';
+      setError(err instanceof Error ? err : new Error(errorMessage));
+
+      showAlert({
+        title: 'Profile Error',
+        description: errorMessage,
+        type: 'error'
+      });
     } finally {
       setIsLoading(false);
     }

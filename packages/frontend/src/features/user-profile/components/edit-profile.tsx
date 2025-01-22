@@ -16,12 +16,13 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { UserProfileFormData, userProfileSchema } from '../lib/validations';
-import { toast } from 'sonner';
 import React from 'react';
 import { userApi } from '../api/user-api';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '../store';
 import { useFetchProfile } from '../hooks/use-fetch-profile';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
+import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 
 function getStepContent(step: number) {
   switch (step) {
@@ -43,6 +44,7 @@ export const EditProfile = () => {
   const router = useRouter();
   const { user } = useUserStore();
   const { isLoading, error } = useFetchProfile();
+  const { showAlert } = useAlertDialog();
 
   const methods = useForm<UserProfileFormData>({
     mode: 'onChange',
@@ -132,11 +134,23 @@ export const EditProfile = () => {
 
       const result = response.data;
       console.log('Submit success:', result);
-      toast.success('Profile updated successfully');
-      router.push('/profile');
+
+      showAlert({
+        title: 'Profile Updated',
+        description: 'Your profile has been successfully updated.',
+        type: 'success'
+      });
+
+      setTimeout(() => {
+        router.push('/profile');
+      }, 3000);
     } catch (error) {
       console.error('Submit error:', error);
-      toast.error('Failed to update profile. Please try again.');
+      showAlert({
+        title: 'Update Failed',
+        description: 'Failed to update profile. Please try again.',
+        type: 'error'
+      });
     }
   };
 
@@ -162,6 +176,7 @@ export const EditProfile = () => {
 
   return (
     <Card className="flex w-[840px] flex-col rounded-[24px]">
+      <AlertDialogUI />
       <CardHeader className="justify-center p-8">
         <CardTitle className="flex flex-col space-y-6 text-center">
           <h2 className="font-semibold">Update Profile</h2>

@@ -1,7 +1,15 @@
-import { Loader2, SearchIcon, User } from 'lucide-react';
+import {
+  AlertTriangle,
+  Loader2,
+  XCircle,
+  SearchIcon,
+  User
+} from 'lucide-react';
 
 export const Icons = {
   spinner: Loader2,
+  xCircle: XCircle,
+  alertTriangle: AlertTriangle,
   google: ({ ...props }) => (
     <svg
       viewBox="0 0 24 25"

@@ -4,7 +4,7 @@ import BreadcrumbNav from './breadcrumb-nav';
 
 export const MainNav = () => {
   return (
-    <div className="sticky top-0 h-20 w-full bg-white">
+    <div className="sticky top-0 z-30 h-20 w-full border-b bg-white">
       <div className="flex h-full items-center justify-between px-8">
         <BreadcrumbNav />
         <div className="flex items-center gap-4">
