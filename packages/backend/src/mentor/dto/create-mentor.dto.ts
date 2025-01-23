@@ -28,4 +28,8 @@ export class CreateMentorDto {
   @IsInt()
   @IsOptional()
   user_id?: number;
+
+  @IsInt({ each: true })
+  @IsOptional()
+  interests?: Array<number>;
 }

@@ -1,11 +1,11 @@
 'use client';
 
-import UserProfile from '@/features/user-profile/components/user-profile';
+import { EditProfile } from '@/features/user-profile/components';
 
 export const UpdateProfilePage = () => {
   return (
     <div className="flex w-full flex-col items-center">
-      <UserProfile />
+      <EditProfile />
     </div>
   );
 };

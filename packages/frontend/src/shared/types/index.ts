@@ -1,9 +1,9 @@
-import { SharedIcons } from '../components/icons';
-
 export interface ApiResponse<T> {
   data: T;
   message?: string;
-  status: number;
+  success: boolean;
+  timestamp: string;
+  path: string;
 }
 
 // export interface ApiError {
