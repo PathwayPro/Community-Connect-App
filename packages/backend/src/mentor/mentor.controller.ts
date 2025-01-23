@@ -51,6 +51,7 @@ export class MentorController {
       availability: createMentorDto.availability,
       has_experience: createMentorDto.has_experience,
       experience_details: createMentorDto.experience_details,
+      interests: createMentorDto.interests,
     };
     return this.mentorService.create(user.sub, createMentor);
   }

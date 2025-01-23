@@ -25,6 +25,9 @@ interface FormInputProps<T extends FieldValues> {
   control?: Control<T>;
   required?: boolean;
   type?: string;
+  disabled?: boolean;
+  min?: number;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const FormInput = <T extends FieldValues>({
@@ -40,7 +43,10 @@ export const FormInput = <T extends FieldValues>({
   rightLabel,
   control: controlProp,
   required = false,
-  type
+  type,
+  disabled = false,
+  min,
+  onChange
 }: FormInputProps<T>) => {
   const formContext = useFormContext<T>();
   const control = controlProp || formContext?.control;
@@ -64,6 +70,7 @@ export const FormInput = <T extends FieldValues>({
           <FormLabel
             className={cn(
               'text-paragraph-sm font-medium text-neutral-dark-600',
+              disabled && 'text-neutral-dark-300',
               required && 'after:content-["*"]'
             )}
           >
@@ -72,37 +79,64 @@ export const FormInput = <T extends FieldValues>({
           <FormControl>
             {hasInputIcon ? (
               <IconInput
+                {...field}
                 placeholder={placeholder}
                 leftIcon={leftIcon}
                 rightIcon={rightIcon}
                 type={type}
+                min={min}
+                onChange={(e) => {
+                  field.onChange(
+                    type === 'number' ? Number(e.target.value) : e.target.value
+                  );
+                  onChange?.(e);
+                }}
                 className={cn(
                   'w-full bg-neutral-light-100',
-                  inputError && 'border-red-500 focus-visible:ring-red-100'
+                  inputError && 'border-red-500 focus-visible:ring-red-100',
+                  disabled && 'bg-neutral-light-100'
                 )}
-                {...field}
+                disabled={disabled}
               />
             ) : hasLabelInput ? (
               <LabelInput
+                {...field}
                 placeholder={placeholder}
                 leftLabel={leftLabel}
                 rightLabel={rightLabel}
                 type={type}
+                min={min}
+                onChange={(e) => {
+                  field.onChange(
+                    type === 'number' ? Number(e.target.value) : e.target.value
+                  );
+                  onChange?.(e);
+                }}
                 className={cn(
                   'w-full bg-neutral-light-100',
-                  inputError && 'border-red-500 focus-visible:ring-red-100'
+                  inputError && 'border-red-500 focus-visible:ring-red-100',
+                  disabled && 'bg-neutral-light-100'
                 )}
-                {...field}
+                disabled={disabled}
               />
             ) : (
               <Input
+                {...field}
                 placeholder={placeholder}
                 type={type}
+                min={min}
+                onChange={(e) => {
+                  field.onChange(
+                    type === 'number' ? Number(e.target.value) : e.target.value
+                  );
+                  onChange?.(e);
+                }}
                 className={cn(
                   'w-full bg-neutral-light-100',
-                  inputError && 'border-red-500 focus-visible:ring-red-100'
+                  inputError && 'border-red-500 focus-visible:ring-red-100',
+                  disabled && 'bg-neutral-light-100'
                 )}
-                {...field}
+                disabled={disabled}
               />
             )}
           </FormControl>

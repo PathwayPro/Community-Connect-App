@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import MentorForm from '@/features/mentorship/components/mentor-form';
 import MenteeForm from '@/features/mentorship/components/mentee-form';
 import MentorshipApply from '@/features/mentorship/components/mentorship-apply';
+import { MentorshipWaitlist } from '@/features/mentorship/components/mentorship-waitlist';
 
 interface MentorshipPageProps {
   params: {
@@ -32,6 +33,15 @@ export default function MentorshipPage({ params }: MentorshipPageProps) {
 
       case 'mentee':
         return <MenteeForm />;
+
+      case 'waitlist':
+        return (
+          <MentorshipWaitlist
+            applicationDate={new Date()}
+            activityType="Mentor"
+          />
+        );
+
       default:
         notFound();
     }

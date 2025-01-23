@@ -9,10 +9,13 @@ import { UpdateMentorDto } from './dto/update-mentor.dto';
 import { PrismaService } from 'src/database';
 import { FilterMentorDto } from './dto/filter-mentor.dto';
 import { Prisma, users_roles } from '@prisma/client';
-
+import { InterestsService } from 'src/interests/interests.service';
 @Injectable()
 export class MentorService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private InterestsService: InterestsService,
+  ) {}
 
   async findAll(filters: FilterMentorDto = null) {
     // filters:
@@ -103,6 +106,18 @@ export class MentorService {
       const mentor = await this.prisma.mentors.create({
         data: { ...createMentorDto, user_id },
       });
+
+      // Add interests to mentor
+      if (createMentorDto.interests) {
+        const userInterests = createMentorDto.interests;
+
+        userInterests.forEach(async (interest) => {
+          await this.InterestsService.addInterestToUser({
+            user_id: mentor.user_id,
+            interest_id: interest,
+          });
+        });
+      }
 
       return mentor;
     } catch (error) {

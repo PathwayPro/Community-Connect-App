@@ -6,56 +6,34 @@ import { toast } from 'sonner';
 import React from 'react';
 import { MentorSchema } from '../../lib/validations';
 import { FormMultiSelect } from '@/shared/components/form/form-multiselect';
-
-const interestsOptions = [
-  { value: 'frontend', label: 'Frontend Development' },
-  { value: 'backend', label: 'Backend Development' },
-  { value: 'fullstack', label: 'Full-Stack Development' },
-  { value: 'mobile', label: 'Mobile App Development (iOS/Android)' },
-  { value: 'game', label: 'Game Development' },
-  { value: 'cybersecurity', label: 'Cybersecurity' },
-  { value: 'data_analytics', label: 'Data and Analytics' },
-  { value: 'product_management', label: 'Product Management' },
-  { value: 'project_management', label: 'Program/Project Management' },
-  { value: 'agile_coaching', label: 'Agile Coaching' },
-  { value: 'ai', label: 'Artificial Intelligence' },
-  { value: 'qa_testing', label: 'Quality Assurance and Testing' },
-  { value: 'vc_investments', label: 'Venture Capital/Investments' },
-  { value: 'startup_advisory', label: 'Startup Advisory' },
-  { value: 'networking_it', label: 'Networking and IT' },
-  { value: 'leadership', label: 'Leadership' },
-  { value: 'career_transition', label: 'Career Transition' },
-  { value: 'career_coaching', label: 'Career Coaching' },
-  { value: 'other', label: 'Others' }
-];
-
-const daysOptions = [
-  { value: 'monday', label: 'Monday' },
-  { value: 'tuesday', label: 'Tuesday' },
-  { value: 'wednesday', label: 'Wednesday' },
-  { value: 'thursday', label: 'Thursday' },
-  { value: 'friday', label: 'Friday' },
-  { value: 'saturday', label: 'Saturday' },
-  { value: 'sunday', label: 'Sunday' }
-];
+import { InterestsResponse } from '../../types';
 
 interface BaseFormProps {
   isMentor: boolean;
+  interests: InterestsResponse[];
+  experienceDetails: string;
 }
 
-export const BaseForm = ({ isMentor }: BaseFormProps) => {
+export const BaseForm = ({
+  isMentor,
+  interests,
+  experienceDetails
+}: BaseFormProps) => {
   const { setValue, watch } = useFormContext<MentorSchema>();
 
-  // Watch values for debugging
-  const firstName = watch('firstName');
-  const lastName = watch('lastName');
+  console.log('exp', experienceDetails);
 
-  React.useEffect(() => {
-    console.log('Current form values:', {
-      firstName,
-      lastName
-    });
-  }, [firstName, lastName]);
+  // Watch interests value
+  const selectedInterests = watch('interests');
+
+  const interestsOptions = React.useMemo(
+    () =>
+      interests?.map((interest) => ({
+        value: interest.id.toString(),
+        label: interest.name
+      })) || [],
+    [interests]
+  );
 
   const handleFileUpload = async (files: File[]) => {
     try {
@@ -95,6 +73,7 @@ export const BaseForm = ({ isMentor }: BaseFormProps) => {
           label="First Name"
           placeholder="Enter your first name"
           customError="First name is required"
+          disabled
           required
         />
         <FormInput
@@ -102,6 +81,7 @@ export const BaseForm = ({ isMentor }: BaseFormProps) => {
           label="Last Name"
           placeholder="Enter your last name"
           customError="Last name is required"
+          disabled
           required
         />
       </div>
@@ -114,31 +94,40 @@ export const BaseForm = ({ isMentor }: BaseFormProps) => {
               placeholder="Enter your profession"
               customError="Profession is required"
               required
+              disabled
             />
             <FormInput
               name="experience"
               label="Years of Experience"
               type="number"
+              min={0}
               placeholder="Enter your years of experience"
               customError="Years of experience is required"
               required
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                setValue('experience', value, { shouldValidate: true });
+              }}
             />
           </div>
           <div className="flex w-full gap-4">
             <FormInput
               name="max_mentees"
-              label="Max Mentees"
+              label="No. of mentees you can accomodate"
               type="number"
+              min={1}
               placeholder="Enter your max mentees"
               customError="Max mentees is required"
               required
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                setValue('max_mentees', value, { shouldValidate: true });
+              }}
             />
-            <FormMultiSelect
+            <FormInput
               name="availability"
               label="Availability"
-              options={daysOptions}
-              placeholder="Select your availability"
-              maxCount={2}
+              placeholder="Enter your availability"
             />
           </div>
         </>
@@ -149,12 +138,13 @@ export const BaseForm = ({ isMentor }: BaseFormProps) => {
         options={interestsOptions}
         placeholder="Select your areas of interest"
         maxCount={5}
+        value={selectedInterests}
       />
       <FormTextarea
-        name="bio"
-        label="Bio"
-        placeholder="Write something about yourself..."
-        customError="Bio is required"
+        name="experience_details"
+        label={experienceDetails}
+        placeholder="Write something about your experience/goals..."
+        customError="Experience details is required"
         required
       />
     </div>

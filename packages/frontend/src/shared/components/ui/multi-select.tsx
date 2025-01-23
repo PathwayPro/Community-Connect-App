@@ -67,7 +67,7 @@ interface MultiSelectProps
     /** The text to display for the option. */
     label: string;
     /** The unique value associated with the option. */
-    value: string;
+    value: string | number;
     /** Optional icon component to display alongside the option. */
     icon?: React.ComponentType<{ className?: string }>;
   }[];
@@ -157,10 +157,11 @@ export const MultiSelect = React.forwardRef<
       }
     };
 
-    const toggleOption = (option: string) => {
-      const newSelectedValues = selectedValues.includes(option)
-        ? selectedValues.filter((value) => value !== option)
-        : [...selectedValues, option];
+    const toggleOption = (option: string | number) => {
+      const optionStr = String(option);
+      const newSelectedValues = selectedValues.includes(optionStr)
+        ? selectedValues.filter((value) => value !== optionStr)
+        : [...selectedValues, optionStr];
       setSelectedValues(newSelectedValues);
       onValueChange(newSelectedValues);
     };
@@ -184,7 +185,7 @@ export const MultiSelect = React.forwardRef<
       if (selectedValues.length === options.length) {
         handleClear();
       } else {
-        const allValues = options.map((option) => option.value);
+        const allValues = options.map((option) => String(option.value));
         setSelectedValues(allValues);
         onValueChange(allValues);
       }
@@ -301,7 +302,7 @@ export const MultiSelect = React.forwardRef<
                   <div
                     className={cn(
                       'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                      selectedValues.length === options.length
+                      selectedValues.length === options?.length
                         ? 'bg-primary text-primary-foreground'
                         : 'opacity-50 [&_svg]:invisible'
                     )}
@@ -310,8 +311,10 @@ export const MultiSelect = React.forwardRef<
                   </div>
                   <span>(Select All)</span>
                 </CommandItem>
-                {options.map((option) => {
-                  const isSelected = selectedValues.includes(option.value);
+                {options?.map((option) => {
+                  const isSelected = selectedValues.includes(
+                    String(option.value)
+                  );
                   return (
                     <CommandItem
                       key={option.value}

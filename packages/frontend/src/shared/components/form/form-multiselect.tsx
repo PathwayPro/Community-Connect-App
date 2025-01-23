@@ -1,6 +1,12 @@
 import { Icons } from '@/features/auth/components/icons';
 import { cn } from '@/shared/lib/utils';
-import { FieldValues, useFormContext, Control, Path } from 'react-hook-form';
+import {
+  FieldValues,
+  useFormContext,
+  Control,
+  Path,
+  FieldError
+} from 'react-hook-form';
 import {
   FormField,
   FormItem,
@@ -8,17 +14,17 @@ import {
   FormControl
 } from '@/shared/components/ui/form';
 import { MultiSelect } from '../ui/multi-select';
-import { useState } from 'react';
 
 interface FormMultiSelectProps<T extends FieldValues> {
   name: Path<T>;
   label: string;
-  options: { value: string; label: string }[];
+  options: { value: number | string; label: string }[];
   placeholder: string;
   customError?: string;
   control?: Control<T>;
   required?: boolean;
   maxCount?: number;
+  value?: (number | string)[];
 }
 
 export const FormMultiSelect = <T extends FieldValues>({
@@ -29,9 +35,9 @@ export const FormMultiSelect = <T extends FieldValues>({
   customError,
   control: controlProp,
   required = false,
-  maxCount = 10
+  maxCount = 10,
+  value
 }: FormMultiSelectProps<T>) => {
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const formContext = useFormContext<T>();
   const control = controlProp || formContext?.control;
   const animation = 2;
@@ -52,6 +58,8 @@ export const FormMultiSelect = <T extends FieldValues>({
         const error = formContext?.formState?.errors[name];
         const showError = error;
 
+        console.log('error :', error);
+
         return (
           <FormItem className="w-full">
             <FormLabel
@@ -71,8 +79,11 @@ export const FormMultiSelect = <T extends FieldValues>({
                   )}
                   options={options}
                   placeholder={placeholder}
-                  onValueChange={setSelectedValues}
-                  defaultValue={selectedValues}
+                  onValueChange={(value: (number | string)[]) =>
+                    field.onChange(value)
+                  }
+                  value={field.value || []}
+                  defaultValue={field.value || []}
                   maxCount={maxCount}
                   animation={animation}
                   variant={variant}
@@ -82,7 +93,11 @@ export const FormMultiSelect = <T extends FieldValues>({
             {showError && (
               <div className="flex items-center gap-2 text-error-500">
                 <Icons.informationCircle className="h-4 w-4" />
-                <p className="text-paragraph-sm">{customError}</p>
+                <p className="text-paragraph-sm text-error-500">
+                  {customError ||
+                    (error as FieldError)?.message ||
+                    'Invalid type of selection'}
+                </p>
               </div>
             )}
           </FormItem>
