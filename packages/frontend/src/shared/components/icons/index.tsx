@@ -20,10 +20,20 @@ import {
   InfoIcon,
   PlusCircleIcon,
   TrendingUpIcon,
-  TrendingDownIcon
+  TrendingDownIcon,
+  SearchIcon,
+  Clock,
+  MapPin,
+  Pencil,
+  Trash
 } from 'lucide-react';
 
 export const SharedIcons = {
+  pencil: Pencil,
+  trash: Trash,
+  search: SearchIcon,
+  clock: Clock,
+  map: MapPin,
   news: NewspaperIcon,
   events: TicketIcon,
   profile: UserCircleIcon,

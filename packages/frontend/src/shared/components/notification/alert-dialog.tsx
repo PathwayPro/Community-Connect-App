@@ -36,9 +36,9 @@ export function AlertDialogUI() {
         <AlertDialogTitle
           className={cn(
             'mt-4 text-center text-[28px] font-semibold leading-tight',
-            type === 'error' && 'text-error-500',
-            type === 'success' && 'text-success-500',
-            type === 'warning' && 'text-warning-500'
+            type === 'error' && 'text-error-600',
+            type === 'success' && 'text-success-600',
+            type === 'warning' && 'text-warning-600'
           )}
         >
           {title}

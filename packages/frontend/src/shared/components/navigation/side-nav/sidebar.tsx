@@ -91,10 +91,12 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
       />
 
       {/* Logout */}
-      <div className="mt-auto text-white">
-        <Link href="#" onClick={handleLogout} className={linkClassName}>
-          <SharedIcons.logout className={cn('h-6 w-6', isOpen && 'ml-4')} />
-          {isOpen && 'Logout'}
+      <div className="mt-auto rounded-md py-3 text-white hover:bg-neutral-200/10">
+        <Link href="#" onClick={handleLogout} className={cn(linkClassName)}>
+          <div className="flex items-center gap-2">
+            <SharedIcons.logout className={cn('ml-3 h-6 w-6')} />
+            {isOpen && 'Logout'}
+          </div>
         </Link>
       </div>
     </div>

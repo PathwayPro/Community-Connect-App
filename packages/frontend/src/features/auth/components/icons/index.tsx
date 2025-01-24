@@ -3,10 +3,14 @@ import {
   Loader2,
   XCircle,
   SearchIcon,
-  User
+  User,
+  MapPin,
+  Clock
 } from 'lucide-react';
 
 export const Icons = {
+  clock: Clock,
+  map: MapPin,
   spinner: Loader2,
   xCircle: XCircle,
   alertTriangle: AlertTriangle,

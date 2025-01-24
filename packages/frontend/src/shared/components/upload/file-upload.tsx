@@ -46,7 +46,13 @@ export const FileUpload = ({
           PNG: { 'image/png': [] },
           JPG: { 'image/jpeg': [] },
           JPEG: { 'image/jpeg': [] },
-          SVG: { 'image/svg+xml': [] }
+          SVG: { 'image/svg+xml': [] },
+          PDF: { 'application/pdf': [] },
+          DOC: { 'application/msword': [] },
+          DOCX: {
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+              []
+          }
         }[type.toUpperCase()];
         return { ...acc, ...mimeType };
       }, {})
@@ -204,6 +210,8 @@ export const FileUpload = ({
                             e.stopPropagation();
                             setSelectedImage(file.preview ?? null);
                           }}
+                          width={128}
+                          height={128}
                         />
                       ) : (
                         <SharedIcons.fileIcon className="mx-auto h-32 w-32 text-neutral-500" />

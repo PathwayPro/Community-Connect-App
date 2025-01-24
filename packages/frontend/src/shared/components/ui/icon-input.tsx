@@ -19,12 +19,21 @@ const IconInput = forwardRef<HTMLInputElement, IconInputProps>(
     return (
       <div className="relative flex flex-row items-center gap-2">
         {leftIcon && (
-          <LeftIcon className="absolute left-3 h-6 w-6 text-neutral-dark-100" />
+          <LeftIcon
+            className={cn(
+              'absolute left-3 h-6 w-6 text-neutral-light-800',
+              state && 'text-primary'
+            )}
+          />
         )}
         <Input
           ref={ref}
           type="text"
-          className={cn('h-12 w-full rounded-xl pl-11', className)}
+          className={cn(
+            'h-12 w-full rounded-xl',
+            leftIcon && 'pl-11',
+            className
+          )}
           {...rest}
         />
         {rightIcon && (
@@ -32,7 +41,7 @@ const IconInput = forwardRef<HTMLInputElement, IconInputProps>(
             className="absolute right-3 m-0 flex cursor-pointer items-center justify-center"
             onClick={() => setState?.(!state)}
           >
-            <RightIcon className="h-6 w-6 text-neutral-dark-100" />
+            <RightIcon className="h-6 w-6 text-neutral-light-800" />
           </div>
         )}
       </div>
