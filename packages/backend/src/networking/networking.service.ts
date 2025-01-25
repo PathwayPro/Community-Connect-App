@@ -1,15 +1,12 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateConnectionRequestsDto, CreateConnectedUsersDto, CreateMessagesDto } from './dto/create-networking.dto';
-import { UpdateConnectionRequestsDto, UpdateConnectedUsersDto, UpdateMessagesDto } from './dto/update-networking.dto';
+import { UpdateConnectionRequestsDto } from './dto/update-networking.dto';
 import { PrismaService } from 'src/database';
-import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
 import ChatList from './dto/ChatList.interface'
 import { FilterConnectionRequestsDto } from './dto/filter-networking.dto';
 import { Prisma } from '@prisma/client';

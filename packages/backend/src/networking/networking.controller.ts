@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Put, Query } from '@nestjs/common';
 import { NetworkingService } from './networking.service';
-import { CreateConnectionRequestsDto, CreateConnectedUsersDto, CreateMessagesDto } from './dto/create-networking.dto';
-import { UpdateConnectionRequestsDto, UpdateConnectedUsersDto, UpdateMessagesDto } from './dto/update-networking.dto';
+import { CreateConnectionRequestsDto, CreateMessagesDto } from './dto/create-networking.dto';
+import { UpdateConnectionRequestsDto } from './dto/update-networking.dto';
 import { Roles, GetUser } from 'src/auth/decorators';
 import { JwtAuthGuard, RolesGuard } from 'src/auth/guards';
 import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
