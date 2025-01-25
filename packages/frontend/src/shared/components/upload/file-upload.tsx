@@ -5,6 +5,7 @@ import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/components/ui/button';
 import { Progress } from '@/shared/components/ui/progress';
 import { FileEdit } from './file-edit';
+import Image from 'next/image';
 
 interface FileWithPreview extends File {
   preview?: string;
@@ -17,8 +18,8 @@ interface UploadStatus {
 }
 
 interface FileUploadProps {
-  maxSize?: number; // in MB
-  acceptedFileTypes?: string[];
+  maxSize?: number;
+  acceptedFileTypes?: Record<string, string[]> | string[];
   maxFiles?: number;
   multiple?: boolean;
   onUpload?: (files: File[]) => Promise<void>;
@@ -28,8 +29,10 @@ interface FileUploadProps {
 }
 
 export const FileUpload = ({
-  maxSize = 5, // 5MB default
-  acceptedFileTypes = ['image/*', 'application/pdf'],
+  maxSize = 5,
+  acceptedFileTypes = {
+    'image/*': []
+  },
   maxFiles = 5,
   multiple = true,
   onUpload,
@@ -37,6 +40,18 @@ export const FileUpload = ({
   title = 'Upload Files',
   disablePreview = false
 }: FileUploadProps) => {
+  const normalizedAcceptedTypes = Array.isArray(acceptedFileTypes)
+    ? acceptedFileTypes.reduce((acc, type) => {
+        const mimeType = {
+          PNG: { 'image/png': [] },
+          JPG: { 'image/jpeg': [] },
+          JPEG: { 'image/jpeg': [] },
+          SVG: { 'image/svg+xml': [] }
+        }[type.toUpperCase()];
+        return { ...acc, ...mimeType };
+      }, {})
+    : acceptedFileTypes;
+
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [uploadStatus, setUploadStatus] = useState<
     Record<string, UploadStatus>
@@ -56,7 +71,32 @@ export const FileUpload = ({
   const handleDrop = async (acceptedFiles: File[]) => {
     const filesToProcess = multiple ? acceptedFiles : [acceptedFiles[0]];
 
-    const newFiles = filesToProcess.map((file) =>
+    const validFiles = filesToProcess.filter((file) => {
+      const isValidType = Object.keys(normalizedAcceptedTypes).some((type) => {
+        if (type.includes('*')) {
+          return file.type.startsWith(type.split('/')[0]);
+        }
+        return file.type === type;
+      });
+
+      if (!isValidType) {
+        setUploadStatus((prev) => ({
+          ...prev,
+          [file.name]: {
+            progress: 0,
+            error: `Invalid file type. Accepted types: ${
+              Array.isArray(acceptedFileTypes)
+                ? acceptedFileTypes.join(', ')
+                : Object.keys(acceptedFileTypes).join(', ')
+            }`
+          }
+        }));
+        return false;
+      }
+      return true;
+    });
+
+    const newFiles = validFiles.map((file) =>
       Object.assign(file, {
         preview:
           !disablePreview && file.type.startsWith('image/')
@@ -85,7 +125,10 @@ export const FileUpload = ({
         } catch (error) {
           setUploadStatus((prev) => ({
             ...prev,
-            [file.name]: { progress: 0, error: 'Upload failed' }
+            [file.name]: {
+              progress: 0,
+              error: error instanceof Error ? error.message : 'Upload failed'
+            }
           }));
         }
       }
@@ -113,13 +156,7 @@ export const FileUpload = ({
       <Dropzone
         onDrop={handleDrop}
         maxSize={maxSize * 1024 * 1024}
-        accept={acceptedFileTypes.reduce(
-          (acc, curr) => ({
-            ...acc,
-            [curr]: []
-          }),
-          {}
-        )}
+        accept={normalizedAcceptedTypes}
         multiple={multiple}
       >
         {({ getRootProps, getInputProps, isDragActive }) => {
@@ -146,7 +183,8 @@ export const FileUpload = ({
                     <p className="mt-2 text-sm text-neutral-500">
                       Max file size: {maxSize}MB |{' '}
                       {multiple ? `Up to ${maxFiles} files` : 'Single file'} |
-                      Supported Formats: {acceptedFileTypes.join(', ')}
+                      Supported Formats:{' '}
+                      {Object.values(acceptedFileTypes).join(', ')}
                     </p>
                   </div>
                 </>
@@ -158,7 +196,7 @@ export const FileUpload = ({
                       className="flex flex-col gap-4 rounded-lg bg-neutral-50 px-3"
                     >
                       {file.preview ? (
-                        <img
+                        <Image
                           src={file.preview}
                           alt={file.name}
                           className="mx-auto h-32 w-32 cursor-pointer rounded-full border border-neutral-200 object-cover"

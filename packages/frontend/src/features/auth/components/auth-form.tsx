@@ -24,7 +24,7 @@ import {
 import Link from 'next/link';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { cn } from '@/shared/lib/utils';
-import AlertDialogUI from '@/shared/components/notification/alert-dialog';
+import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 
 type AuthFormValues = LoginFormValues & {
   firstName?: string;
@@ -35,14 +35,7 @@ type AuthFormValues = LoginFormValues & {
 
 export function AuthForm() {
   const pathname = usePathname();
-  const {
-    login,
-    register,
-    dialogState,
-    setDialogState,
-    isLoading,
-    setIsLoading
-  } = useAuth();
+  const { login, register, isLoading, setIsLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const isRegisterPage = pathname === '/auth/register';
@@ -80,24 +73,13 @@ export function AuthForm() {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
-
     console.log('google sign in');
-
     window.location.href = process.env.NEXT_PUBLIC_API_URL + '/auth/google';
   };
 
   return (
     <div className="w-full max-w-md space-y-6 bg-white dark:bg-slate-900">
-      {dialogState.isOpen && (
-        <AlertDialogUI
-          title={dialogState.title}
-          description={dialogState.description}
-          open={dialogState.isOpen}
-          onOpenChange={(open) =>
-            setDialogState((prev) => ({ ...prev, isOpen: open }))
-          }
-        />
-      )}
+      <AlertDialogUI />
       <Icons.logo className="mx-auto h-[84px] w-[84px]" />
       <div className="space-y-2 text-center">
         <h2>{isRegisterPage ? 'Create an account' : 'Welcome back'}</h2>

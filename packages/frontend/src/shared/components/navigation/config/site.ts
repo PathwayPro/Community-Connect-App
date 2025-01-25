@@ -22,17 +22,17 @@ export const MainSiteNav = [
   {
     name: 'Mentorship',
     href: '/mentorship',
-    icon: 'mentors',
-    subItems: [
-      {
-        name: 'Become a Mentor',
-        href: '/mentorship/mentor'
-      },
-      {
-        name: 'Become a Mentee',
-        href: '/mentorship/mentee'
-      }
-    ]
+    icon: 'mentors'
+    // subItems: [
+    //   {
+    //     name: 'Apply',
+    //     href: '/mentorship/apply'
+    //   },
+    //   {
+    //     name: 'Dashboard',
+    //     href: '/mentorship/dashboard'
+    //   }
+    // ]
   }
 ];
 

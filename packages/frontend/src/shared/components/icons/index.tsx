@@ -18,7 +18,9 @@ import {
   Trash2Icon,
   RefreshCcw,
   InfoIcon,
-  PlusCircleIcon
+  PlusCircleIcon,
+  TrendingUpIcon,
+  TrendingDownIcon
 } from 'lucide-react';
 
 export const SharedIcons = {
@@ -41,6 +43,8 @@ export const SharedIcons = {
   refresh: RefreshCcw,
   info: InfoIcon,
   plusCircle: PlusCircleIcon,
+  arrowTrendingUp: TrendingUpIcon,
+  arrowTrendingDown: TrendingDownIcon,
   mentors: ({ ...props }) => (
     <svg
       viewBox="0 0 24 24"
@@ -279,6 +283,23 @@ export const SharedIcons = {
           stroke="#2D2D2D"
         />
       </g>
+    </svg>
+  ),
+  pencilSquare: ({ ...props }) => (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="M14.5517 3.73913L15.9575 2.33246C16.2506 2.0394 16.648 1.87476 17.0625 1.87476C17.477 1.87476 17.8744 2.0394 18.1675 2.33246C18.4606 2.62553 18.6252 3.02301 18.6252 3.43746C18.6252 3.85192 18.4606 4.2494 18.1675 4.54246L9.31833 13.3916C8.87777 13.8319 8.33447 14.1556 7.7375 14.3333L5.5 15L6.16667 12.7625C6.3444 12.1655 6.66803 11.6222 7.10833 11.1816L14.5517 3.73913ZM14.5517 3.73913L16.75 5.93746M15.5 11.6666V15.625C15.5 16.1222 15.3025 16.5992 14.9508 16.9508C14.5992 17.3024 14.1223 17.5 13.625 17.5H4.875C4.37772 17.5 3.90081 17.3024 3.54917 16.9508C3.19754 16.5992 3 16.1222 3 15.625V6.87496C3 6.37768 3.19754 5.90077 3.54917 5.54914C3.90081 5.19751 4.37772 4.99996 4.875 4.99996H8.83333"
+        stroke="#FAFBFC"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}
+      />
     </svg>
   )
 };

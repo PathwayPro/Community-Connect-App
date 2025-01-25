@@ -13,17 +13,14 @@ import {
 } from '@/features/auth/types';
 import { userApi } from '@/features/user-profile/api/user-api';
 import Cookies from 'js-cookie';
-import { DialogState, ApiError } from '@/shared/types';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
+import { ApiError } from '@/shared/types';
 
 export function useAuth() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { loginContext, logoutContext } = useAuthContext();
-  const [dialogState, setDialogState] = useState<DialogState>({
-    isOpen: false,
-    title: '',
-    description: ''
-  });
+  const { showAlert } = useAlertDialog();
   const [error, setError] = useState<string | null>(null);
 
   const login = async (credentials: LoginCredentials) => {
@@ -58,10 +55,10 @@ export function useAuth() {
         console.log('responseUserData', responseUserData);
 
         if (responseUserData.success) {
-          setDialogState({
-            isOpen: true,
+          showAlert({
             title: 'Login successful!',
-            description: 'Welcome back to the app!'
+            description: 'Welcome back to the app!',
+            type: 'success'
           });
 
           loginContext(responseUserData.data);
@@ -71,10 +68,10 @@ export function useAuth() {
       }
     } catch (error) {
       console.error('Login error:', error);
-      setDialogState({
-        isOpen: true,
+      showAlert({
         title: 'Login Failed!',
-        description: 'Please check your credentials and try again.'
+        description: 'Please check your credentials and try again.',
+        type: 'error'
       });
       throw error;
     } finally {
@@ -90,15 +87,14 @@ export function useAuth() {
       console.log('register response in hook:', response);
 
       if (response.success) {
-        setDialogState({
-          isOpen: true,
+        showAlert({
           title: 'Registration successful!',
           description:
-            'Welcome to the app! Please check your email for a verification link.'
+            'Welcome to the app! Please check your email for a verification link.',
+          type: 'success'
         });
 
         setTimeout(() => {
-          setDialogState((prev) => ({ ...prev, isOpen: false }));
           router.push('/auth/login');
           router.refresh();
         }, 3000);
@@ -106,10 +102,10 @@ export function useAuth() {
     } catch (error) {
       console.log('error in register', error);
       const apiError = error as ApiError;
-      setDialogState({
-        isOpen: true,
+      showAlert({
         title: 'Registration Failed!',
-        description: apiError.response?.data?.message || 'Please try again.'
+        description: apiError.response?.data?.message || 'Please try again.',
+        type: 'error'
       });
       throw error;
     } finally {
@@ -123,11 +119,11 @@ export function useAuth() {
       const response = await authApi.verifyEmail(token);
 
       if (response.success) {
-        setDialogState({
-          isOpen: true,
+        showAlert({
           title: 'Email verified successfully!',
           description:
-            'Your email has been verified. You will be redirected to login.'
+            'Your email has been verified. You will be redirected to login.',
+          type: 'success'
         });
 
         setTimeout(() => {
@@ -138,10 +134,10 @@ export function useAuth() {
     } catch (error) {
       const apiError = error as ApiError;
       setError(apiError.response?.data?.message || 'Please try again.');
-      setDialogState({
-        isOpen: true,
+      showAlert({
         title: 'Verification Failed!',
-        description: apiError.response?.data?.message || 'Please try again.'
+        description: apiError.response?.data?.message || 'Please try again.',
+        type: 'error'
       });
       setTimeout(() => {
         router.push('/auth/login');
@@ -158,11 +154,11 @@ export function useAuth() {
       const response = await authApi.updatePassword(credentials);
 
       if (response.success) {
-        setDialogState({
-          isOpen: true,
+        showAlert({
           title: 'Password updated successfully!',
           description:
-            'You have successfully reset your password. You can now login using the new password. '
+            'You have successfully reset your password. You can now login using the new password. ',
+          type: 'success'
         });
         setTimeout(() => {
           router.push('/auth/login');
@@ -171,10 +167,10 @@ export function useAuth() {
       }
     } catch (error) {
       const apiError = error as ApiError;
-      setDialogState({
-        isOpen: true,
+      showAlert({
         title: 'Failed to update password',
-        description: apiError.response?.data?.message || 'Please try again.'
+        description: apiError.response?.data?.message || 'Please try again.',
+        type: 'error'
       });
       throw error;
     } finally {
@@ -188,11 +184,11 @@ export function useAuth() {
       const response = await authApi.forgotPassword(credentials);
 
       if (response.success) {
-        setDialogState({
-          isOpen: true,
+        showAlert({
           title: 'Email Sent!',
           description:
-            'A password reset link has been sent to your registered Email ID.'
+            'A password reset link has been sent to your registered Email ID.',
+          type: 'success'
         });
         setTimeout(() => {
           router.push('/auth/login');
@@ -201,10 +197,10 @@ export function useAuth() {
       }
     } catch (error) {
       const apiError = error as ApiError;
-      setDialogState({
-        isOpen: true,
+      showAlert({
         title: 'Failed to process forgot password request',
-        description: apiError.response?.data?.message || 'Please try again.'
+        description: apiError.response?.data?.message || 'Please try again.',
+        type: 'error'
       });
       throw error;
     } finally {
@@ -219,10 +215,10 @@ export function useAuth() {
       return response;
     } catch (error) {
       const apiError = error as ApiError;
-      setDialogState({
-        isOpen: true,
+      showAlert({
         title: 'Failed to reset password',
-        description: apiError.response?.data?.message || 'Please try again.'
+        description: apiError.response?.data?.message || 'Please try again.',
+        type: 'error'
       });
       throw error;
     } finally {
@@ -237,10 +233,10 @@ export function useAuth() {
 
       if (response.message === 'Logout successful') {
         logoutContext();
-        setDialogState({
-          isOpen: true,
+        showAlert({
           title: 'Logged out successfully!',
-          description: 'See you soon!'
+          description: 'See you soon!',
+          type: 'success'
         });
 
         router.push('/auth/login');
@@ -248,10 +244,10 @@ export function useAuth() {
       }
     } catch (error) {
       const apiError = error as ApiError;
-      setDialogState({
-        isOpen: true,
+      showAlert({
         title: 'Logout Failed!',
-        description: apiError.response?.data?.message || 'Please try again.'
+        description: apiError.response?.data?.message || 'Please try again.',
+        type: 'error'
       });
       throw error;
     } finally {
@@ -266,10 +262,10 @@ export function useAuth() {
       return response;
     } catch (error) {
       const apiError = error as ApiError;
-      setDialogState({
-        isOpen: true,
+      showAlert({
         title: 'Refresh Token Failed!',
-        description: apiError.response?.data?.message || 'Please try again.'
+        description: apiError.response?.data?.message || 'Please try again.',
+        type: 'error'
       });
       throw error;
     } finally {
@@ -288,8 +284,6 @@ export function useAuth() {
     refreshToken,
     isLoading,
     setIsLoading,
-    dialogState,
-    setDialogState,
     error,
     setError
   };

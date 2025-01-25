@@ -5,7 +5,7 @@ export enum RoleEnum {
 }
 
 export interface UserProfile {
-  id?: string;
+  id?: number;
   firstName: string;
   lastName: string;
   email?: string;
@@ -32,8 +32,6 @@ export interface UserProfile {
 
 export interface UserResponse {
   success: boolean;
-  message: string;
+  message?: string;
   data: UserProfile;
-  timestamp: string;
-  path: string;
 }
