@@ -20,7 +20,7 @@ export class EventsCategoriesService {
       });
       return category;
     } catch (error) {
-      throw new BadRequestException(
+      throw new InternalServerErrorException(
         'Error creating category: ' + error.message,
       );
     }
