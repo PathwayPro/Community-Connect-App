@@ -1,4 +1,8 @@
-import { InternalServerErrorException, NotFoundException, Injectable } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  NotFoundException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateNewsDto } from './dto/create-news.dto';
 import { UpdateNewsDto } from './dto/update-news.dto';
 import { PrismaService } from 'src/database/prisma.service';
@@ -7,8 +11,8 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class NewsService {
-  constructor(private prisma: PrismaService){}
-  
+  constructor(private prisma: PrismaService) {}
+
   getFormattedFilters(filters: FilterNewsDto): Prisma.NewsWhereInput {
     const formattedFilters: Prisma.NewsWhereInput = {};
 
@@ -37,11 +41,11 @@ export class NewsService {
       };
     }
     if (filters?.published) {
-      formattedFilters.published = (filters.published === true || filters.published === "true");
+      formattedFilters.published =
+        filters.published === true || filters.published === 'true';
     }
     if (filters?.user_id) {
       formattedFilters.user_id = filters.user_id;
-      
     }
     if (filters?.date_from && filters?.date_to) {
       formattedFilters.created_at = {
@@ -62,78 +66,94 @@ export class NewsService {
 
     return formattedFilters;
   }
-  
-  
-  async create(user_id:number, createNewsDto: CreateNewsDto) {
-    try{
+
+  async create(user_id: number, createNewsDto: CreateNewsDto) {
+    try {
       const data = {
-        ...createNewsDto, 
+        ...createNewsDto,
         created_at: new Date(),
         updated_at: new Date(),
-        user_id
+        user_id,
       };
 
-      const newNews = await this.prisma.news.create({data})
+      const newNews = await this.prisma.news.create({ data });
 
       return newNews;
     } catch (error) {
-      throw new InternalServerErrorException('Error creating a news: ' + error.message);
+      throw new InternalServerErrorException(
+        'Error creating the news: ' + error.message,
+      );
     }
   }
 
   async findAll(filters: FilterNewsDto) {
-    const formattedFilters: Prisma.NewsWhereInput = this.getFormattedFilters(filters);
+    try {
+      const formattedFilters: Prisma.NewsWhereInput =
+        this.getFormattedFilters(filters);
 
-    const filteredNews = this.prisma.news.findMany({where: formattedFilters});
+      const filteredNews = this.prisma.news.findMany({
+        where: formattedFilters,
+      });
 
-    return filteredNews;
+      return filteredNews;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error fetching news: ' + error.message,
+      );
+    }
   }
 
   async findOnePublic(id: number) {
-    try{
+    try {
       const where: Prisma.NewsWhereInput = {
         id: id,
-        published: true
-      }
+        published: true,
+      };
 
-      const news = await this.prisma.news.findFirst({where})
-      
-      if(!news){
+      const news = await this.prisma.news.findFirst({ where });
+
+      if (!news) {
         throw new NotFoundException(`There is no News with ID #${id}`);
       }
 
       return news;
-    }catch(error){
-      throw new InternalServerErrorException(`Error fetching news with ID #${id}:`, error.message);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error fetching news with ID #${id}:`,
+        error.message,
+      );
     }
   }
 
   async findOne(id: number) {
-    try{
-      const news = await this.prisma.news.findFirst({where: {id}})
-      
-      if(!news){
+    try {
+      const news = await this.prisma.news.findFirst({ where: { id } });
+
+      if (!news) {
         throw new NotFoundException(`There is no News with ID #${id}`);
       }
 
       return news;
-    }catch(error){
-      throw new InternalServerErrorException(`Error fetching news with ID #${id}:`, error.message);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error fetching news with ID #${id}:`,
+        error.message,
+      );
     }
   }
 
   async update(id: number, updateNewsDto: UpdateNewsDto) {
-    try{
+    try {
       // Validate News exist
       const newsToUpdate = await this.findOne(id);
-      if(!newsToUpdate){
+      if (!newsToUpdate) {
         throw new NotFoundException(`There is no News with ID #${id}`);
       }
 
       // Update news information
       const data = {
-        ...updateNewsDto, 
-        updated_at: new Date()
+        ...updateNewsDto,
+        updated_at: new Date(),
       };
 
       const updatedNews = await this.prisma.news.update({
@@ -142,22 +162,27 @@ export class NewsService {
       });
 
       return updatedNews;
-
     } catch (error) {
-      throw new InternalServerErrorException(`Error updating news with ID #${id}:`, error.message);
+      throw new InternalServerErrorException(
+        `Error updating news with ID #${id}:`,
+        error.message,
+      );
     }
   }
 
   async remove(id: number) {
     try {
       // VALIDATE NEWS EXIST
-      const newsToDelete = await this.findOne(id); 
-      if(!newsToDelete){throw new NotFoundException(`There is no News with ID #${id} to delete`);}
+      const newsToDelete = await this.findOne(id);
+      if (!newsToDelete) {
+        throw new NotFoundException(
+          `There is no News with ID #${id} to delete`,
+        );
+      }
 
-      const deletedNews = await this.prisma.news.delete({where: {id}});
-      
+      const deletedNews = await this.prisma.news.delete({ where: { id } });
+
       return deletedNews;
-
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
