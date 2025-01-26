@@ -1,31 +1,40 @@
+'use client';
+
 import { Calendar, MapPin, Clock } from 'lucide-react';
 import { Card } from '@/shared/components/ui/card';
 import Image from 'next/image';
 import { IconButton } from '@/shared/components/ui/icon-button';
+import { useRouter } from 'next/navigation';
 
 interface EventCardProps {
+  id: string;
   title: string;
   description?: string;
   date?: string;
   address?: string;
   time?: string;
   imageUrl?: string | undefined;
-  onLearnMore?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
 }
 
 export const EventCard = ({
+  id,
   title,
   description,
   date,
   address,
   time,
   imageUrl,
-  onLearnMore,
   onEdit,
   onDelete
 }: EventCardProps) => {
+  const router = useRouter();
+
+  const handleLearnMore = () => {
+    router.push(`/events/${id}`);
+  };
+
   return (
     <Card className="overflow-hidden rounded-[24px]">
       <div className="grid grid-cols-2 gap-4">
@@ -37,6 +46,7 @@ export const EventCard = ({
             className="h-full w-full rounded-[20px] object-cover"
             width={300}
             height={200}
+            priority
           />
         </div>
 
@@ -67,7 +77,7 @@ export const EventCard = ({
               label="Learn More"
               rightIcon="arrowRight"
               className="w-full"
-              onClick={onLearnMore}
+              onClick={handleLearnMore}
             />
             <IconButton
               label="Edit Details"
