@@ -21,6 +21,7 @@ import { ResourcesModule } from './resources/resources.module';
 import { FilesModule } from './files/files.module';
 import { GoalsModule } from './goals/goals.module';
 import { InterestsModule } from './interests/interests.module';
+import { NetworkingModule } from './networking/networking.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { InterestsModule } from './interests/interests.module';
     FilesModule,
     GoalsModule,
     InterestsModule,
+    NetworkingModule,
   ],
   controllers: [AppController],
   providers: [

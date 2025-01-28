@@ -62,6 +62,16 @@ model users {
   goal_id              Int?
   // INTERESTS RELATIONSHIP
   interests            UsersInterests[]
+  // NETWORKING - CONNECTION REQUESTS
+  connection_request_sender_id        ConnectionRequests[]          @relation(name: "ConnectionRequestsSender")
+  connection_request_recipient_id        ConnectionRequests[]          @relation(name: "ConnectionRequestsRecipient")
+  // NETWORKING - CONNECTED USERS
+  connected_sender_id        ConnectedUsers[]          @relation(name: "ConnectedUsersSender")
+  connected_recipient_id        ConnectedUsers[]          @relation(name: "ConnectedUsersRecipient")
+  // NETWORKING - MESSAGES
+  messages_sender_id        Messages[]          @relation(name: "MessagesSender")
+  messages_recipient_id        Messages[]          @relation(name: "MessagesRecipient")
+
 }
 
 enum users_roles {
@@ -261,3 +271,39 @@ model UsersInterests {
 }
 
 // USERS NETWORKING
+enum ConnectionRequestsStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model ConnectionRequests {
+  id              Int                       @id @default(autoincrement())
+  sender_id       Int
+  sender          users                     @relation(name: "ConnectionRequestsSender", fields: [sender_id], references: [id])
+  recipient_id    Int
+  recipient       users                     @relation(name: "ConnectionRequestsRecipient", fields: [recipient_id], references: [id])
+  message         String?
+  status          ConnectionRequestsStatus  @default(PENDING)
+  created_at      DateTime                  @default(now())
+  updated_at      DateTime?
+}
+
+model ConnectedUsers {
+  sender_id       Int
+  sender          users                     @relation(name: "ConnectedUsersSender", fields: [sender_id], references: [id])
+  recipient_id    Int
+  recipient       users                     @relation(name: "ConnectedUsersRecipient", fields: [recipient_id], references: [id])
+  created_at      DateTime                  @default(now())
+  @@id([sender_id, recipient_id])
+}
+
+model Messages {
+  id              Int                       @id @default(autoincrement())
+  sender_id       Int
+  sender          users                     @relation(name: "MessagesSender", fields: [sender_id], references: [id])
+  recipient_id    Int
+  recipient       users                     @relation(name: "MessagesRecipient", fields: [recipient_id], references: [id])
+  message         String?
+  created_at      DateTime                  @default(now())
+}
