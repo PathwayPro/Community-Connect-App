@@ -8,6 +8,7 @@ import {
   FormControl
 } from '@/shared/components/ui/form';
 import { DateTimePicker } from '../date-picker/date-picker';
+import CustomDatePicker from '../date-picker/custom-date-picker';
 
 interface FormDatePickerProps<T extends FieldValues> {
   name: Path<T>;
@@ -54,21 +55,21 @@ export const FormDatePicker = <T extends FieldValues>({
             </FormLabel>
             <FormControl>
               <div className="space-y-2">
-                <DateTimePicker
+                <CustomDatePicker
                   className={cn(
-                    'h-[103px] max-h-[103px] w-full bg-neutral-light-100',
+                    'h-12 max-h-12 w-full bg-neutral-light-100',
                     showError && 'border-error-500 focus-visible:ring-error-100'
                   )}
-                  value={field.value}
-                  onChange={field.onChange}
-                  hideTime
+                  onSelect={field.onChange}
                 />
               </div>
             </FormControl>
             {showError && (
               <div className="flex items-center gap-2 text-error-500">
                 <Icons.informationCircle className="h-4 w-4" />
-                <p className="text-paragraph-sm">{customError}</p>
+                <p className="text-paragraph-sm text-error-500">
+                  {customError}
+                </p>
               </div>
             )}
           </FormItem>
