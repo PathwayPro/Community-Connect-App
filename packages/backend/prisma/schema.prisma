@@ -82,9 +82,11 @@ enum users_roles {
 
 model mentors {
   id                 Int            @id @default(autoincrement())
+  resume             String
   max_mentees        Int
   availability       String
-  has_experience     Boolean        @default(false)
+  profession         String
+  experience_years   Int
   experience_details String?
   // STATUS ENUM
   status             mentors_status @default(PENDING)

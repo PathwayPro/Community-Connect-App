@@ -1,14 +1,21 @@
-import {
-  IsBoolean,
-  IsInt,
-  IsOptional,
-  IsString,
-  IsEnum,
-} from 'class-validator';
-import { mentors_status } from '@prisma/client';
+import { IsInt, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateMentorDto {
+  @ApiProperty({ description: 'Profession, related to mentoring' })
+  @IsString()
+  profession: string;
+
+  @ApiProperty({
+    description: 'Years of experience as a mentor (greater than 0)',
+    example: 10,
+    minimum: 0,
+  })
+  @IsInt()
+  @Transform(({ value }) => parseInt(value))
+  experience_years: number;
+
   @ApiProperty({
     description: 'Maximum amount of mentees they can handle',
     example: 5,
@@ -16,6 +23,7 @@ export class CreateMentorDto {
     maximum: 5,
   })
   @IsInt()
+  @Transform(({ value }) => parseInt(value))
   max_mentees: number;
 
   @ApiProperty({
@@ -26,33 +34,17 @@ export class CreateMentorDto {
   availability: string;
 
   @ApiPropertyOptional({
-    description:
-      'If the applicant has previous specific experience in mentoring others. Default: FALSE',
-    example: true,
-  })
-  @IsBoolean()
-  has_experience?: boolean = false;
-
-  @ApiPropertyOptional({
     description: 'Description of previous experience in mentoring others',
   })
   @IsString()
   @IsOptional()
   experience_details?: string;
 
-  @IsEnum(mentors_status)
-  @IsOptional()
-  status?: mentors_status = 'PENDING';
-
-  @IsInt()
-  @IsOptional()
-  user_id?: number;
-
   @ApiProperty({
-    description: 'Array of interests IDs to match with mentees',
-    example: [1, 2, 3],
+    description: 'Array of interests IDs to match with mentees (String)',
+    example: '[1, 2, 3]',
   })
-  @IsInt({ each: true })
+  @IsString()
   @IsOptional()
-  interests?: Array<number>;
+  interests: string;
 }

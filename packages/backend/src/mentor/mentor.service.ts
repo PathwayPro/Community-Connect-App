@@ -8,13 +8,15 @@ import { CreateMentorDto } from './dto/create-mentor.dto';
 import { UpdateMentorDto } from './dto/update-mentor.dto';
 import { PrismaService } from 'src/database';
 import { FilterMentorDto } from './dto/filter-mentor.dto';
-import { Prisma, users_roles } from '@prisma/client';
-import { InterestsService } from 'src/interests/interests.service';
+import { Prisma, users_roles, mentors_status } from '@prisma/client';
+import { FilesService } from 'src/files/files.service';
+import { FileValidationEnum } from 'src/files/util/files-validation.enum';
+
 @Injectable()
 export class MentorService {
   constructor(
     private prisma: PrismaService,
-    private InterestsService: InterestsService,
+    private filesService: FilesService,
   ) {}
 
   async findAll(filters: FilterMentorDto = null) {
@@ -31,7 +33,7 @@ export class MentorService {
     }
 
     if (filters?.has_experience !== undefined) {
-      appliedFilters.has_experience = filters.has_experience;
+      //appliedFilters.has_experience = filters.has_experience;
     }
 
     if (filters?.status) {
@@ -101,22 +103,75 @@ export class MentorService {
     }
   }
 
-  async create(user_id: number, createMentorDto: CreateMentorDto) {
+  async create(
+    user_id: number,
+    createMentorDto: CreateMentorDto,
+    file: Express.Multer.File,
+  ) {
     try {
+      // UPLOAD RESUME TO GET THE LINK
+      const resumeLink = await this.filesService.upload(
+        FileValidationEnum.RESUME,
+        file,
+      );
+      if (!resumeLink) {
+        throw new InternalServerErrorException(
+          'There was a problem uploading your resume. Please try again later',
+        );
+      }
+
+      // FIXED DATA FOR CREATIONS
+      const mentorData = {
+        profession: createMentorDto.profession,
+        experience_years: createMentorDto.experience_years,
+        experience_details: createMentorDto.experience_details,
+        max_mentees: createMentorDto.max_mentees,
+        availability: createMentorDto.availability,
+        user: { connect: { id: user_id } },
+        resume: resumeLink.path,
+        status: mentors_status.PENDING,
+      };
+
+      // CREATE THE MENTOR APPLICATION
       const mentor = await this.prisma.mentors.create({
-        data: { ...createMentorDto, user_id },
+        data: mentorData,
+      });
+      if (!mentor) {
+        throw new InternalServerErrorException(
+          'There was a problema creating your mentorship application. Please try again later.',
+        );
+      }
+
+      // INTERESTS
+      // TRANSFORM STRING OF INTEREST INTO ARRAY
+      const interestsToArray = JSON.parse(createMentorDto.interests);
+
+      // VALIDATE ONLY THE EXISTING ONES AND RETURN FORMATTED VALUES
+      const validInterestsIds = await this.prisma.interests
+        .findMany({
+          where: { id: { in: interestsToArray } },
+          select: { id: true },
+        })
+        .then((interests) =>
+          interests.map((interest) => ({
+            user_id: user_id,
+            interest_id: interest.id,
+          })),
+        );
+      //.then(interests => interests.map(interest => interest.id));
+
+      console.log('INTERESTS: ', validInterestsIds);
+
+      // ADD VALIDATED INTERESTS TO THE USER
+      const userInterests = await this.prisma.usersInterests.createMany({
+        data: validInterestsIds,
+        skipDuplicates: true,
       });
 
-      // Add interests to mentor
-      if (createMentorDto.interests) {
-        const userInterests = createMentorDto.interests;
-
-        userInterests.forEach(async (interest) => {
-          await this.InterestsService.addInterestToUser({
-            user_id: mentor.user_id,
-            interest_id: interest,
-          });
-        });
+      if (!userInterests || userInterests.count < 1) {
+        throw new InternalServerErrorException(
+          'There was an error saving your interests. Please try again later or edit your application.',
+        );
       }
 
       return mentor;

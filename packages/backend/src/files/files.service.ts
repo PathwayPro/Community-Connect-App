@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -7,73 +11,113 @@ import { FileValidationEnum } from './util/files-validation.enum';
 import { UploadedFile } from './util/uploaded-file.interface';
 import { FileValidations } from './util/file-validations.interface';
 
-
 @Injectable()
 export class FilesService {
-
   constructor(private readonly configService: ConfigService) {
-    const commonImageTypes: string[] = ['image/jpeg', 'image/png', 'image/bmp', 'image/webp'];
+    const commonImageTypes: string[] = [
+      'image/jpeg',
+      'image/png',
+      'image/bmp',
+      'image/webp',
+    ];
     const commonDocumentTypes: string[] = [
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // (Microsoft Word documents)
       'application/vnd.openxmlformats-officedocument.presentationml.presentation', // (Microsoft PowerPoint presentations)
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // (Microsoft Excel spreadsheets)
-      'text/plain'
+      'text/plain',
     ];
     const commonVideoTypes: string[] = ['video/mp4', 'video/webm'];
+    const commonResumesTypes: string[] = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // (Microsoft Word documents)
+      'text/plain',
+    ];
 
     this.fileValidations = {
-      'PROFILE_PICTURE': {
+      PROFILE_PICTURE: {
         allowedMimeTypes: commonImageTypes,
-        maxSizeInBytes: 2 * 1024 * 1024 // 2MB
+        maxSizeInBytes: 2 * 1024 * 1024, // 2MB
       },
-      'EVENTS': {
+      EVENTS: {
         allowedMimeTypes: commonImageTypes,
-        maxSizeInBytes: 10 * 1024 * 1024 // 10MB
+        maxSizeInBytes: 10 * 1024 * 1024, // 10MB
       },
-      'NEWS': {
+      NEWS: {
         allowedMimeTypes: commonImageTypes,
-        maxSizeInBytes: 5 * 1024 * 1024 // 5MB
+        maxSizeInBytes: 5 * 1024 * 1024, // 5MB
       },
-      'RESOURCES': {
-        allowedMimeTypes: [...commonImageTypes, ...commonVideoTypes, ...commonDocumentTypes],
-        maxSizeInBytes: 20 * 1024 * 1024 // 10MB
-      }
+      RESOURCES: {
+        allowedMimeTypes: [
+          ...commonImageTypes,
+          ...commonVideoTypes,
+          ...commonDocumentTypes,
+        ],
+        maxSizeInBytes: 20 * 1024 * 1024, // 10MB
+      },
+      RESUME: {
+        allowedMimeTypes: commonResumesTypes,
+        maxSizeInBytes: 10 * 1024 * 1024, // 10MB
+      },
     };
-   }
+  }
 
-   private fileValidations: Record<FileValidationEnum, FileValidations>;
+  private fileValidations: Record<FileValidationEnum, FileValidations>;
 
   private fileDirectory(validation: FileValidationEnum): string {
-    const publicDir = this.configService.get<string>('UPLOAD_DIR_ROOT')
+    const publicDir = this.configService.get<string>('UPLOAD_DIR_ROOT');
     switch (validation) {
-      case "PROFILE_PICTURE":
-        return publicDir + '/' + this.configService.get<string>('UPLOAD_DIR_PROFILE_PICTURE');
-      case "RESOURCES":
-        return publicDir + '/' + this.configService.get<string>('UPLOAD_DIR_RESOURCES');
-      case "EVENTS":
-        return publicDir + '/' + this.configService.get<string>('UPLOAD_DIR_EVENTS');
-      case "NEWS":
-        return publicDir + '/' + this.configService.get<string>('UPLOAD_DIR_NEWS');
+      case 'PROFILE_PICTURE':
+        return (
+          publicDir +
+          '/' +
+          this.configService.get<string>('UPLOAD_DIR_PROFILE_PICTURE')
+        );
+      case 'RESOURCES':
+        return (
+          publicDir +
+          '/' +
+          this.configService.get<string>('UPLOAD_DIR_RESOURCES')
+        );
+      case 'EVENTS':
+        return (
+          publicDir + '/' + this.configService.get<string>('UPLOAD_DIR_EVENTS')
+        );
+      case 'NEWS':
+        return (
+          publicDir + '/' + this.configService.get<string>('UPLOAD_DIR_NEWS')
+        );
+      case 'RESUME':
+        return (
+          publicDir + '/' + this.configService.get<string>('UPLOAD_DIR_RESUME')
+        );
       default:
-        throw new BadRequestException('You must specify a valid use fir this file.');
+        throw new BadRequestException(
+          'You must specify a valid use fir this file.',
+        );
     }
   }
 
-  
-
-  async upload(validation: FileValidationEnum, file: Express.Multer.File): Promise<UploadedFile> {
+  async upload(
+    validation: FileValidationEnum,
+    file: Express.Multer.File,
+  ): Promise<UploadedFile> {
     try {
       // // VALIDATE FILE
-      const { allowedMimeTypes, maxSizeInBytes } = this.fileValidations[validation]; 
+      const { allowedMimeTypes, maxSizeInBytes } =
+        this.fileValidations[validation];
 
       if (!allowedMimeTypes.includes(file.mimetype)) {
-        console.log('FILE MIMETYPE:', file.mimetype)
-        throw new BadRequestException(`Invalid file type. Allowed types: ${allowedMimeTypes.join(', ')}`);
+        console.log('FILE MIMETYPE:', file.mimetype);
+        throw new BadRequestException(
+          `Invalid file type. Allowed types: ${allowedMimeTypes.join(', ')}`,
+        );
       }
 
       if (file.size > maxSizeInBytes) {
-        throw new BadRequestException(`File size exceeds the limit of ${maxSizeInBytes / (1024 * 1024)} MB.`);
+        throw new BadRequestException(
+          `File size exceeds the limit of ${maxSizeInBytes / (1024 * 1024)} MB.`,
+        );
       }
 
       // DEFINE DIRECTORY FOR THE FILE ACCORDING TO ITS USAGE
@@ -94,11 +138,12 @@ export class FilesService {
       // VERIFY UPLOADED FILE
       const fileUploaded = fs.existsSync(filePath);
       if (!fileUploaded) {
-        throw new InternalServerErrorException('There was an error uploading your file. Please try agein later.')
+        throw new InternalServerErrorException(
+          'There was an error uploading your file. Please try agein later.',
+        );
       }
 
       return { fileName, path: uploadDir };
-      
     } catch (error) {
       console.error('Error uploading file:', error);
       throw error;

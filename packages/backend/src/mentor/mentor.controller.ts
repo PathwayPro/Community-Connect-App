@@ -8,7 +8,10 @@ import {
   Param,
   Delete,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { MentorService } from './mentor.service';
 import { CreateMentorDto } from './dto/create-mentor.dto';
 import {
@@ -91,7 +94,8 @@ export class MentorController {
   }
 
   @Post()
-  @Roles('USER', 'MENTOR', 'ADMIN')
+  @Roles('USER')
+  @UseInterceptors(FileInterceptor('file'))
   @ApiBody({ type: CreateMentorDto })
   @ApiOkResponse({ type: Mentors })
   @ApiInternalServerErrorResponse({
@@ -100,7 +104,7 @@ export class MentorController {
   @ApiOperation({
     summary: 'Create new mentor application',
     description:
-      'Create new mentor application for the logged user. \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**',
+      'Create new mentor application for the logged user. Requires "form-data" request with an aditional field type "file" and name "file" with the resume (.doc, .pdf, .txt, up to 10MB) \n\n REQUIRED ROLES: **USER**',
   })
   @ApiBadRequestResponse({ description: 'Mentor already exists' })
   @ApiNotFoundResponse({ description: 'The associated user does not exists' })
@@ -108,15 +112,17 @@ export class MentorController {
   create(
     @GetUser() user: JwtPayload,
     @Body() createMentorDto: CreateMentorDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
     const createMentor: CreateMentorDto = {
-      max_mentees: createMentorDto.max_mentees,
+      profession: createMentorDto.profession,
+      experience_years: +createMentorDto.experience_years,
+      max_mentees: +createMentorDto.max_mentees,
       availability: createMentorDto.availability,
-      has_experience: createMentorDto.has_experience,
       experience_details: createMentorDto.experience_details,
       interests: createMentorDto.interests,
     };
-    return this.mentorService.create(user.sub, createMentor);
+    return this.mentorService.create(user.sub, createMentor, file);
   }
 
   @Patch()
