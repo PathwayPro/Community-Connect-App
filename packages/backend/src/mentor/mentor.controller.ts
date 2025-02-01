@@ -146,10 +146,12 @@ export class MentorController {
     @Body() updateMentorDto: UpdateMentorDto,
   ) {
     const updatedMentor: UpdateMentorDto = {
+      profession: updateMentorDto.profession,
+      experience_years: updateMentorDto.experience_years,
       max_mentees: updateMentorDto.max_mentees,
       availability: updateMentorDto.availability,
-      has_experience: updateMentorDto.has_experience,
       experience_details: updateMentorDto.experience_details,
+      interests: updateMentorDto.interests,
     };
     return this.mentorService.update(+user.sub, updatedMentor);
   }

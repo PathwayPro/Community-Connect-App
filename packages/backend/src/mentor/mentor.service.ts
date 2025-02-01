@@ -19,6 +19,53 @@ export class MentorService {
     private filesService: FilesService,
   ) {}
 
+  private async addUserInterestsFormatted(
+    user_id: number,
+    interests: string | number[],
+  ) {
+    try {
+      // TRANSFORM STRING OF INTEREST INTO ARRAY
+      const interestsToArray =
+        typeof interests === 'string' ? JSON.parse(interests) : interests;
+
+      // VALIDATE ONLY THE EXISTING ONES AND RETURN FORMATTED VALUES
+      const validInterestsIds = await this.prisma.interests
+        .findMany({
+          where: { id: { in: interestsToArray } },
+          select: { id: true },
+        })
+        .then((interests) =>
+          interests.map((interest) => ({
+            user_id: user_id,
+            interest_id: interest.id,
+          })),
+        );
+
+      // REMOVE PREVOIUS INTEREST FOR THE USER
+      await this.prisma.usersInterests.deleteMany({
+        where: { user_id: user_id },
+      });
+
+      // ADD VALIDATED INTERESTS TO THE USER
+      const userInterests = await this.prisma.usersInterests.createMany({
+        data: validInterestsIds,
+        skipDuplicates: true,
+      });
+
+      if (!userInterests || userInterests.count < 1) {
+        throw new InternalServerErrorException(
+          'There was an error saving your interests. Please try again later or edit your application.',
+        );
+      }
+
+      return validInterestsIds;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error saving interests: ' + error.message,
+      );
+    }
+  }
+
   async findAll(filters: FilterMentorDto = null) {
     // filters:
     //    max_mentees > X,
@@ -44,7 +91,18 @@ export class MentorService {
       const mentors = await this.prisma.mentors.findMany({
         where: appliedFilters,
         include: {
-          user: true,
+          user: {
+            select: {
+              first_name: true,
+              middle_name: true,
+              last_name: true,
+              interests: {
+                select: {
+                  interest: true,
+                },
+              },
+            },
+          },
         },
       });
       return mentors;
@@ -58,7 +116,18 @@ export class MentorService {
       const mentor = await this.prisma.mentors.findFirst({
         where: { id },
         include: {
-          user: true,
+          user: {
+            select: {
+              first_name: true,
+              middle_name: true,
+              last_name: true,
+              interests: {
+                select: {
+                  interest: true,
+                },
+              },
+            },
+          },
         },
       });
 
@@ -146,6 +215,15 @@ export class MentorService {
       // CREATE THE MENTOR APPLICATION
       const mentor = await this.prisma.mentors.create({
         data: mentorData,
+        include: {
+          user: {
+            select: {
+              first_name: true,
+              middle_name: true,
+              last_name: true,
+            },
+          },
+        },
       });
       if (!mentor) {
         throw new InternalServerErrorException(
@@ -154,38 +232,12 @@ export class MentorService {
       }
 
       // INTERESTS
-      // TRANSFORM STRING OF INTEREST INTO ARRAY
-      const interestsToArray = JSON.parse(createMentorDto.interests);
+      const mentorInterests = await this.addUserInterestsFormatted(
+        user_id,
+        createMentorDto.interests,
+      );
 
-      // VALIDATE ONLY THE EXISTING ONES AND RETURN FORMATTED VALUES
-      const validInterestsIds = await this.prisma.interests
-        .findMany({
-          where: { id: { in: interestsToArray } },
-          select: { id: true },
-        })
-        .then((interests) =>
-          interests.map((interest) => ({
-            user_id: user_id,
-            interest_id: interest.id,
-          })),
-        );
-      //.then(interests => interests.map(interest => interest.id));
-
-      console.log('INTERESTS: ', validInterestsIds);
-
-      // ADD VALIDATED INTERESTS TO THE USER
-      const userInterests = await this.prisma.usersInterests.createMany({
-        data: validInterestsIds,
-        skipDuplicates: true,
-      });
-
-      if (!userInterests || userInterests.count < 1) {
-        throw new InternalServerErrorException(
-          'There was an error saving your interests. Please try again later or edit your application.',
-        );
-      }
-
-      return mentor;
+      return { ...mentor, interests: mentorInterests };
     } catch (error) {
       if (error.code === 'P2002') {
         throw new BadRequestException('Mentor already exists');
@@ -202,11 +254,53 @@ export class MentorService {
       // Validate mentor existence
       const mentorToUpdate = await this.findOneByUserId(user_id);
 
+      // Update interests first to get them directly when updating mentor application
+      if (updateMentor.interests) {
+        const updatedInterests = await this.addUserInterestsFormatted(
+          user_id,
+          updateMentor.interests,
+        );
+        if (!updatedInterests) {
+          throw new InternalServerErrorException(
+            'There was an error updating your interests. Please try again later.',
+          );
+        }
+      }
+
+      // Update mentor application and select data to return
       if (mentorToUpdate) {
         // Update mentor information
+        const dataToUpdate: Prisma.mentorsUncheckedUpdateInput = {
+          profession: updateMentor.profession,
+          experience_years: updateMentor.experience_years,
+          max_mentees: updateMentor.max_mentees,
+          availability: updateMentor.availability,
+          experience_details: updateMentor.experience_details,
+        };
         const updatedMentor = await this.prisma.mentors.update({
           where: { id: mentorToUpdate.id },
-          data: updateMentor,
+          data: dataToUpdate,
+          select: {
+            max_mentees: true,
+            availability: true,
+            experience_details: true,
+            experience_years: true,
+            status: true,
+            profession: true,
+            resume: true,
+            user: {
+              select: {
+                first_name: true,
+                middle_name: true,
+                last_name: true,
+                interests: {
+                  select: {
+                    interest: true,
+                  },
+                },
+              },
+            },
+          },
         });
 
         return updatedMentor;
@@ -244,8 +338,17 @@ export class MentorService {
           const updatedUser = await this.prisma.users.update({
             where: { id: userId },
             data: { role: userRole },
-            include: {
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+              middle_name: true,
               mentor: true,
+              interests: {
+                select: {
+                  interest: true,
+                },
+              },
             },
           });
 

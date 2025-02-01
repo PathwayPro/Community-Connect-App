@@ -1,16 +1,24 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateMentorDto } from './create-mentor.dto';
-import {
-  IsBoolean,
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { mentors_status } from '@prisma/client';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateMentorDto extends PartialType(CreateMentorDto) {
+  @ApiPropertyOptional({ description: 'Profession, related to mentoring' })
+  @IsString()
+  @IsOptional()
+  profession?: string;
+
+  @ApiPropertyOptional({
+    description: 'Experience in years. "0" for no experience.',
+    example: 5,
+    minimum: 0,
+  })
+  @IsInt()
+  @IsOptional()
+  experience_years?: number;
+
   @ApiPropertyOptional({
     description: 'Maximum amount of mentees they can handle',
     example: 5,
@@ -30,20 +38,19 @@ export class UpdateMentorDto extends PartialType(CreateMentorDto) {
   availability?: string;
 
   @ApiPropertyOptional({
-    description:
-      'If the applicant has previous specific experience in mentoring others. Default: FALSE',
-    example: true,
-  })
-  @IsBoolean()
-  @IsOptional()
-  has_experience?: boolean = false;
-
-  @ApiPropertyOptional({
     description: 'Description of previous experience in mentoring others',
   })
   @IsString()
   @IsOptional()
   experience_details?: string;
+
+  @ApiPropertyOptional({
+    description: 'Array of interests IDs to match with mentees (String)',
+    example: '[1, 2, 3]',
+  })
+  @IsString()
+  @IsOptional()
+  interests?: string;
 }
 
 export class UpdateMentorStatusDto extends PartialType(CreateMentorDto) {
