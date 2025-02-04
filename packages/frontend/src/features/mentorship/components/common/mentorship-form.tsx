@@ -15,7 +15,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { MentorSchema, mentorSchema } from '../../lib/validations';
 import { Button } from '@/shared/components/ui/button';
 import { useMentorshipStore } from '../../store';
-import { MentorshipAgreementDialog } from './agreement-dialog';
+import { MentorshipAgreementDialog } from './modals/agreement-dialog';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserProfile } from '@/features/user-profile/types';
 import { useFetchProfile } from '@/features/user-profile/hooks/use-fetch-profile';

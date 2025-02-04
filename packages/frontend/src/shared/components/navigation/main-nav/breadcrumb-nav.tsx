@@ -14,8 +14,13 @@ const BreadcrumbNav = () => {
   const pathname = usePathname();
   const pathSegments = pathname.split('/').filter(Boolean);
 
+  // for the breadcrumb, we want to display the pathname in a readable format
+  // format the breadcrumb to separate words with a space and capitalize the first letter of each word if it has a dash
   const breadcrumbItems = pathSegments.map((path) => ({
-    label: path.charAt(0).toUpperCase() + path.slice(1).toLowerCase(),
+    label: path
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' '),
     path: path.toLowerCase()
   }));
 

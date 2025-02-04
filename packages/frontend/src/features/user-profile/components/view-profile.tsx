@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '../store';
 import { useFetchProfile } from '../hooks/use-fetch-profile';
+import { arrivalInCanadaOptions } from '@/shared/lib/constants/profile';
+import { formatDate } from 'date-fns';
 
 interface StatItemProps {
   label: string;
@@ -80,12 +82,19 @@ export const ViewProfile = () => {
       {
         label: 'Date of Birth',
         value: user?.dob
-          ? new Date(user.dob).toLocaleDateString()
+          ? formatDate(new Date(user.dob), 'MMMM d')
           : 'Not specified'
       },
       {
         label: 'Years in Canada',
-        value: `${user?.arrivalInCanada || 0} years`
+        value:
+          arrivalInCanadaOptions.find(
+            (option) => option.value === user?.arrivalInCanada
+          )?.label || 'Not specified'
+      },
+      {
+        label: 'Country of Origin',
+        value: user?.countryOfOrigin || 'Not specified'
       },
       { label: 'Languages', value: user?.languages || 'Not specified' }
     ],
@@ -96,7 +105,9 @@ export const ViewProfile = () => {
     ],
     professionalInfo: [
       { label: 'Profession', value: user?.profession || 'Not specified' },
-      { label: 'Experience', value: `${user?.experience || 0} years` }
+      { label: 'Company', value: user?.companyName || 'Not specified' },
+      { label: 'Experience', value: `${user?.experience || 0} years` },
+      { label: 'Skills', value: user?.skills?.join(', ') || 'Not specified' }
     ],
     links: [
       ...(user?.linkedinLink

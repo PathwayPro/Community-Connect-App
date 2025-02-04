@@ -1,17 +1,17 @@
-import { MentorshipIcons } from '../icons';
+import { IconFrame } from '@/shared/components/ui/icon-frame';
 import { SharedIcons } from '@/shared/components/icons';
 
-interface MentorshipCardProps {
+interface MentorCardProps {
   title: string;
   value: string;
-  icon: React.ReactNode;
+  icon: keyof typeof SharedIcons;
   trend: string;
   trendValue: string;
   trendText: string;
   trendUp: boolean;
 }
 
-const MentorshipCard = ({
+const MentorCard = ({
   title,
   value,
   icon,
@@ -19,8 +19,7 @@ const MentorshipCard = ({
   trendValue,
   trendText,
   trendUp
-}: MentorshipCardProps) => {
-  const MentorshipIcon = MentorshipIcons[icon as keyof typeof MentorshipIcons];
+}: MentorCardProps) => {
   const TrendIcon = SharedIcons[trend as keyof typeof SharedIcons];
 
   return (
@@ -43,11 +42,17 @@ const MentorshipCard = ({
         </div>
       </div>
       <div className="relative flex items-center gap-2">
-        <MentorshipIcon className="mr-11 h-20 w-20" />
+        <IconFrame
+          icon={icon as keyof typeof SharedIcons}
+          variant="circle"
+          size="lg"
+          className="mr-7 h-20 w-20 bg-secondary-200"
+          iconClassName="h-9 w-9"
+        />
         <SharedIcons.info className="absolute right-0 top-0 h-6 w-6 text-neutral-light-500" />
       </div>
     </div>
   );
 };
 
-export default MentorshipCard;
+export default MentorCard;

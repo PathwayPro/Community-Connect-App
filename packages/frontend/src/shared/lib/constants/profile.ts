@@ -29,3 +29,34 @@ export const provinceData = [
   { label: 'Saskatchewan (SK)', value: 'SK' },
   { label: 'Yukon (YT)', value: 'YT' }
 ];
+
+export const workStatusData = [
+  { label: 'Student', value: '1' },
+  { label: 'Employed', value: '2' },
+  { label: 'Self-Employed', value: '3' },
+  { label: 'Unemployed', value: '4' }
+];
+
+export const ageRangeData = [
+  { label: '18-25', value: '1' },
+  { label: '26-35', value: '2' },
+  { label: '36-45', value: '3' },
+  { label: '46-55', value: '4' },
+  { label: '56+', value: '5' }
+];
+
+// sample: will be replaced with data from backend endpoint
+export const skillsOptions = [
+  { label: 'React', value: '1' },
+  { label: 'Next.js', value: '2' },
+  { label: 'Typescript', value: '3' },
+  { label: 'Node.js', value: '4' },
+  { label: 'Express', value: '5' },
+  { label: 'MongoDB', value: '6' },
+  { label: 'PostgreSQL', value: '7' },
+  { label: 'Docker', value: '8' },
+  { label: 'Kubernetes', value: '9' },
+  { label: 'AWS', value: '10' },
+  { label: 'Azure', value: '11' },
+  { label: 'GCP', value: '12' }
+];

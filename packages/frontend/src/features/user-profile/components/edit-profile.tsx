@@ -1,3 +1,4 @@
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import Stepper from '@/shared/components/stepper/stepper';
 import {
   PersonalInfoForm,
@@ -11,12 +12,10 @@ import {
   CardContent,
   CardTitle
 } from '@/shared/components/ui/card';
-import { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { UserProfileFormData, userProfileSchema } from '../lib/validations';
-import React from 'react';
 import { userApi } from '../api/user-api';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '../store';
@@ -25,6 +24,7 @@ import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 
 function getStepContent(step: number) {
+  console.log('STEP HERE', step);
   switch (step) {
     case 1:
       return <PersonalInfoForm />;
@@ -49,13 +49,13 @@ export const EditProfile = () => {
   const methods = useForm<UserProfileFormData>({
     mode: 'onChange',
     resolver: zodResolver(userProfileSchema),
-    values: React.useMemo(
+    values: useMemo(
       () => ({
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
         province: user?.province || '',
         city: user?.city || '',
-        dob: user?.dob ? new Date(user.dob) : new Date(),
+        dob: user?.dob || '',
         languages: user?.languages || '',
         profession: user?.profession || '',
         experience: user?.experience || '',
@@ -68,14 +68,17 @@ export const EditProfile = () => {
         twitterLink: user?.twitterLink || '',
         portfolioLink: user?.portfolioLink || '',
         otherLinks: user?.otherLinks || '',
-        additionalLinks: user?.additionalLinks || []
+        additionalLinks: user?.additionalLinks || [],
+        workStatus: user?.workStatus || '',
+        companyName: user?.companyName || '',
+        countryOfOrigin: user?.countryOfOrigin || '',
+        ageRange: user?.ageRange || ''
       }),
       [user]
     )
   });
 
-  // Add form state logging for debugging
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('Form Values:', methods.getValues());
     console.log('Form Errors:', methods.formState.errors);
   }, [methods]);
@@ -85,55 +88,47 @@ export const EditProfile = () => {
     formState: { isSubmitting }
   } = methods;
 
-  const handleNext = React.useCallback(async () => {
-    const fieldsToValidate = {
-      1: ['firstName', 'lastName', 'province', 'city', 'dob'],
-      2: ['languages', 'profession', 'experience'],
-      3: ['pictureUploadLink'],
-      4: ['bio']
-    }[activeStep];
+  const handleNext = async () => {
+    // const fieldsToValidate = {
+    //   1: [
+    //     'firstName',
+    //     'lastName',
+    //     'province',
+    //     'dob',
+    //     'ageRange',
+    //     'countryOfOrigin'
+    //   ],
+    //   2: ['languages', 'profession', 'experience', 'skills'],
+    //   3: ['pictureUploadLink'],
+    //   4: ['bio']
+    // }[activeStep];
 
-    const isValid = await methods.trigger(
-      fieldsToValidate as (keyof UserProfileFormData)[]
-    );
+    // const isValid = await methods.trigger(
+    //   fieldsToValidate as (keyof UserProfileFormData)[]
+    // );
 
-    if (isValid) {
-      setActiveStep((prevStep) => prevStep + 1);
-    }
-  }, [activeStep, methods]);
+    // if (isValid) {
+    setActiveStep((prevStep) => prevStep + 1);
+    // }
+  };
 
-  const handleBack = React.useCallback(() => {
+  const handleBack = () => {
     setActiveStep((prevStep) => prevStep - 1);
-  }, []);
+  };
 
   const onSubmit = async (data: UserProfileFormData) => {
-    // Only proceed if we're on the last step
     if (activeStep !== 4) {
       handleNext();
       return;
     }
 
-    // Ensure type conversion before submission
-    const modifiedData = {
-      ...data,
-      dob: data.dob ? new Date(data.dob) : undefined
-    };
-
     try {
-      console.log('Submitting data:', modifiedData);
-
-      const response = await userApi.updateUserProfile(
-        modifiedData,
-        Number(user?.id)
-      );
+      console.log('Submitting data:', data);
+      const response = await userApi.updateUserProfile(data, Number(user?.id));
 
       if (response.success !== true) {
-        console.error('Server response:', response);
         throw new Error(response.message || 'Failed to update profile');
       }
-
-      const result = response.data;
-      console.log('Submit success:', result);
 
       showAlert({
         title: 'Profile Updated',
@@ -183,7 +178,7 @@ export const EditProfile = () => {
           <h4 className="font-normal text-neutral-dark-600">
             {activeStep === 1 && 'Personal Information'}
             {activeStep === 2 && 'Social Links'}
-            {activeStep === 3 && 'Resume Upload'}
+            {activeStep === 3 && 'Professional Information'}
             {activeStep === 4 && 'Goals'}
           </h4>
           <Stepper activeStep={activeStep} totalSteps={4} />
@@ -196,6 +191,7 @@ export const EditProfile = () => {
             <div className="flex w-full justify-between pt-5">
               <IconButton
                 className="w-[180px]"
+                type="button"
                 leftIcon="arrowLeft"
                 onClick={handleBack}
                 variant="outline"

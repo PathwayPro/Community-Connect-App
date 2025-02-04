@@ -9,7 +9,8 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   email?: string;
-  dob?: Date;
+  dob?: string;
+  ageRange?: string;
   showDob?: boolean;
   arrivalInCanada?: string;
   goalId?: string;
@@ -28,6 +29,10 @@ export interface UserProfile {
   otherLinks?: string;
   additionalLinks?: string[];
   languages?: string;
+  countryOfOrigin?: string;
+  workStatus?: string;
+  companyName?: string;
+  skills?: string[];
 }
 
 export interface UserResponse {

@@ -1,10 +1,11 @@
-import MentorshipDashboard from '@/features/mentorship/components/mentorship-dashboard';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import MentorForm from '@/features/mentorship/components/mentor-form';
 import MenteeForm from '@/features/mentorship/components/mentee-form';
 import MentorshipApply from '@/features/mentorship/components/mentorship-apply';
 import { MentorshipWaitlist } from '@/features/mentorship/components/mentorship-waitlist';
+import MentorDashboard from '@/features/mentorship/components/mentor-dashboard';
+import MenteeDashboard from '@/features/mentorship/components/mentee-dashboard';
 
 interface MentorshipPageProps {
   params: {
@@ -25,8 +26,11 @@ export default function MentorshipPage({ params }: MentorshipPageProps) {
 
     // Handle first level routes
     switch (params.slug[0]) {
-      case 'dashboard':
-        return <MentorshipDashboard />;
+      case 'mentor-dashboard':
+        return <MentorDashboard />;
+
+      case 'mentee-dashboard':
+        return <MenteeDashboard />;
 
       case 'mentor':
         return <MentorForm />;
