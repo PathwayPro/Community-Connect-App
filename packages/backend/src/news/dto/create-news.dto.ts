@@ -1,5 +1,13 @@
-import { IsString, IsInt, IsBoolean, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsUrl,
+  IsEnum,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { NewsType } from '@prisma/client';
+import { Transform, Type } from 'class-transformer';
 
 export class CreateNewsDto {
   @ApiProperty({
@@ -9,28 +17,23 @@ export class CreateNewsDto {
   @IsString()
   title: string;
 
-  @ApiPropertyOptional({
-    description: 'Subitle for the news',
-    example: 'Subitle for the news',
-  })
-  @IsString()
-  @IsOptional()
-  subtitle?: string;
-
-  @ApiPropertyOptional({
-    description: 'Keywords or phrases sepparated by ","',
-    example: 'keyword1,keyword two, etc',
-  })
-  @IsString()
-  @IsOptional()
-  keywords?: string;
-
   @ApiProperty({
     description: 'News full content',
     example: 'News full content',
   })
   @IsString()
-  content: string;
+  details: string;
+
+  @ApiProperty({
+    description: 'Type of news [FEATURED_POST | EDITORS_PICK]',
+    example: 'EDITORS_PICK',
+  })
+  @IsEnum(NewsType)
+  type: NewsType;
+
+  @IsString()
+  @IsUrl()
+  link: string;
 
   @ApiPropertyOptional({
     description:
@@ -39,9 +42,18 @@ export class CreateNewsDto {
   })
   @IsBoolean()
   @IsOptional()
+  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.toLowerCase() === 'true';
+    }
+    return value;
+  })
   published?: boolean = false;
 
-  @IsInt()
+  @ApiProperty({
+    description: 'Uploaded file. Will use validation for news (OPTIONAL)',
+  })
   @IsOptional()
-  user_id?: number;
+  file?: Express.Multer.File;
 }

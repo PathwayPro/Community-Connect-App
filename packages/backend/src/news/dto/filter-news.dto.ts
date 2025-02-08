@@ -18,28 +18,12 @@ export class FilterNewsDto {
   title?: string;
 
   @ApiPropertyOptional({
-    description: 'Subitle containing this word / phrase',
-    example: 'LIKE "%search%"',
-  })
-  @IsString()
-  @IsOptional()
-  subtitle?: string;
-
-  @ApiPropertyOptional({
-    description: 'Keyword list containing this word / phrase',
-    example: 'LIKE "%search%"',
-  })
-  @IsString()
-  @IsOptional()
-  keywords?: string;
-
-  @ApiPropertyOptional({
     description: 'Content containing this word / phrase',
     example: 'LIKE "%search%"',
   })
   @IsString()
   @IsOptional()
-  content?: string;
+  details?: string;
 
   @ApiPropertyOptional({
     description: 'Published or hidden news (only ADMIN roles). Default: true',

@@ -5,7 +5,10 @@ import {
   IsString,
   IsInt,
   IsNotEmpty,
+  IsEnum,
+  IsUrl,
 } from 'class-validator';
+import { NewsType } from '@prisma/client';
 
 export class News {
   @ApiProperty()
@@ -14,23 +17,26 @@ export class News {
 
   @ApiProperty()
   @IsString()
+  @IsOptional()
+  image?: string;
+
+  @ApiProperty()
+  @IsString()
   @IsNotEmpty()
   title: string;
 
   @ApiProperty()
-  @IsOptional()
-  @IsString()
-  subtitle?: string;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  keywords?: string;
-
-  @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  content: string;
+  details: string;
+
+  @ApiProperty()
+  @IsEnum(NewsType)
+  type: NewsType;
+
+  @IsString()
+  @IsUrl()
+  link: string;
 
   @ApiProperty()
   @IsBoolean()

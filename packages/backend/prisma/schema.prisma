@@ -225,12 +225,18 @@ model EventsInvitations {
 }
 
 // NEWS
+enum NewsType {
+  FEATURED_POST
+  EDITORS_PICK
+}
+
 model News {
   id         Int      @id @default(autoincrement())
   title      String
-  subtitle   String?
-  keywords   String?
-  content    String
+  details    String
+  type       NewsType
+  link       String
+  image      String?
   published  Boolean  @default(false)
   created_at DateTime @default(now())
   updated_at DateTime @default(now())

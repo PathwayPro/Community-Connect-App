@@ -8,6 +8,8 @@ import {
   Delete,
   UseGuards,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/create-news.dto';
@@ -28,6 +30,7 @@ import {
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
 import { News } from './entities/news.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('News')
@@ -37,6 +40,7 @@ export class NewsController {
 
   @Roles('ADMIN')
   @Post()
+  @UseInterceptors(FileInterceptor('file'))
   @ApiBody({ type: CreateNewsDto })
   @ApiCreatedResponse({ type: News })
   @ApiInternalServerErrorResponse({
@@ -45,19 +49,26 @@ export class NewsController {
   @ApiOperation({
     summary: 'Create news record',
     description:
-      'Creates news or throws Internal Server Error Exception. \n\n REQUIRED ROLES: **ADMIN**',
+      'Creates news or throws Internal Server Error Exception. \n\n Using form-data for images (file) \n\n REQUIRED ROLES: **ADMIN**',
   })
   @ApiBearerAuth()
-  create(@GetUser() user: JwtPayload, @Body() createNewsDto: CreateNewsDto) {
+  create(
+    @GetUser() user: JwtPayload,
+    @Body() createNewsDto: CreateNewsDto,
+    @UploadedFile() file: Express.Multer.File | null,
+  ) {
     const newNews: CreateNewsDto = {
       title: createNewsDto.title,
-      subtitle: createNewsDto.subtitle,
-      keywords: createNewsDto.keywords,
-      content: createNewsDto.content,
-      published: createNewsDto.published,
-      user_id: user.sub,
+      details: createNewsDto.details,
+      type: createNewsDto.type,
+      link: createNewsDto.link,
+      published:
+        typeof createNewsDto.published === 'string'
+          ? createNewsDto.published === 'true'
+          : createNewsDto.published,
     };
-    return this.newsService.create(user.sub, newNews);
+    console.log('CREATE NEWS:', newNews);
+    return this.newsService.create(user.sub, newNews, file);
   }
 
   @Roles('ADMIN')
@@ -146,6 +157,7 @@ export class NewsController {
 
   @Roles('ADMIN')
   @Patch(':id')
+  @UseInterceptors(FileInterceptor('file'))
   @ApiBody({ type: UpdateNewsDto })
   @ApiOkResponse({ type: News })
   @ApiNotFoundResponse({ description: 'There is no News with ID #[:id]' })
@@ -154,18 +166,26 @@ export class NewsController {
   })
   @ApiOperation({
     summary: 'Update news (public and private)',
-    description: 'Update news with ID. \n\n REQUIRED ROLES: **ADMIN**',
+    description:
+      'Update news with ID. \n\n Using form-data for images (file) \n\n REQUIRED ROLES: **ADMIN**',
   })
   @ApiBearerAuth()
-  update(@Param('id') id: string, @Body() updateNewsDto: UpdateNewsDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateNewsDto: UpdateNewsDto,
+    @UploadedFile() file: Express.Multer.File | null,
+  ) {
     const updateNews: UpdateNewsDto = {
       title: updateNewsDto.title,
-      subtitle: updateNewsDto.subtitle,
-      keywords: updateNewsDto.keywords,
-      content: updateNewsDto.content,
-      published: updateNewsDto.published,
+      details: updateNewsDto.details,
+      type: updateNewsDto.type,
+      link: updateNewsDto.link,
+      published:
+        typeof updateNewsDto.published === 'string'
+          ? updateNewsDto.published === 'true'
+          : updateNewsDto.published,
     };
-    return this.newsService.update(+id, updateNews);
+    return this.newsService.update(+id, updateNews, file);
   }
 
   @Roles('ADMIN')

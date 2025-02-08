@@ -8,10 +8,15 @@ import { UpdateNewsDto } from './dto/update-news.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import { FilterNewsDto } from './dto/filter-news.dto';
 import { Prisma } from '@prisma/client';
+import { FilesService } from 'src/files/files.service';
+import { FileValidationEnum } from 'src/files/util/files-validation.enum';
 
 @Injectable()
 export class NewsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private filesService: FilesService,
+  ) {}
 
   getFormattedFilters(filters: FilterNewsDto): Prisma.NewsWhereInput {
     const formattedFilters: Prisma.NewsWhereInput = {};
@@ -22,21 +27,9 @@ export class NewsService {
         mode: 'insensitive',
       };
     }
-    if (filters?.subtitle) {
-      formattedFilters.subtitle = {
-        contains: filters.subtitle,
-        mode: 'insensitive',
-      };
-    }
-    if (filters?.content) {
-      formattedFilters.content = {
-        contains: filters.content,
-        mode: 'insensitive',
-      };
-    }
-    if (filters?.keywords) {
-      formattedFilters.keywords = {
-        contains: filters.keywords,
+    if (filters?.details) {
+      formattedFilters.details = {
+        contains: filters.details,
         mode: 'insensitive',
       };
     }
@@ -67,13 +60,36 @@ export class NewsService {
     return formattedFilters;
   }
 
-  async create(user_id: number, createNewsDto: CreateNewsDto) {
+  async uploadImage(file: Express.Multer.File) {
+    // UPLOAD IMAGE TO GET THE LINK
+    const imageLink = await this.filesService.upload(
+      FileValidationEnum.NEWS,
+      file,
+    );
+    if (!imageLink) {
+      throw new InternalServerErrorException(
+        'There was a problem uploading the image. Please try again later',
+      );
+    }
+    return imageLink;
+  }
+
+  async create(
+    user_id: number,
+    createNewsDto: CreateNewsDto,
+    file: Express.Multer.File,
+  ) {
     try {
+      const image = file ? await this.uploadImage(file) : null;
+
       const data = {
         ...createNewsDto,
         created_at: new Date(),
         updated_at: new Date(),
-        user_id,
+        image: image ? image.path + '/' + image.fileName : null,
+        user: {
+          connect: { id: user_id },
+        },
       };
 
       const newNews = await this.prisma.news.create({ data });
@@ -142,7 +158,11 @@ export class NewsService {
     }
   }
 
-  async update(id: number, updateNewsDto: UpdateNewsDto) {
+  async update(
+    id: number,
+    updateNewsDto: UpdateNewsDto,
+    file: Express.Multer.File,
+  ) {
     try {
       // Validate News exist
       const newsToUpdate = await this.findOne(id);
@@ -150,10 +170,14 @@ export class NewsService {
         throw new NotFoundException(`There is no News with ID #${id}`);
       }
 
+      // Get image link if there is one
+      const image = file ? await this.uploadImage(file) : null;
+
       // Update news information
       const data = {
         ...updateNewsDto,
         updated_at: new Date(),
+        image: image ? image.path + '/' + image.fileName : null,
       };
 
       const updatedNews = await this.prisma.news.update({
