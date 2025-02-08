@@ -8,7 +8,6 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Decimal } from '@prisma/client/runtime/library'; // Import Decimal
 /*
 import { EventsDates } from './events-dates.entity'; // Import EventsDates entity
 import { eventsSpeakers } from './events-speakers.entity'; // Import eventsSpeakers entity
@@ -26,10 +25,6 @@ export class Events {
   @IsString()
   title: string;
 
-  @IsOptional()
-  @IsString()
-  subtitle: string | null;
-
   @IsString()
   description: string;
 
@@ -45,8 +40,8 @@ export class Events {
   @IsString()
   image: string | null;
 
-  @Type(() => Decimal) // Transform to Decimal
-  price: Decimal;
+  @IsBoolean()
+  is_free: boolean;
 
   @IsEnum(EventsTypes)
   type: EventsTypes;
@@ -64,6 +59,14 @@ export class Events {
   @IsDate()
   @Type(() => Date)
   updated_at: Date;
+
+  @IsDate()
+  @Type(() => Date)
+  start_date: Date;
+
+  @IsDate()
+  @Type(() => Date)
+  end_date: Date;
 
   @ValidateNested()
   @Type(() => EventsCategory)

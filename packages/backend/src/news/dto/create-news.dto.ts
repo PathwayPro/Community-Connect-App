@@ -31,6 +31,7 @@ export class CreateNewsDto {
   @IsEnum(NewsType)
   type: NewsType;
 
+  @ApiProperty({ description: 'Source link', example: 'https://news.com' })
   @IsString()
   @IsUrl()
   link: string;
