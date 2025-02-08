@@ -1,20 +1,34 @@
 'use client';
 
 import { Button } from '@/shared/components/ui/button';
-import { PlusCircleIcon } from 'lucide-react';
+import { PlusCircleIcon, UserRoundPlus } from 'lucide-react';
 import { useUserStore } from '@/features/user-profile/store';
-import { useMentorshipStore } from '@/features/mentorship/store';
 import { MentorshipSection } from './common/mentorship-section';
 import { MentorshipIcons } from './icons';
 import { DataTable } from './table/data-table';
 import { sessionsColumns } from './table/sessions-columns';
 import { menteesData } from './table/data';
 import { menteesColumns } from './table/mentees-column';
-import { ProfileDialog } from './common/modals/profile-dialog';
 import MentorCard from './common/mentor-card';
+import { useState } from 'react';
+import { MentorModal } from './common/modals/mentor-modal';
+// import { useMentorshipStore } from '@/features/mentorship/store';
+
 const MentorDashboard = () => {
   const { user } = useUserStore();
-  const { mentor } = useMentorshipStore();
+  // const { mentor } = useMentorshipStore();
+  const [isMentorModalOpen, setIsMentorModalOpen] = useState(false);
+
+  const mentorData = {
+    id: user?.id || 0,
+    firstName: user?.firstName,
+    lastName: user?.lastName,
+    profession: user?.profession,
+    company: user?.companyName,
+    expertise: user?.profession,
+    email: user?.email,
+    avatarUrl: '/profile/profile.png'
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -25,7 +39,19 @@ const MentorDashboard = () => {
             <Button className="h-10">
               <PlusCircleIcon className="h-4 w-4" /> Create a Session
             </Button>
-            <ProfileDialog mentor={mentor} user={user} />
+            <Button
+              variant="outline"
+              className="h-10 w-fit"
+              onClick={() => setIsMentorModalOpen(true)}
+            >
+              <UserRoundPlus className="h-4 w-4" /> View Profile
+            </Button>
+            <MentorModal
+              isOpen={isMentorModalOpen}
+              onClose={() => setIsMentorModalOpen(false)}
+              mentorData={mentorData}
+              setIsMentorModalOpen={setIsMentorModalOpen}
+            />
           </div>
         </MentorshipSection.Header>
         <MentorshipSection.Content>

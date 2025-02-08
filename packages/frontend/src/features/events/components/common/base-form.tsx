@@ -4,17 +4,17 @@ import { FormTextarea } from '@/shared/components/form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
 import React from 'react';
-import { EventFormValues, EventsTypes } from '../../lib/validation';
+import { EventFormValues, EventTicketTypes } from '../../lib/validation';
 import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
 
 const ticketTypeOptions = [
   {
-    value: EventsTypes.PUBLIC,
-    label: 'Public Event'
+    value: EventTicketTypes.FREE,
+    label: 'Free Event'
   },
   {
-    value: EventsTypes.PRIVATE,
-    label: 'Private Event'
+    value: EventTicketTypes.PAID,
+    label: 'Paid Event'
   }
 ];
 
@@ -87,8 +87,8 @@ export const BaseForm = () => {
           name="ticket_type"
           label="Ticket Type"
           options={ticketTypeOptions}
-          value={watch('type')}
-          onChange={(value) => setValue('type', value)}
+          value={watch('ticket_type')}
+          onChange={(value) => setValue('ticket_type', value)}
           required
         />
       </div>

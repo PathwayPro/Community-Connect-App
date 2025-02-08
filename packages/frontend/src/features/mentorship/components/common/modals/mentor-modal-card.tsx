@@ -21,7 +21,7 @@ export const MentorModalCard = ({
     <div className="relative flex items-center overflow-hidden rounded-2xl border border-neutral-light-500">
       <div className="absolute left-0 top-0 h-full w-[72px] shrink-0 bg-primary-200" />
       <div className="flex flex-1 items-center gap-4 bg-white py-5 pl-6 pr-5">
-        <Avatar className="h-[86px] w-[86px]">
+        <Avatar className="h-[86px] w-[86px] bg-warning-500">
           <AvatarImage
             src={mentor.avatarUrl}
             alt="Mentor avatar"
@@ -65,7 +65,7 @@ export const MentorModalCardExpanded = ({ mentor }: MentorModalCardProps) => {
     <div className="relative flex flex-col items-center gap-4 rounded-2xl border border-neutral-light-500 bg-white p-6">
       <div className="absolute top-0 h-[70px] w-full rounded-t-2xl bg-primary-200" />
 
-      <Avatar className="h-20 w-20">
+      <Avatar className="h-20 w-20 bg-warning-500">
         <AvatarImage
           src={mentor.avatarUrl}
           alt="Mentor avatar"

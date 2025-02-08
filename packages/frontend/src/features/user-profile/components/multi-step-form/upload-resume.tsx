@@ -65,13 +65,13 @@ export const UploadResume = () => {
             />
           </div>
         </div>
-        <div className="my-2 flex w-full items-center gap-4 justify-end">
+        <div className="my-2 flex w-full items-center justify-end gap-4">
           <p>Actively Searching</p>
           <Switch name="activelySearching" />
         </div>
         <FormMultiSelect
           name="skills"
-          label="Skills"
+          label="Skills & Proficiencies"
           options={skillsOptions}
           placeholder="Select your skills"
           maxCount={5}

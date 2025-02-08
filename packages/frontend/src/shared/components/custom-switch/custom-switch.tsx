@@ -57,18 +57,10 @@ export function CustomSwitch<T>({
         <div
           className={cn(
             'absolute h-10 rounded-xl bg-primary transition-all duration-200',
-            'border-neutral-light-100',
-            activeIndex === 0 && 'left-1',
-            activeIndex === options.length - 1 && 'right-1'
+            'border-neutral-light-100'
           )}
           style={{
-            left:
-              activeIndex === 0
-                ? undefined
-                : activeIndex === options.length - 1
-                  ? undefined
-                  : `${(activeIndex * 100) / options.length}%`,
-            right: activeIndex === options.length - 1 ? undefined : undefined,
+            left: `${(activeIndex * 100) / options.length}%`,
             width: `${100 / options.length}%`
           }}
         />

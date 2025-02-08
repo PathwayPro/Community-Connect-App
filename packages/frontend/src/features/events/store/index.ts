@@ -7,6 +7,8 @@ interface Event {
   description: string;
   date: string;
   location: string;
+  ticket_type: string;
+  type: string;
   // Add other event properties as needed
 }
 

@@ -38,11 +38,12 @@ export const workStatusData = [
 ];
 
 export const ageRangeData = [
-  { label: '18-25', value: '1' },
-  { label: '26-35', value: '2' },
-  { label: '36-45', value: '3' },
-  { label: '46-55', value: '4' },
-  { label: '56+', value: '5' }
+  { label: '18-25 years', value: '1' },
+  { label: '26-35 years', value: '2' },
+  { label: '36-45 years', value: '3' },
+  { label: '46-55 years', value: '4' },
+  { label: '56-65 years', value: '5' },
+  { label: '66+ years', value: '6' }
 ];
 
 // sample: will be replaced with data from backend endpoint

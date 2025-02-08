@@ -274,7 +274,7 @@ const MenteeDashboard = () => {
             </MentorshipSection.Header>
 
             <MentorshipSection.Content>
-              <NoteEditor />
+              <NoteEditor onSubmit={() => {}} />
             </MentorshipSection.Content>
           </div>
         </div>

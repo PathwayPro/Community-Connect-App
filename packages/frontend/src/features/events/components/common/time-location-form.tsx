@@ -2,15 +2,15 @@ import { FormInput } from '@/shared/components/form';
 import React from 'react';
 import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
 import { useFormContext } from 'react-hook-form';
-
-const eventTimeOptions = [
+import { EventsTypes } from '../../lib/validation';
+const eventTypeOptions = [
   {
-    value: 'single',
-    label: 'Single Event'
+    value: EventsTypes.PUBLIC,
+    label: 'Public Event'
   },
   {
-    value: 'recurring',
-    label: 'Recurring Event'
+    value: EventsTypes.PRIVATE,
+    label: 'Private Event'
   }
 ];
 export const TimeLocationForm = () => {
@@ -18,14 +18,6 @@ export const TimeLocationForm = () => {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="flex w-full justify-center gap-4">
-        <CustomSwitch
-          name="event_time"
-          options={eventTimeOptions}
-          value={watch('type')}
-          onChange={(value) => setValue('type', value)}
-        />
-      </div>
       <div className="flex w-full gap-4">
         <FormInput
           name="date"
@@ -51,6 +43,17 @@ export const TimeLocationForm = () => {
           name="end_time"
           label="Event End Time"
           placeholder="00:00 AM"
+        />
+      </div>
+
+      <div className="flex w-full justify-start gap-4 pt-4">
+        <CustomSwitch
+          name="type"
+          label="Event Type"
+          options={eventTypeOptions}
+          value={watch('type')}
+          onChange={(value) => setValue('type', value)}
+          required
         />
       </div>
 

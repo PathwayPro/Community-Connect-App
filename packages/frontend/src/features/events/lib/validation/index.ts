@@ -5,6 +5,11 @@ export const EventsTypes = {
   PRIVATE: 'PRIVATE'
 } as const;
 
+export const EventTicketTypes = {
+  PAID: 'PAID',
+  FREE: 'FREE'
+} as const;
+
 export const eventFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   subtitle: z.string().optional(),
@@ -15,8 +20,10 @@ export const eventFormSchema = z.object({
   image: z.string().optional(),
   price: z.number().min(0).optional().default(0),
   type: z.enum(['PUBLIC', 'PRIVATE'] as const).default('PUBLIC'),
+  ticket_type: z.enum(['PAID', 'FREE'] as const).default('FREE'),
   requires_confirmation: z.boolean().default(false),
-  accept_subscriptions: z.boolean().default(true)
+  accept_subscriptions: z.boolean().default(true),
+  date: z.date().default(new Date())
 });
 
 export type EventFormValues = z.infer<typeof eventFormSchema>;

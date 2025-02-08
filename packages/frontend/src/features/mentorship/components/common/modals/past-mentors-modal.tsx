@@ -12,14 +12,14 @@ import { MentorModalCard, MentorModalCardExpanded } from './mentor-modal-card';
 
 // temporary mentor interface
 export interface Mentor {
-  id: number;
-  firstName: string;
-  lastName: string;
-  profession: string;
-  company: string;
-  expertise: string;
-  email: string;
-  avatarUrl: string;
+  id?: number;
+  firstName?: string;
+  lastName?: string;
+  profession?: string;
+  company?: string;
+  expertise?: string;
+  email?: string;
+  avatarUrl?: string;
 }
 
 interface PastMentorsModalProps {
@@ -45,8 +45,12 @@ export function PastMentorsModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsPastMentorsOpen}>
-      <DialogContent className="w-[600px] max-w-[800px]">
+    <Dialog
+      open={isOpen}
+      onOpenChange={setIsPastMentorsOpen}
+      // className="w-[600px] max-w-[800px] rounded-3xl"
+    >
+      <DialogContent className="w-[552px] max-w-[552px] rounded-3xl">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-semibold">
             {selectedMentor ? 'Mentor Profile' : 'Past Mentors'}

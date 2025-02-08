@@ -38,18 +38,16 @@ const defaultEventValues = (): EventFormValues => ({
   image: '',
   price: 0,
   type: 'PUBLIC',
+  ticket_type: 'FREE',
   requires_confirmation: false,
-  accept_subscriptions: true
+  accept_subscriptions: true,
+  date: new Date()
 });
 
 export const EventForm = () => {
   const router = useRouter();
   const { createEvent, fetchEvents } = useEventStore();
   const { showAlert } = useAlertDialog();
-
-  const [events, setEvents] = React.useState<
-    Array<{ id: number; name: string }>
-  >([]);
 
   const [activeStep, setActiveStep] = React.useState(1);
 
