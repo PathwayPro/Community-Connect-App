@@ -106,17 +106,18 @@ enum mentors_status {
 model Events {
   id                    Int                   @id @default(autoincrement())
   title                 String
-  subtitle              String?
   description           String
   location              String?
   link                  String?
   image                 String?
-  price                 Decimal               @default(0) @db.Decimal(10, 2)
+  is_free               Boolean               @default(true)
   type                  EventsTypes           @default(PUBLIC)
   requires_confirmation Boolean               @default(false) // IF SUBSCRIPTIONS ARE ACCEPTED DIRECTLY OR IF THEY REQUIRE AN APPROVAL AFTER REVIEW
   accept_subscriptions  Boolean               @default(true) // IF USERS CAN STILL SUBSCRIBE TO THE EVENT OR IS FULL
   created_at            DateTime              @default(now())
   updated_at            DateTime              @default(now())
+  start_date            DateTime              @default(now())
+  end_date              DateTime              @default(now())
   // RELATIONSHIPS
   category              EventsCategories      @relation(fields: [category_id], references: [id])
   category_id           Int
