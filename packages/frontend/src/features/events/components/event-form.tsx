@@ -71,7 +71,12 @@ export const EventForm = () => {
 
   const onSubmit = async (data: EventFormValues) => {
     try {
-      await createEvent(data);
+      await createEvent({
+        ...data,
+        date: data.date.toISOString(),
+        location: data.location || '',
+        link: data.link || ''
+      });
 
       showAlert({
         type: 'success',

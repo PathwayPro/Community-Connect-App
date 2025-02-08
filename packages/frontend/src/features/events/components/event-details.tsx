@@ -13,8 +13,7 @@ import {
   Heart,
   Globe,
   Lock,
-  Users,
-  PlusCircle
+  Users
 } from 'lucide-react';
 import Image from 'next/image';
 import { sampleEvents } from './event-list';
@@ -33,7 +32,6 @@ interface EventDetailsProps {
 
 export const EventDetails = ({
   eventId,
-  onBack,
   onShare,
   onFavorite,
   onRegister,

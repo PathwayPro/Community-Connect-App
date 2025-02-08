@@ -9,6 +9,7 @@ interface Event {
   location: string;
   ticket_type: string;
   type: string;
+  link: string;
   // Add other event properties as needed
 }
 
