@@ -4,6 +4,7 @@ import { EventsController } from './events.controller';
 import { PrismaService } from 'src/database';
 import { FilesService } from 'src/files/files.service';
 import { EventsCategoriesService } from 'src/events_categories/events_categories.service';
+import { EventsManagersService } from 'src/events_managers/events_managers.service';
 
 @Module({
   controllers: [EventsController],
@@ -12,6 +13,7 @@ import { EventsCategoriesService } from 'src/events_categories/events_categories
     EventsService,
     EventsCategoriesService,
     FilesService,
+    EventsManagersService,
   ],
 })
 export class EventsModule {}

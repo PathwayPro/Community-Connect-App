@@ -11,6 +11,7 @@ import { Prisma } from '@prisma/client';
 import { FilterEventDto } from './dto/filter-event.dto';
 import { EventsCategoriesService } from 'src/events_categories/events_categories.service';
 import { FilesService } from 'src/files/files.service';
+import { EventsManagersService } from 'src/events_managers/events_managers.service';
 import { FileValidationEnum } from 'src/files/util/files-validation.enum';
 import { EventsCategory } from 'src/events_categories/entities/events_category.entity';
 import { UploadedFile } from 'src/files/util/uploaded-file.interface';
@@ -22,6 +23,7 @@ export class EventsService {
     private prisma: PrismaService,
     private categories: EventsCategoriesService,
     private filesService: FilesService,
+    private eventsManagersService: EventsManagersService,
   ) {}
 
   getFormattedFilters(filters: FilterEventDto): Prisma.EventsWhereInput {
@@ -142,10 +144,19 @@ export class EventsService {
         data: eventData,
       });
 
-      /* * * * * * * * * * * * * * * * * * */
-      /* * * * * * * * TO-DO * * * * * * * */
-      /* * * * * * * * * * * * * * * * * * */
-      // AGREGAR MANAGERS (USER ID)
+      // ADD USER AS EVENT MANAGER
+      if (event) {
+        const manager = await this.eventsManagersService.create({
+          user_id: user.sub,
+          event_id: event.id,
+          is_speaker: false,
+        });
+        if (!manager) {
+          throw new InternalServerErrorException(
+            'There was a problem setting the user as manager for this event. Please try again later or update this event.',
+          );
+        }
+      }
 
       return event;
     } catch (error) {
