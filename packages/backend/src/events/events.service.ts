@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -217,6 +218,17 @@ export class EventsService {
         throw new NotFoundException(`Event with ID: ${event_id} not found.`);
       }
 
+      // VALIDATE IF THE USER IS ADMIN OR MANAGER
+      const allowedToUpdate =
+        user.roles === 'ADMIN'
+          ? true
+          : await this.eventsManagersService.isEventManager(user.sub, event_id);
+      if (!allowedToUpdate) {
+        throw new UnauthorizedException(
+          'You are not authorized to edit this event.',
+        );
+      }
+
       // VALIDATE CATGORY OR LEAVE IT NULL
       const category = updateEventDto.category_id
         ? await this.validateEventCategory(updateEventDto.category_id)
@@ -243,17 +255,28 @@ export class EventsService {
     }
   }
 
-  async toggleSubscription(id: number) {
+  async toggleSubscription(user: JwtPayload, event_id: number) {
     try {
       // VALIDATE EVENT EXIST OR THROW EXCEPTION
-      const eventToUpdate = await this.findOne(id);
+      const eventToUpdate = await this.findOne(event_id);
       if (!eventToUpdate) {
-        throw new NotFoundException(`Event with ID: ${id} not found.`);
+        throw new NotFoundException(`Event with ID: ${event_id} not found.`);
+      }
+
+      // VALIDATE IF THE USER IS ADMIN OR MANAGER
+      const allowedToUpdate =
+        user.roles === 'ADMIN'
+          ? true
+          : await this.eventsManagersService.isEventManager(user.sub, event_id);
+      if (!allowedToUpdate) {
+        throw new UnauthorizedException(
+          'You are not authorized to edit this event.',
+        );
       }
 
       // UPDATE SUBSCRIPTION: TOGGLE STATUS true => false | false => true
       const updatedEvent = await this.prisma.events.update({
-        where: { id },
+        where: { id: event_id },
         data: { accept_subscriptions: !eventToUpdate.accept_subscriptions },
       });
 

@@ -204,8 +204,11 @@ export class EventsController {
       'Toggle `accept_subscription` status. \n\n When `accept_subscriptions` is `false`, the event keeps showing in the lists, but it wont allow users to subscribe. \n\n REQUIRED ROLES: **ADMIN | MENTOR**',
   })
   @ApiBearerAuth()
-  toggleSubscription(@Param('id') id: string) {
-    return this.eventsService.toggleSubscription(+id);
+  toggleSubscription(
+    @GetUser() user: JwtPayload,
+    @Param('id') event_id: string,
+  ) {
+    return this.eventsService.toggleSubscription(user, +event_id);
   }
 
   @Roles('ADMIN', 'MENTOR')
