@@ -170,6 +170,8 @@ export class EventsService {
       const appliedFilters: Prisma.EventsWhereInput =
         this.getFormattedFilters(filters);
 
+      console.log('filters:', appliedFilters);
+
       const events = await this.prisma.events.findMany({
         where: appliedFilters,
         include: {

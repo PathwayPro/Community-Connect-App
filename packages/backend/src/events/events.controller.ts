@@ -15,7 +15,7 @@ import {
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { Roles, GetUser, Public } from 'src/auth/decorators';
+import { Roles, GetUser, Public, GetUserOptional } from 'src/auth/decorators';
 import { JwtAuthGuard, RolesGuard } from 'src/auth/guards';
 import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
 import { FilterEventDto } from './dto/filter-event.dto';
@@ -95,7 +95,10 @@ export class EventsController {
     summary: 'Fetch events',
     description: 'Fetch events. \n\n REQUIRED ROLES: **PUBLIC**',
   })
-  findAll(@Query() filters: FilterEventDto) {
+  findAll(
+    @GetUserOptional() user: JwtPayload | undefined,
+    @Query() filters: FilterEventDto,
+  ) {
     // Set filter "Date to" to the end of the day if exists
     const filterDateTo = filters.date_to ? new Date(filters.date_to) : null;
     if (filterDateTo) {
@@ -111,7 +114,7 @@ export class EventsController {
         typeof filters.is_free === 'string'
           ? filters.is_free === 'true'
           : filters.is_free,
-      type: filters.type, // USER: public + invited | MENTOR: Public + personal + invited | ADMIN: *
+      type: user?.roles === 'ADMIN' ? filters.type : 'PUBLIC', // USER: public events | MENTOR: Public events | ADMIN: All events
       requires_confirmation:
         typeof filters.requires_confirmation === 'string'
           ? filters.requires_confirmation === 'true'
@@ -122,7 +125,7 @@ export class EventsController {
           : filters.accept_subscriptions,
       start_date: filters.start_date ? new Date(filters.start_date) : null,
       end_date: filters.end_date ? new Date(filters.end_date) : null,
-      date_from: filters.date_from ? new Date(filters.date_from) : null,
+      date_from: filters.date_from ? new Date(filters.date_from) : new Date(), // If not specified, fetch only future events
       date_to: filterDateTo ? new Date(filterDateTo.toISOString()) : null,
     };
     return this.eventsService.findAll(searchFilters);
