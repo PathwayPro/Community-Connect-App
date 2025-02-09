@@ -13,6 +13,7 @@ import { FilterEventDto } from './dto/filter-event.dto';
 import { EventsCategoriesService } from 'src/events_categories/events_categories.service';
 import { FilesService } from 'src/files/files.service';
 import { EventsManagersService } from 'src/events_managers/events_managers.service';
+import { EventsInvitationsService } from 'src/events_invitations/events_invitations.service';
 import { FileValidationEnum } from 'src/files/util/files-validation.enum';
 import { EventsCategory } from 'src/events_categories/entities/events_category.entity';
 import { UploadedFile } from 'src/files/util/uploaded-file.interface';
@@ -25,6 +26,7 @@ export class EventsService {
     private categories: EventsCategoriesService,
     private filesService: FilesService,
     private eventsManagersService: EventsManagersService,
+    private eventsInvitationsService: EventsInvitationsService,
   ) {}
 
   getFormattedFilters(filters: FilterEventDto): Prisma.EventsWhereInput {
@@ -184,20 +186,53 @@ export class EventsService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, user: JwtPayload | undefined = undefined) {
     try {
+      const user_role = user ? user.roles : 'GUEST';
+      // VALIDATE EVENT EXIST
       const event = await this.prisma.events.findFirst({
         where: { id },
-        include: {
-          category: true,
-        },
+        include: { category: true },
       });
-
       if (!event) {
         throw new NotFoundException(`There is no event with ID: ${id}.`);
       }
 
-      return event;
+      // IF EVENT TYPE IS "PUBLIC" OR USER ROLE IS ADMIN, ALWAYS RETURN THE EVENT
+      if (event.type === 'PUBLIC' || user_role === 'ADMIN') {
+        return event;
+      }
+
+      // IF EVENT TYPE IS "PRIVATE" AND THERE IS NO USER, RETURN UNAUTHORIZED EXCEPTION
+      if (event.type === 'PRIVATE' && user_role === 'GUEST') {
+        throw new UnauthorizedException(
+          'You are not authorized to access this event information.',
+        );
+      }
+
+      // IF EVENT TYPE IS "PRIVATE" AND THE USER ROLE IS "USER" OR "MENTOR":
+      // 1. VALIDATE IF THEY ARE MANAGERS
+      const isEventManager = await this.eventsManagersService.isEventManager(
+        user?.sub,
+        id,
+      );
+      if (isEventManager) {
+        return event;
+      }
+
+      // 2. IF IS NOT MANAGER, VALIDATE INVITATION
+      const isEventInvitee = await this.eventsInvitationsService.isEventInvitee(
+        user?.sub,
+        id,
+      );
+      if (isEventInvitee) {
+        return event;
+      }
+
+      // IF THE EVENT IS PRIVATE, AND THE USER IS NOT INVITED OR A MANAGER, RETURN UNAUTHORIZED EXECPTION
+      throw new UnauthorizedException(
+        'You are not authorized to access this event information.',
+      );
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

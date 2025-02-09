@@ -117,6 +117,17 @@ export class EventsInvitationsService {
     return { inviter, invitee, event };
   }
 
+  async isEventInvitee(invitee_id: number, event_id: number): Promise<boolean> {
+    try {
+      const isInvitee = await this.prisma.eventsInvitations.findFirst({
+        where: { invitee_id, event_id },
+      });
+      return isInvitee ? true : false;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
   async create(
     user: JwtPayload,
     createEventsInvitationDto: CreateEventsInvitationDto,

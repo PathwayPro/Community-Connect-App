@@ -28,10 +28,10 @@ import {
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiBearerAuth,
-  ApiQuery,
   ApiOkResponse,
   ApiNotFoundResponse,
   ApiParam,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -86,14 +86,20 @@ export class EventsController {
 
   @Public()
   @Get()
-  @ApiQuery({ type: FilterEventDto })
   @ApiOkResponse({ type: Events, isArray: true })
   @ApiInternalServerErrorResponse({
     description: 'Error fetching events: [ERROR MESSAGE]',
   })
   @ApiOperation({
     summary: 'Fetch events',
-    description: 'Fetch events. \n\n REQUIRED ROLES: **PUBLIC**',
+    description: `
+    Fetch events. 
+    \n\n REQUIRED ROLES: **PUBLIC**
+    \n\n OPTIONAL ROLES: **ADMIN**
+    \n\n **VALIDATIONS:**
+    \n\n * ONLY ADMIN USERS CAN FETCH "PRIVATE" EVENTS
+    \n\n * IF THERE IS NO USER OR THE USER IS NOT ADMIN, "TYPE" FILTER IS FORCED TO "PUBLIC"
+  `,
   })
   findAll(
     @GetUserOptional() user: JwtPayload | undefined,
@@ -124,7 +130,7 @@ export class EventsController {
           ? filters.accept_subscriptions === 'true'
           : filters.accept_subscriptions,
       start_date: filters.start_date ? new Date(filters.start_date) : null,
-      end_date: filters.end_date ? new Date(filters.end_date) : null,
+      //end_date: filters.end_date ? new Date(filters.end_date) : null,
       date_from: filters.date_from ? new Date(filters.date_from) : new Date(), // If not specified, fetch only future events
       date_to: filterDateTo ? new Date(filterDateTo.toISOString()) : null,
     };
@@ -138,13 +144,30 @@ export class EventsController {
     description: 'Error fetching event: [ERROR MESSAGE]',
   })
   @ApiNotFoundResponse({ description: 'There is no event with ID #[:id]' })
+  @ApiUnauthorizedResponse({
+    description:
+      'If the event is "private" and the user is not logged, admin, invitee or manager',
+  })
   @ApiOperation({
     summary: 'Fetch events by ID',
-    description: 'Fetch one event by ID. \n\n REQUIRED ROLES: **PUBLIC**',
+    description: `
+    Fetch one event by ID. 
+    \n\n REQUIRED ROLES: **PUBLIC**
+    \n\n OPTIONAL ROLES: **ADMIN | MENTOR | USER**
+    \n\n **VALIDATIONS:**
+    \n\n * IF THE EVENT IS PUBLIC: Always return the event.
+    \n\n * IF THE USER ROLE IS "ADMIN": Always return the event.
+    \n\n * IF THE EVENT IS PRIVATE AND THE USER IS MANAGER: Returns the event.
+    \n\n * IF THE EVENT IS PRIVATE AND THE USER IS INVITEE: Returns the event.
+    \n\n * IF THE EVENT IS PRIVATE AND THE USER IS **NOT** ADMIN, INVITEE OR MAnAGER: Returns unauthorized.
+  `,
   })
   @ApiParam({ name: 'id' })
-  findOne(@Param('id') id: string) {
-    return this.eventsService.findOne(+id);
+  findOne(
+    @GetUserOptional() user: JwtPayload | undefined,
+    @Param('id') id: string,
+  ) {
+    return this.eventsService.findOne(+id, user);
   }
 
   @Roles('ADMIN', 'MENTOR')
@@ -158,8 +181,14 @@ export class EventsController {
   })
   @ApiOperation({
     summary: 'Update event',
-    description:
-      'Update event with ID. \n\n Using form-data for images (file) \n\n REQUIRED ROLES: **ADMIN | MENTOR**',
+    description: `
+    Update event with ID {:id}
+    \n\n Using form-data for images (file)
+    \n\n REQUIRED ROLES: **ADMIN | MENTOR**
+    \n\n **VALIDATIONS:**
+    \n\n * ADMIN can update any event
+    \n\n * MENTOR can update events where they are managers
+  `,
   })
   @ApiBearerAuth()
   update(
@@ -202,9 +231,15 @@ export class EventsController {
   })
   @ApiInternalServerErrorResponse({ description: '[ERROR MESSAGE]' })
   @ApiOperation({
-    summary: 'Update subscription status',
-    description:
-      'Toggle `accept_subscription` status. \n\n When `accept_subscriptions` is `false`, the event keeps showing in the lists, but it wont allow users to subscribe. \n\n REQUIRED ROLES: **ADMIN | MENTOR**',
+    summary: 'Toggle `accept_subscription` status',
+    description: `
+    Toggle \`accept_subscription\` status. 
+    \n\n When \`accept_subscriptions\` is \`false\`, the event keeps showing in the lists, but it wont allow users to subscribe. 
+    \n\n REQUIRED ROLES: **ADMIN | MENTOR**
+    \n\n **VALIDATIONS:**
+    \n\n * ADMIN can update any event
+    \n\n * MENTOR can update events where they are managers
+  `,
   })
   @ApiBearerAuth()
   toggleSubscription(
