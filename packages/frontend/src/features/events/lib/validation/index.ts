@@ -19,8 +19,12 @@ export const eventFormSchema = z.object({
   link: z.string().url('Must be a valid URL').optional(),
   image: z.string().optional(),
   price: z.number().min(0).optional().default(0),
-  type: z.enum(['PUBLIC', 'PRIVATE'] as const).default('PUBLIC'),
-  ticket_type: z.enum(['PAID', 'FREE'] as const).default('FREE'),
+  type: z
+    .enum(Object.values(EventsTypes) as [string, ...string[]])
+    .default('PUBLIC'),
+  ticket_type: z
+    .enum(Object.values(EventTicketTypes) as [string, ...string[]])
+    .default('FREE'),
   requires_confirmation: z.boolean().default(false),
   accept_subscriptions: z.boolean().default(true),
   date: z.date().default(new Date())

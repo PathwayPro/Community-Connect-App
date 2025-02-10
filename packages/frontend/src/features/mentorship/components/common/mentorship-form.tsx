@@ -126,7 +126,15 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
     <Card className="flex w-[840px] flex-col rounded-[24px]">
       <CardHeader className="justify-center p-8">
         <CardTitle className="flex flex-col space-y-6 text-center">
-          <h2 className="font-semibold">{title}</h2>
+          <div className="relative flex items-center justify-center gap-2">
+            <IconButton
+              leftIcon="arrowLeft"
+              variant="ghost"
+              className="absolute left-0 h-10 w-10"
+              onClick={() => router.back()}
+            />
+            <h2 className="font-semibold">{title}</h2>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col justify-center gap-4">

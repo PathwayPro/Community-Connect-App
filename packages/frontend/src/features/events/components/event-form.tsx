@@ -101,7 +101,15 @@ export const EventForm = () => {
     <Card className="flex w-[840px] flex-col rounded-[24px]">
       <CardHeader className="justify-center p-8">
         <CardTitle className="flex flex-col space-y-6 text-center">
-          <h2 className="font-semibold">Create New Event</h2>
+          <div className="relative flex items-center justify-center gap-2">
+            <IconButton
+              leftIcon="arrowLeft"
+              variant="ghost"
+              className="absolute left-0 h-10 w-10"
+              onClick={() => router.back()}
+            />
+            <h2 className="font-semibold">Create New Event</h2>
+          </div>
           <h4>Event Information</h4>
         </CardTitle>
       </CardHeader>

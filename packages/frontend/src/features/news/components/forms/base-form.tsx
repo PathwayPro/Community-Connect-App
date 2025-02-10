@@ -4,8 +4,8 @@ import { FormTextarea } from '@/shared/components/form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
 import React from 'react';
-import { NewsFormValues } from '../../../lib/validation';
-import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
+import { FormCheckbox } from '@/shared/components/form/form-checkbox';
+import { NewsFormValues } from '@/features/news/lib/validation';
 
 interface BaseFormProps {
   mode: 'create' | 'edit';
@@ -17,7 +17,7 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
 
   console.log(mode, newsId);
 
-  const handleImageUpload = async (files: File[]) => {
+  const handlePosterUpload = async (files: File[]) => {
     try {
       const formData = new FormData();
       files.forEach((file) => formData.append('files', file));
@@ -41,12 +41,12 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
   return (
     <div className="flex w-full flex-col gap-4">
       <FileUpload
-        title="Upload News Image"
+        title="Upload News Poster"
         maxSize={5}
         acceptedFileTypes={['JPG', 'JPEG', 'PNG']}
         multiple={false}
         uploadIcon="image"
-        onUpload={handleImageUpload}
+        onUpload={handlePosterUpload}
       />
 
       <div className="flex w-full gap-4">
@@ -67,6 +67,15 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
         />
       </div>
 
+      <FormTextarea
+        name="content"
+        label="News Details"
+        placeholder="Write your news details..."
+        customError="Content is required"
+        maxLength={400}
+        required
+      />
+
       <div className="flex w-full gap-4">
         <FormInput
           name="keywords"
@@ -75,24 +84,24 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
         />
       </div>
 
-      <FormTextarea
-        name="content"
-        label="News Content"
-        placeholder="Write your news content..."
-        customError="Content is required"
-        required
-      />
+      <div className="flex w-full gap-4">
+        <FormCheckbox
+          name="news_type"
+          label="News Type"
+          options={[
+            { value: 'featured', label: 'Featured Post', id: 'featured' },
+            { value: 'editorial', label: "Editor's Pick", id: 'editorial' }
+          ]}
+        />
+      </div>
 
       <div className="flex w-full gap-4">
-        <CustomSwitch
-          name="published"
-          label="Publication Status"
-          options={[
-            { value: false, label: 'Draft' },
-            { value: true, label: 'Published' }
-          ]}
-          value={watch('published')}
-          onChange={(value) => setValue('published', value)}
+        <FormInput
+          name="link"
+          label="Article Link"
+          hasLabelInput={true}
+          leftLabel="https://"
+          placeholder="Link text"
         />
       </div>
     </div>

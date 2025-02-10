@@ -174,7 +174,15 @@ export const EditProfile = () => {
       <AlertDialogUI />
       <CardHeader className="justify-center p-8">
         <CardTitle className="flex flex-col space-y-6 text-center">
-          <h2 className="font-semibold">Update Profile</h2>
+          <div className="relative flex items-center justify-center gap-2">
+            <IconButton
+              leftIcon="arrowLeft"
+              variant="ghost"
+              className="absolute left-0 h-10 w-10"
+              onClick={() => router.back()}
+            />
+            <h2 className="font-semibold">Update Profile</h2>
+          </div>
           <h4 className="font-normal text-neutral-dark-600">
             {activeStep === 1 && 'Personal Information'}
             {activeStep === 2 && 'Social Links'}
