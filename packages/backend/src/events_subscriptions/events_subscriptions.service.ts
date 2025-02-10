@@ -7,10 +7,9 @@ import {
 } from '@nestjs/common';
 import { CreateEventsSubscriptionDto } from './dto/create-events_subscription.dto';
 import { FilterEventsSubscriptionDto } from './dto/filter-events_subscription.dto';
-import { DeleteEventsSubscriptionDto } from './dto/delete-events_subscription.dto';
 import { UpdateEventsSubscriptionStatusDto } from './dto/update-events_subscription_status.dto';
 import { PrismaService } from 'src/database';
-import { Prisma } from '@prisma/client';
+import { EventsTypes, Prisma } from '@prisma/client';
 import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
 import { EventsManagersService } from '../events_managers/events_managers.service';
 
@@ -25,11 +24,6 @@ export class EventsSubscriptionsService {
     user: JwtPayload,
     filters: FilterEventsSubscriptionDto,
   ): Prisma.EventsSubscriptionsWhereInput {
-    // DESCRIPTION:
-    //    USER: Will only fetch their own subscriptions (user_id = user.sub)
-    //    ADMIN: Can use any filter without limitations
-    //    MENTOR: Can fetch their own subscriptions AND those in events they manage
-
     const formattedFilters: Prisma.EventsSubscriptionsWhereInput = {};
 
     if (filters?.user_id) {
@@ -40,6 +34,17 @@ export class EventsSubscriptionsService {
     }
     if (filters?.status) {
       formattedFilters.status = filters.status;
+    }
+
+    if (filters?.date_from && filters?.date_to) {
+      formattedFilters.created_at = {
+        gte: filters.date_from,
+        lte: filters.date_to,
+      };
+    } else if (filters?.date_from) {
+      formattedFilters.created_at = { gte: filters.date_from };
+    } else if (filters?.date_to) {
+      formattedFilters.created_at = { lte: filters.date_to };
     }
 
     const mentorFormattedFilters: Prisma.EventsSubscriptionsWhereInput =
@@ -56,35 +61,49 @@ export class EventsSubscriptionsService {
   }
 
   async validateSubscription(
-    createEventsSubscriptionDto: CreateEventsSubscriptionDto,
+    user_id: number,
+    event_id: number,
     isNewSubscription: boolean = true,
   ) {
     // VALIDATION: USER EXISTS
     const user = await this.prisma.users.findFirst({
-      where: { id: createEventsSubscriptionDto.user_id },
+      where: { id: user_id },
+      select: {
+        id: true,
+        first_name: true,
+        middle_name: true,
+        last_name: true,
+      },
     });
     if (!user) {
-      throw new NotFoundException(
-        `There is no user with ID: ${createEventsSubscriptionDto.user_id}.`,
-      );
+      throw new NotFoundException(`There is no user with ID: ${user_id}.`);
     }
 
     // VALIDATION: EVENT EXISTS
     const event = await this.prisma.events.findFirst({
-      where: { id: createEventsSubscriptionDto.event_id },
+      where: { id: event_id },
+      select: {
+        id: true,
+        title: true,
+        location: true,
+        link: true,
+        image: true,
+        type: true,
+        start_date: true,
+        end_date: true,
+        requires_confirmation: true,
+        is_free: true,
+        category: true,
+        accept_subscriptions: true,
+      },
     });
     if (!event) {
-      throw new NotFoundException(
-        `There is no event with ID: ${createEventsSubscriptionDto.event_id}.`,
-      );
+      throw new NotFoundException(`There is no event with ID: ${event_id}.`);
     }
 
     // VALIDATION: SUBSCRIPTION EXISTS
     const subscription = await this.prisma.eventsSubscriptions.findFirst({
-      where: {
-        user_id: createEventsSubscriptionDto.user_id,
-        event_id: createEventsSubscriptionDto.event_id,
-      },
+      where: { user_id: user_id, event_id: event_id },
     });
     if (subscription && isNewSubscription) {
       throw new BadRequestException(`
@@ -102,7 +121,7 @@ export class EventsSubscriptionsService {
   async canSubscribe(
     user_id: number,
     event_id: number,
-    event_type: 'PUBLIC' | 'PRIVATE',
+    event_type: EventsTypes,
     accept_subscriptions: boolean,
   ) {
     // THE EVENT HAS TO BE ACCEPTING NEW SUBSCRIPTIONS
@@ -127,16 +146,21 @@ export class EventsSubscriptionsService {
     return true;
   }
 
-  async create(createEventsSubscriptionDto: CreateEventsSubscriptionDto) {
+  async create(
+    createEventsSubscriptionDto: CreateEventsSubscriptionDto,
+    user: JwtPayload,
+  ) {
     try {
       // VALIDATE EXISTENCES AND GET DATA
       const subscriptionData = await this.validateSubscription(
-        createEventsSubscriptionDto,
+        user.sub,
+        createEventsSubscriptionDto.event_id,
+        true,
       );
 
       // VALIDATE IF THE USER CAN SUBSCRIBE TO THAT EVENT
       const canSubscribe = await this.canSubscribe(
-        createEventsSubscriptionDto.user_id,
+        user.sub,
         subscriptionData.event.id,
         subscriptionData.event.type,
         subscriptionData.event.accept_subscriptions,
@@ -145,9 +169,9 @@ export class EventsSubscriptionsService {
         throw new BadRequestException("You can't subscribe to this event");
       }
 
-      const newSubscriptionData: CreateEventsSubscriptionDto = {
-        user_id: createEventsSubscriptionDto.user_id,
-        event_id: createEventsSubscriptionDto.event_id,
+      const newSubscriptionData: Prisma.EventsSubscriptionsCreateInput = {
+        event: { connect: { id: createEventsSubscriptionDto.event_id } },
+        user: { connect: { id: user.sub } },
         status: subscriptionData.event.requires_confirmation
           ? 'PENDING'
           : 'APPROVED',
@@ -155,9 +179,17 @@ export class EventsSubscriptionsService {
 
       const newSubscription = await this.prisma.eventsSubscriptions.create({
         data: newSubscriptionData,
+        select: {
+          id: true,
+          status: true,
+          created_at: true,
+        },
       });
 
-      return { newSubscription, ...subscriptionData };
+      return {
+        newSubscription,
+        details: { user: subscriptionData.user, event: subscriptionData.event },
+      };
     } catch (error) {
       throw new BadRequestException(
         'Error creating subscription: ' + error.message,
@@ -173,8 +205,30 @@ export class EventsSubscriptionsService {
       const subscriptions = await this.prisma.eventsSubscriptions.findMany({
         where: appliedFilters,
         include: {
-          user: true,
-          event: true,
+          user: {
+            select: {
+              id: true,
+              first_name: true,
+              middle_name: true,
+              last_name: true,
+            },
+          },
+          event: {
+            select: {
+              id: true,
+              title: true,
+              location: true,
+              link: true,
+              image: true,
+              type: true,
+              start_date: true,
+              end_date: true,
+              requires_confirmation: true,
+              is_free: true,
+              category: true,
+              accept_subscriptions: true,
+            },
+          },
           updates: true,
         },
       });
@@ -185,14 +239,18 @@ export class EventsSubscriptionsService {
     }
   }
 
-  async remove(
-    user: JwtPayload,
-    deleteEventsSubscriptionDto: DeleteEventsSubscriptionDto,
-  ) {
+  async remove(user: JwtPayload, id: number) {
     try {
+      // VALIDATE SUBSCRIPTION
+      const subscriptionToDelete =
+        await this.prisma.eventsSubscriptions.findFirst({ where: { id } });
+      if (!subscriptionToDelete) {
+        throw new NotFoundException('Tere is no subscription with ID:' + id);
+      }
+
       const canDelete =
         // ANYONE CAN DELETE THEIR OWN SUBSCRIPTIONS (USER, MENTOR, ADMIN)
-        user.sub === deleteEventsSubscriptionDto.user_id
+        user.sub === subscriptionToDelete.user_id
           ? true
           : // ADMIN CAN DELETE ANY SUBSCRIPTION
             user.roles === 'ADMIN'
@@ -201,7 +259,7 @@ export class EventsSubscriptionsService {
               user.roles === 'MENTOR' &&
                 (await this.managers.isEventManager(
                   user.sub,
-                  deleteEventsSubscriptionDto.event_id,
+                  subscriptionToDelete.event_id,
                 ))
               ? true
               : // OTHERWISE IS NOT AUTHORIZED TO DELETE
@@ -213,13 +271,11 @@ export class EventsSubscriptionsService {
         );
       }
 
-      const deletedSubscription =
-        await this.prisma.eventsSubscriptions.deleteMany({
-          where: {
-            user_id: deleteEventsSubscriptionDto.user_id,
-            event_id: deleteEventsSubscriptionDto.event_id,
-          },
-        });
+      // DELETE SUBSCRIPTION
+      const deletedSubscription = await this.prisma.eventsSubscriptions.delete({
+        where: { id },
+      });
+
       return deletedSubscription;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
@@ -229,10 +285,20 @@ export class EventsSubscriptionsService {
   async updateStatus(
     user: JwtPayload,
     updateEventsSubscriptionStatusDto: UpdateEventsSubscriptionStatusDto,
+    subscription_id: number,
   ) {
-    // TO-DO: MENTORS CAN ONLY UPDATE STATUS OF THEIR MANAGED EVENTS, NOT ON THEIR APPLICATIONS (isEventManager)
-
     try {
+      // VALIDATE SUBSCRIPTION EXISTS
+      const subscriptionToUpdate =
+        await this.prisma.eventsSubscriptions.findFirst({
+          where: { id: subscription_id },
+        });
+      if (!subscriptionToUpdate) {
+        throw new BadRequestException(
+          'There is no subscription with ID ' + subscription_id,
+        );
+      }
+
       const canUpdateStatus =
         // ADMIN CAN UPDATE ANY SUBSCRIPTION STATUS
         user.roles === 'ADMIN'
@@ -241,7 +307,7 @@ export class EventsSubscriptionsService {
             user.roles === 'MENTOR' &&
               (await this.managers.isEventManager(
                 user.sub,
-                updateEventsSubscriptionStatusDto.event_id,
+                subscriptionToUpdate.event_id,
               ))
             ? true
             : // OTHERWISE IS NOT AUTHORIZED TO UPDATE SUBSCRIPTION STATUS
@@ -253,20 +319,9 @@ export class EventsSubscriptionsService {
         );
       }
 
-      // VALIDATE SUBSCRIPTION, USER AND EVENT
-      const currentSubscription = await this.validateSubscription(
-        updateEventsSubscriptionStatusDto,
-        false,
-      );
-      if (!currentSubscription) {
-        throw new BadRequestException(
-          `There is no subscription from ${currentSubscription.user.first_name} ${currentSubscription.user.last_name} for the event ${currentSubscription.event.title}`,
-        );
-      }
-
       // IF SUBSCRIPTION EXISTS, UPDATE CURRENT STATUS
       const updatedSubscription = await this.prisma.eventsSubscriptions.update({
-        where: { id: currentSubscription.subscription.id },
+        where: { id: subscription_id },
         data: {
           status: updateEventsSubscriptionStatusDto.new_status,
           updated_at: new Date(),
@@ -283,11 +338,11 @@ export class EventsSubscriptionsService {
       const logStatusChange =
         await this.prisma.eventsSubscriptionsUpdates.create({
           data: {
-            subscription_id: currentSubscription.subscription.id,
-            prev_status: currentSubscription.subscription.status,
+            subscription_id: subscription_id,
+            prev_status: subscriptionToUpdate.status,
             new_status: updateEventsSubscriptionStatusDto.new_status,
             message: updateEventsSubscriptionStatusDto.message,
-            updated_by: updateEventsSubscriptionStatusDto.updated_by,
+            updated_by: user.sub,
           },
         });
 
@@ -300,21 +355,39 @@ export class EventsSubscriptionsService {
       // RETURN SUBSCRIPTION WITH FULL INFORMATION
       const fullyUpdatedSubscription =
         await this.prisma.eventsSubscriptions.findFirst({
-          where: { id: currentSubscription.subscription.id },
+          where: { id: subscription_id },
           include: {
-            event: true,
-            user: true,
-            updates: {
-              include: {
-                updater: true,
+            user: {
+              select: {
+                id: true,
+                first_name: true,
+                middle_name: true,
+                last_name: true,
               },
             },
+            event: {
+              select: {
+                id: true,
+                title: true,
+                location: true,
+                link: true,
+                image: true,
+                type: true,
+                start_date: true,
+                end_date: true,
+                requires_confirmation: true,
+                is_free: true,
+                category: true,
+                accept_subscriptions: true,
+              },
+            },
+            updates: true,
           },
         });
 
       if (!fullyUpdatedSubscription) {
         throw new InternalServerErrorException(
-          'There was an error fetching the updated subscription. Please, try again later or try to fetch this subscription by user and event.',
+          'There was an error fetching the updated subscription. Please, try again later',
         );
       }
 
