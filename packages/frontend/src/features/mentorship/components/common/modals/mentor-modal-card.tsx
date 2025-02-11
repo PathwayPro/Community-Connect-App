@@ -102,7 +102,7 @@ export const MentorModalCardExpanded = ({ mentor }: MentorModalCardProps) => {
       <div className="flex items-center gap-6 py-2">
         <SharedIcons.ball className="h-5 w-5" />
         <SharedIcons.briefcase className="h-5 w-5" />
-        <SharedIcons.linkedin className="h-5 w-5" />
+        <Linkedin className="h-4 w-4 text-neutral-dark-100" />
         <SharedIcons.twitter className="h-5 w-5" />
       </div>
 

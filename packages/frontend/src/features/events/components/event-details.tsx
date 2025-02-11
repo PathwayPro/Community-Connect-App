@@ -58,19 +58,27 @@ export const EventDetails = ({
   } = event;
 
   return (
-    <div className="container mx-auto max-w-4xl space-y-6 py-6">
+    <div className="container mx-auto max-w-4xl space-y-6 rounded-[24px] bg-white px-6 py-6 shadow-md">
       {/* Top Navigation */}
       <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={() => router.back()}>
+        <Button
+          variant="outline"
+          onClick={() => router.back()}
+          className="h-10 border-primary text-primary"
+        >
           <ArrowLeft className="h-5 w-5" />
           Back
         </Button>
         <div className="flex gap-2">
-          <Button onClick={onShare}>
+          <Button
+            onClick={onShare}
+            className="h-10 border-primary text-primary"
+            variant="outline"
+          >
             <Share2 className="h-5 w-5" />
             Share
           </Button>
-          <Button onClick={onFavorite}>
+          <Button onClick={onFavorite} className="h-10">
             <Heart className="h-5 w-5" />
             Favourite
           </Button>
@@ -121,7 +129,7 @@ export const EventDetails = ({
           )}
           <span className="capitalize">{eventType} Event</span>
         </div>
-        <Button className="w-full" onClick={onRegister}>
+        <Button className="h-12 w-full" onClick={onRegister}>
           Register Now
         </Button>
       </Card>
@@ -139,14 +147,20 @@ export const EventDetails = ({
             />
           </Avatar>
           <div className="flex flex-col gap-2">
-            <h3 className="text-lg font-medium">{host?.name}</h3>
+            <h6 className="font-medium">{host?.name}</h6>
             <p className="text-muted-foreground">{host?.bio}</p>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={onConnect}>
+            <div className="mt-4 flex gap-2">
+              <Button
+                variant="outline"
+                onClick={onConnect}
+                className="h-10 w-[200px] border-primary text-primary"
+              >
                 <Users className="mr-2 h-4 w-4" />
                 Connect
               </Button>
-              <Button onClick={onFollow}>Follow</Button>
+              <Button onClick={onFollow} className="h-10 w-[200px]">
+                Follow
+              </Button>
             </div>
           </div>
         </div>
@@ -166,7 +180,7 @@ export const EventDetails = ({
       </Card>
 
       {/* Bottom Register Button */}
-      <Button className="w-full" size="lg" onClick={onRegister}>
+      <Button className="h-12 w-full" onClick={onRegister}>
         Register Now
       </Button>
     </div>

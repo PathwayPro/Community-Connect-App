@@ -61,7 +61,7 @@ const DayMonthPicker: React.FC<DayMonthPickerProps> = ({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className={`w-60 justify-between text-left text-sm font-normal ${!date && 'text-gray-500'} ${className}`}
+          className={`w-60 justify-between border-neutral-light-400 text-left text-sm font-normal ${!date && 'text-gray-500'} ${className}`}
         >
           {date ? formatDate(date) : 'Pick a date'}
           <CalendarIcon className="h-4 w-4" />
