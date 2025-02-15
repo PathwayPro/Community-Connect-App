@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { CreateEventsInvitationDto } from './dto/create-events_invitation.dto';
 import { FilterEventsInvitationDto } from './dto/filter-events_invitation.dto';
-import { DeleteEventsInvitationDto } from './dto/delete-events_invitation.dto';
 import { PrismaService } from 'src/database';
 import { Prisma } from '@prisma/client';
 import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
@@ -29,6 +28,7 @@ export class EventsInvitationsService {
     if (filters?.inviter_id) {
       formattedFilters.inviter_id = filters.inviter_id;
     }
+
     // USERS CAN ONLY SEE WHEN THEY ARE INVITEES
     if (user.roles === 'USER') {
       formattedFilters.invitee_id = user.sub;
@@ -48,30 +48,31 @@ export class EventsInvitationsService {
     if (filters?.event_id) {
       formattedFilters.event_id = filters.event_id;
     }
-    if (filters?.date_from) {
+    if (filters?.date_from && filters?.date_to) {
       formattedFilters.created_at = {
         gte: filters.date_from,
-      };
-    }
-    if (filters?.date_to) {
-      formattedFilters.created_at = {
         lte: filters.date_to,
       };
+    } else if (filters?.date_from) {
+      formattedFilters.created_at = { gte: filters.date_from };
+    } else if (filters?.date_to) {
+      formattedFilters.created_at = { lte: filters.date_to };
     }
 
     return formattedFilters;
   }
 
   async validateInvitation(
+    user: JwtPayload,
     createEventsInvitationDto: CreateEventsInvitationDto,
   ) {
     // VALIDATION: INVITER EXISTS
     const inviter = await this.prisma.users.findFirst({
-      where: { id: createEventsInvitationDto.inviter_id },
+      where: { id: user.sub },
     });
     if (!inviter) {
       throw new NotFoundException(
-        `There is no inviter user with ID: ${createEventsInvitationDto.inviter_id}.`,
+        `There is no inviter user with ID: ${user.sub}.`,
       );
     }
 
@@ -81,7 +82,7 @@ export class EventsInvitationsService {
     });
     if (!invitee) {
       throw new NotFoundException(
-        `There is no invitee user with ID: ${createEventsInvitationDto.inviter_id}.`,
+        `There is no invitee user with ID: ${createEventsInvitationDto.invitee_id}.`,
       );
     }
 
@@ -98,7 +99,7 @@ export class EventsInvitationsService {
     // VALIDATION: INVITATION EXISTS
     const invitation = await this.prisma.eventsInvitations.findFirst({
       where: {
-        inviter_id: createEventsInvitationDto.inviter_id,
+        inviter_id: user.sub,
         invitee_id: createEventsInvitationDto.invitee_id,
         event_id: createEventsInvitationDto.event_id,
       },
@@ -148,14 +149,27 @@ export class EventsInvitationsService {
 
       // VALIDATE EXISTENCES AND GET DATA
       const invitationData = await this.validateInvitation(
+        user,
         createEventsInvitationDto,
       );
+      if (!invitationData) {
+        throw new InternalServerErrorException(
+          'There was an error validating the invitation.',
+        );
+      }
+
+      const newInvitationData: Prisma.EventsInvitationsCreateInput = {
+        inviter: { connect: { id: user.sub } },
+        invitee: { connect: { id: createEventsInvitationDto.invitee_id } },
+        event: { connect: { id: createEventsInvitationDto.event_id } },
+        message: createEventsInvitationDto.message || '',
+      };
 
       const newInvitation = await this.prisma.eventsInvitations.create({
-        data: createEventsInvitationDto,
+        data: newInvitationData,
       });
 
-      return { newInvitation, ...invitationData };
+      return { newInvitation };
     } catch (error) {
       throw new BadRequestException(
         'Error creating invitation: ' + error.message,
@@ -171,9 +185,31 @@ export class EventsInvitationsService {
       const invitations = await this.prisma.eventsInvitations.findMany({
         where: appliedFilters,
         include: {
-          invitee: true,
-          inviter: true,
-          event: true,
+          invitee: {
+            select: {
+              first_name: true,
+              middle_name: true,
+              last_name: true,
+            },
+          },
+          inviter: {
+            select: {
+              first_name: true,
+              middle_name: true,
+              last_name: true,
+            },
+          },
+          event: {
+            select: {
+              title: true,
+              location: true,
+              link: true,
+              image: true,
+              is_free: true,
+              start_date: true,
+              end_date: true,
+            },
+          },
         },
       });
       return invitations;
@@ -182,16 +218,18 @@ export class EventsInvitationsService {
     }
   }
 
-  async remove(
-    user: JwtPayload,
-    deleteEventsInvitationDto: DeleteEventsInvitationDto,
-  ) {
+  async remove(user: JwtPayload, id: number) {
     try {
+      //FIND INVITATION
+      const invitationToDelete = await this.prisma.eventsInvitations.findFirst({
+        where: { id },
+      });
+      if (!invitationToDelete) {
+        throw new NotFoundException('Tere is no invitation with ID:' + id);
+      }
+
       // USERS CAN ONLY DELETE THEIR INVITATIONS
-      if (
-        user.roles === 'USER' &&
-        deleteEventsInvitationDto.invitee_id !== user.sub
-      ) {
+      if (user.roles === 'USER' && invitationToDelete.invitee_id !== user.sub) {
         throw new BadRequestException(
           'You are not authorized to delete this invitation.',
         );
@@ -200,21 +238,18 @@ export class EventsInvitationsService {
       // MENTORS CAN ONLY DELETE THEIR RELATED INVITATIONS
       if (
         user.roles === 'MENTOR' &&
-        deleteEventsInvitationDto.invitee_id !== user.sub &&
-        deleteEventsInvitationDto.inviter_id !== user.sub
+        invitationToDelete.invitee_id !== user.sub &&
+        invitationToDelete.inviter_id !== user.sub
       ) {
         throw new BadRequestException(
           'You are not authorized to delete this invitation.',
         );
       }
 
-      const deletedInvitation = await this.prisma.eventsInvitations.deleteMany({
-        where: {
-          inviter_id: deleteEventsInvitationDto.inviter_id,
-          invitee_id: deleteEventsInvitationDto.invitee_id,
-          event_id: deleteEventsInvitationDto.event_id,
-        },
+      const deletedInvitation = await this.prisma.eventsInvitations.delete({
+        where: { id },
       });
+
       return deletedInvitation;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
