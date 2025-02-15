@@ -19,9 +19,9 @@ export const MentorModalCard = ({
 }: MentorModalCardProps) => {
   return (
     <div className="relative flex items-center overflow-hidden rounded-2xl border border-neutral-light-500">
-      <div className="absolute left-0 top-0 h-full w-[72px] shrink-0 bg-primary-200" />
+      <div className="absolute left-0 top-0 h-full w-[72px] shrink-0 bg-secondary-200" />
       <div className="flex flex-1 items-center gap-4 bg-white py-5 pl-6 pr-5">
-        <Avatar className="h-[86px] w-[86px] bg-warning-500">
+        <Avatar className="h-[86px] w-[86px] border-4 border-white bg-warning-500">
           <AvatarImage
             src={mentor.avatarUrl}
             alt="Mentor avatar"
@@ -63,9 +63,14 @@ export const MentorModalCard = ({
 export const MentorModalCardExpanded = ({ mentor }: MentorModalCardProps) => {
   return (
     <div className="relative flex flex-col items-center gap-4 rounded-2xl border border-neutral-light-500 bg-white p-6">
-      <div className="absolute top-0 h-[70px] w-full rounded-t-2xl bg-primary-200" />
+      <div className="absolute top-0 h-[70px] w-full rounded-t-2xl bg-secondary-200" />
 
-      <Avatar className="h-20 w-20 bg-warning-500">
+      <div className="absolute right-4 top-4 z-[10] flex flex-col items-center justify-end">
+        <SharedIcons.logo className="h-6 w-6 rounded-full bg-white" />
+        <p className="z-[10] text-xs text-neutral-dark-600">Mentor</p>
+      </div>
+
+      <Avatar className="h-20 w-20 border-4 border-white bg-warning-500">
         <AvatarImage
           src={mentor.avatarUrl}
           alt="Mentor avatar"

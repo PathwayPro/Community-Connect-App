@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import { NewsForm, NewsList } from '@/features/news/components';
+import { NewsForm, NewsList } from '@/features/resources/components';
 
 interface NewsPageProps {
   params: {

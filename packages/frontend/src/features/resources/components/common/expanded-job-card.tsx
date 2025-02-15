@@ -7,7 +7,7 @@ import { Button } from '@/shared/components/ui/button';
 import { Card } from '@/shared/components/ui/card';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { Link } from 'lucide-react';
-import { JobCardProps } from '@/features/news/types';
+import { JobCardProps } from '@/features/resources/types';
 
 export function ExpandedJobCard({
   companyLogo,

@@ -13,7 +13,7 @@ import {
 
 interface FormInputProps<T extends FieldValues> {
   name: Path<T>;
-  label: string;
+  label?: string;
   placeholder: string;
   customError?: string;
   hasInputIcon?: boolean;

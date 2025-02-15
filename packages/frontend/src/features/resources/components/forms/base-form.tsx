@@ -5,7 +5,7 @@ import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
 import React from 'react';
 import { FormCheckbox } from '@/shared/components/form/form-checkbox';
-import { NewsFormValues } from '@/features/news/lib/validation';
+import { NewsFormValues } from '@/features/resources/lib/validation';
 
 interface BaseFormProps {
   mode: 'create' | 'edit';

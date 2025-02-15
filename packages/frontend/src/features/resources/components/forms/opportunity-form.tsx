@@ -6,7 +6,7 @@ import React from 'react';
 import {
   OpportunityFormValues,
   workModeTypes
-} from '@/features/news/lib/validation';
+} from '@/features/resources/lib/validation';
 import { FormSelect } from '@/shared/components/form/form-select';
 import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
 import { Label } from '@/shared/components/ui/label';

@@ -26,7 +26,7 @@ import {
   sampleResource,
   sampleOpportunity
 } from '../lib/validation/data/mock-data';
-import { NewsItem, JobCardProps } from '@/features/news/types';
+import { NewsItem, JobCardProps } from '@/features/resources/types';
 
 // Add these filter functions before the NewsList component
 const filterRecentNews = (news: NewsItem[]) => {
@@ -80,11 +80,11 @@ export const NewsList = () => {
                   News
                 </TabsTrigger>
                 <TabsTrigger
-                  value="resources"
+                  value="contentLibrary"
                   className={`h-10`}
-                  onClick={() => setActiveTab('resources')}
+                  onClick={() => setActiveTab('contentLibrary')}
                 >
-                  Resources
+                  Content Library
                 </TabsTrigger>
                 <TabsTrigger
                   value="opportunities"
@@ -97,9 +97,9 @@ export const NewsList = () => {
             </div>
             <IconButton
               leftIcon="plusCircle"
-              label={`Create ${activeTab === 'news' ? 'News' : activeTab === 'resources' ? 'Resource' : 'Opportunity'} Item`}
+              label={`Create ${activeTab === 'news' ? 'News' : activeTab === 'contentLibrary' ? 'Resource' : 'Opportunity'} Item`}
               className="h-12 w-fit bg-secondary-500"
-              onClick={() => router.push(`/news/create?mode=${activeTab}`)}
+              onClick={() => router.push(`/resources/create?mode=${activeTab}`)}
             />
           </div>
 
@@ -166,7 +166,7 @@ export const NewsList = () => {
           </TabsContent>
 
           <TabsContent
-            value="resources"
+            value="contentLibrary"
             className="flex w-full flex-col gap-6 rounded-2xl bg-white p-6"
           >
             <div className="flex items-center justify-between">

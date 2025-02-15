@@ -83,12 +83,12 @@ export const NewsCard = ({
             label={
               mode === 'news'
                 ? 'Read More'
-                : mode === 'resources'
+                : mode === 'contentLibrary'
                   ? 'Get Resource'
                   : 'View Opportunity'
             }
             rightIcon={mode === 'news' ? 'arrowRight' : ''}
-            leftIcon={mode === 'resources' ? 'squareArrowTopRight' : ''}
+            leftIcon={mode === 'contentLibrary' ? 'squareArrowTopRight' : ''}
             iconClassName="text-white"
             className="w-full"
             onClick={() => setIsOpen(true)}

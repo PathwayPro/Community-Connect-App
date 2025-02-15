@@ -27,7 +27,9 @@ import {
   Pencil,
   Trash,
   SquareArrowOutUpRight,
-  Link
+  Link,
+  Globe,
+  SendIcon
 } from 'lucide-react';
 
 export const SharedIcons = {
@@ -59,6 +61,8 @@ export const SharedIcons = {
   arrowTrendingDown: TrendingDownIcon,
   squareArrowTopRight: SquareArrowOutUpRight,
   link: Link,
+  networking: Globe,
+  send: SendIcon,
   mentors: ({ ...props }) => (
     <svg
       viewBox="0 0 24 24"

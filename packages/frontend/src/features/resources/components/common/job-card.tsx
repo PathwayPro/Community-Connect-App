@@ -6,7 +6,7 @@ import {
 import { Button } from '@/shared/components/ui/button';
 import { Card } from '@/shared/components/ui/card';
 import { Link } from 'lucide-react';
-import { JobCardProps } from '@/features/news/types';
+import { JobCardProps } from '@/features/resources/types';
 
 export function JobCard({
   companyLogo,

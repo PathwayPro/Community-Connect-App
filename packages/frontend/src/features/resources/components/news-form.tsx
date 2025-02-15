@@ -8,7 +8,7 @@ import {
 } from '@/shared/components/ui/card';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { FormProvider, useForm } from 'react-hook-form';
-import { NewsFormValues } from '@/features/news/lib/validation';
+import { NewsFormValues } from '@/features/resources/lib/validation';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { BaseForm } from './forms/base-form';
@@ -35,7 +35,7 @@ export const NewsForm = ({ newsId }: NewsFormProps) => {
     if (mode === 'news') {
       return <BaseForm mode="create" />;
     }
-    if (mode === 'resources') {
+    if (mode === 'contentLibrary') {
       return <ResourceForm />;
     }
     if (mode === 'opportunities') {

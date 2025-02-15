@@ -5,19 +5,19 @@ export const MainSiteNav = [
     icon: 'home'
   },
   {
-    name: 'News',
-    href: '/news',
-    icon: 'news'
-  },
-  {
-    name: 'Events',
-    href: '/events',
-    icon: 'events'
+    name: 'Networking',
+    href: '/networking',
+    icon: 'networking'
   },
   {
     name: 'Resources',
     href: '/resources',
     icon: 'resources'
+  },
+  {
+    name: 'Events',
+    href: '/events',
+    icon: 'events'
   },
   {
     name: 'Mentorship',
