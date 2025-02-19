@@ -43,8 +43,13 @@ export const FooterSiteNav = [
     icon: 'profile'
   },
   {
-    name: 'Support',
-    href: '/support',
-    icon: 'support'
+    name: 'Settings',
+    href: '/settings',
+    icon: 'settings'
+  },
+  {
+    name: 'Contact Us',
+    href: '/contact-us',
+    icon: 'chatBubble'
   }
 ];

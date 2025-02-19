@@ -5,8 +5,9 @@ import {
   AvatarImage
 } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
-import { UserRoundIcon, MessageSquare, Linkedin } from 'lucide-react';
+import { UserRoundIcon, MessageSquare, Linkedin, FileText } from 'lucide-react';
 import { Mentor } from './past-mentors-modal';
+import { cn } from '@/shared/lib/utils';
 
 interface MentorModalCardProps {
   mentor: Mentor;
@@ -63,12 +64,19 @@ export const MentorModalCard = ({
 export const MentorModalCardExpanded = ({ mentor }: MentorModalCardProps) => {
   return (
     <div className="relative flex flex-col items-center gap-4 rounded-2xl border border-neutral-light-500 bg-white p-6">
-      <div className="absolute top-0 h-[70px] w-full rounded-t-2xl bg-secondary-200" />
+      <div
+        className={cn(
+          'absolute top-0 h-[70px] w-full rounded-t-2xl',
+          mentor.isMentor ? 'bg-secondary-200' : 'bg-primary-200'
+        )}
+      />
 
-      <div className="absolute right-4 top-4 z-[10] flex flex-col items-center justify-end">
-        <SharedIcons.logo className="h-6 w-6 rounded-full bg-white" />
-        <p className="z-[10] text-xs text-neutral-dark-600">Mentor</p>
-      </div>
+      {mentor.isMentor && (
+        <div className="absolute right-4 top-4 z-[10] flex flex-col items-center justify-end">
+          <SharedIcons.logo className="h-6 w-6 rounded-full bg-white" />
+          <p className="z-[10] text-xs text-neutral-dark-600">Mentor</p>
+        </div>
+      )}
 
       <Avatar className="h-20 w-20 border-4 border-white bg-warning-500">
         <AvatarImage
@@ -90,10 +98,12 @@ export const MentorModalCardExpanded = ({ mentor }: MentorModalCardProps) => {
           {mentor.profession}
         </p>
 
-        <p className="text-sm text-neutral-dark-100">
-          Field of Expertise:{' '}
-          <span className="text-neutral-dark-600"> {mentor.expertise}</span>
-        </p>
+        {mentor.isMentor && (
+          <p className="text-sm text-neutral-dark-100">
+            Field of Expertise:{' '}
+            <span className="text-neutral-dark-600"> {mentor.expertise}</span>
+          </p>
+        )}
         <p className="text-sm text-neutral-dark-100">
           Company:{' '}
           <span className="text-neutral-dark-600"> {mentor.company}</span>
@@ -113,8 +123,8 @@ export const MentorModalCardExpanded = ({ mentor }: MentorModalCardProps) => {
 
       <div className="flex w-full gap-2">
         <Button className="h-10 w-full">
-          <MessageSquare className="mr-1 h-5 w-5" />
-          Message
+          <FileText className="mr-1 h-5 w-5" />
+          View Resume
         </Button>
       </div>
     </div>

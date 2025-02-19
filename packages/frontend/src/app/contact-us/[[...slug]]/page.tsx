@@ -13,7 +13,7 @@ export default async function SupportPage({ params }: SupportPageProps) {
 
   switch (action) {
     case undefined:
-      // Handle /support - Show support dashboard
+      // Handle /contact-us - Show contact us page
       return (
         <Suspense fallback={<SupportLoadingSkeleton />}>
           <div className="flex w-full justify-center">

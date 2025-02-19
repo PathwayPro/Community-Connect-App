@@ -2,7 +2,9 @@ export type Mentee = {
   id: string;
   identity: {
     avatar: string;
-    name: string;
+    firstName: string;
+    lastName: string;
+    email: string;
   };
   date: string;
   profession: string;
@@ -12,7 +14,9 @@ export type Sessions = {
   id: string;
   identity: {
     avatar: string;
-    name: string;
+    firstName: string;
+    lastName: string;
+    email: string;
   };
   date: string;
   profession: string;
@@ -23,7 +27,9 @@ export const menteesData: Mentee[] = [
     id: '728ed52f',
     identity: {
       avatar: 'https://github.com/shadcn.png',
-      name: 'John Doe'
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@example.com'
     },
     date: '2024-01-01',
     profession: 'Software Engineer'
@@ -32,7 +38,9 @@ export const menteesData: Mentee[] = [
     id: '489e1d42',
     identity: {
       avatar: 'https://github.com/shadcn.png',
-      name: 'Jane Doe'
+      firstName: 'Jane',
+      lastName: 'Doe',
+      email: 'jane.doe@example.com'
     },
     date: '2024-01-02',
     profession: 'Product Manager'
@@ -41,7 +49,9 @@ export const menteesData: Mentee[] = [
     id: '489e1d42',
     identity: {
       avatar: 'https://github.com/shadcn.png',
-      name: 'Jane Doe'
+      firstName: 'FranK',
+      lastName: 'Doe',
+      email: 'fran@example.com'
     },
     date: '2024-01-02',
     profession: 'Product Manager'
@@ -50,7 +60,9 @@ export const menteesData: Mentee[] = [
     id: '489e1d42',
     identity: {
       avatar: 'https://github.com/shadcn.png',
-      name: 'Jane Doe'
+      firstName: 'Jones',
+      lastName: 'Doe',
+      email: 'jones@example.com'
     },
     date: '2024-01-02',
     profession: 'Product Manager'
@@ -59,7 +71,9 @@ export const menteesData: Mentee[] = [
     id: '489e1d42',
     identity: {
       avatar: 'https://github.com/shadcn.png',
-      name: 'Jane Doe'
+      firstName: 'Liberty',
+      lastName: 'Doe',
+      email: 'liberty@example.com'
     },
     date: '2024-01-02',
     profession: 'Product Manager'

@@ -8,60 +8,74 @@ import {
 } from '@/shared/components/ui/dialog';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { MentorModalCardExpanded } from './mentor-modal-card';
+import { ChevronLeft, MessageSquareIcon, User } from 'lucide-react';
+import { cn } from '@/shared/lib/utils';
 
-// temporary mentor interface
-export interface Mentor {
-  id?: number;
-  firstName?: string;
-  lastName?: string;
-  profession?: string;
+export interface ProfileData {
+  firstName: string;
+  lastName: string;
+  profession: string;
+  email: string;
+  avatarUrl: string;
+  isMentor: boolean;
   company?: string;
   expertise?: string;
-  email?: string;
-  avatarUrl?: string;
 }
 
 interface MentorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mentorData?: Mentor;
-  setIsMentorModalOpen: (open: boolean) => void;
+  profileData: ProfileData | null;
+  setIsModalOpen: (open: boolean) => void;
 }
 
 export function MentorModal({
   isOpen,
-  mentorData,
-  setIsMentorModalOpen
+  profileData,
+  setIsModalOpen
 }: MentorModalProps) {
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={setIsMentorModalOpen}
-      // className="w-[600px] max-w-[800px] rounded-3xl"
-    >
+    <Dialog open={isOpen} onOpenChange={setIsModalOpen}>
       <DialogContent className="w-[552px] max-w-[552px] rounded-3xl">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-semibold">
-            Mentor Profile
+            {profileData?.isMentor ? 'Mentor Profile' : 'Mentee Profile'}
           </DialogTitle>
           <DialogDescription className="sr-only">
-            View the mentor profile.
+            View the {profileData?.isMentor ? 'mentor' : 'mentee'} profile.
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="h-[450px] rounded-2xl bg-neutral-light-300 p-4">
+        <ScrollArea
+          className={cn(
+            'rounded-2xl bg-neutral-light-300 p-4',
+            profileData?.isMentor ? 'h-[450px]' : ''
+          )}
+        >
           <div className="flex flex-col gap-4">
-            {mentorData && <MentorModalCardExpanded mentor={mentorData} />}
+            {profileData && <MentorModalCardExpanded mentor={profileData} />}
           </div>
         </ScrollArea>
 
         <div className="flex gap-4">
           <Button
-            variant="default"
-            className="mx-auto w-full"
-            onClick={() => setIsMentorModalOpen(false)}
+            variant="outline"
+            className="mx-auto h-10 w-full"
+            onClick={() => setIsModalOpen(false)}
           >
-            Back to Dashboard
+            <User className="h-4 w-4" />
+            View Profile
+          </Button>
+          <Button
+            className="mx-auto h-10 w-full"
+            onClick={() => setIsModalOpen(false)}
+          >
+            {profileData?.isMentor ? (
+              <ChevronLeft className="h-4 w-4" />
+            ) : (
+              <MessageSquareIcon className="h-4 w-4" />
+            )}
+            {profileData?.isMentor ? 'Back to Dashboard' : 'Message'}
           </Button>
         </div>
       </DialogContent>

@@ -8,7 +8,7 @@ import {
 } from '@/shared/components/ui/dialog';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { useState } from 'react';
-import { MentorModalCard, MentorModalCardExpanded } from './mentor-modal-card';
+import { MentorModalCard } from './mentor-modal-card';
 
 // temporary mentor interface
 export interface Mentor {
@@ -20,6 +20,7 @@ export interface Mentor {
   expertise?: string;
   email?: string;
   avatarUrl?: string;
+  isMentor?: boolean;
 }
 
 interface PastMentorsModalProps {
@@ -40,10 +41,6 @@ export function PastMentorsModal({
     setSelectedMentor(mentor);
   };
 
-  const handleBack = () => {
-    setSelectedMentor(null);
-  };
-
   return (
     <Dialog
       open={isOpen}
@@ -53,7 +50,7 @@ export function PastMentorsModal({
       <DialogContent className="w-[552px] max-w-[552px] rounded-3xl">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-semibold">
-            {selectedMentor ? 'Mentor Profile' : 'Past Mentors'}
+            Past Mentors
           </DialogTitle>
           <DialogDescription className="sr-only">
             {selectedMentor
@@ -64,28 +61,19 @@ export function PastMentorsModal({
 
         <ScrollArea className="h-[450px] rounded-2xl bg-neutral-light-300 p-4">
           <div className="flex flex-col gap-4">
-            {selectedMentor ? (
-              <MentorModalCardExpanded mentor={selectedMentor} />
-            ) : (
-              <div className="grid grid-cols-1 gap-4">
-                {mentors.map((mentor) => (
-                  <MentorModalCard
-                    key={mentor.id}
-                    mentor={mentor}
-                    onViewProfile={() => handleViewProfile(mentor)}
-                  />
-                ))}
-              </div>
-            )}
+            <div className="grid grid-cols-1 gap-4">
+              {mentors.map((mentor) => (
+                <MentorModalCard
+                  key={mentor.id}
+                  mentor={mentor}
+                  onViewProfile={() => handleViewProfile(mentor)}
+                />
+              ))}
+            </div>
           </div>
         </ScrollArea>
 
         <div className="flex gap-4">
-          {selectedMentor && (
-            <Button variant="outline" className="w-full" onClick={handleBack}>
-              Previous
-            </Button>
-          )}
           <Button
             variant="default"
             className="mx-auto w-full"

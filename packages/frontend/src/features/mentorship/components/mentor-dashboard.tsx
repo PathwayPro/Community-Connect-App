@@ -14,20 +14,39 @@ import { useState } from 'react';
 import { MentorModal } from './common/modals/mentor-modal';
 // import { useMentorshipStore } from '@/features/mentorship/store';
 
+interface ProfileData {
+  firstName: string;
+  lastName: string;
+  profession: string;
+  email: string;
+  avatarUrl: string;
+  isMentor: boolean;
+  company?: string;
+  expertise?: string;
+}
+
 const MentorDashboard = () => {
   const { user } = useUserStore();
   // const { mentor } = useMentorshipStore();
-  const [isMentorModalOpen, setIsMentorModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<ProfileData | null>(
+    null
+  );
 
-  const mentorData = {
-    id: user?.id || 0,
-    firstName: user?.firstName,
-    lastName: user?.lastName,
-    profession: user?.profession,
+  const mentorData: ProfileData = {
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    profession: user?.profession || '',
     company: user?.companyName,
     expertise: user?.profession,
-    email: user?.email,
-    avatarUrl: '/profile/profile.png'
+    email: user?.email || '',
+    avatarUrl: '/profile/profile.png',
+    isMentor: true
+  };
+
+  const handleViewProfile = () => {
+    setSelectedProfile(mentorData);
+    setIsModalOpen(true);
   };
 
   return (
@@ -42,15 +61,15 @@ const MentorDashboard = () => {
             <Button
               variant="outline"
               className="h-10 w-fit"
-              onClick={() => setIsMentorModalOpen(true)}
+              onClick={handleViewProfile}
             >
               <UserRoundPlus className="h-4 w-4" /> View Profile
             </Button>
             <MentorModal
-              isOpen={isMentorModalOpen}
-              onClose={() => setIsMentorModalOpen(false)}
-              mentorData={mentorData}
-              setIsMentorModalOpen={setIsMentorModalOpen}
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              profileData={selectedProfile}
+              setIsModalOpen={setIsModalOpen}
             />
           </div>
         </MentorshipSection.Header>
@@ -108,7 +127,21 @@ const MentorDashboard = () => {
             <Button className="h-10">View All</Button>
           </MentorshipSection.Header>
           <MentorshipSection.Content>
-            <DataTable columns={menteesColumns} data={menteesData} />
+            <DataTable
+              columns={menteesColumns}
+              data={menteesData}
+              onRowClick={(rowData) => {
+                setSelectedProfile({
+                  firstName: rowData.identity.firstName,
+                  lastName: rowData.identity.lastName,
+                  profession: rowData.profession,
+                  email: rowData.identity.email,
+                  avatarUrl: rowData.identity.avatar,
+                  isMentor: false
+                });
+                setIsModalOpen(true);
+              }}
+            />
           </MentorshipSection.Content>
         </MentorshipSection>
       </div>

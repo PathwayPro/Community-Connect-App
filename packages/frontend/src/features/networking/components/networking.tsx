@@ -16,6 +16,7 @@ import {
 import { NetworkingFilter } from './networking-filter';
 import { NetworkingCard } from './networking-card';
 import { mockNetworkingProfiles } from '@/features/networking/lib/mock-data.ts';
+import { PaginationComponent } from '@/shared/components/pagination/pagination';
 
 interface FilterValues {
   search: string;
@@ -26,6 +27,9 @@ interface FilterValues {
 
 export const Networking = () => {
   const [activeTab, setActiveTab] = useState<string>('network');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 12;
+
   const [filters, setFilters] = useState<FilterValues>({
     search: '',
     country: [],
@@ -81,6 +85,18 @@ export const Networking = () => {
     });
   }, [filters, networkingProfiles, activeTab]);
 
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredData, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="container h-full w-full space-y-4">
       <Tabs defaultValue="network" onValueChange={setActiveTab}>
@@ -108,11 +124,22 @@ export const Networking = () => {
                     No results found
                   </p>
                 ) : (
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                    {filteredData.map((profile) => (
-                      <NetworkingCard key={profile.id} profile={profile} />
-                    ))}
-                  </div>
+                  <>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                      {paginatedData.map((profile) => (
+                        <NetworkingCard key={profile.id} profile={profile} />
+                      ))}
+                    </div>
+                    {totalPages > 1 && (
+                      <div className="mt-8 flex justify-center">
+                        <PaginationComponent
+                          currentPage={currentPage}
+                          totalPages={totalPages}
+                          onPageChange={handlePageChange}
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </TabsContent>
