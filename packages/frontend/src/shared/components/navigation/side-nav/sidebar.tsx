@@ -23,6 +23,9 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
   const { logout } = useAuth();
 
   const isPathActive = (path: string) => {
+    if (path === '/') {
+      return pathname === '/';
+    }
     return pathname.startsWith(path);
   };
 

@@ -54,7 +54,7 @@ export const menteesData: Mentee[] = [
       email: 'fran@example.com'
     },
     date: '2024-01-02',
-    profession: 'Product Manager'
+    profession: 'UX Designer'
   },
   {
     id: '489e1d42',
@@ -65,7 +65,7 @@ export const menteesData: Mentee[] = [
       email: 'jones@example.com'
     },
     date: '2024-01-02',
-    profession: 'Product Manager'
+    profession: 'QA Engineer'
   },
   {
     id: '489e1d42',
@@ -76,6 +76,6 @@ export const menteesData: Mentee[] = [
       email: 'liberty@example.com'
     },
     date: '2024-01-02',
-    profession: 'Product Manager'
+    profession: 'Business Analyst'
   }
 ];

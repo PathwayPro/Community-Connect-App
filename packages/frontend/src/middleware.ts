@@ -31,16 +31,11 @@ export async function middleware(request: NextRequest) {
 
   // Create URLs for redirects
   const signInPage = new URL('/auth/login', request.url);
-  const homePage = new URL('/dashboard', request.url);
+  const homePage = new URL('/', request.url);
 
   // Redirect root path to dashboard
-  if (pathname === '/') {
-    return NextResponse.redirect(new URL('/home', request.url));
-  }
-
-  // Redirect mentorship to mentorship/dashboard
-  // if (pathname === '/mentorship') {
-  //   return NextResponse.redirect(new URL('/mentorship/dashboard', request.url));
+  // if (pathname === '/') {
+  //   return NextResponse.redirect(new URL('/dashboard', request.url));
   // }
 
   // Special handling for verify-email with token

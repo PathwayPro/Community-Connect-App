@@ -1,7 +1,7 @@
 export const MainSiteNav = [
   {
     name: 'Home',
-    href: '/home',
+    href: '/',
     icon: 'home'
   },
   {
