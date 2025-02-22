@@ -59,6 +59,10 @@ export class FilesService {
         allowedMimeTypes: commonResumesTypes,
         maxSizeInBytes: 10 * 1024 * 1024, // 10MB
       },
+      POST: {
+        allowedMimeTypes: commonImageTypes,
+        maxSizeInBytes: 2 * 1024 * 1024, // 2MB
+      },
     };
   }
 
@@ -91,9 +95,13 @@ export class FilesService {
         return (
           publicDir + '/' + this.configService.get<string>('UPLOAD_DIR_RESUME')
         );
+      case 'POST':
+        return (
+          publicDir + '/' + this.configService.get<string>('UPLOAD_DIR_POST')
+        );
       default:
         throw new BadRequestException(
-          'You must specify a valid use fir this file.',
+          'You must specify a valid use for this file.',
         );
     }
   }

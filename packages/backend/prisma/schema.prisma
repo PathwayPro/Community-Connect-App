@@ -71,6 +71,11 @@ model users {
   // NETWORKING - MESSAGES
   messages_sender_id        Messages[]          @relation(name: "MessagesSender")
   messages_recipient_id        Messages[]          @relation(name: "MessagesRecipient")
+  // POSTS
+  posts                       Posts[]
+  posts_comments                       PostsComments[]
+  posts_likes                 PostsLikes[]
+  post_saves                  PostsSaves[]
 
 }
 
@@ -315,4 +320,48 @@ model Messages {
   recipient       users                     @relation(name: "MessagesRecipient", fields: [recipient_id], references: [id])
   message         String?
   created_at      DateTime                  @default(now())
+}
+
+// BLOG
+model Posts {
+  id               Int                       @id @default(autoincrement())
+  user_id          Int
+  user             users                     @relation(fields: [user_id], references: [id])
+  message          String
+  image            String?
+  created_at       DateTime                  @default(now())
+  updated_at       DateTime                  @default(now())
+  published        Boolean                   @default(false)
+  comments         PostsComments[]
+  likes            PostsLikes[]
+  saves            PostsSaves[]
+}
+model PostsComments {
+  id               Int                       @id @default(autoincrement())
+  user_id          Int
+  user             users                     @relation(fields: [user_id], references: [id])
+  post_id          Int
+  post             Posts                     @relation(fields: [post_id], references: [id])
+  message          String
+  created_at       DateTime                  @default(now())
+  updated_at       DateTime                  @default(now())
+  published        Boolean                   @default(false)
+}
+model PostsLikes {
+  id               Int                       @id @default(autoincrement())
+  user_id          Int
+  post_id          Int
+  post             Posts                     @relation(fields: [post_id], references: [id])
+  user             users                     @relation(fields: [user_id], references: [id])
+  created_at       DateTime                  @default(now())
+  @@unique([user_id, post_id])
+}
+model PostsSaves {
+  id               Int                       @id @default(autoincrement())
+  user_id          Int
+  user             users                     @relation(fields: [user_id], references: [id])
+  post_id          Int
+  post             Posts                     @relation(fields: [post_id], references: [id])
+  created_at       DateTime                  @default(now())
+  @@unique([user_id, post_id])
 }

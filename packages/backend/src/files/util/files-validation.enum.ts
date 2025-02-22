@@ -4,6 +4,7 @@ export enum FileValidationEnum {
   EVENTS = 'EVENTS',
   NEWS = 'NEWS',
   RESUME = 'RESUME',
+  POST = 'POST',
 }
 
 export type FileValidationEnumType =
