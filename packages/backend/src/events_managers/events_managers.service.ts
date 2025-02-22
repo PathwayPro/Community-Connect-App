@@ -3,10 +3,9 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateEventsManagerDto } from './dto/create-events_manager.dto';
-import { UpdateEventsManagerDto } from './dto/update-events_manager.dto';
-import { DeleteEventsManagerDto } from './dto/delete-events_manager.dto';
 import { FilterEventsManagerDto } from './dto/filter-events_manager.dto';
 import { PrismaService } from 'src/database';
 import { Prisma } from '@prisma/client';
@@ -40,7 +39,16 @@ export class EventsManagersService {
     validateManagerExist: boolean = false,
   ) {
     // VALIDATION: USER EXISTS && IS ADMIN OR MENTOR
-    const user = await this.prisma.users.findFirst({ where: { id: user_id } });
+    const user = await this.prisma.users.findFirst({
+      where: { id: user_id },
+      select: {
+        id: true,
+        first_name: true,
+        middle_name: true,
+        last_name: true,
+        role: true,
+      },
+    });
     if (!user) {
       throw new NotFoundException(`There is no user with ID: ${user_id}.`);
     }
@@ -53,15 +61,23 @@ export class EventsManagersService {
     // VALIDATION: EVENT EXISTS
     const event = await this.prisma.events.findFirst({
       where: { id: event_id },
+      select: {
+        id: true,
+        title: true,
+        location: true,
+        link: true,
+        image: true,
+        is_free: true,
+        start_date: true,
+        end_date: true,
+      },
     });
     if (!event) {
       throw new NotFoundException(`There is no event with ID: ${event_id}.`);
     }
 
     // VALIDATION: MANAGER ALREADY EXIST
-    const isManager = await this.prisma.eventsManagers.findFirst({
-      where: { user_id: user_id, event_id: event_id },
-    });
+    const isManager: boolean = await this.isEventManager(user_id, event_id);
     if (isManager && validateManagerExist) {
       throw new BadRequestException(
         `The user ${user.first_name} ${user.last_name} is already a manager for the event ${event.title}`,
@@ -82,8 +98,35 @@ export class EventsManagersService {
     }
   }
 
-  async create(createEventsManagerDto: CreateEventsManagerDto) {
+  async create(
+    user: JwtPayload,
+    createEventsManagerDto: CreateEventsManagerDto,
+    managerFromNewEvent: boolean = true,
+  ) {
     try {
+      let canCreate: boolean = user.roles === 'ADMIN'; // ADMIN ALWAYS CAN ADD MANAGERS TO EVENTS
+      if (!canCreate) {
+        // IF THE USER IS A MENTOR, THEY HAVE TO BE CREATING THE EVENT OR BE ALREADY MANAGERS
+        if (user.roles === 'MENTOR') {
+          if (
+            (managerFromNewEvent &&
+              user.sub === createEventsManagerDto.user_id) ||
+            (await this.isEventManager(
+              user.sub,
+              createEventsManagerDto.event_id,
+            ))
+          ) {
+            canCreate = true;
+          }
+        }
+      }
+
+      if (!canCreate) {
+        throw new UnauthorizedException(
+          'You are not authorized to add managers to this event.',
+        );
+      }
+
       // VALIDATE EXISTENCES AND GET DATA
       const managerData = await this.validateExistences(
         createEventsManagerDto.user_id,
@@ -91,9 +134,9 @@ export class EventsManagersService {
         true,
       );
 
-      const newManagerData: CreateEventsManagerDto = {
-        user_id: createEventsManagerDto.user_id,
-        event_id: createEventsManagerDto.event_id,
+      const newManagerData: Prisma.EventsManagersCreateInput = {
+        user: { connect: { id: createEventsManagerDto.user_id } },
+        event: { connect: { id: createEventsManagerDto.event_id } },
         is_speaker: createEventsManagerDto.is_speaker
           ? createEventsManagerDto.is_speaker
           : false,
@@ -111,7 +154,7 @@ export class EventsManagersService {
     }
   }
 
-  async findAll(filters: FilterEventsManagerDto) {
+  async findAll(user: JwtPayload, filters: FilterEventsManagerDto) {
     const appliedFilters: Prisma.EventsManagersWhereInput =
       this.getFormattedFilters(filters);
 
@@ -119,8 +162,27 @@ export class EventsManagersService {
       const managers = await this.prisma.eventsManagers.findMany({
         where: appliedFilters,
         include: {
-          user: true,
-          event: true,
+          user: {
+            select: {
+              id: true,
+              first_name: true,
+              middle_name: true,
+              last_name: true,
+              role: true,
+            },
+          },
+          event: {
+            select: {
+              id: true,
+              title: true,
+              location: true,
+              link: true,
+              image: true,
+              is_free: true,
+              start_date: true,
+              end_date: true,
+            },
+          },
         },
       });
       return managers;
@@ -129,40 +191,50 @@ export class EventsManagersService {
     }
   }
 
-  async updateIsSpeaker(
-    logged_user: JwtPayload,
-    updateEventsManagerDto: UpdateEventsManagerDto,
-  ) {
+  async toggleIsSpeaker(user: JwtPayload, id: number) {
     try {
       // VALIDATE USER HAS MANAGEMENT PERMISSIONS: ADMIN || MENTOR AS MANAGER
       const canEdit =
-        logged_user.roles === 'ADMIN' ||
-        (await this.isEventManager(
-          logged_user.sub,
-          updateEventsManagerDto.event_id,
-        ));
+        user.roles === 'ADMIN' || (await this.isEventManager(user.sub, id));
       if (!canEdit) {
         throw new BadRequestException(
           `You are not allowed to manage this event.`,
         );
       }
 
-      // VALIDATE USER, EVENT, IS_MANAGER
-      const currentManager = await this.validateExistences(
-        updateEventsManagerDto.user_id,
-        updateEventsManagerDto.event_id,
-        false,
-      );
-      if (!currentManager.isManager) {
-        throw new BadRequestException(
-          `The user is not a manager for this event. You can register them as managers or add an external speaker.`,
-        );
-      }
+      // VALIDATE MANAGER EXISTS
+      const currentManager = await this.prisma.eventsManagers.findFirst({
+        select: { is_speaker: true },
+        where: { id },
+      });
 
       // IF IS MANAGER, UPDATE CURRENT SPEKAER STATUS
       const updatedIsSpeaker = await this.prisma.eventsManagers.update({
-        where: { id: currentManager.isManager.id },
-        data: { is_speaker: !currentManager.isManager.is_speaker },
+        where: { id },
+        data: { is_speaker: !currentManager.is_speaker },
+        include: {
+          user: {
+            select: {
+              id: true,
+              first_name: true,
+              middle_name: true,
+              last_name: true,
+              role: true,
+            },
+          },
+          event: {
+            select: {
+              id: true,
+              title: true,
+              location: true,
+              link: true,
+              image: true,
+              is_free: true,
+              start_date: true,
+              end_date: true,
+            },
+          },
+        },
       });
 
       if (!updatedIsSpeaker) {
@@ -171,23 +243,24 @@ export class EventsManagersService {
         );
       }
 
-      return {
-        updatedIsSpeaker,
-        user: currentManager.user,
-        event: currentManager.event,
-      };
+      return { updatedIsSpeaker };
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
   }
 
-  async remove(removeManager: DeleteEventsManagerDto) {
+  async remove(user: JwtPayload, id: number) {
     try {
-      const deletedManager = await this.prisma.eventsManagers.deleteMany({
-        where: {
-          user_id: removeManager.user_id,
-          event_id: removeManager.event_id,
-        },
+      // VALIDATE USER HAS MANAGEMENT PERMISSIONS: ADMIN || MENTOR AS MANAGER
+      const canDelete =
+        user.roles === 'ADMIN' || (await this.isEventManager(user.sub, id));
+      if (!canDelete) {
+        throw new BadRequestException(
+          `You are not allowed to manage this event.`,
+        );
+      }
+      const deletedManager = await this.prisma.eventsManagers.delete({
+        where: { id },
       });
       return deletedManager;
     } catch (error) {

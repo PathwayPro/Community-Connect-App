@@ -17,7 +17,7 @@ import { EventsInvitationsService } from 'src/events_invitations/events_invitati
 import { FileValidationEnum } from 'src/files/util/files-validation.enum';
 import { EventsCategory } from 'src/events_categories/entities/events_category.entity';
 import { UploadedFile } from 'src/files/util/uploaded-file.interface';
-import { JwtPayload } from 'src/auth/types';
+import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
 
 @Injectable()
 export class EventsService {
@@ -149,11 +149,15 @@ export class EventsService {
 
       // ADD USER AS EVENT MANAGER
       if (event) {
-        const manager = await this.eventsManagersService.create({
-          user_id: user.sub,
-          event_id: event.id,
-          is_speaker: false,
-        });
+        const manager = await this.eventsManagersService.create(
+          user,
+          {
+            user_id: user.sub,
+            event_id: event.id,
+            is_speaker: false,
+          },
+          true,
+        );
         if (!manager) {
           throw new InternalServerErrorException(
             'There was a problem setting the user as manager for this event. Please try again later or update this event.',

@@ -68,7 +68,7 @@ export class EventsInvitationsController {
   @Roles('ADMIN', 'MENTOR', 'USER')
   @ApiCreatedResponse({ type: EventsInvitation })
   @ApiInternalServerErrorResponse({ description: '[ERROR MESSAGE]' })
-  @ApiQuery({ type: EventsInvitation })
+  @ApiQuery({ type: FilterEventsInvitationDto })
   @ApiOperation({
     summary: 'Fetch invitations with filters (limitations by role)',
     description: `Fetch invitations with filters.
