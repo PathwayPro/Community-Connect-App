@@ -69,36 +69,19 @@ export class FilesService {
   private fileValidations: Record<FileValidationEnum, FileValidations>;
 
   private fileDirectory(validation: FileValidationEnum): string {
-    const publicDir = this.configService.get<string>('UPLOAD_DIR_ROOT');
     switch (validation) {
       case 'PROFILE_PICTURE':
-        return (
-          publicDir +
-          '/' +
-          this.configService.get<string>('UPLOAD_DIR_PROFILE_PICTURE')
-        );
+        return this.configService.get<string>('UPLOAD_DIR_PROFILE_PICTURE');
       case 'RESOURCES':
-        return (
-          publicDir +
-          '/' +
-          this.configService.get<string>('UPLOAD_DIR_RESOURCES')
-        );
+        return this.configService.get<string>('UPLOAD_DIR_RESOURCES');
       case 'EVENTS':
-        return (
-          publicDir + '/' + this.configService.get<string>('UPLOAD_DIR_EVENTS')
-        );
+        return this.configService.get<string>('UPLOAD_DIR_EVENTS');
       case 'NEWS':
-        return (
-          publicDir + '/' + this.configService.get<string>('UPLOAD_DIR_NEWS')
-        );
+        return this.configService.get<string>('UPLOAD_DIR_NEWS');
       case 'RESUME':
-        return (
-          publicDir + '/' + this.configService.get<string>('UPLOAD_DIR_RESUME')
-        );
+        return this.configService.get<string>('UPLOAD_DIR_RESUME');
       case 'POST':
-        return (
-          publicDir + '/' + this.configService.get<string>('UPLOAD_DIR_POST')
-        );
+        return this.configService.get<string>('UPLOAD_DIR_POST');
       default:
         throw new BadRequestException(
           'You must specify a valid use for this file.',
@@ -129,7 +112,9 @@ export class FilesService {
       }
 
       // DEFINE DIRECTORY FOR THE FILE ACCORDING TO ITS USAGE
-      const uploadDir = this.fileDirectory(validation);
+      const publicDir = this.configService.get<string>('UPLOAD_DIR_ROOT');
+      const fileTypeDirectory = this.fileDirectory(validation);
+      const uploadDir = publicDir + '/' + fileTypeDirectory;
 
       // CREATE DIRECTORIES IF DON'T EXIST
       if (!fs.existsSync(uploadDir)) {
@@ -151,7 +136,7 @@ export class FilesService {
         );
       }
 
-      return { fileName, path: uploadDir };
+      return { fileName, path: fileTypeDirectory };
     } catch (error) {
       console.error('Error uploading file:', error);
       throw error;
