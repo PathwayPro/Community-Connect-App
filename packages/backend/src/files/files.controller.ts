@@ -14,12 +14,54 @@ import { FileValidationEnum } from './util/files-validation.enum';
 import { Response } from 'express';
 import * as path from 'path';
 import { ConfigService } from '@nestjs/config';
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('Files')
 @Controller('files')
 export class FilesController {
   constructor(
     private readonly configService: ConfigService /*private readonly filesService: FilesService*/,
   ) {}
+
+  @Public()
+  @Get(':filetype/:filename')
+  @ApiOkResponse({
+    description: 'File content',
+    content: {
+      'application/octet-stream': {
+        // Or the specific content type (e.g., image/jpeg, application/pdf)
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiOperation({
+    summary: 'Get file',
+    description: `
+      \n\n Returns a file according to its type and name. 
+      \n\n REQUIRED ROLES: **PUBLIC** 
+      \n\n Files are stored in the DB with the format \`type/name\`
+  `,
+  })
+  @ApiParam({ name: 'filetype' })
+  @ApiParam({ name: 'filename' })
+  async getFile(
+    @Param('filetype') type: FileValidationEnum,
+    @Param('filename') name: string,
+    @Res() res: Response,
+  ) {
+    const root = this.configService.get<string>('UPLOAD_DIR_ROOT');
+    const filePath = path.join(type, name);
+    return res.sendFile(filePath, { root });
+  }
+
   /*
   @Roles('ADMIN', 'MENTOR', 'USER')
   @UseInterceptors(FileInterceptor('file'))
@@ -49,15 +91,4 @@ export class FilesController {
     return this.filesService.upload(FileValidationEnum.NEWS, file);
   }
 */
-  @Public()
-  @Get(':filetype/:filename')
-  async getFile(
-    @Param('filetype') type: FileValidationEnum,
-    @Param('filename') name: string,
-    @Res() res: Response,
-  ) {
-    const root = this.configService.get<string>('UPLOAD_DIR_ROOT');
-    const filePath = path.join(type, name);
-    return res.sendFile(filePath, { root });
-  }
 }
