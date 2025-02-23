@@ -85,6 +85,15 @@ export class FilterCommentsDto {
   user_id?: number;
 
   @ApiPropertyOptional({
+    description: 'Comments on a specific post',
+    example: 7,
+  })
+  @IsInt()
+  @IsOptional()
+  @Type(() => Number)
+  post_id?: number;
+
+  @ApiPropertyOptional({
     description:
       '`created_at` greater than inserted date, ignoring time. `Y-m-d 00:00:00.000`',
     example: '2025-01-02',

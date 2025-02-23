@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { CreatePostDto, CreateCommentDto } from './dto/create.dto';
 import { UpdatePostDto, UpdateCommentDto } from './dto/update.dto';
-//import { FilterPostsDto, FilterCommentsDto } from './dto/filters.dto';
+import { FilterPostsDto, FilterCommentsDto } from './dto/filters.dto';
 import { PrismaService } from 'src/database';
 import { Prisma } from '@prisma/client';
 import { FilesService } from 'src/files/files.service';
@@ -22,7 +22,88 @@ export class BlogService {
     private filesService: FilesService,
   ) {}
 
-  getUserSelection() {
+  getPostFormattedFilters(filters: FilterPostsDto): Prisma.PostsWhereInput {
+    const formattedFilters: Prisma.PostsWhereInput = {};
+
+    if (filters?.message) {
+      formattedFilters.message = {
+        contains: filters.message,
+        mode: 'insensitive',
+      };
+    }
+    if (filters?.user_id) {
+      formattedFilters.user_id = filters.user_id;
+    }
+    if (typeof filters?.published === 'boolean') {
+      formattedFilters.published = filters.published;
+    }
+    if (filters?.date_from && filters?.date_to) {
+      formattedFilters.updated_at = {
+        gte: filters.date_from,
+        lte: filters.date_to,
+      };
+    } else if (filters?.date_from) {
+      formattedFilters.updated_at = { gte: filters.date_from };
+    } else if (filters?.date_to) {
+      formattedFilters.updated_at = { lte: filters.date_to };
+    }
+
+    return formattedFilters;
+  }
+
+  getCommentsFormattedFilters(
+    filters: FilterCommentsDto,
+  ): Prisma.PostsCommentsWhereInput {
+    const formattedFilters: Prisma.PostsCommentsWhereInput = {};
+
+    if (filters?.message) {
+      formattedFilters.message = {
+        contains: filters.message,
+        mode: 'insensitive',
+      };
+    }
+    if (filters?.post_id) {
+      formattedFilters.post_id = filters.post_id;
+    }
+    if (filters?.user_id) {
+      formattedFilters.user_id = filters.user_id;
+    }
+    if (typeof filters?.published === 'boolean') {
+      formattedFilters.published = filters.published;
+    }
+    if (filters?.date_from && filters?.date_to) {
+      formattedFilters.updated_at = {
+        gte: filters.date_from,
+        lte: filters.date_to,
+      };
+    } else if (filters?.date_from) {
+      formattedFilters.updated_at = { gte: filters.date_from };
+    } else if (filters?.date_to) {
+      formattedFilters.updated_at = { lte: filters.date_to };
+    }
+
+    return formattedFilters;
+  }
+
+  returnFormattedData(returnValue: any) {
+    const formattedReturnValue = {
+      ...returnValue,
+      content: returnValue.message ? returnValue.message : undefined,
+      comments_count: returnValue._count?.comments
+        ? returnValue._count?.comments
+        : undefined,
+      likes_count: returnValue._count?.likes
+        ? returnValue._count?.likes
+        : undefined,
+    };
+
+    delete formattedReturnValue.message;
+    delete formattedReturnValue._count;
+
+    return formattedReturnValue;
+  }
+
+  getUserSelection(): Prisma.usersSelect {
     return {
       id: true,
       first_name: true,
@@ -31,7 +112,7 @@ export class BlogService {
     };
   }
 
-  getPostSelection() {
+  getPostSelection(): Prisma.PostsSelect {
     return {
       id: true,
       user: { select: this.getUserSelection() },
@@ -87,7 +168,7 @@ export class BlogService {
         },
       });
 
-      return post;
+      return this.returnFormattedData(post);
     } catch (error) {
       throw new BadRequestException('Error creating post: ' + error.message);
     }
@@ -118,7 +199,7 @@ export class BlogService {
         },
       });
 
-      return comment;
+      return this.returnFormattedData(comment);
     } catch (error) {
       throw new BadRequestException('Error creating comment: ' + error.message);
     }
@@ -236,7 +317,7 @@ export class BlogService {
         },
       });
 
-      return post;
+      return this.returnFormattedData(post);
     } catch (error) {
       throw new BadRequestException('Error updating post: ' + error.message);
     }
@@ -283,7 +364,7 @@ export class BlogService {
         },
       });
 
-      return comment;
+      return this.returnFormattedData(comment);
     } catch (error) {
       throw new BadRequestException('Error updating comment: ' + error.message);
     }
@@ -316,7 +397,7 @@ export class BlogService {
         },
       });
 
-      return updatedPost;
+      return this.returnFormattedData(updatedPost);
     } catch (error) {
       throw new BadRequestException(
         'Error updating published status: ' + error.message,
@@ -357,11 +438,256 @@ export class BlogService {
         },
       });
 
-      return updatedComment;
+      return this.returnFormattedData(updatedComment);
     } catch (error) {
       throw new BadRequestException(
         'Error updating published status: ' + error.message,
       );
+    }
+  }
+
+  async deletePost(user: JwtPayload, post_id: number) {
+    try {
+      // VERIFY POST EXIST
+      const currentPost = await this.prisma.posts.findFirst({
+        where: { id: post_id },
+      });
+      if (!currentPost) {
+        throw new NotFoundException(`There is no post with ID #${post_id}`);
+      }
+
+      // IF NOT ADMIN OR AUTHOR RETURN UNAUTHORIZED
+      if (user.roles !== 'ADMIN' && currentPost.user_id !== user.sub) {
+        throw new UnauthorizedException(
+          'You are not authorized to delete this post.',
+        );
+      }
+
+      // DELETE POST
+      const deletedPost = await this.prisma.posts.delete({
+        where: { id: post_id },
+      });
+      return this.returnFormattedData(deletedPost);
+    } catch (error) {
+      throw new BadRequestException('Error deleting post: ' + error.message);
+    }
+  }
+
+  async deleteComment(user: JwtPayload, comment_id: number) {
+    try {
+      // VERIFY COMMENT EXIST
+      const currentComment = await this.prisma.postsComments.findFirst({
+        where: { id: comment_id },
+      });
+      if (!currentComment) {
+        throw new NotFoundException(
+          `There is no comment with ID #${comment_id}`,
+        );
+      }
+
+      // IF NOT ADMIN OR AUTHOR RETURN UNAUTHORIZED
+      if (user.roles !== 'ADMIN' && currentComment.user_id !== user.sub) {
+        throw new UnauthorizedException(
+          'You are not authorized to delete this comment.',
+        );
+      }
+
+      // DELETE COMMENT
+      const deletedComment = await this.prisma.postsComments.delete({
+        where: { id: comment_id },
+      });
+      return this.returnFormattedData(deletedComment);
+    } catch (error) {
+      throw new BadRequestException('Error deleting comment: ' + error.message);
+    }
+  }
+
+  async deleteLike(user: JwtPayload, like_id: number) {
+    try {
+      // VERIFY LIKE EXIST
+      const currentLike = await this.prisma.postsLikes.findFirst({
+        where: { id: like_id },
+      });
+      if (!currentLike) {
+        throw new NotFoundException(`There is no like with ID #${like_id}`);
+      }
+
+      // IF NOT AUTHOR RETURN UNAUTHORIZED
+      if (currentLike.user_id !== user.sub) {
+        throw new UnauthorizedException(
+          'You are not authorized to delete this like.',
+        );
+      }
+
+      // DELETE LIKE
+      const deletedLike = await this.prisma.postsLikes.delete({
+        where: { id: like_id },
+      });
+      return deletedLike;
+    } catch (error) {
+      throw new BadRequestException('Error deleting like: ' + error.message);
+    }
+  }
+
+  async deleteSave(user: JwtPayload, save_id: number) {
+    try {
+      // VERIFY SAVE EXIST
+      const currentSave = await this.prisma.postsSaves.findFirst({
+        where: { id: save_id },
+      });
+      if (!currentSave) {
+        throw new NotFoundException(`There is no save with ID #${save_id}`);
+      }
+
+      // IF NOT AUTHOR RETURN UNAUTHORIZED
+      if (currentSave.user_id !== user.sub) {
+        throw new UnauthorizedException(
+          'You are not authorized to delete this save.',
+        );
+      }
+
+      // DELETE SAVE
+      const deletedSave = await this.prisma.postsSaves.delete({
+        where: { id: save_id },
+      });
+      return deletedSave;
+    } catch (error) {
+      throw new BadRequestException('Error deleting save: ' + error.message);
+    }
+  }
+
+  async findOnePost(user: JwtPayload, id: number) {
+    // VERIFY POST EXIST
+    const currentPost = await this.prisma.posts.findFirst({
+      where: { id },
+      select: {
+        ...this.getPostSelection(),
+        published: true,
+        _count: {
+          select: {
+            comments: true,
+            likes: true,
+          },
+        },
+      },
+    });
+    if (!currentPost) {
+      throw new NotFoundException(`There is no post with ID #${id}`);
+    }
+
+    // VERIFY IF CAN FETCH [published=true | ADMIN | author]
+    const canFetch =
+      currentPost.published === true
+        ? true // If is published, anyone can see
+        : !user
+          ? false // If not published, it requires logged user
+          : user.roles === 'ADMIN'
+            ? true // Admin always can see
+            : user.sub === currentPost.user.id
+              ? true // Authors always can see
+              : false;
+
+    if (!canFetch) {
+      throw new UnauthorizedException(
+        'You are not authorized to see this post.',
+      );
+    }
+
+    // REMOVE PUBLISHED STATUS FROM RESPONSE
+    delete currentPost.published;
+
+    return this.returnFormattedData(currentPost);
+  }
+
+  async findOneComment(user: JwtPayload, id: number) {
+    // VERIFY COMMENT EXIST
+    const currentComment = await this.prisma.postsComments.findFirst({
+      where: { id },
+      select: {
+        post: { select: this.getPostSelection() },
+        user: { select: this.getUserSelection() },
+        message: true,
+        updated_at: true,
+        published: true,
+      },
+    });
+    if (!currentComment) {
+      throw new NotFoundException(`There is no comment with ID #${id}`);
+    }
+
+    // VERIFY IF CAN FETCH [published=true | ADMIN | author]
+    const canFetch =
+      currentComment.published === true
+        ? true // If is published, anyone can see
+        : !user
+          ? false // If not published, it requires logged user
+          : user.roles === 'ADMIN'
+            ? true // Admin always can see
+            : user.sub === currentComment.user.id
+              ? true // Authors always can see
+              : false;
+
+    if (!canFetch) {
+      throw new UnauthorizedException(
+        'You are not authorized to see this comment.',
+      );
+    }
+
+    // REMOVE PUBLISHED STATUS FROM RESPONSE
+    delete currentComment.published;
+
+    return this.returnFormattedData(currentComment);
+  }
+
+  async findAllPosts(filters: FilterPostsDto) {
+    try {
+      const appliedFilters: Prisma.PostsWhereInput =
+        this.getPostFormattedFilters(filters);
+
+      const posts = await this.prisma.posts.findMany({
+        where: appliedFilters,
+        select: {
+          ...this.getPostSelection(),
+          image: true,
+          published: true,
+          _count: {
+            select: {
+              comments: { where: { published: true } },
+              likes: true,
+            },
+          },
+        },
+      });
+
+      const formattedPosts = posts.map((post) =>
+        this.returnFormattedData(post),
+      );
+      return formattedPosts;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async findAllComments(filters: FilterCommentsDto) {
+    try {
+      const appliedFilters: Prisma.PostsCommentsWhereInput =
+        this.getCommentsFormattedFilters(filters);
+
+      const comments = await this.prisma.postsComments.findMany({
+        where: appliedFilters,
+        select: {
+          id: true,
+          message: true,
+          updated_at: true,
+          published: true,
+          user: { select: this.getUserSelection() },
+          post: { select: this.getPostSelection() },
+        },
+      });
+
+      return comments;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
     }
   }
 }

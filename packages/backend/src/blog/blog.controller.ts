@@ -1,26 +1,23 @@
 import {
   Controller,
-  //  Get,
+  Get,
   Post,
   Body,
   Patch,
   Param,
-  //Delete,
+  Delete,
   Put,
   UseGuards,
   UploadedFile,
   UseInterceptors,
-  ///Query,
+  Query,
 } from '@nestjs/common';
 import { PostEntity, Comment, Like, Save } from './entities/blog.entity';
 import { BlogService } from './blog.service';
 import { CreatePostDto, CreateCommentDto } from './dto/create.dto';
 import { UpdatePostDto, UpdateCommentDto } from './dto/update.dto';
-//import { FilterPostsDto, FilterCommentsDto } from './dto/filters.dto';
+import { FilterPostsDto, FilterCommentsDto } from './dto/filters.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-// import { ApiTags, ApiBody, ApiOperation, ApiCreatedResponse, ApiInternalServerErrorResponse, ApiBearerAuth, ApiOkResponse, ApiNotFoundResponse, ApiParam, ApiUnauthorizedResponse, ApiBadRequestResponse, } from '@nestjs/swagger';
-// import { Roles, GetUser, Public, GetUserOptional } from 'src/auth/decorators';
-
 import {
   ApiTags,
   ApiBody,
@@ -31,10 +28,10 @@ import {
   ApiOkResponse,
   ApiNotFoundResponse,
   ApiParam,
+  ApiUnauthorizedResponse,
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
-import { Roles, GetUser } from 'src/auth/decorators';
-
+import { Roles, GetUser, Public, GetUserOptional } from 'src/auth/decorators';
 import { JwtAuthGuard, RolesGuard } from 'src/auth/guards';
 import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
 
@@ -245,189 +242,255 @@ export class BlogController {
   }
 
   // FIND ONE: POST | COMMENT
-  // @Public()
-  // @Get('/post/:id')
-  // @ApiOkResponse({ type: PostEntity })
-  // @ApiInternalServerErrorResponse({ description: 'Error fetching post: [ERROR MESSAGE]', })
-  // @ApiNotFoundResponse({ description: 'There is no post with ID #[:id]' })
-  // @ApiUnauthorizedResponse({ description: 'If the post is "unpublished" and the user is not admin or the owner of the post', })
-  // @ApiOperation({
-  //   summary: 'Fetch post by ID',
-  //   description: `
-  //     Fetch one post by ID.
-  //     \n\n REQUIRED ROLES: **PUBLIC**
-  //     \n\n OPTIONAL ROLES: **ADMIN | MENTOR | USER**
-  //     \n\n **VALIDATIONS:**
-  //     \n\n * IF THE POST IS PUBLISHED: Always return the post.
-  //     \n\n * IF THE USER ROLE IS "ADMIN": Always return the post.
-  //     \n\n * IF THE POST IS UNPUBLISHED: If the user is **NOT** the owner of the post, returns Unauthorized
-  //   `,
-  // })
-  // @ApiParam({ name: 'id' })
-  // findOnePost(@GetUserOptional() user: JwtPayload | undefined, @Param('id') id: string,) {
-  //   //return this.blogService.findOnePost(+id, user);
-  // }
+  @Public()
+  @Get('/post/:id')
+  @ApiOkResponse({ type: PostEntity })
+  @ApiInternalServerErrorResponse({
+    description: 'Error fetching post: [ERROR MESSAGE]',
+  })
+  @ApiNotFoundResponse({ description: 'There is no post with ID #[:id]' })
+  @ApiUnauthorizedResponse({
+    description:
+      'If the post is "unpublished" and the user is not admin or the owner of the post',
+  })
+  @ApiOperation({
+    summary: 'Fetch post by ID',
+    description: `
+      Fetch one post by ID.
+      \n\n REQUIRED ROLES: **PUBLIC**
+      \n\n OPTIONAL ROLES: **ADMIN | MENTOR | USER**
+      \n\n **VALIDATIONS:**
+      \n\n * IF THE POST IS PUBLISHED: Always return the post.
+      \n\n * IF THE USER ROLE IS "ADMIN": Always return the post.
+      \n\n * IF THE POST IS UNPUBLISHED: If the user is **NOT** the owner of the post, returns Unauthorized
+    `,
+  })
+  @ApiParam({ name: 'id' })
+  findOnePost(
+    @GetUserOptional() user: JwtPayload | undefined,
+    @Param('id') id: string,
+  ) {
+    return this.blogService.findOnePost(user, +id);
+  }
 
-  // @Public()
-  // @Get('/comment/:id')
-  // @ApiOkResponse({ type: Comment })
-  // @ApiInternalServerErrorResponse({ description: 'Error fetching comment: [ERROR MESSAGE]', })
-  // @ApiNotFoundResponse({ description: 'There is no comment with ID #[:id]' })
-  // @ApiUnauthorizedResponse({ description: 'If the comment is "unpublished" and the user is not admin or the owner of the comment', })
-  // @ApiOperation({
-  //   summary: 'Fetch comment by ID',
-  //   description: `
-  //     Fetch one comment by ID.
-  //     \n\n REQUIRED ROLES: **PUBLIC**
-  //     \n\n OPTIONAL ROLES: **ADMIN | MENTOR | USER**
-  //     \n\n **VALIDATIONS:**
-  //     \n\n * IF THE COMMENT IS PUBLISHED: Always return the comment.
-  //     \n\n * IF THE USER ROLE IS "ADMIN": Always return the comment.
-  //     \n\n * IF THE COMMENT IS UNPUBLISHED: If the user is **NOT** the owner of the comment, returns Unauthorized
-  //   `,
-  // })
-  // @ApiParam({ name: 'id' })
-  // findOneComment(@GetUserOptional() user: JwtPayload | undefined, @Param('id') id: string,) {
-  //   //return this.blogService.findOneComment(+id, user);
-  // }
+  @Public()
+  @Get('/comment/:id')
+  @ApiOkResponse({ type: Comment })
+  @ApiInternalServerErrorResponse({
+    description: 'Error fetching comment: [ERROR MESSAGE]',
+  })
+  @ApiNotFoundResponse({ description: 'There is no comment with ID #[:id]' })
+  @ApiUnauthorizedResponse({
+    description:
+      'If the comment is "unpublished" and the user is not admin or the owner of the comment',
+  })
+  @ApiOperation({
+    summary: 'Fetch comment by ID',
+    description: `
+      Fetch one comment by ID.
+      \n\n REQUIRED ROLES: **PUBLIC**
+      \n\n OPTIONAL ROLES: **ADMIN | MENTOR | USER**
+      \n\n **VALIDATIONS:**
+      \n\n * IF THE COMMENT IS PUBLISHED: Always return the comment.
+      \n\n * IF THE USER ROLE IS "ADMIN": Always return the comment.
+      \n\n * IF THE COMMENT IS UNPUBLISHED: If the user is **NOT** the owner of the comment, returns Unauthorized
+    `,
+  })
+  @ApiParam({ name: 'id' })
+  findOneComment(
+    @GetUserOptional() user: JwtPayload | undefined,
+    @Param('id') id: string,
+  ) {
+    return this.blogService.findOneComment(user, +id);
+  }
 
   // FIND ALL: POST | COMMENTS
-  // @Public()
-  // @Get('/post')
-  // @ApiOkResponse({ type: PostEntity, isArray: true })
-  // @ApiInternalServerErrorResponse({ description: 'Error fetching posts: [ERROR MESSAGE]', })
-  // @ApiOperation({
-  //   summary: 'Fetch posts',
-  //   description: `
-  //       Fetch posts.
-  //       \n\n REQUIRED ROLES: **PUBLIC**
-  //       \n\n OPTIONAL ROLES: **ADMIN | MENTOR | USER**
-  //       \n\n **VALIDATIONS:**
-  //       \n\n * ONLY ADMIN USERS CAN FETCH "UNPUBLISHED" POSTS
-  //       \n\n * IF THERE IS NO USER OR THE USER IS NOT ADMIN, "PUBLISHED" FILTER IS FORCED TO "TRUE"
-  //     `,
-  // })
-  // findAllPosts(@GetUserOptional() user: JwtPayload | undefined, @Query() filters: FilterPostsDto,) {
-  //   // Set filter "Date to" to the end of the day if exists
-  //   const filterDateTo = filters.date_to ? new Date(filters.date_to) : null;
-  //   if (filterDateTo) { filterDateTo.setUTCHours(23, 59, 59); }
+  @Public()
+  @Get('/post')
+  @ApiOkResponse({ type: PostEntity, isArray: true })
+  @ApiInternalServerErrorResponse({
+    description: 'Error fetching posts: [ERROR MESSAGE]',
+  })
+  @ApiOperation({
+    summary: 'Fetch posts',
+    description: ` 
+        \n\n Fetch posts.
+        \n\n REQUIRED ROLES: **PUBLIC**
+        \n\n OPTIONAL ROLES: **ADMIN | MENTOR | USER**
+        \n\n **VALIDATIONS:**
+        \n\n * ONLY ADMIN USERS CAN FETCH "UNPUBLISHED" POSTS
+        \n\n * IF THERE IS NO USER OR THE USER IS NOT ADMIN, "PUBLISHED" FILTER IS FORCED TO "TRUE"
+      `,
+  })
+  findAllPosts(
+    @GetUserOptional() user: JwtPayload | undefined,
+    @Query() filters: FilterPostsDto,
+  ) {
+    // Set filter "Date to" to the end of the day if exists
+    const filterDateTo = filters.date_to ? new Date(filters.date_to) : null;
+    if (filterDateTo) {
+      filterDateTo.setUTCHours(23, 59, 59);
+    }
 
-  //   const searchFilters: FilterPostsDto = {
-  //     message: filters.message,
-  //     published: user?.roles === 'ADMIN' ? filters.published : true,
-  //     user_id: filters.user_id,
-  //     date_from: filters.date_from ? new Date(filters.date_from) : null,
-  //     date_to: filterDateTo ? new Date(filterDateTo.toISOString()) : null,
-  //   };
-  //   //return this.blogService.findAllPosts(searchFilters);
-  // }
+    // Set filter "published" according to user role
+    const filterPublished = !user
+      ? true
+      : user?.roles !== 'ADMIN'
+        ? true
+        : typeof filters.published === 'string'
+          ? filters.published === 'true'
+          : filters.published;
 
-  // @Public()
-  // @Get('/comments')
-  // @ApiOkResponse({ type: Comment, isArray: true })
-  // @ApiInternalServerErrorResponse({ description: 'Error fetching comments: [ERROR MESSAGE]', })
-  // @ApiOperation({
-  //   summary: 'Fetch comments',
-  //   description: `
-  //       Fetch comments.
-  //       \n\n REQUIRED ROLES: **PUBLIC**
-  //       \n\n OPTIONAL ROLES: **ADMIN | MENTOR | USER**
-  //       \n\n **VALIDATIONS:**
-  //       \n\n * ONLY ADMIN USERS CAN FETCH "UNPUBLISHED" COMMENTS
-  //       \n\n * IF THERE IS NO USER OR THE USER IS NOT ADMIN, "PUBLISHED" FILTER IS FORCED TO "TRUE"
-  //     `,
-  // })
-  // findAllComments(@GetUserOptional() user: JwtPayload | undefined, @Query() filters: FilterCommentsDto,) {
-  //   // Set filter "Date to" to the end of the day if exists
-  //   const filterDateTo = filters.date_to ? new Date(filters.date_to) : null;
-  //   if (filterDateTo) { filterDateTo.setUTCHours(23, 59, 59); }
+    const searchFilters: FilterPostsDto = {
+      message: filters.message,
+      published: filterPublished,
+      user_id: filters.user_id ? +filters.user_id : null,
+      date_from: filters.date_from ? new Date(filters.date_from) : null,
+      date_to: filterDateTo ? new Date(filterDateTo.toISOString()) : null,
+    };
+    return this.blogService.findAllPosts(searchFilters);
+  }
 
-  //   const searchFilters: FilterCommentsDto = {
-  //     message: filters.message,
-  //     published: user?.roles === 'ADMIN' ? filters.published : true,
-  //     user_id: filters.user_id,
-  //     date_from: filters.date_from ? new Date(filters.date_from) : null,
-  //     date_to: filterDateTo ? new Date(filterDateTo.toISOString()) : null,
-  //   };
-  //   //return this.blogService.findAllComments(searchFilters);
-  // }
+  @Public()
+  @Get('/post/:post_id/comments')
+  @ApiOkResponse({ type: Comment, isArray: true })
+  @ApiInternalServerErrorResponse({
+    description: 'Error fetching comments: [ERROR MESSAGE]',
+  })
+  @ApiOperation({
+    summary: 'Fetch published comments by post',
+    description: `
+        \n\n Fetch comments.
+        \n\n REQUIRED ROLES: **PUBLIC**
+        \n\n OPTIONAL ROLES: **ADMIN | MENTOR | USER**
+        \n\n **VALIDATIONS:**
+        \n\n * PUBLISHED IS FORCED TO TRUE
+        \n\n * POST ID IS FORCED TO \`:post_id\`
+      `,
+  })
+  findAllCommentsByPostId(@Param('post_id') post_id: string) {
+    const searchFilters: FilterCommentsDto = {
+      post_id: +post_id,
+      published: true,
+    };
+    return this.blogService.findAllComments(searchFilters);
+  }
+
+  @Roles('ADMIN')
+  @Get('/comments')
+  @ApiOkResponse({ type: Comment, isArray: true })
+  @ApiInternalServerErrorResponse({
+    description: 'Error fetching comments: [ERROR MESSAGE]',
+  })
+  @ApiOperation({
+    summary: 'Fetch comments (ADMINs management)',
+    description: `Fetch comments. \n\n REQUIRED ROLES: **ADMIN** \n\n To allow admins to filter comments by different fields. No need for public use.`,
+  })
+  findAllComments(@Query() filters: FilterCommentsDto) {
+    // Set filter "Date to" to the end of the day if exists
+    const filterDateTo = filters.date_to ? new Date(filters.date_to) : null;
+    if (filterDateTo) {
+      filterDateTo.setUTCHours(23, 59, 59);
+    }
+
+    const searchFilters: FilterCommentsDto = {
+      message: filters.message,
+      published:
+        typeof filters.published === 'string'
+          ? filters.published === 'true'
+          : filters.published,
+      user_id: filters.user_id ? +filters.user_id : null,
+      post_id: filters.post_id ? +filters.post_id : null,
+      date_from: filters.date_from ? new Date(filters.date_from) : null,
+      date_to: filterDateTo ? new Date(filterDateTo.toISOString()) : null,
+    };
+    return this.blogService.findAllComments(searchFilters);
+  }
 
   // DELETE: POST | COMMENT | LIKE | SAVE
-  // @Roles('ADMIN', 'MENTOR', 'USER')
-  // @Delete('post/:id')
-  // @ApiOkResponse({ type: PostEntity })
-  // @ApiNotFoundResponse({ description: 'There is no post with ID #[:id] to delete', })
-  // @ApiInternalServerErrorResponse({ description: '[ERROR MESSAGE]' })
-  // @ApiOperation({
-  //   summary: 'Delete a post',
-  //   description: `
-  //     Delete a post and its related data (comments, likes, saves)
-  //     \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**
-  //     \n\n **VALIDATIONS:**
-  //     \n\n * ADMIN can delete any post
-  //     \n\n * MENTOR | USER can delete their own posts
-  //   `,
-  // })
-  // @ApiBearerAuth()
-  // deletePost(@GetUser() user: JwtPayload, @Param('id') post_id: string,) {
-  //   //return this.blogService.deletePost(user, +post_id);
-  // }
+  @Roles('ADMIN', 'MENTOR', 'USER')
+  @Delete('post/:id')
+  @ApiOkResponse({ type: PostEntity })
+  @ApiNotFoundResponse({
+    description: 'There is no post with ID #[:id] to delete',
+  })
+  @ApiInternalServerErrorResponse({ description: '[ERROR MESSAGE]' })
+  @ApiOperation({
+    summary: 'Delete a post',
+    description: `
+      Delete a post and its related data (comments, likes, saves)
+      \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**
+      \n\n **VALIDATIONS:**
+      \n\n * ADMIN can delete any post
+      \n\n * MENTOR | USER can delete their own posts
+    `,
+  })
+  @ApiBearerAuth()
+  deletePost(@GetUser() user: JwtPayload, @Param('id') post_id: string) {
+    return this.blogService.deletePost(user, +post_id);
+  }
 
-  // @Roles('ADMIN', 'MENTOR', 'USER')
-  // @Delete('comment/:id')
-  // @ApiOkResponse({ type: Comment })
-  // @ApiNotFoundResponse({ description: 'There is no comment with ID #[:id] to delete', })
-  // @ApiInternalServerErrorResponse({ description: '[ERROR MESSAGE]' })
-  // @ApiOperation({
-  //   summary: 'Delete a comment',
-  //   description: `
-  //     Delete a comment
-  //     \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**
-  //     \n\n **VALIDATIONS:**
-  //     \n\n * ADMIN can delete any comment
-  //     \n\n * MENTOR | USER can delete their own comments
-  //   `,
-  // })
-  // @ApiBearerAuth()
-  // deleteComment(@GetUser() user: JwtPayload, @Param('id') comment_id: string,) {
-  //   //return this.blogService.deleteComment(user, +comment_id);
-  // }
+  @Roles('ADMIN', 'MENTOR', 'USER')
+  @Delete('comment/:id')
+  @ApiOkResponse({ type: Comment })
+  @ApiNotFoundResponse({
+    description: 'There is no comment with ID #[:id] to delete',
+  })
+  @ApiInternalServerErrorResponse({ description: '[ERROR MESSAGE]' })
+  @ApiOperation({
+    summary: 'Delete a comment',
+    description: `
+      Delete a comment
+      \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**
+      \n\n **VALIDATIONS:**
+      \n\n * ADMIN can delete any comment
+      \n\n * MENTOR | USER can delete their own comments
+    `,
+  })
+  @ApiBearerAuth()
+  deleteComment(@GetUser() user: JwtPayload, @Param('id') comment_id: string) {
+    return this.blogService.deleteComment(user, +comment_id);
+  }
 
-  // @Roles('ADMIN', 'MENTOR', 'USER')
-  // @Delete('like/:id')
-  // @ApiOkResponse({ type: Like })
-  // @ApiNotFoundResponse({ description: 'There is no like with ID #[:id] to delete', })
-  // @ApiInternalServerErrorResponse({ description: '[ERROR MESSAGE]' })
-  // @ApiOperation({
-  //   summary: 'Delete a like',
-  //   description: `
-  //     Delete a like
-  //     \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**
-  //     \n\n **VALIDATIONS:**
-  //     \n\n * Any user can remove their own likes
-  //   `,
-  // })
-  // @ApiBearerAuth()
-  // deleteLike(@GetUser() user: JwtPayload, @Param('id') like_id: string,) {
-  //   //return this.blogService.deleteLike(user, +like_id);
-  // }
+  @Roles('ADMIN', 'MENTOR', 'USER')
+  @Delete('like/:id')
+  @ApiOkResponse({ type: Like })
+  @ApiNotFoundResponse({
+    description: 'There is no like with ID #[:id] to delete',
+  })
+  @ApiInternalServerErrorResponse({ description: '[ERROR MESSAGE]' })
+  @ApiOperation({
+    summary: 'Delete a like',
+    description: `
+      Delete a like
+      \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**
+      \n\n **VALIDATIONS:**
+      \n\n * Any user can remove their own likes
+    `,
+  })
+  @ApiBearerAuth()
+  deleteLike(@GetUser() user: JwtPayload, @Param('id') like_id: string) {
+    return this.blogService.deleteLike(user, +like_id);
+  }
 
-  // @Roles('ADMIN', 'MENTOR', 'USER')
-  // @Delete('save/:id')
-  // @ApiOkResponse({ type: Save })
-  // @ApiNotFoundResponse({ description: 'There is no save with ID #[:id] to delete', })
-  // @ApiInternalServerErrorResponse({ description: '[ERROR MESSAGE]' })
-  // @ApiOperation({
-  //   summary: 'Delete a saved post',
-  //   description: `
-  //     Delete a save
-  //     \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**
-  //     \n\n **VALIDATIONS:**
-  //     \n\n * Any user can remove their own saved posts
-  //   `,
-  // })
-  // @ApiBearerAuth()
-  // deleteSave(@GetUser() user: JwtPayload, @Param('id') save_id: string,) {
-  //   //return this.blogService.deleteSave(user, +save_id);
-  // }
+  @Roles('ADMIN', 'MENTOR', 'USER')
+  @Delete('save/:id')
+  @ApiOkResponse({ type: Save })
+  @ApiNotFoundResponse({
+    description: 'There is no save with ID #[:id] to delete',
+  })
+  @ApiInternalServerErrorResponse({ description: '[ERROR MESSAGE]' })
+  @ApiOperation({
+    summary: 'Delete a saved post',
+    description: `
+      Delete a save
+      \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**
+      \n\n **VALIDATIONS:**
+      \n\n * Any user can remove their own saved posts
+    `,
+  })
+  @ApiBearerAuth()
+  deleteSave(@GetUser() user: JwtPayload, @Param('id') save_id: string) {
+    return this.blogService.deleteSave(user, +save_id);
+  }
 }
