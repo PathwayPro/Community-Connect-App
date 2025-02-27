@@ -10,55 +10,63 @@ import {
 import { SharedIcons } from '@/shared/components/icons';
 import { cn } from '@/shared/lib/utils';
 
-interface ThreadInputProps {
-  onSubmit?: (content: string, attachments: File[]) => void;
-  initialContent?: string;
+interface ThreadCommentInputProps {
+  onSubmit: (comment: string) => void;
+  onCancel: () => void;
   className?: string;
+  variant?: 'primary' | 'secondary';
 }
 
-export const ThreadInput = ({
+export const ThreadCommentInput = ({
   onSubmit,
-  initialContent = '',
-  className
-}: ThreadInputProps) => {
-  const [content, setContent] = useState(initialContent);
-  const [attachments, setAttachments] = useState<File[]>([]);
+  onCancel,
+  className,
+  variant = 'primary'
+}: ThreadCommentInputProps) => {
+  const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    if (!content.trim() && attachments.length === 0) return;
+    if (!comment.trim()) return;
 
     setIsSubmitting(true);
     try {
-      onSubmit?.(content, attachments);
-      setContent('');
-      setAttachments([]);
+      onSubmit(comment);
+      setComment('');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const characterLimit = 1000;
-  const remainingCharacters = characterLimit - content.length;
+  console.log('this is the variant ', variant);
+
+  const characterLimit = 500;
+  const remainingCharacters = characterLimit - comment.length;
   const isOverLimit = remainingCharacters < 0;
 
   return (
     <div
-      className={cn('space-y-4 rounded-lg border bg-card p-4', className)}
+      className={cn(
+        'space-y-4 rounded-xl border p-4',
+        className,
+        variant === 'primary' ? 'bg-white' : 'bg-muted'
+      )}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="flex gap-6">
-        <Avatar className="h-11 w-11 bg-warning-500">
+      <div className="flex items-center gap-6">
+        <Avatar className="mb-12 h-11 w-11 bg-warning-500">
           <AvatarImage src="https://github.com/shadcn.png" alt="User avatar" />
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <div className="relative flex flex-col">
             <Textarea
-              placeholder="What's on your mind?"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="min-h-[400px] resize-none rounded-lg text-base"
+              placeholder="Write a comment..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className={cn(
+                'min-h-[150px] resize-none rounded-lg bg-white text-base'
+              )}
               maxLength={characterLimit}
             />
             <div className="absolute bottom-14 right-4 flex items-center gap-1 text-sm text-muted-foreground">
@@ -86,17 +94,22 @@ export const ThreadInput = ({
                 </button>
               </div>
 
-              <Button
-                onClick={handleSubmit}
-                className="h-10 w-fit rounded-xl"
-                // disabled={
-                //   isSubmitting ||
-                //   (!content.trim() && attachments.length === 0) ||
-                //   isOverLimit
-                // }
-              >
-                Post Thread
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={onCancel}
+                  className="h-10 w-fit rounded-xl"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmit}
+                  className="h-10 w-fit rounded-xl"
+                  disabled={isSubmitting || !comment.trim() || isOverLimit}
+                >
+                  Post Comment
+                </Button>
+              </div>
             </div>
           </div>
         </div>

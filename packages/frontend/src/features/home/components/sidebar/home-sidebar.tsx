@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { NavItem } from './nav-item';
 import { navItems } from './config/site';
 
-export const HomeSidebar = () => {
-  const [activeTab, setActiveTab] = useState<string>('threads');
+interface HomeSidebarProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}
 
+export const HomeSidebar = ({ activeTab, setActiveTab }: HomeSidebarProps) => {
   return (
     <div className="flex h-full flex-col gap-6">
       {/* Search */}

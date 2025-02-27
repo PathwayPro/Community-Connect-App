@@ -5,7 +5,33 @@ export const sortOptions = [
   { value: 'most-commented', label: 'Most Commented' }
 ];
 
-export const mockThreads = [
+export interface Thread {
+  id: number;
+  authorName: string;
+  authorUsername: string;
+  timeAgo: string;
+  content: string;
+  avatarUrl: string;
+  imageUrl: string;
+  likes: number;
+  comments: number;
+  tags?: string[];
+  isSaved?: boolean;
+}
+
+export interface Comment {
+  id: number;
+  authorName: string;
+  authorUsername: string;
+  timeAgo: string;
+  content: string;
+  avatarUrl: string;
+  likes?: number;
+  comments?: number;
+  replies?: Comment[];
+}
+
+export const mockThreads: Thread[] = [
   {
     id: 1,
     authorName: 'Sarah Johnson',
@@ -16,7 +42,9 @@ export const mockThreads = [
     avatarUrl: '/profile/msnobody.png',
     imageUrl: '/home/1.png',
     likes: 42,
-    comments: 12
+    comments: 12,
+    isSaved: false,
+    tags: ['mentorship', 'events']
   },
   {
     id: 2,
@@ -24,11 +52,13 @@ export const mockThreads = [
     authorUsername: 'alexc_dev',
     timeAgo: '5h',
     content:
-      "Exploring the power of Tailwind CSS and Shadcn UI. The developer experience is unmatched! Here's a sneak peek of my latest project.",
+      "Exploring the power of Tailwind CSS and Shadcn UI. The developer experience is unmatched! Here's a sneak peek of my latest project built using the latest Next.js 14 App Router. Great for building complex applications and scalable websites. #webdev #tailwindcss #shadcn",
     avatarUrl: '/profile/mra.png',
     imageUrl: '/home/2.png',
     likes: 89,
-    comments: 24
+    comments: 24,
+    isSaved: false,
+    tags: ['career', 'education', 'design']
   },
   {
     id: 3,
@@ -40,7 +70,9 @@ export const mockThreads = [
     avatarUrl: '/profile/mrnice.png',
     imageUrl: '/home/1.png',
     likes: 156,
-    comments: 35
+    comments: 35,
+    isSaved: true,
+    tags: ['design', 'mentorship', 'events']
   },
   {
     id: 4,
@@ -52,7 +84,9 @@ export const mockThreads = [
     avatarUrl: '/profile/mrnobody.png',
     imageUrl: '/home/2.png',
     likes: 267,
-    comments: 58
+    comments: 58,
+    isSaved: false,
+    tags: ['documentaries', 'data analytics']
   },
   {
     id: 5,
@@ -64,6 +98,63 @@ export const mockThreads = [
     avatarUrl: '/profile/mrnobody.png',
     imageUrl: '/home/1.png',
     likes: 193,
-    comments: 45
+    comments: 45,
+    isSaved: true,
+    tags: ['mentorship', 'events']
+  }
+];
+
+export const mockComments: Comment[] = [
+  {
+    id: 1,
+    authorName: 'Sarah Johnson',
+    authorUsername: 'sarahj',
+    timeAgo: '2h',
+    content: 'This is a comment',
+    avatarUrl: '/profile/msnobody.png',
+    likes: 10,
+    comments: 0,
+    replies: []
+  },
+  {
+    id: 2,
+    authorName: 'Alex Chen',
+    authorUsername: 'alexc_dev',
+    timeAgo: '5h',
+    content: 'This is a comment',
+    avatarUrl: '/profile/mra.png',
+    likes: 15,
+    comments: 0,
+    replies: []
+  },
+  {
+    id: 3,
+    authorName: 'Maria Garcia',
+    authorUsername: 'maria_codes',
+    timeAgo: '1d',
+    content: 'This is a comment',
+    avatarUrl: '/profile/mrnice.png',
+    likes: 25,
+    comments: 2,
+    replies: [
+      {
+        id: 1,
+        authorName: 'Sarah Johnson',
+        authorUsername: 'sarahj',
+        timeAgo: '2h',
+        content: 'This is a reply',
+        avatarUrl: '/profile/msnobody.png',
+        likes: 10
+      },
+      {
+        id: 2,
+        authorName: 'Alex Chen',
+        authorUsername: 'alexc_dev',
+        timeAgo: '5h',
+        content: 'This is a reply',
+        avatarUrl: '/profile/mra.png',
+        likes: 15
+      }
+    ]
   }
 ];
