@@ -1,11 +1,7 @@
-import { Home } from '@/features/home/components/home';
+import { LandingPage } from '@/features/landing/components/landing-page';
 
-const DashboardPage = () => {
-  return (
-    <div className="h-full w-full">
-      <Home />
-    </div>
-  );
+const HomePage = () => {
+  return <LandingPage />;
 };
 
-export default DashboardPage;
+export default HomePage;

@@ -14,6 +14,19 @@ const BreadcrumbNav = () => {
   const pathname = usePathname();
   const pathSegments = pathname.split('/').filter(Boolean);
 
+  // Skip processing if we're on the home page
+  if (pathSegments.length === 1 && pathSegments[0] === 'home') {
+    return (
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Home</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    );
+  }
+
   // for the breadcrumb, we want to display the pathname in a readable format
   // format the breadcrumb to separate words with a space and capitalize the first letter of each word if it has a dash
   const breadcrumbItems = pathSegments.map((path) => ({

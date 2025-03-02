@@ -1,7 +1,9 @@
+import { Home } from '@/features/home/components/home';
+
 const HomePage = () => {
   return (
     <div className="h-full w-full">
-      <h1>Home Page</h1>
+      <Home />
     </div>
   );
 };

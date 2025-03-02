@@ -14,12 +14,13 @@ export function RootLayoutClient({
 }>) {
   const pathname = usePathname();
   const isAuth = pathname.startsWith('/auth');
+  const isLanding = pathname === '/';
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <AuthProvider>
         <TooltipProvider>
-          {isAuth ? (
+          {isAuth || isLanding ? (
             children
           ) : (
             <MainLayout>

@@ -5,10 +5,12 @@ import {
   SearchIcon,
   User,
   MapPin,
-  Clock
+  Clock,
+  Info
 } from 'lucide-react';
 
 export const Icons = {
+  info: Info,
   clock: Clock,
   map: MapPin,
   spinner: Loader2,

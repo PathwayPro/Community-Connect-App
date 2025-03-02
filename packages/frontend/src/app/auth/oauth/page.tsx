@@ -56,7 +56,7 @@ export const OAuthHandler = () => {
             description: 'Welcome back to the app!'
           });
 
-          router.push('/profile');
+          router.push('/home');
           router.refresh();
         }
       } catch (error) {

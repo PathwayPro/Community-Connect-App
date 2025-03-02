@@ -141,3 +141,11 @@ body {
     @apply mx-auto max-w-[1280px] px-4;
   }
 }
+
+.dialog-overlay {
+  @apply rounded-2xl;
+}
+
+[role='dialog'] {
+  @apply rounded-2xl;
+}
