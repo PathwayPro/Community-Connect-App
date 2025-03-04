@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { Linkedin, Facebook, Instagram } from 'lucide-react';
+import { Icons } from '@/features/auth/components';
+import { Separator } from '@/shared/components/ui/separator';
 
 interface FooterLinkProps {
   href: string;
@@ -10,7 +11,7 @@ interface FooterLinkProps {
 const FooterLink = ({ href, children }: FooterLinkProps) => (
   <Link
     href={href}
-    className="text-gray-600 transition-colors hover:text-gray-900"
+    className="text-neutral-dark-100 transition-colors hover:text-gray-900"
   >
     {children}
   </Link>
@@ -18,66 +19,84 @@ const FooterLink = ({ href, children }: FooterLinkProps) => (
 
 export function FooterSection() {
   return (
-    <footer className="border-t bg-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-          {/* Logo and Social Links */}
-          <div className="space-y-6">
-            <Image
-              src="/images/logo.png"
-              alt="CommunNet Logo"
-              width={150}
-              height={40}
-              className="h-10 w-auto"
-            />
-            <div className="flex space-x-4">
-              <FooterLink href="https://linkedin.com">
-                <Linkedin className="h-5 w-5" />
-              </FooterLink>
-              <FooterLink href="https://facebook.com">
-                <Facebook className="h-5 w-5" />
-              </FooterLink>
-              <FooterLink href="https://instagram.com">
-                <Instagram className="h-5 w-5" />
-              </FooterLink>
+    <footer className="border-t bg-[#E9EEFF]">
+      <div className="px-16">
+        <div className="py-8">
+          <div className="flex justify-between">
+            {/* Logo and Social Links */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Icons.logo className="h-16 w-16" />
+                <h5 className="text-2xl font-semibold text-primary-500">
+                  CommuNet
+                </h5>
+              </div>
+              <div className="flex flex-col">
+                <p className="text-sm text-neutral-dark-100">
+                  Connecting communities through technology
+                </p>
+              </div>
+              <div className="flex space-x-4 pt-6">
+                <FooterLink href="https://linkedin.com">
+                  <Linkedin className="h-5 w-5" />
+                </FooterLink>
+                <FooterLink href="https://facebook.com">
+                  <Facebook className="h-5 w-5" />
+                </FooterLink>
+                <FooterLink href="https://instagram.com">
+                  <Instagram className="h-5 w-5" />
+                </FooterLink>
+              </div>
             </div>
-          </div>
 
-          {/* Company Links */}
-          <div>
-            <h3 className="mb-4 font-semibold">Company</h3>
-            <div className="space-y-3">
-              <FooterLink href="/about">About Us</FooterLink>
-              <FooterLink href="/contact">Contact Us</FooterLink>
-              <FooterLink href="/membership">Apply for membership</FooterLink>
-              <FooterLink href="/careers">Careers</FooterLink>
-            </div>
-          </div>
+            {/* Company Links */}
+            <div className="flex gap-4">
+              <div className="flex flex-col">
+                <h6 className="mb-4 font-semibold text-primary-500">Company</h6>
+                <div className="flex flex-col gap-2">
+                  <FooterLink href="/about">About Us</FooterLink>
+                  <FooterLink href="/contact">Contact Us</FooterLink>
+                  <FooterLink href="/membership">
+                    Apply for membership
+                  </FooterLink>
+                  <FooterLink href="/careers">Careers</FooterLink>
+                </div>
+              </div>
 
-          {/* Work with Us Links */}
-          <div>
-            <h3 className="mb-4 font-semibold">Work with Us</h3>
-            <div className="space-y-3">
-              <FooterLink href="/member">Become a member</FooterLink>
-              <FooterLink href="/volunteer">Become a volunteer</FooterLink>
-              <FooterLink href="/partner">Become a partner</FooterLink>
-            </div>
-          </div>
+              {/* Work with Us Links */}
+              <div>
+                <h6 className="mb-4 font-semibold text-primary-500">
+                  Work with Us
+                </h6>
+                <div className="flex flex-col gap-2">
+                  <FooterLink href="/member">Become a member</FooterLink>
+                  <FooterLink href="/volunteer">Become a volunteer</FooterLink>
+                  <FooterLink href="/partner">Become a partner</FooterLink>
+                </div>
+              </div>
 
-          {/* Events Links */}
-          <div>
-            <h3 className="mb-4 font-semibold">Events</h3>
-            <div className="space-y-3">
-              <FooterLink href="/events/upcoming">Upcoming Events</FooterLink>
-              <FooterLink href="/events/past">Past Events</FooterLink>
+              {/* Events Links */}
+              <div>
+                <h6 className="mb-4 font-semibold text-primary-500">Events</h6>
+                <div className="flex flex-col gap-2">
+                  <FooterLink href="/events/upcoming">
+                    Upcoming Events
+                  </FooterLink>
+                  <FooterLink href="/events/past">Past Events</FooterLink>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
+      <Separator className="my-2 border-[0.5px] border-[#C3D0FF]" />
+
+      <div className="px-16">
         {/* Copyright */}
-        <div className="mt-8 border-t pt-8">
+        <div className="py-4">
           <p className="text-sm text-gray-600">
-            © {new Date().getFullYear()} All rights reserved.
+            © {new Date().getFullYear()} CommuNet. All rights reserved.
           </p>
         </div>
       </div>

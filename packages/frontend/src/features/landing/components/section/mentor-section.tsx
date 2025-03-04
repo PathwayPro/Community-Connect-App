@@ -1,28 +1,49 @@
 import { Button } from '@/shared/components/ui/button';
+import { ItemCard } from '../common/item-card';
+import { ItemCardProps } from '@/features/landing/types';
 
-interface StepProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}
-
-const Step = ({ icon, title, description }: StepProps) => (
-  <div className="flex flex-col items-center space-y-2 text-center">
-    <div className="mb-2 rounded-full bg-opacity-20 p-4">{icon}</div>
-    <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-    <p className="max-w-[200px] text-sm text-gray-600">{description}</p>
-  </div>
-);
+const steps: ItemCardProps[] = [
+  {
+    title: 'Sign Up to the Platform',
+    description:
+      'Create your profile and become part of the CommuneNet platform for free.',
+    icon: 'pen',
+    bgColor: 'bg-[#E3DFFF]'
+  },
+  {
+    title: 'Apply for Mentorship',
+    description:
+      'Tell us about your goals and background so we can match you with the right mentor.',
+    icon: 'document',
+    bgColor: 'bg-[#FFEAE2]'
+  },
+  {
+    title: 'Get Matched and Learn',
+    description:
+      'Connect with your mentor for one-on-one guidance, career advice, and support.',
+    icon: 'search',
+    bgColor: 'bg-[#FFE2EB]'
+  },
+  {
+    title: 'Thrive and Give Back',
+    description:
+      "Apply what you've learned and when you're ready, become a mentor to support others!",
+    icon: 'tick',
+    bgColor: 'bg-[#D7FFD7]'
+  }
+];
 
 export function MentorSection() {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16">
-      <div className="mb-12 text-center">
-        <p className="mb-2 text-sm font-medium text-gray-600">HOW IT WORKS</p>
-        <h2 className="mb-4 text-3xl font-bold text-gray-900">
+    <section className="mx-auto py-[160px]">
+      <div className="mb-[120px] text-center">
+        <h6 className="mb-2 font-semibold text-neutral-dark-100">
+          HOW IT WORKS
+        </h6>
+        <h2 className="mb-6 text-5xl font-semibold text-primary-500">
           Find a Mentor & Grow Your Career
         </h2>
-        <p className="mx-auto max-w-2xl text-gray-600">
+        <p className="paragraph-lg mx-auto max-w-2xl text-center font-normal">
           Gain support from experienced mentors who have navigated the
           challenges of immigrating and building a career. Whether you need
           career advice, skill development, or industry insights, our mentors
@@ -30,32 +51,25 @@ export function MentorSection() {
         </p>
       </div>
 
-      <div className="mb-12 grid grid-cols-1 gap-8 md:grid-cols-4">
-        <Step
-          icon={<div className="h-12 w-12 rounded-full bg-purple-200" />}
-          title="Sign Up to the Platform"
-          description="Create your profile and become part of the CommuneNet platform for free."
-        />
-        <Step
-          icon={<div className="h-12 w-12 rounded-full bg-orange-200" />}
-          title="Apply for Mentorship"
-          description="Tell us about your goals and background so we can match you with the right mentor."
-        />
-        <Step
-          icon={<div className="h-12 w-12 rounded-full bg-pink-200" />}
-          title="Get Matched and Learn"
-          description="Connect with your mentor for one-on-one guidance, career advice, and support."
-        />
-        <Step
-          icon={<div className="h-12 w-12 rounded-full bg-green-200" />}
-          title="Thrive and Give Back"
-          description="Apply what you've learned and when you're ready, become a mentor to support others!"
-        />
-      </div>
+      <div className="mb-12 grid grid-cols-1 gap-24 rounded-3xl bg-[#E9EEFF] p-16">
+        <div className="flex items-start gap-8">
+          {steps.map((step, index) => (
+            <ItemCard
+              key={index}
+              bgColor={step.bgColor}
+              icon={step.icon}
+              title={step.title}
+              description={step.description}
+            />
+          ))}
+        </div>
 
-      <div className="flex justify-center gap-4">
-        <Button variant="outline">Become a Mentor</Button>
-        <Button>Apply for Mentorship</Button>
+        <div className="flex justify-center gap-4">
+          <Button variant="outline" className="h-[60px] w-fit px-12">
+            Become a Mentor
+          </Button>
+          <Button className="h-[60px] w-fit px-12">Apply for Mentorship</Button>
+        </div>
       </div>
     </section>
   );

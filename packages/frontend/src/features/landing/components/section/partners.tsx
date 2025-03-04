@@ -20,9 +20,9 @@ export function PartnersSection({ className }: PartnersProps) {
     <div
       className={cn('w-full overflow-hidden bg-background py-12', className)}
     >
-      <h2 className="mb-8 text-center text-lg font-medium text-muted-foreground">
+      <h6 className="mb-8 text-center font-semibold text-neutral-dark-100">
         OUR TRUSTED PARTNERS
-      </h2>
+      </h6>
 
       <div className="relative flex overflow-x-hidden">
         {/* First scroll container */}

@@ -2,13 +2,7 @@
 
 import { Features } from '@/features/landing/components/common/assets/features';
 import { cn } from '@/shared/lib/utils';
-
-interface ItemCardProps {
-  title: string;
-  description: string;
-  icon: string;
-  bgColor: string;
-}
+import { ItemCardProps } from '@/features/landing/types';
 
 export const ItemCard = ({
   title,

@@ -50,7 +50,7 @@ const MentorDashboard = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="container-wide flex flex-col gap-6">
       <MentorshipSection>
         <MentorshipSection.Header>
           <h6 className="font-semibold">Hey, {user?.firstName}!👋</h6>

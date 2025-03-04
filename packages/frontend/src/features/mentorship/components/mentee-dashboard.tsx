@@ -147,7 +147,7 @@ const MenteeDashboard = () => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-6">
+    <div className="container-wide flex w-full flex-col gap-6">
       <MentorshipSection className="h-auto w-full">
         <MentorshipSection.Header>
           <h6 className="font-semibold">Hey, {user?.firstName}!👋</h6>

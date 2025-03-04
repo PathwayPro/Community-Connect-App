@@ -35,7 +35,7 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="mt-12 px-16 py-16">
+    <section id="features" className="px-16 py-[160px]">
       <div className="mx-auto flex max-w-7xl flex-col items-center">
         <div className="mb-[120px] flex flex-col items-center gap-2 text-center">
           <h6 className="text-center font-semibold text-neutral-dark-100">
