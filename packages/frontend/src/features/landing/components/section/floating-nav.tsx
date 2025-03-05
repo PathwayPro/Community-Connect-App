@@ -14,12 +14,28 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Home', href: '#home' },
   { label: 'About', href: '#about' },
-  { label: 'Contact Us', href: '#contact' },
-  { label: 'Features', href: '#features' }
+  { label: 'Features', href: '#features' },
+  { label: 'Mentorship', href: '#mentorship' },
+  { label: 'Contact Us', href: '#contact' }
 ];
 
 export function FloatingNav() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeHash, setActiveHash] = useState('');
+
+  useEffect(() => {
+    // Update active hash on mount and hash change
+    const updateActiveHash = () => {
+      setActiveHash(window.location.hash);
+    };
+
+    // Set initial hash
+    updateActiveHash();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', updateActiveHash);
+    return () => window.removeEventListener('hashchange', updateActiveHash);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,6 +45,24 @@ export function FloatingNav() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleNavClick = (href: string) => {
+    // Prevent default behavior
+    const targetId = href.replace('#', '');
+    const element = document.getElementById(targetId);
+
+    if (element) {
+      // Smooth scroll to element
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+
+      // Update URL and trigger hashchange after scrolling
+      window.history.pushState(null, '', href);
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    }
+  };
 
   return (
     <nav
@@ -49,7 +83,14 @@ export function FloatingNav() {
           <Link
             href={item.href}
             key={item.href}
-            className="px-2 text-base font-medium text-primary hover:border-b hover:border-primary"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavClick(item.href);
+            }}
+            className={cn(
+              'px-2 text-base font-medium text-primary hover:border-b hover:border-primary',
+              item.href === activeHash ? 'border-b border-primary' : ''
+            )}
           >
             {item.label}
           </Link>

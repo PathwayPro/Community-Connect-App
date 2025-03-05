@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { ThemeProvider } from '@/styles/theme-provider';
 import MainLayout from './main-layout';
 import { TooltipProvider } from '@/shared/components/ui/tooltip';
+import LandingLayout from './landing-layout';
 
 export function RootLayoutClient({
   children
@@ -20,8 +21,10 @@ export function RootLayoutClient({
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <AuthProvider>
         <TooltipProvider>
-          {isAuth || isLanding ? (
+          {isAuth ? (
             children
+          ) : isLanding ? (
+            <LandingLayout>{children}</LandingLayout>
           ) : (
             <MainLayout>
               <div className="flex w-full">{children}</div>

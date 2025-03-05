@@ -8,7 +8,8 @@ export const ItemCard = ({
   title,
   description,
   icon,
-  bgColor
+  bgColor,
+  iconClassName
 }: ItemCardProps) => {
   const Icon = Features[icon as keyof typeof Features];
 
@@ -18,14 +19,14 @@ export const ItemCard = ({
   }
 
   return (
-    <div className="flex max-w-[264px] flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-4">
       <div
         className={cn(
           `mb-4 flex h-[112px] w-[104px] items-center justify-center rounded-3xl`,
           bgColor
         )}
       >
-        <Icon className="h-[64px] w-[56px]" />
+        <Icon className={cn(iconClassName)} />
       </div>
       <div className="flex flex-col items-center gap-2">
         <h3 className="whitespace-pre-line text-center font-medium leading-tight text-primary">

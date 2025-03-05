@@ -1,25 +1,45 @@
-import { FloatingNav } from '@/features/landing/components/section/floating-nav';
-import { HeroSection } from '@/features/landing/components/section/hero-section';
-import { FeaturesSection } from '@/features/landing/components/section/features-section';
-import { PartnersSection } from '@/features/landing/components/section/partners';
-import { ForumSection } from '@/features/landing/components/section/forum-section';
-import { MentorSection } from '@/features/landing/components/section/mentor-section';
-import { ContactSection } from '@/features/landing/components/section/contact-section';
-import { NewsletterSection } from '@/features/landing/components/section/newsletter';
-import { FooterSection } from '@/features/landing/components/section/footer';
+'use client';
+
+import { useState, useEffect } from 'react';
+import {
+  AboutSection,
+  FeaturesSection,
+  ForumSection,
+  HeroSection,
+  MentorSection,
+  MissionSection,
+  PartnersSection
+} from './section';
 
 export const LandingPage = () => {
+  const [hash, setHash] = useState('');
+
+  useEffect(() => {
+    // Set initial hash
+    setHash(window.location.hash);
+
+    // Listen for hash changes
+    const handleHashChange = () => {
+      setHash(window.location.hash);
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
   return (
     <main className="container-wide relative min-h-screen px-0">
-      <FloatingNav />
-      <HeroSection />
-      <PartnersSection />
-      <FeaturesSection />
-      <ForumSection />
-      <MentorSection />
-      <ContactSection />
-      <NewsletterSection />
-      <FooterSection />
+      <div className={hash === '#about' ? 'block' : 'hidden'}>
+        <AboutSection />
+        <MissionSection />
+      </div>
+      <div className={hash === '#about' ? 'hidden' : 'block'}>
+        <HeroSection />
+        <PartnersSection />
+        <FeaturesSection />
+        <ForumSection />
+        <MentorSection />
+      </div>
     </main>
   );
 };

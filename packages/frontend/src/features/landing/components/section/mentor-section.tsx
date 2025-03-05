@@ -35,7 +35,7 @@ const steps: ItemCardProps[] = [
 
 export function MentorSection() {
   return (
-    <section className="mx-auto py-[160px]">
+    <section id="mentorship" className="mx-auto pt-[160px]">
       <div className="mb-[120px] text-center">
         <h6 className="mb-2 font-semibold text-neutral-dark-100">
           HOW IT WORKS
@@ -60,6 +60,7 @@ export function MentorSection() {
               icon={step.icon}
               title={step.title}
               description={step.description}
+              iconClassName="h-[64px] w-[61px]"
             />
           ))}
         </div>

@@ -485,5 +485,21 @@ export const SharedIcons = {
         strokeLinejoin="round"
       />
     </svg>
+  ),
+  check: ({ ...props }) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <rect width="24" height="24" rx="12" fill="#22C55E" />
+      <path
+        d="M7 12.45L10.6 16.05L16 7.95001"
+        stroke="#FAFBFC"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 };

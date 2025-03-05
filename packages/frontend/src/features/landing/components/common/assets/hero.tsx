@@ -1,4 +1,4 @@
-export const ImageSVG = {
+export const HeroImageSVG = {
   hero: ({ ...props }) => (
     <svg
       viewBox="0 0 677 637"

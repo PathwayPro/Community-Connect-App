@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +14,8 @@ import {
   FormItem,
   FormMessage
 } from '@/shared/components/ui/form';
+import { cn } from '@/shared/lib/utils';
+import { SharedIcons } from '@/shared/components/icons';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address')
@@ -21,6 +24,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function NewsletterSection() {
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<FormValues>({
@@ -32,15 +36,21 @@ export function NewsletterSection() {
 
   const onSubmit = async (values: FormValues) => {
     try {
+      setIsSubmitted(true);
       // TODO: Implement your newsletter subscription API call here
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated API call
+
+      console.log('Submitted', values);
 
       toast({
         title: 'Success!',
         description: "You've been subscribed to our newsletter."
       });
 
-      form.reset();
+      setTimeout(() => {
+        setIsSubmitted(false);
+        form.reset();
+      }, 3000);
     } catch (error) {
       console.error(error);
       toast({
@@ -70,36 +80,45 @@ export function NewsletterSection() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="mt-8 flex gap-2"
         >
-          <div className="relative flex w-full items-center">
+          <div className="relative flex w-full">
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <Input
-                      placeholder="johndoe@email.com"
-                      className={`h-[60px] w-full rounded-xl border-[#C3D0FF] shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)] ${
-                        form.formState.isValid
-                          ? 'bg-[#E9EEFF] ring-8 ring-[#E9EEFF]'
-                          : 'bg-neutral-light-200 ring-8 ring-neutral-light-200'
-                      }`}
-                      type="email"
-                      {...field}
-                      disabled={form.formState.isSubmitting}
-                    />
+                    <div className="relative">
+                      <Input
+                        placeholder="johndoe@email.com"
+                        className={cn(
+                          'h-[60px] w-full rounded-xl border-[#C3D0FF] shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)]',
+                          isSubmitted && 'pl-10',
+                          form.formState.isValid
+                            ? 'bg-[#E9EEFF] ring-8 ring-[#E9EEFF]'
+                            : 'bg-neutral-light-200 ring-8 ring-neutral-light-200'
+                        )}
+                        type="email"
+                        {...field}
+                        disabled={form.formState.isSubmitting}
+                      />
+                      {isSubmitted && (
+                        <SharedIcons.check className="absolute left-2 top-1/2 h-6 w-6 -translate-y-1/2" />
+                      )}
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <div className="absolute right-0 flex items-center">
+            <div className="absolute right-0 flex">
               <Button
                 type="submit"
-                disabled={form.formState.isSubmitting}
-                className="h-[60px] w-fit rounded-xl bg-primary-500 px-12 text-white"
+                disabled={form.formState.isSubmitting || isSubmitted}
+                className={cn(
+                  'h-[60px] w-fit rounded-xl bg-primary-500 px-12 text-white'
+                )}
               >
-                {form.formState.isSubmitting ? 'Subscribing...' : 'Subscribe'}
+                {isSubmitted ? 'Subscribed!' : 'Subscribe'}
               </Button>
             </div>
           </div>

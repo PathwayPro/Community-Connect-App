@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -13,6 +14,7 @@ import {
 } from '@/shared/components/ui/form';
 import { Input } from '@/shared/components/ui/input';
 import { Textarea } from '@/shared/components/ui/textarea';
+import { cn } from '@/shared/lib/utils';
 
 const formSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
@@ -24,6 +26,8 @@ const formSchema = z.object({
 type ContactFormValues = z.infer<typeof formSchema>;
 
 export function ContactSection() {
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,12 +44,18 @@ export function ContactSection() {
   };
 
   async function onSubmit(values: ContactFormValues) {
+    setIsSubmitted(true);
     // TODO: Implement your form submission logic here
+    form.reset();
     console.log(values);
+
+    setTimeout(() => {
+      setIsSubmitted(false);
+    }, 3000);
   }
 
   return (
-    <div className="mx-auto w-full px-16 pb-[160px]">
+    <section id="contact" className="container-wide w-full px-16 py-[160px]">
       <div className="mb-16 text-center">
         <h6 className="mb-2 font-semibold text-neutral-dark-100">
           Have Questions? We&apos;re Here to Help
@@ -139,11 +149,18 @@ export function ContactSection() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="h-[60px] w-full">
-            Send Message
+          <Button
+            type="submit"
+            className={cn(
+              'h-[60px] w-full',
+              isSubmitted && 'bg-success-500 text-white'
+            )}
+            disabled={isSubmitted}
+          >
+            {isSubmitted ? 'Message Sent!' : 'Send Message'}
           </Button>
         </form>
       </Form>
-    </div>
+    </section>
   );
 }

@@ -1,0 +1,11 @@
+export { ContactSection } from './contact-section';
+export { FeaturesSection } from './features-section';
+export { FloatingNav } from './floating-nav';
+export { FooterSection } from './footer';
+export { ForumSection } from './forum-section';
+export { HeroSection } from './hero-section';
+export { MentorSection } from './mentor-section';
+export { PartnersSection } from './partners';
+export { NewsletterSection } from './newsletter';
+export { AboutSection } from './about-section';
+export { MissionSection } from './mission-section';

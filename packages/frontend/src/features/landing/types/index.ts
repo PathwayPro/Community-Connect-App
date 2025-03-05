@@ -3,4 +3,5 @@ export interface ItemCardProps {
   description: string;
   icon: string;
   bgColor: string;
+  iconClassName?: string;
 }

@@ -53,6 +53,7 @@ export function FeaturesSection() {
               description={feature.description}
               icon={feature.icon}
               bgColor={feature.bgColor}
+              iconClassName="h-[64px] w-[56px]"
             />
           ))}
         </div>
