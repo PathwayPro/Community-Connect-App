@@ -26,7 +26,7 @@ jobs:
 
       - name: Install dependencies, generate prisma client, run migrations, and build (Backend)
         run: |
-          cd backend
+          cd packages/backend
           npm install
           npx prisma generate
           npx prisma migrate deploy
