@@ -345,6 +345,7 @@ export const SharedIcons = {
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        {...props}
       />
     </svg>
   ),
@@ -361,6 +362,7 @@ export const SharedIcons = {
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        {...props}
       />
     </svg>
   ),
@@ -376,6 +378,7 @@ export const SharedIcons = {
         stroke="#2D2D2D"
         strokeWidth="1.5"
         strokeLinecap="round"
+        {...props}
       />
     </svg>
   ),
@@ -392,6 +395,7 @@ export const SharedIcons = {
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        {...props}
       />
     </svg>
   ),

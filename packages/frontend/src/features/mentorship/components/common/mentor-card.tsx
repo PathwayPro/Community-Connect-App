@@ -1,10 +1,13 @@
 import { IconFrame } from '@/shared/components/ui/icon-frame';
 import { SharedIcons } from '@/shared/components/icons';
+import { cn } from '@/shared/lib/utils';
 
 interface MentorCardProps {
   title: string;
   value: string;
   icon: keyof typeof SharedIcons;
+  iconFrameClassName?: string;
+  iconClassName?: string;
   trend: string;
   trendValue: string;
   trendText: string;
@@ -15,6 +18,8 @@ const MentorCard = ({
   title,
   value,
   icon,
+  iconFrameClassName = 'bg-secondary-200',
+  iconClassName = 'h-9 w-9',
   trend,
   trendValue,
   trendText,
@@ -46,8 +51,8 @@ const MentorCard = ({
           icon={icon as keyof typeof SharedIcons}
           variant="circle"
           size="lg"
-          className="mr-7 h-20 w-20 bg-secondary-200"
-          iconClassName="h-9 w-9"
+          className={cn('mr-7 h-20 w-20', iconFrameClassName)}
+          iconClassName={cn('h-9 w-9', iconClassName)}
         />
         <SharedIcons.info className="absolute right-0 top-0 h-6 w-6 text-neutral-light-500" />
       </div>

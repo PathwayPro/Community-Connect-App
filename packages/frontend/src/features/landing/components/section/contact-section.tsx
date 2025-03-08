@@ -155,7 +155,13 @@ export function ContactSection() {
               'h-[60px] w-full',
               isSubmitted && 'bg-success-500 text-white'
             )}
-            disabled={isSubmitted}
+            disabled={
+              isSubmitted ||
+              !isFieldValid('firstName') ||
+              !isFieldValid('lastName') ||
+              !isFieldValid('email') ||
+              !isFieldValid('message')
+            }
           >
             {isSubmitted ? 'Message Sent!' : 'Send Message'}
           </Button>

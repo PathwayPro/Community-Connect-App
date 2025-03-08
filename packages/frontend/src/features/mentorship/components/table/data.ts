@@ -22,6 +22,19 @@ export type Sessions = {
   profession: string;
 };
 
+export type MentorshipAdmin = {
+  id: string;
+  identity: {
+    avatar: string;
+    firstName: string;
+    lastName: string;
+  };
+  experience: string;
+  profession: string;
+  email: string;
+  status: 'Approved' | 'Pending' | 'Rejected';
+};
+
 export const menteesData: Mentee[] = [
   {
     id: '728ed52f',
@@ -77,5 +90,56 @@ export const menteesData: Mentee[] = [
     },
     date: '2024-01-02',
     profession: 'Business Analyst'
+  }
+];
+
+export const mentorshipAdminData: MentorshipAdmin[] = [
+  {
+    id: '728ed52f',
+    identity: {
+      avatar: 'https://github.com/shadcn.png',
+      firstName: 'John',
+      lastName: 'Doe'
+    },
+    experience: '10 years',
+    profession: 'Software Engineer',
+    email: 'john.doe@example.com',
+    status: 'Approved'
+  },
+  {
+    id: '489e1d42',
+    identity: {
+      avatar: 'https://github.com/shadcn.png',
+      firstName: 'Jane',
+      lastName: 'Doe'
+    },
+    experience: '10 years',
+    profession: 'Software Engineer',
+    email: 'jane.doe@example.com',
+    status: 'Pending'
+  },
+  {
+    id: '489e1d42',
+    identity: {
+      avatar: 'https://github.com/shadcn.png',
+      firstName: 'Jones',
+      lastName: 'Doe'
+    },
+    experience: '10 years',
+    profession: 'Software Engineer',
+    email: 'jones@example.com',
+    status: 'Rejected'
+  },
+  {
+    id: '489e1d42',
+    identity: {
+      avatar: 'https://github.com/shadcn.png',
+      firstName: 'Liberty',
+      lastName: 'Doe'
+    },
+    experience: '10 years',
+    profession: 'Software Engineer',
+    email: 'liberty@example.com',
+    status: 'Pending'
   }
 ];
