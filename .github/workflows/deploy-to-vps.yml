@@ -23,9 +23,6 @@ jobs:
           cd packages/frontend
           npm install
           # npm run build
-          # Stop previous pm2 process and start new one.
-          pm2 stop frontend || true
-          pm2 start npm --name "communect-frontend" -- run dev
 
       - name: Install dependencies, generate prisma client, run migrations, and build (Backend)
         run: |
@@ -34,9 +31,6 @@ jobs:
           npx prisma generate
           npx prisma migrate deploy
           # npm run build
-          # Stop previous pm2 process and start new one.
-          pm2 stop backend || true
-          pm2 start npm --name "communect-backend" -- run start:dev
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.10
