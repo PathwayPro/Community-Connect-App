@@ -25,7 +25,7 @@ jobs:
           # npm run build
           # Stop previous pm2 process and start new one.
           pm2 stop frontend || true
-          pm2 start npm --name "frontend" -- run dev
+          pm2 start npm --name "communect-frontend" -- run dev
 
       - name: Install dependencies, generate prisma client, run migrations, and build (Backend)
         run: |
@@ -36,7 +36,7 @@ jobs:
           # npm run build
           # Stop previous pm2 process and start new one.
           pm2 stop backend || true
-          pm2 start npm --name "backend" -- run start:dev
+          pm2 start npm --name "communect-backend" -- run start:dev
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.10
@@ -46,8 +46,8 @@ jobs:
           key: ${{ secrets.VPS_PRIVATE_KEY }}
           script: |
             #copy the built files to the correct directories.
-            rsync -avz ./frontend/build/* ${{ secrets.VPS_DEPLOY_PATH }}/frontend/build/
-            rsync -avz ./backend/dist/* ${{ secrets.VPS_DEPLOY_PATH }}/backend/dist/
+            # rsync -avz ./frontend/build/* ${{ secrets.VPS_DEPLOY_PATH }}/frontend/build/
+            # rsync -avz ./backend/dist/* ${{ secrets.VPS_DEPLOY_PATH }}/backend/dist/
             #restart pm2 processes.
-            pm2 restart frontend
-            pm2 restart backend
+            pm2 restart communect-frontend
+            pm2 restart communect-backend
