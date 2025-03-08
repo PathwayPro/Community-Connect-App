@@ -1,3 +1,5 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsInt, IsOptional, IsString } from 'class-validator';
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from 'typeorm';
 
 @Entity('users')
@@ -51,4 +53,23 @@ export class User extends BaseEntity {
 
   @Column({ type: 'date', nullable: true })
   last_logout?: Date;
+}
+
+export class UserResponseMin {
+  @ApiProperty({ description: 'User ID' })
+  @IsInt()
+  id: number;
+
+  @ApiProperty({ description: 'User name' })
+  @IsString()
+  first_name: string;
+
+  @ApiPropertyOptional({ description: 'User middle name (optional)' })
+  @IsString()
+  @IsOptional()
+  middle_name?: string;
+
+  @ApiProperty({ description: 'User last name' })
+  @IsString()
+  last_name: string;
 }

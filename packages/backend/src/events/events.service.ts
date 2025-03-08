@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -10,28 +11,29 @@ import { PrismaService } from 'src/database';
 import { Prisma } from '@prisma/client';
 import { FilterEventDto } from './dto/filter-event.dto';
 import { EventsCategoriesService } from 'src/events_categories/events_categories.service';
+import { FilesService } from 'src/files/files.service';
+import { EventsManagersService } from 'src/events_managers/events_managers.service';
+import { EventsInvitationsService } from 'src/events_invitations/events_invitations.service';
+import { FileValidationEnum } from 'src/files/util/files-validation.enum';
+import { EventsCategory } from 'src/events_categories/entities/events_category.entity';
+import { UploadedFile } from 'src/files/util/uploaded-file.interface';
+import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
 
 @Injectable()
 export class EventsService {
   constructor(
     private prisma: PrismaService,
     private categories: EventsCategoriesService,
+    private filesService: FilesService,
+    private eventsManagersService: EventsManagersService,
+    private eventsInvitationsService: EventsInvitationsService,
   ) {}
 
   getFormattedFilters(filters: FilterEventDto): Prisma.EventsWhereInput {
     const formattedFilters: Prisma.EventsWhereInput = {};
 
     if (filters?.title) {
-      formattedFilters.title = {
-        contains: filters.title,
-        mode: 'insensitive',
-      };
-    }
-    if (filters?.subtitle) {
-      formattedFilters.subtitle = {
-        contains: filters.subtitle,
-        mode: 'insensitive',
-      };
+      formattedFilters.title = { contains: filters.title, mode: 'insensitive' };
     }
     if (filters?.description) {
       formattedFilters.description = {
@@ -39,45 +41,129 @@ export class EventsService {
         mode: 'insensitive',
       };
     }
-    if (filters?.category_id) {
-      formattedFilters.category_id = filters.category_id;
-    }
     if (filters?.location) {
       formattedFilters.location = {
         contains: filters.location,
         mode: 'insensitive',
       };
     }
+    if (filters?.category_id) {
+      formattedFilters.category_id = filters.category_id;
+    }
+    if (typeof filters?.is_free === 'boolean') {
+      formattedFilters.is_free = filters.is_free;
+    }
+    // TYPE ONLY FOR ADMINS (MENTORS-MAnAGERS AND INVITATIONS WILL BE FETCHED SOMEWHERE ELSE)
     if (filters?.type) {
       formattedFilters.type = filters.type;
     }
-    if (filters?.accept_subscriptions) {
+    if (typeof filters?.requires_confirmation === 'boolean') {
+      formattedFilters.requires_confirmation = filters.requires_confirmation;
+    }
+    if (typeof filters?.accept_subscriptions === 'boolean') {
       formattedFilters.accept_subscriptions = filters.accept_subscriptions;
     }
-    if (filters?.price) {
-      formattedFilters.price = {
-        lte: filters.price,
-      };
+
+    // IF IS SET `start_date` filters only events for that specific date.
+    // IF NOT `start_date` can filter for a date range with `date_from` and `date_to`
+    if (filters?.start_date) {
+      const date_from = new Date(filters.start_date);
+      const date_to = new Date(date_from);
+      date_to.setUTCHours(23, 59, 59, 999);
+      formattedFilters.start_date = { gte: date_from, lte: date_to };
+    } else {
+      if (filters?.date_from && filters?.date_to) {
+        formattedFilters.start_date = {
+          gte: filters.date_from,
+          lte: filters.date_to,
+        };
+      } else if (filters?.date_from) {
+        formattedFilters.start_date = { gte: filters.date_from };
+      } else if (filters?.date_to) {
+        formattedFilters.start_date = { lte: filters.date_to };
+      }
     }
 
     return formattedFilters;
   }
 
-  async create(createEventDto: CreateEventDto) {
+  async validateEventCategory(category_id: number): Promise<EventsCategory> {
     try {
-      // VALIDATE CATEGORY
-      const category = await this.categories.findOne(
-        createEventDto.category_id,
-      );
+      const category = await this.categories.findOne(category_id);
       if (!category) {
         throw new BadRequestException(
-          `The category with ID #${createEventDto.category_id} was not found.`,
+          `The category with ID #${category_id} was not found.`,
         );
       }
+      return category;
+    } catch (error) {
+      throw new BadRequestException(
+        'Error validating event_category: ' + error.message,
+      );
+    }
+  }
 
+  async uploadImage(file: Express.Multer.File): Promise<UploadedFile> {
+    try {
+      // UPLOAD IMAGE TO GET THE LINK
+      const imageLink = await this.filesService.upload(
+        FileValidationEnum.EVENTS,
+        file,
+      );
+      if (!imageLink) {
+        throw new InternalServerErrorException(
+          'There was a problem uploading the image. Please try again later',
+        );
+      }
+      return imageLink;
+    } catch (error) {
+      throw new BadRequestException(
+        'Error uploading the image for this event: ' + error.message,
+      );
+    }
+  }
+
+  async create(
+    user: JwtPayload,
+    createEventDto: CreateEventDto,
+    file: Express.Multer.File | null,
+  ) {
+    try {
+      // VALIDATE CATEGORY
+      const category = await this.validateEventCategory(
+        createEventDto.category_id,
+      );
+
+      // UPLOAD IMAGE AND GET THE LINK OR NULL
+      const image = file ? await this.uploadImage(file) : null;
+
+      // CREATE EVENT
+      const eventData = {
+        ...createEventDto,
+        image: image ? image.path + '/' + image.fileName : null,
+        category_id: category.id,
+      };
       const event = await this.prisma.events.create({
-        data: createEventDto,
+        data: eventData,
       });
+
+      // ADD USER AS EVENT MANAGER
+      if (event) {
+        const manager = await this.eventsManagersService.create(
+          user,
+          {
+            user_id: user.sub,
+            event_id: event.id,
+            is_speaker: false,
+          },
+          true,
+        );
+        if (!manager) {
+          throw new InternalServerErrorException(
+            'There was a problem setting the user as manager for this event. Please try again later or update this event.',
+          );
+        }
+      }
 
       return event;
     } catch (error) {
@@ -86,11 +172,12 @@ export class EventsService {
   }
 
   async findAll(filters: FilterEventDto) {
-    const appliedFilters: Prisma.EventsWhereInput =
-      this.getFormattedFilters(filters);
-    console.log('APPLIED FILTERS:', appliedFilters);
-
     try {
+      const appliedFilters: Prisma.EventsWhereInput =
+        this.getFormattedFilters(filters);
+
+      console.log('filters:', appliedFilters);
+
       const events = await this.prisma.events.findMany({
         where: appliedFilters,
         include: {
@@ -103,20 +190,53 @@ export class EventsService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, user: JwtPayload | undefined = undefined) {
     try {
+      const user_role = user ? user.roles : 'GUEST';
+      // VALIDATE EVENT EXIST
       const event = await this.prisma.events.findFirst({
         where: { id },
-        include: {
-          category: true,
-        },
+        include: { category: true },
       });
-
       if (!event) {
         throw new NotFoundException(`There is no event with ID: ${id}.`);
       }
 
-      return event;
+      // IF EVENT TYPE IS "PUBLIC" OR USER ROLE IS ADMIN, ALWAYS RETURN THE EVENT
+      if (event.type === 'PUBLIC' || user_role === 'ADMIN') {
+        return event;
+      }
+
+      // IF EVENT TYPE IS "PRIVATE" AND THERE IS NO USER, RETURN UNAUTHORIZED EXCEPTION
+      if (event.type === 'PRIVATE' && user_role === 'GUEST') {
+        throw new UnauthorizedException(
+          'You are not authorized to access this event information.',
+        );
+      }
+
+      // IF EVENT TYPE IS "PRIVATE" AND THE USER ROLE IS "USER" OR "MENTOR":
+      // 1. VALIDATE IF THEY ARE MANAGERS
+      const isEventManager = await this.eventsManagersService.isEventManager(
+        user?.sub,
+        id,
+      );
+      if (isEventManager) {
+        return event;
+      }
+
+      // 2. IF IS NOT MANAGER, VALIDATE INVITATION
+      const isEventInvitee = await this.eventsInvitationsService.isEventInvitee(
+        user?.sub,
+        id,
+      );
+      if (isEventInvitee) {
+        return event;
+      }
+
+      // IF THE EVENT IS PRIVATE, AND THE USER IS NOT INVITED OR A MANAGER, RETURN UNAUTHORIZED EXECPTION
+      throw new UnauthorizedException(
+        'You are not authorized to access this event information.',
+      );
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -126,30 +246,48 @@ export class EventsService {
     }
   }
 
-  async update(id: number, updateEventDto: UpdateEventDto) {
+  async update(
+    event_id: number,
+    user: JwtPayload,
+    updateEventDto: UpdateEventDto,
+    file: Express.Multer.File | null,
+  ) {
     try {
-      // Validate event existence
-      const eventToUpdate = await this.findOne(id);
+      // VALIDATE EVENT EXIST OR THROW EXCEPTION
+      const eventToUpdate = await this.findOne(event_id);
       if (!eventToUpdate) {
-        throw new NotFoundException(`Event with ID: ${id} not found.`);
+        throw new NotFoundException(`Event with ID: ${event_id} not found.`);
       }
 
-      // Validate category if required
-      if (updateEventDto.category_id !== undefined) {
-        const category = await this.categories.findOne(
-          updateEventDto.category_id,
+      // VALIDATE IF THE USER IS ADMIN OR MANAGER
+      const allowedToUpdate =
+        user.roles === 'ADMIN'
+          ? true
+          : await this.eventsManagersService.isEventManager(user.sub, event_id);
+      if (!allowedToUpdate) {
+        throw new UnauthorizedException(
+          'You are not authorized to edit this event.',
         );
-        if (!category) {
-          throw new BadRequestException(
-            `The category with ID #${updateEventDto.category_id} was not found.`,
-          );
-        }
       }
 
-      // Update event information
+      // VALIDATE CATGORY OR LEAVE IT NULL
+      const category = updateEventDto.category_id
+        ? await this.validateEventCategory(updateEventDto.category_id)
+        : null;
+
+      // UPLOAD IMAGE AND GET THE LINK OR NULL
+      const image = file ? await this.uploadImage(file) : null;
+
+      // UPDATE EVENT INFORMATION
+      const eventData = {
+        ...updateEventDto,
+        image: image ? image.path + '/' + image.fileName : undefined,
+        category_id: category ? category.id : undefined,
+      };
+
       const updatedEvent = await this.prisma.events.update({
-        where: { id },
-        data: updateEventDto,
+        where: { id: event_id },
+        data: eventData,
       });
 
       return updatedEvent;
@@ -158,17 +296,28 @@ export class EventsService {
     }
   }
 
-  async toggleSubscription(id: number) {
+  async toggleSubscription(user: JwtPayload, event_id: number) {
     try {
-      // Validate event existence
-      const eventToUpdate = await this.findOne(id);
+      // VALIDATE EVENT EXIST OR THROW EXCEPTION
+      const eventToUpdate = await this.findOne(event_id);
       if (!eventToUpdate) {
-        throw new NotFoundException(`Event with ID: ${id} not found.`);
+        throw new NotFoundException(`Event with ID: ${event_id} not found.`);
       }
 
-      // Update event information
+      // VALIDATE IF THE USER IS ADMIN OR MANAGER
+      const allowedToUpdate =
+        user.roles === 'ADMIN'
+          ? true
+          : await this.eventsManagersService.isEventManager(user.sub, event_id);
+      if (!allowedToUpdate) {
+        throw new UnauthorizedException(
+          'You are not authorized to edit this event.',
+        );
+      }
+
+      // UPDATE SUBSCRIPTION: TOGGLE STATUS true => false | false => true
       const updatedEvent = await this.prisma.events.update({
-        where: { id },
+        where: { id: event_id },
         data: { accept_subscriptions: !eventToUpdate.accept_subscriptions },
       });
 
