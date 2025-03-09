@@ -4,6 +4,7 @@ import { useAuthContext } from '../providers/auth-context';
 import { authApi } from '@/features/auth/api';
 import {
   AccessToken,
+  ChangePasswordCredentials,
   ForgotPasswordCredentials,
   LoginCredentials,
   RefreshToken,
@@ -62,7 +63,7 @@ export function useAuth() {
           });
 
           loginContext(responseUserData.data);
-          router.push('/profile');
+          router.push('/home');
           router.refresh();
         }
       }
@@ -226,6 +227,24 @@ export function useAuth() {
     }
   };
 
+  const changePassword = async (credentials: ChangePasswordCredentials) => {
+    try {
+      setIsLoading(true);
+      const response = await authApi.changePassword(credentials);
+      return response;
+    } catch (error) {
+      const apiError = error as ApiError;
+      showAlert({
+        title: 'Failed to change password',
+        description: apiError.response?.data?.message || 'Please try again.',
+        type: 'error'
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       setIsLoading(true);
@@ -239,7 +258,7 @@ export function useAuth() {
           type: 'success'
         });
 
-        router.push('/auth/login');
+        router.push('/home');
         router.refresh();
       }
     } catch (error) {
@@ -280,6 +299,7 @@ export function useAuth() {
     updatePassword,
     forgotPassword,
     resetPassword,
+    changePassword,
     logout,
     refreshToken,
     isLoading,

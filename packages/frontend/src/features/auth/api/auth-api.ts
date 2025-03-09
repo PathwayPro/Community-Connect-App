@@ -7,7 +7,8 @@ import {
   ForgotPasswordCredentials,
   UpdatePasswordCredentials,
   AccessToken,
-  RefreshToken
+  RefreshToken,
+  ChangePasswordCredentials
 } from '@/features/auth/types';
 
 export const authApi = {
@@ -28,6 +29,9 @@ export const authApi = {
 
   resetPassword: (credentials: ResetPasswordCredentials) =>
     apiMethods.post<AuthResponse>('/auth/reset-password', credentials),
+
+  changePassword: (credentials: ChangePasswordCredentials) =>
+    apiMethods.post<AuthResponse>('/auth/change-password', credentials),
 
   logout: () => apiMethods.post<AuthResponse>('/auth/logout'),
 

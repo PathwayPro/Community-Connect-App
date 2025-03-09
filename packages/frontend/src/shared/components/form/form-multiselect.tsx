@@ -35,8 +35,8 @@ export const FormMultiSelect = <T extends FieldValues>({
   customError,
   control: controlProp,
   required = false,
-  maxCount = 10,
-  value
+  maxCount = 10
+  // value
 }: FormMultiSelectProps<T>) => {
   const formContext = useFormContext<T>();
   const control = controlProp || formContext?.control;
