@@ -31,13 +31,13 @@ export function useAuth() {
       const response = await authApi.login(credentials);
 
       console.log('login response in hook:', response);
-
-      if (!response.data.tokens) {
+      
+      if (!response.data.data.tokens) {
         throw new Error('No tokens received from login request');
       }
 
-      const accessToken = response.data.tokens.accessToken;
-      const refreshToken = response.data.tokens.refreshToken;
+      const accessToken = response.data.data.tokens.accessToken;
+      const refreshToken = response.data.data.tokens.refreshToken;
 
       console.log('accessToken', accessToken);
 

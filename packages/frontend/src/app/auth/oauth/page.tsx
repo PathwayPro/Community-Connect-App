@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthContext } from '@/features/auth/providers';
 import { tokens } from '@/shared/utils';
@@ -8,7 +8,7 @@ import { userApi } from '@/features/user-profile/api/user-api';
 import { useToast } from '@/shared/hooks/use-toast';
 import { Icons } from '@/features/auth/components/icons';
 
-export const OAuthHandler = () => {
+const OAuthHandlerContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { loginContext } = useAuthContext();
@@ -24,14 +24,14 @@ export const OAuthHandler = () => {
       toast({
         title: 'Authentication Error!',
         description: 'Authentication failed. Please try again.',
-        variant: 'destructive'
+        variant: 'destructive',
       });
       return;
     }
 
     tokens.set({
       accessToken,
-      refreshToken
+      refreshToken,
     });
 
     const handleAuth = async () => {
@@ -44,7 +44,7 @@ export const OAuthHandler = () => {
           if (!responseUserData) {
             toast({
               title: 'Login failed!',
-              description: 'Please try again.'
+              description: 'Please try again.',
             });
             return;
           }
@@ -53,7 +53,7 @@ export const OAuthHandler = () => {
 
           toast({
             title: 'Login successful!',
-            description: 'Welcome back to the app!'
+            description: 'Welcome back to the app!',
           });
 
           router.push('/home');
@@ -65,7 +65,7 @@ export const OAuthHandler = () => {
         toast({
           title: 'Authentication Error!',
           description: 'Authentication failed. Please try again.',
-          variant: 'destructive'
+          variant: 'destructive',
         });
 
         router.push('/auth/login');
@@ -94,6 +94,14 @@ export const OAuthHandler = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const OAuthHandler = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <OAuthHandlerContent />
+    </Suspense>
   );
 };
 

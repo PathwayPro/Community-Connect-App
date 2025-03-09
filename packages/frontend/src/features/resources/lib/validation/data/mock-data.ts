@@ -1,4 +1,4 @@
-import { NewsItem, JobCardProps } from '@/features/news/types';
+import { NewsItem, JobCardProps } from '@/features/resources/types';
 
 // Sample data array (showing structure - you'll want to update with real content)
 export const sampleNews: NewsItem[] = [
