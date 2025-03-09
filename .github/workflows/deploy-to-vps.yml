@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: '20' # Or your desired Node.js version
 
+      - name: Install pm2
+        run: npm install -g pm2
+
       - name: Install dependencies and build (Frontend)
         run: |
           cd packages/frontend
