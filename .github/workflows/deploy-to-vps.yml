@@ -26,8 +26,8 @@ jobs:
           cd packages/frontend
           npm install
           npm run build
-          pm2 stop communect-frontend
-          pm2 delete communect-frontend
+          pm2 stop communect-frontend || true
+          pm2 delete communect-frontend || true
           pm2 start npm --name "communect-frontend" -- run start
 
       - name: Install dependencies, generate prisma client, run migrations, and build (Backend)
@@ -37,8 +37,8 @@ jobs:
           npx prisma generate
           npx prisma migrate deploy
           npm run build
-          pm2 stop communect-backend
-          pm2 delete communect-backend
+          pm2 stop communect-backend || true
+          pm2 delete communect-backend || true
           pm2 start npm --name "communect-backend" -- run start:prod
 
         env:
