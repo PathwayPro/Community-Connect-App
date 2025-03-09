@@ -75,7 +75,7 @@ export class BlogController {
   @ApiOperation({
     summary: 'Create new comment for a post',
     description:
-      'Creates a new message for a specific post or throws Internal Server Error Exception. \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**',
+      'Creates a new message for a specific post or throws Internal Server Error Exception. \n\n REQUIRED ROLES:  **ADMIN | MENTOR | USER**',
   })
   @ApiBearerAuth()
   createComment(
