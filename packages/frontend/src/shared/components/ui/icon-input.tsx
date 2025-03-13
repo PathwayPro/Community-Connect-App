@@ -17,7 +17,7 @@ const IconInput = forwardRef<HTMLInputElement, IconInputProps>(
     const RightIcon = Icons[rightIcon as keyof typeof Icons];
 
     return (
-      <div className="relative flex flex-row items-center gap-2">
+      <div className="relative flex w-full flex-row items-center gap-2">
         {leftIcon && (
           <LeftIcon
             className={cn(

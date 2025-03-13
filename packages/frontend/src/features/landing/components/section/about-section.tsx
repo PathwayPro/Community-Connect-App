@@ -15,7 +15,7 @@ export function AboutSection() {
               <h1 className="font-semibold tracking-tight text-primary-500">
                 About Us
               </h1>
-              <p className="paragraph-lg font-normal">
+              <p className="text-xl font-normal leading-10">
                 In 2019, Wunmi Adekanmbi discovered Alberta’s thriving tech
                 scene but also noticed a lack of diversity. Determined to create
                 a more inclusive space, she founded Immigrant Techies Alberta, a

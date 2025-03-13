@@ -7,14 +7,14 @@ const features = [
     title: 'Our Mission',
     description:
       'Our mission is to bridge the gap for immigrant professionals in tech. By fostering connections, sharing knowledge, and providing access to opportunities, we empower skilled immigrants to thrive and lead in the industry.',
-    icon: 'community',
+    icon: 'lightbulb',
     bgColor: 'bg-[#FFF5EA]'
   },
   {
     title: 'Our Vision',
     description:
       'We strive to build a united and diverse tech community where immigrant professionals can thrive, collaborate, and make meaningful contributions. CommunityConnect is your go-to platform for networking, mentorship, and growth—regardless of background.',
-    icon: 'community',
+    icon: 'target',
     bgColor: 'bg-[#FFDEDE]'
   }
 ];

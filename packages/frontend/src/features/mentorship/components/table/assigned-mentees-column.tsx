@@ -7,10 +7,9 @@ import {
   AvatarFallback,
   AvatarImage
 } from '@/shared/components/ui/avatar';
-import { Badge } from '@/shared/components/ui/badge';
-import Link from 'next/link';
+import { AdminMentorModalCard } from '../common/modals/admin-mentor-modal';
 
-export const mentorshipAdminColumns: ColumnDef<MentorshipAdmin>[] = [
+export const AssignMenteesColumns: ColumnDef<MentorshipAdmin>[] = [
   {
     accessorKey: 'identity.firstName',
     header: () => (
@@ -55,24 +54,25 @@ export const mentorshipAdminColumns: ColumnDef<MentorshipAdmin>[] = [
     cell: ({ row }) => <div>{row.getValue('experience')}</div>
   },
   {
-    accessorKey: 'status',
+    accessorKey: 'lastSession',
     header: () => (
-      <div className="font-semibold text-neutral-dark-600">Status</div>
+      <div className="font-semibold text-neutral-dark-600">Last Session</div>
     ),
-    cell: ({ row }) => (
-      <Badge
-        variant={
-          row.getValue('status') === 'Approved'
-            ? 'success'
-            : row.getValue('status') === 'Pending'
-              ? 'warning'
-              : 'destructive'
-        }
-        className="h-8 w-[90px] justify-center rounded-full text-sm font-medium text-white"
-      >
-        {row.getValue('status')}
-      </Badge>
-    )
+    cell: ({ row }) => <div>{row.getValue('lastSession')}</div>
+  },
+  {
+    accessorKey: 'sessionsBooked',
+    header: () => (
+      <div className="font-semibold text-neutral-dark-600">Sessions Booked</div>
+    ),
+    cell: ({ row }) => {
+      const sessions = row.getValue('sessionsBooked') as number;
+      return (
+        <div>
+          {sessions} {sessions === 1 ? 'session' : 'sessions'}
+        </div>
+      );
+    }
   },
   {
     id: 'actions',
@@ -82,16 +82,8 @@ export const mentorshipAdminColumns: ColumnDef<MentorshipAdmin>[] = [
       </div>
     ),
     cell: ({ row }) => (
-      <div className="flex justify-center">
-        <Link
-          href={{
-            pathname: '/mentorship/admin/mentor-profile',
-            query: { data: JSON.stringify(row.original) }
-          }}
-          className="flex h-10 w-[90px] items-center justify-center rounded-xl border border-primary-400 text-base font-medium text-primary-400 hover:bg-primary-400 hover:text-white"
-        >
-          View
-        </Link>
+      <div className="flex justify-center px-0">
+        <AdminMentorModalCard data={row.original} />
       </div>
     )
   }

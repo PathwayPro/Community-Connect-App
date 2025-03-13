@@ -258,7 +258,7 @@ export function useAuth() {
           type: 'success'
         });
 
-        router.push('/home');
+        router.push('/');
         router.refresh();
       }
     } catch (error) {
