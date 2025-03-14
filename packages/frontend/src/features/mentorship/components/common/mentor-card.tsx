@@ -12,12 +12,14 @@ interface MentorCardProps {
   trendValue: string;
   trendText: string;
   trendUp: boolean;
+  className?: string;
 }
 
 const MentorCard = ({
   title,
   value,
   icon,
+  className = 'bg-neutral-light-200',
   iconFrameClassName = 'bg-secondary-200',
   iconClassName = 'h-9 w-9',
   trend,
@@ -28,7 +30,12 @@ const MentorCard = ({
   const TrendIcon = SharedIcons[trend as keyof typeof SharedIcons];
 
   return (
-    <div className="flex h-[156px] w-full min-w-[380px] justify-between rounded-2xl border border-neutral-light-400 bg-neutral-light-200 p-4 shadow-sm">
+    <div
+      className={cn(
+        'flex h-[156px] w-full min-w-[380px] justify-between rounded-2xl border border-neutral-light-400 p-4 shadow-sm',
+        className
+      )}
+    >
       <div className="relative flex w-full flex-col">
         <p className="text-base font-normal">{title}</p>
         <h4 className="font-bold">{value}</h4>
