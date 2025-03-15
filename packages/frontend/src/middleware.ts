@@ -12,7 +12,8 @@ const publicPaths = [
   '/home',
   '/mentorship',
   '/resources',
-  '/events'
+  '/events',
+  '/contact-us'
 ];
 
 // Define paths that should redirect to home if already authenticated

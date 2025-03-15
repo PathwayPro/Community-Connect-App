@@ -58,7 +58,7 @@ export const Analytics = () => {
               </div>
               <div className="flex flex-col gap-6">
                 <MentorCard
-                  title="Minutes Mentored"
+                  title="Total Users"
                   value="1893"
                   icon="minutesMentored"
                   trend="arrowTrendingUp"
@@ -70,8 +70,8 @@ export const Analytics = () => {
                   iconClassName="stroke-white"
                 />
                 <MentorCard
-                  title="Mentees"
-                  value="15"
+                  title="Engagement Rate"
+                  value="15%"
                   icon="mentees"
                   trend="arrowTrendingDown"
                   trendValue="2.5%"
