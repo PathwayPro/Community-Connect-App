@@ -19,13 +19,15 @@ export const menteesColumns: ColumnDef<Mentee>[] = [
         <Avatar>
           <AvatarImage
             src={row.original.identity.avatar}
-            alt={`${row.original.identity.name}'s avatar`}
+            alt={`${row.original.identity.firstName} ${row.original.identity.lastName}'s avatar`}
           />
           <AvatarFallback>
-            {row.original.identity.name.slice(0, 2).toUpperCase()}
+            {row.original.identity.firstName.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <span>{row.original.identity.name}</span>
+        <span>
+          {row.original.identity.firstName} {row.original.identity.lastName}
+        </span>
       </div>
     )
   },

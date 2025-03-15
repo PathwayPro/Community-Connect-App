@@ -8,7 +8,12 @@ const publicPaths = [
   '/auth/verify-email',
   '/auth/forgot-password',
   '/auth/reset-password',
-  '/auth/oauth'
+  '/auth/oauth',
+  '/home',
+  '/mentorship',
+  '/resources',
+  '/events',
+  '/contact-us'
 ];
 
 // Define paths that should redirect to home if already authenticated
@@ -25,34 +30,26 @@ export async function middleware(request: NextRequest) {
 
   // Get auth token from cookies
   const authToken = request.cookies.get('accessToken')?.value;
-
-  // Check if user is authenticated
   const isAuthenticated = !!authToken;
 
   // Create URLs for redirects
-  const signInPage = new URL('/auth/login', request.url);
-  const homePage = new URL('/dashboard', request.url);
+  const homePage = new URL('/home', request.url);
+  const loginPage = new URL('/auth/login', request.url);
 
-  // Redirect root path to dashboard
+  // Allow access to root path (/) for all users
   if (pathname === '/') {
-    return NextResponse.redirect(new URL('/home', request.url));
+    return NextResponse.next();
   }
 
-  // Redirect mentorship to mentorship/dashboard
-  // if (pathname === '/mentorship') {
-  //   return NextResponse.redirect(new URL('/mentorship/dashboard', request.url));
-  // }
-
   // Special handling for verify-email with token
-  if (pathname.startsWith('/auth/verify-email') && !isAuthenticated) {
-    const hasToken = searchParams.has('token');
-    if (!hasToken) {
-      return NextResponse.redirect(signInPage);
+  if (pathname.startsWith('/auth/verify-email')) {
+    if (!isAuthenticated && !searchParams.has('token')) {
+      return NextResponse.redirect(loginPage);
     }
     return NextResponse.next();
   }
 
-  // Redirect authenticated users trying to access auth pages back to home
+  // Redirect authenticated users trying to access auth pages to /home
   if (isAuthenticated && authOnlyPaths.includes(pathname)) {
     return NextResponse.redirect(homePage);
   }
@@ -62,10 +59,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Protect all other routes
+  // Protect all other routes - redirect to login if not authenticated
   if (!isAuthenticated) {
-    signInPage.searchParams.set('callbackUrl', pathname);
-    return NextResponse.redirect(signInPage);
+    return NextResponse.redirect(loginPage);
   }
 
   return NextResponse.next();

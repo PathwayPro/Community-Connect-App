@@ -1,30 +1,41 @@
-import { MentorshipIcons } from '../icons';
+import { IconFrame } from '@/shared/components/ui/icon-frame';
 import { SharedIcons } from '@/shared/components/icons';
+import { cn } from '@/shared/lib/utils';
 
-interface MentorshipCardProps {
+interface MentorCardProps {
   title: string;
   value: string;
-  icon: React.ReactNode;
+  icon: keyof typeof SharedIcons;
+  iconFrameClassName?: string;
+  iconClassName?: string;
   trend: string;
   trendValue: string;
   trendText: string;
   trendUp: boolean;
+  className?: string;
 }
 
-const MentorshipCard = ({
+const MentorCard = ({
   title,
   value,
   icon,
+  className = 'bg-neutral-light-200',
+  iconFrameClassName = 'bg-secondary-200',
+  iconClassName = 'h-9 w-9',
   trend,
   trendValue,
   trendText,
   trendUp
-}: MentorshipCardProps) => {
-  const MentorshipIcon = MentorshipIcons[icon as keyof typeof MentorshipIcons];
+}: MentorCardProps) => {
   const TrendIcon = SharedIcons[trend as keyof typeof SharedIcons];
 
   return (
-    <div className="flex h-[156px] w-full min-w-[380px] justify-between rounded-2xl border border-neutral-light-400 bg-neutral-light-200 p-4 shadow-sm">
+    <div
+      className={cn(
+        'flex h-[156px] w-full min-w-[380px] justify-between rounded-2xl border border-neutral-light-400 p-4 shadow-sm',
+        className
+      )}
+    >
       <div className="relative flex w-full flex-col">
         <p className="text-base font-normal">{title}</p>
         <h4 className="font-bold">{value}</h4>
@@ -43,11 +54,17 @@ const MentorshipCard = ({
         </div>
       </div>
       <div className="relative flex items-center gap-2">
-        <MentorshipIcon className="mr-11 h-20 w-20" />
+        <IconFrame
+          icon={icon as keyof typeof SharedIcons}
+          variant="circle"
+          size="lg"
+          className={cn('mr-7 h-20 w-20', iconFrameClassName)}
+          iconClassName={cn('h-9 w-9', iconClassName)}
+        />
         <SharedIcons.info className="absolute right-0 top-0 h-6 w-6 text-neutral-light-500" />
       </div>
     </div>
   );
 };
 
-export default MentorshipCard;
+export default MentorCard;

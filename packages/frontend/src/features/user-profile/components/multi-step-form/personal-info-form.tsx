@@ -3,7 +3,7 @@ import { FormInput, FormSelect } from '@/shared/components/form';
 import { FormTextarea } from '@/shared/components/form';
 import { FormDatePicker } from '@/shared/components/form/form-date-picker';
 import { FileUpload } from '@/shared/components/upload/file-upload';
-import { provinceData } from '@/shared/lib/constants/profile';
+import { ageRangeData, provinceData } from '@/shared/lib/constants/profile';
 import { toast } from 'sonner';
 import React from 'react';
 import { UserProfileFormData } from '../../lib/validations';
@@ -91,10 +91,31 @@ export const PersonalInfoForm = () => {
         </div>
       </div>
       <div className="flex w-full gap-4">
-        <FormDatePicker
-          name="dob"
-          label="Date of Birth"
-          customError="Date of birth is required"
+        <div className="flex-1">
+          <FormDatePicker
+            name="dob"
+            label="Date of Birth"
+            customError="Date of birth is required"
+            required
+          />
+        </div>
+        <div className="flex-1">
+          <FormSelect
+            name="ageRange"
+            label="Age Range (This will not be visible to the public)"
+            placeholder="Enter your age range"
+            customError="Age range is required"
+            options={ageRangeData}
+            required
+          />
+        </div>
+      </div>
+      <div className="flex w-full gap-4">
+        <FormInput
+          name="countryOfOrigin"
+          label="Country of Origin"
+          placeholder="Enter your country of origin"
+          customError="Country of origin is required"
           required
         />
         <FormInput
@@ -102,22 +123,6 @@ export const PersonalInfoForm = () => {
           label="Languages Spoken (comma separated)"
           placeholder="Enter your languages spoken"
           customError="Languages spoken is required"
-        />
-      </div>
-      <div className="flex w-full gap-4">
-        <FormInput
-          name="profession"
-          label="Profession"
-          placeholder="Enter your profession"
-          customError="Profession is required"
-          required
-        />
-        <FormInput
-          name="experience"
-          label="Years of Experience"
-          placeholder="Enter your years of experience"
-          customError="Years of experience is required"
-          required
         />
       </div>
       <FormTextarea

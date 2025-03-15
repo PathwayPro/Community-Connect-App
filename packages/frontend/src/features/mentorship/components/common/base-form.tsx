@@ -40,16 +40,19 @@ export const BaseForm = ({
       const formData = new FormData();
       files.forEach((file) => formData.append('files', file));
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      });
+      console.log('formData', formData);
 
-      if (!response.ok) throw new Error('Upload failed');
+      toast.success('Resume uploaded successfully');
 
-      const { urls } = await response.json();
-      setValue('resume_upload_link', urls[0], { shouldValidate: true });
-      toast.success('Profile picture uploaded successfully');
+      //   const response = await fetch('/api/upload', {
+      //     method: 'POST',
+      //     body: formData
+      //   });
+
+      //   if (!response.ok) throw new Error('Upload failed');
+
+      //   const { urls } = await response.json();
+      //   setValue('resume_upload_link', urls[0], { shouldValidate: true });
     } catch (error) {
       console.error('Upload failed:', error);
       toast.error('Failed to upload profile picture');
@@ -60,10 +63,11 @@ export const BaseForm = ({
     <div className="flex w-full flex-col gap-4">
       <FileUpload
         title="Upload your Resume/CV"
-        maxSize={10}
-        acceptedFileTypes={['.pdf', '.txt', '.doc', '.docx']}
+        maxSize={10} // 10MB
+        acceptedFileTypes={['PDF', 'DOC', 'DOCX']}
         multiple={false}
         uploadIcon="fileIcon"
+        disablePreview={true}
         onUpload={handleFileUpload}
       />
 

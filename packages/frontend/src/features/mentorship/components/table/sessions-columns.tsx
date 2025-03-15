@@ -20,13 +20,15 @@ export const sessionsColumns: ColumnDef<Sessions>[] = [
         <Avatar>
           <AvatarImage
             src={row.original.identity.avatar}
-            alt={`${row.original.identity.name}'s avatar`}
+            alt={`${row.original.identity.firstName} ${row.original.identity.lastName}'s avatar`}
           />
           <AvatarFallback>
-            {row.original.identity.name.slice(0, 2).toUpperCase()}
+            {row.original.identity.firstName.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <span>{row.original.identity.name}</span>
+        <span>
+          {row.original.identity.firstName} {row.original.identity.lastName}
+        </span>
       </div>
     )
   },
@@ -58,7 +60,11 @@ export const sessionsColumns: ColumnDef<Sessions>[] = [
           className="h-10 w-[90px] rounded-xl border border-primary-400 text-base font-medium text-primary-400"
           onClick={() => {
             // TODO: Implement call joining logic
-            console.log('Joining call with:', row.original.identity.name);
+            console.log(
+              'Joining call with:',
+              row.original.identity.firstName,
+              row.original.identity.lastName
+            );
           }}
         >
           Join
