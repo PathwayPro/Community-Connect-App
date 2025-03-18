@@ -30,7 +30,7 @@ export class User extends BaseEntity {
   arrival_in_canada?: Date;
 
   @Column({ type: 'int', nullable: true })
-  goal_id?: number;
+  goal_id?: string;
 
   @Column({
     type: 'enum',

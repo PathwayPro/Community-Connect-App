@@ -2,7 +2,7 @@ import { FormSelect } from '@/shared/components/form';
 import {
   goalsOptions,
   arrivalInCanadaOptions
-} from '@/shared/lib/constants/profile';
+} from '@/features/user-profile/lib/constants/profile';
 
 export const GoalsForm = () => {
   return (

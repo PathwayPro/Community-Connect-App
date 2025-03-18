@@ -5,12 +5,12 @@ export const userProfileSchema = z.object({
   lastName: z.string().min(1, 'Last name is required'),
   city: z.string().min(1, 'City is required'),
   dob: z.string().optional(),
+  ageRange: z.string().optional(),
   languages: z.string().optional(),
   profession: z.string().min(1, 'Profession is required'),
   experience: z.string().min(1, 'Years of experience is required'),
   bio: z.string().min(1, 'Bio is required'),
   email: z.string().email().optional(),
-  showDob: z.boolean().optional(),
   arrivalInCanada: z.string().optional(),
   goalId: z.string().optional(),
   province: z.string().optional(),
@@ -25,7 +25,8 @@ export const userProfileSchema = z.object({
   skills: z.array(z.string()).optional(),
   workStatus: z.string().optional(),
   companyName: z.string().optional(),
-  countryOfOrigin: z.string().optional()
+  countryOfOrigin: z.string().optional(),
+  activelySearching: z.boolean().optional().default(false)
 });
 
 export type UserProfileFormData = z.infer<typeof userProfileSchema>;
