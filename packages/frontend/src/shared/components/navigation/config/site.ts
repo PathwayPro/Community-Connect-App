@@ -5,19 +5,19 @@ export const MainSiteNav = [
     icon: 'home'
   },
   {
-    name: 'News',
-    href: '/news',
-    icon: 'news'
-  },
-  {
-    name: 'Events',
-    href: '/events',
-    icon: 'events'
+    name: 'Networking',
+    href: '/networking',
+    icon: 'networking'
   },
   {
     name: 'Resources',
     href: '/resources',
     icon: 'resources'
+  },
+  {
+    name: 'Events',
+    href: '/events',
+    icon: 'events'
   },
   {
     name: 'Mentorship',
@@ -33,6 +33,11 @@ export const MainSiteNav = [
     //     href: '/mentorship/dashboard'
     //   }
     // ]
+  },
+  {
+    name: 'Analytics',
+    href: '/analytics',
+    icon: 'analytics'
   }
 ];
 
@@ -43,8 +48,13 @@ export const FooterSiteNav = [
     icon: 'profile'
   },
   {
-    name: 'Support',
-    href: '/support',
-    icon: 'support'
+    name: 'Settings',
+    href: '/settings',
+    icon: 'settings'
+  },
+  {
+    name: 'Contact Us',
+    href: '/contact-us',
+    icon: 'chatBubble'
   }
 ];

@@ -13,6 +13,12 @@ export type RegisterCredentials = {
   lastName: string;
 };
 
+export type ChangePasswordCredentials = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
 export type AuthResponse = {
   success: boolean;
   data: {

@@ -35,16 +35,16 @@ export class ReadUserDto {
   // password_hash: string;
 
   @IsOptional()
-  @IsDate() // Ensure dob is a valid Date object
-  dob?: Date;
+  @IsString()
+  dob?: string;
 
   @IsOptional()
   @IsBoolean()
   showDob?: boolean;
 
   @IsOptional()
-  @IsDate() // Ensure arrival_in_canada is a valid Date object
-  arrivalInCanada?: Date;
+  @IsString()
+  arrivalInCanada?: string;
 
   @IsOptional()
   @IsNumber()
@@ -246,16 +246,16 @@ export class NewUserFromDbDto {
   email: string;
 
   @IsOptional()
-  @IsDate()
-  dob?: Date;
+  @IsString()
+  dob?: string;
 
   @IsOptional()
   @IsBoolean()
   show_dob?: boolean;
 
   @IsOptional()
-  @IsNumber()
-  arrival_in_canada?: number;
+  @IsString()
+  arrival_in_canada?: string;
 
   @IsOptional()
   @IsNumber()
