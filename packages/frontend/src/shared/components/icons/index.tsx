@@ -35,7 +35,8 @@ import {
   BookmarkIcon,
   HeartIcon,
   MessageSquareIcon,
-  SaveIcon
+  SaveIcon,
+  ChartArea
 } from 'lucide-react';
 
 export const SharedIcons = {
@@ -75,6 +76,7 @@ export const SharedIcons = {
   heart: HeartIcon,
   messageSquare: MessageSquareIcon,
   save: SaveIcon,
+  analytics: ChartArea,
   mentors: ({ ...props }) => (
     <svg
       viewBox="0 0 24 24"

@@ -16,7 +16,7 @@ export function ForumSection() {
               <h1 className="font-semibold tracking-tight text-primary-500">
                 Join the Conversation
               </h1>
-              <p className="paragraph-lg font-normal">
+              <p className="text-xl font-normal leading-8">
                 Join conversations with fellow immigrants, mentors, and industry
                 professionals. Ask questions, share experiences, and find
                 support in a welcoming community that understands your journey.

@@ -33,6 +33,11 @@ export const MainSiteNav = [
     //     href: '/mentorship/dashboard'
     //   }
     // ]
+  },
+  {
+    name: 'Analytics',
+    href: '/analytics',
+    icon: 'analytics'
   }
 ];
 

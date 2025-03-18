@@ -1,6 +1,7 @@
 import { Button } from '@/shared/components/ui/button';
 import { ItemCard } from '../common/item-card';
 import { ItemCardProps } from '@/features/landing/types';
+import Link from 'next/link';
 
 const steps: ItemCardProps[] = [
   {
@@ -25,7 +26,7 @@ const steps: ItemCardProps[] = [
     bgColor: 'bg-[#FFE2EB]'
   },
   {
-    title: 'Thrive and Give Back',
+    title: 'Thrive and Help Others',
     description:
       "Apply what you've learned and when you're ready, become a mentor to support others!",
     icon: 'tick',
@@ -43,7 +44,7 @@ export function MentorSection() {
         <h2 className="mb-6 text-5xl font-semibold text-primary-500">
           Find a Mentor & Grow Your Career
         </h2>
-        <p className="paragraph-lg mx-auto max-w-2xl text-center font-normal">
+        <p className="mx-auto max-w-2xl text-center text-xl font-normal">
           Gain support from experienced mentors who have navigated the
           challenges of immigrating and building a career. Whether you need
           career advice, skill development, or industry insights, our mentors
@@ -66,10 +67,14 @@ export function MentorSection() {
         </div>
 
         <div className="flex justify-center gap-4">
-          <Button variant="outline" className="h-[60px] w-fit px-12">
-            Become a Mentor
-          </Button>
-          <Button className="h-[60px] w-fit px-12">Apply for Mentorship</Button>
+          <Link href="/mentorship" className="h-[60px] w-fit">
+            <Button className="px-12" variant="outline">
+              Become a Mentor
+            </Button>
+          </Link>
+          <Link href="/mentorship" className="h-[60px] w-fit">
+            <Button className="px-12">Apply for Mentorship</Button>
+          </Link>
         </div>
       </div>
     </section>

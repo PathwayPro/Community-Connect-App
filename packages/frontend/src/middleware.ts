@@ -8,7 +8,12 @@ const publicPaths = [
   '/auth/verify-email',
   '/auth/forgot-password',
   '/auth/reset-password',
-  '/auth/oauth'
+  '/auth/oauth',
+  '/home',
+  '/mentorship',
+  '/resources',
+  '/events',
+  '/contact-us'
 ];
 
 // Define paths that should redirect to home if already authenticated

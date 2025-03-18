@@ -1,16 +1,16 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { MentorshipAdmin } from './data';
+import { MentorRating } from './data';
 import {
   Avatar,
   AvatarFallback,
   AvatarImage
 } from '@/shared/components/ui/avatar';
-import { Badge } from '@/shared/components/ui/badge';
-import Link from 'next/link';
+import { Rating } from '@/shared/components/ui/rating';
+import { AdminMentorModalCard } from '../common/modals/admin-mentor-modal';
 
-export const mentorshipAdminColumns: ColumnDef<MentorshipAdmin>[] = [
+export const RegisteredSessionsColumns: ColumnDef<MentorRating>[] = [
   {
     accessorKey: 'identity.firstName',
     header: () => (
@@ -55,24 +55,21 @@ export const mentorshipAdminColumns: ColumnDef<MentorshipAdmin>[] = [
     cell: ({ row }) => <div>{row.getValue('experience')}</div>
   },
   {
-    accessorKey: 'status',
+    accessorKey: 'lastSession',
     header: () => (
-      <div className="font-semibold text-neutral-dark-600">Status</div>
+      <div className="font-semibold text-neutral-dark-600">Last Session</div>
     ),
-    cell: ({ row }) => (
-      <Badge
-        variant={
-          row.getValue('status') === 'Approved'
-            ? 'success'
-            : row.getValue('status') === 'Pending'
-              ? 'warning'
-              : 'destructive'
-        }
-        className="h-8 w-[90px] justify-center rounded-full text-sm font-medium text-white"
-      >
-        {row.getValue('status')}
-      </Badge>
-    )
+    cell: ({ row }) => <div>{row.getValue('lastSession')}</div>
+  },
+  {
+    accessorKey: 'ratings',
+    header: () => (
+      <div className="font-semibold text-neutral-dark-600">Overall Ratings</div>
+    ),
+    cell: ({ row }) => {
+      const rating = row.getValue('ratings') as number;
+      return <Rating rating={rating} />;
+    }
   },
   {
     id: 'actions',
@@ -83,15 +80,7 @@ export const mentorshipAdminColumns: ColumnDef<MentorshipAdmin>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex justify-center">
-        <Link
-          href={{
-            pathname: '/mentorship/admin/mentor-profile',
-            query: { data: JSON.stringify(row.original) }
-          }}
-          className="flex h-10 w-[90px] items-center justify-center rounded-xl border border-primary-400 text-base font-medium text-primary-400 hover:bg-primary-400 hover:text-white"
-        >
-          View
-        </Link>
+        <AdminMentorModalCard data={row.original} isRating={true} />
       </div>
     )
   }
