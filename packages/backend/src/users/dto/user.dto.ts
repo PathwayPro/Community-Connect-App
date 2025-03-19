@@ -39,16 +39,16 @@ export class ReadUserDto {
   dob?: string;
 
   @IsOptional()
-  @IsBoolean()
-  showDob?: boolean;
+  @IsString()
+  ageRange?: string;
 
   @IsOptional()
   @IsString()
   arrivalInCanada?: string;
 
   @IsOptional()
-  @IsNumber()
-  goalId?: number;
+  @IsString()
+  goalId?: string;
 
   @ApiPropertyOptional({
     description: 'User role',
@@ -113,8 +113,8 @@ export class UpdateUserDto {
   dob?: string;
 
   @IsOptional()
-  @IsBoolean()
-  showDob?: boolean;
+  @IsString()
+  ageRange?: string;
 
   @IsOptional()
   @IsString()
@@ -122,7 +122,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  goalId?: number;
+  goalId?: string;
 
   @IsOptional()
   @IsString()
@@ -179,6 +179,26 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   languages?: string;
+
+  @IsOptional()
+  @IsString()
+  countryOfOrigin?: string;
+
+  @IsOptional()
+  @IsString()
+  workStatus?: string;
+
+  @IsOptional()
+  @IsString()
+  companyName?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  activelySearching?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  skills?: string[];
 }
 
 export class DeleteUserDto {
@@ -258,8 +278,8 @@ export class NewUserFromDbDto {
   arrival_in_canada?: string;
 
   @IsOptional()
-  @IsNumber()
-  goal_id?: number;
+  @IsString()
+  goalId?: string;
 
   @IsOptional()
   @IsEnum(['USER', 'ADMIN', 'MENTOR'])

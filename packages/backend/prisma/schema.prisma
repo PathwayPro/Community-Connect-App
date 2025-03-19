@@ -43,6 +43,13 @@ model users {
   additional_links     String[]
   province             String?
   city                 String?
+  country_of_origin    String?
+  work_status          String?
+  company_name         String?
+  actively_searching   Boolean?
+  skills               String[]
+  age_range            String?
+  goal_id              String?
   // MENTOR RELATIONSHIP
   mentor               mentors?
   // EVENTS MANAGERS RELATIONSHIP
@@ -57,9 +64,6 @@ model users {
   news                 News[]
   //RESOURCES RELATIONSHIP
   resources            Resources[]
-  // GOALS RELATIONSHIP
-  goal                 UsersGoals?                   @relation(fields: [goal_id], references: [id])
-  goal_id              Int?
   // INTERESTS RELATIONSHIP
   interests            UsersInterests[]
   // NETWORKING - CONNECTION REQUESTS
@@ -261,13 +265,6 @@ model Resources {
   user_id    Int
 }
 
-// GOALS
-model UsersGoals {
-  id    Int     @id @default(autoincrement())
-  name  String
-  users users[]
-}
-
 // INTERESTS
 model Interests {
   id    Int              @id @default(autoincrement())
@@ -365,3 +362,9 @@ model PostsSaves {
   created_at       DateTime                  @default(now())
   @@unique([user_id, post_id])
 }
+// GOALS
+model UsersGoals {
+  id    Int     @id @default(autoincrement())
+  name  String
+}
+

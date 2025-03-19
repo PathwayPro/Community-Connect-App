@@ -182,20 +182,26 @@ export class UsersService {
           last_name: updateData.lastName,
           province: updateData.province,
           city: updateData.city,
-          dob: updateData.dob ? updateData.dob : undefined,
+          dob: updateData.dob,
+          age_range: updateData.ageRange,
           languages: updateData.languages,
           profession: updateData.profession,
           experience: updateData.experience,
           bio: updateData.bio,
           picture_upload_link: updateData.pictureUploadLink,
           arrival_in_canada: updateData.arrivalInCanada,
-          goal_id: updateData.goalId ? updateData.goalId : undefined,
+          goal_id: updateData.goalId,
           linkedin_link: updateData.linkedinLink,
           github_link: updateData.githubLink,
           twitter_link: updateData.twitterLink,
           portfolio_link: updateData.portfolioLink,
           other_links: updateData.otherLinks,
           additional_links: updateData.additionalLinks,
+          skills: updateData.skills,
+          work_status: updateData.workStatus,
+          company_name: updateData.companyName,
+          country_of_origin: updateData.countryOfOrigin,
+          actively_searching: updateData.activelySearching,
         },
       });
 
@@ -208,9 +214,18 @@ export class UsersService {
 
       if (
         error instanceof NotFoundException ||
-        error instanceof UnauthorizedException
+        error instanceof UnauthorizedException ||
+        error instanceof HttpException
       ) {
         throw error;
+      }
+
+      // Handle Prisma foreign key violation specifically
+      if (error.code === 'P2003') {
+        throw new HttpException(
+          'Invalid goal ID provided',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       throw new HttpException(
@@ -307,7 +322,7 @@ export class UsersService {
       lastName: user.last_name,
       email: user.email,
       dob: user.dob,
-      showDob: user.show_dob,
+      ageRange: user.age_range,
       arrivalInCanada: user.arrival_in_canada,
       goalId: user.goal_id,
       role: user.role as 'USER' | 'ADMIN' | 'MENTOR',
@@ -325,6 +340,11 @@ export class UsersService {
       portfolioLink: user.portfolio_link,
       otherLinks: user.other_links,
       additionalLinks: user.additional_links,
+      skills: user.skills,
+      workStatus: user.work_status,
+      companyName: user.company_name,
+      countryOfOrigin: user.country_of_origin,
+      activelySearching: user.actively_searching,
     });
     return readUser;
   }

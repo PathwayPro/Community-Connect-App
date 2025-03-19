@@ -7,7 +7,6 @@ import {
   FormLabel,
   FormControl
 } from '@/shared/components/ui/form';
-import { DateTimePicker } from '../date-picker/date-picker';
 import CustomDatePicker from '../date-picker/custom-date-picker';
 
 interface FormDatePickerProps<T extends FieldValues> {

@@ -8,8 +8,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '../store';
 import { useFetchProfile } from '../hooks/use-fetch-profile';
-import { arrivalInCanadaOptions } from '@/shared/lib/constants/profile';
 import { formatDate } from 'date-fns';
+import {
+  getArrivalInCanadaLabel,
+  getSkillLabel
+} from '@/features/user-profile/lib/utils';
 
 interface StatItemProps {
   label: string;
@@ -51,7 +54,9 @@ const InfoGroup = ({ title, items }: InfoGroupProps) => (
               {item.value}
             </Link>
           ) : (
-            <span className="paragraph-lg">{item.value}</span>
+            <div className="flex w-[50%] justify-end">
+              <span className="paragraph-lg text-right">{item.value}</span>
+            </div>
           )}
         </div>
       ))}
@@ -63,6 +68,8 @@ export const ViewProfile = () => {
   const router = useRouter();
   const { user } = useUserStore();
   const { isLoading, error } = useFetchProfile();
+
+  console.log('user data', user);
 
   // view profile data builder
   const profileData = {
@@ -87,10 +94,9 @@ export const ViewProfile = () => {
       },
       {
         label: 'Years in Canada',
-        value:
-          arrivalInCanadaOptions.find(
-            (option) => option.value === user?.arrivalInCanada
-          )?.label || 'Not specified'
+        value: user?.arrivalInCanada
+          ? getArrivalInCanadaLabel(user.arrivalInCanada)
+          : 'Not specified'
       },
       {
         label: 'Country of Origin',
@@ -107,7 +113,12 @@ export const ViewProfile = () => {
       { label: 'Profession', value: user?.profession || 'Not specified' },
       { label: 'Company', value: user?.companyName || 'Not specified' },
       { label: 'Experience', value: `${user?.experience || 0} years` },
-      { label: 'Skills', value: user?.skills?.join(', ') || 'Not specified' }
+      {
+        label: 'Skills',
+        value: user?.skills
+          ? user.skills.map((skill) => getSkillLabel(skill)).join(', ')
+          : 'Not specified'
+      }
     ],
     links: [
       ...(user?.linkedinLink
