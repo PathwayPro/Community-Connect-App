@@ -1,6 +1,11 @@
 import { IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateInterestDto {
-    @IsString()
-      name: string;
+  @ApiProperty({
+    description: 'Name for the interest',
+    example: 'Networking',
+  })
+  @IsString()
+  name: string;
 }

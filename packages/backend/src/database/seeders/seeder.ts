@@ -1,8 +1,8 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { UsersData, MentorsData, UsersInterestsData } from './data/users.seed';
-import { EventsCategoriesData, EventsData, EventsInvitationsData, EventsManagersData, EventsSubscriptionsData, EventsSubscriptionsUpdatesData } from './data/events.seed';
-import { NewsData } from './data/news.seed';
-import { ResourcesData } from './data/resources.seed';
+import { UsersData } from './data/users.seed';
+// import { EventsCategoriesData, EventsData, EventsInvitationsData, EventsManagersData, EventsSubscriptionsData, EventsSubscriptionsUpdatesData } from './data/events.seed';
+// import { NewsData } from './data/news.seed';
+// import { ResourcesData } from './data/resources.seed';
 import { PrismaClient } from '@prisma/client';
 import { GoalsData } from './data/goals.seed';
 import { InterestsData } from './data/interests';
@@ -10,40 +10,56 @@ import { InterestsData } from './data/interests';
 const prisma = new PrismaClient();
 
 const emptyTables = async () => {
-    try {
+  try {
     // DELETING IN ORDER TO PREVENT FK ERRORS
     console.log('\n\n 1. DELETING DATA (IN ORDER) TO PREVENT FK ERRORS:\n');
 
     // USERS-INTERESTS
-    const usersInterestsStatus = (await prisma.usersInterests.deleteMany({})) ? 'OK' : 'ERROR';
+    const usersInterestsStatus = (await prisma.usersInterests.deleteMany({}))
+      ? 'OK'
+      : 'ERROR';
     console.log(`     - USERS INTERESTS (${usersInterestsStatus}!)`);
-    
+
     // INTERESTS
-    const interestsStatus = (await prisma.interests.deleteMany({})) ? 'OK' : 'ERROR';
+    const interestsStatus = (await prisma.interests.deleteMany({}))
+      ? 'OK'
+      : 'ERROR';
     console.log(`     - INTERESTS (${interestsStatus}!)`);
-    
+
     // RESOURCES
-    const resourcesStatus = (await prisma.resources.deleteMany({})) ? 'OK' : 'ERROR';
+    const resourcesStatus = (await prisma.resources.deleteMany({}))
+      ? 'OK'
+      : 'ERROR';
     console.log(`     - RESOURCES (${resourcesStatus}!)`);
 
     // NEWS
     const newsStatus = (await prisma.news.deleteMany({})) ? 'OK' : 'ERROR';
     console.log(`     - NEWS (${newsStatus}!)`);
-    
+
     // EVENTS SUBSCRIPTIONS UPDATES
-    const eventsSubscriptionsUpdatesStatus = (await prisma.eventsSubscriptionsUpdates.deleteMany({})) ? 'OK' : 'ERROR';
-    console.log(`     - EVENTS SUBSCRIPTIONS UPDATES (${eventsSubscriptionsUpdatesStatus}!)`);
-    
+    const eventsSubscriptionsUpdatesStatus =
+      (await prisma.eventsSubscriptionsUpdates.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(
+      `     - EVENTS SUBSCRIPTIONS UPDATES (${eventsSubscriptionsUpdatesStatus}!)`,
+    );
+
     // EVENTS SUBSCRIPTIONS UPDATES
-    const eventsSubscriptionsStatus = (await prisma.eventsSubscriptions.deleteMany({})) ? 'OK' : 'ERROR';
+    const eventsSubscriptionsStatus =
+      (await prisma.eventsSubscriptions.deleteMany({})) ? 'OK' : 'ERROR';
     console.log(`     - EVENTS SUBSCRIPTIONS (${eventsSubscriptionsStatus}!)`);
 
     // EVENTS INVITATIONS
-    const eventsInvitationsStatus = (await prisma.eventsInvitations.deleteMany({})) ? 'OK' : 'ERROR';
+    const eventsInvitationsStatus = (await prisma.eventsInvitations.deleteMany(
+      {},
+    ))
+      ? 'OK'
+      : 'ERROR';
     console.log(`     - EVENTS INVITATIONS (${eventsInvitationsStatus}!)`);
 
     // EVENTS MANAGERS
-    const eventsManagersStatus = (await prisma.eventsManagers.deleteMany({})) ? 'OK' : 'ERROR';
+    const eventsManagersStatus = (await prisma.eventsManagers.deleteMany({}))
+      ? 'OK'
+      : 'ERROR';
     console.log(`     - EVENTS MANAGERS (${eventsManagersStatus}!)`);
 
     // EVENTS
@@ -51,11 +67,17 @@ const emptyTables = async () => {
     console.log(`     - EVENTS (${eventsStatus}!)`);
 
     // EVENTS CATEGORIES
-    const eventsCategoriesStatus = (await prisma.eventsCategories.deleteMany({})) ? 'OK' : 'ERROR';
+    const eventsCategoriesStatus = (await prisma.eventsCategories.deleteMany(
+      {},
+    ))
+      ? 'OK'
+      : 'ERROR';
     console.log(`     - EVENTS CATEGORIES (${eventsCategoriesStatus}!)`);
 
     // MENTORS
-    const mentorsStatus = (await prisma.mentors.deleteMany({})) ? 'OK' : 'ERROR';
+    const mentorsStatus = (await prisma.mentors.deleteMany({}))
+      ? 'OK'
+      : 'ERROR';
     console.log(`     - MENTORS (${mentorsStatus}!)`);
 
     // USERS
@@ -63,41 +85,54 @@ const emptyTables = async () => {
     console.log(`     - USERS (${usersStatus}!)`);
 
     // GOALS
-    const goalsStatus = (await prisma.usersGoals.deleteMany({})) ? 'OK' : 'ERROR';
+    const goalsStatus = (await prisma.usersGoals.deleteMany({}))
+      ? 'OK'
+      : 'ERROR';
     console.log(`     - GOALS (${goalsStatus}!)`);
-
-
-    }catch(error){
-        throw new InternalServerErrorException('| - - - - - > An error ocurred deleting records.', error)
-    }
-}
+  } catch (error) {
+    throw new InternalServerErrorException(
+      '| - - - - - > An error ocurred deleting records.',
+      error,
+    );
+  }
+};
 
 const seedGoals = async () => {
-    try{
-        console.log(`\n\n\n 2. SEEDING TABLE GOALS:   (${GoalsData.length} records)\n`)
-        for(const g of GoalsData){
-            if(await prisma.usersGoals.create({data: g})) 
-            console.log(`     GOAL ID: ${g.id} created - - - - - - - > OK! `)
-        else
-            console.log(`     GOAL ID: ${g.id} created - - - - - - - > ERROR! `);
-        }
-    }catch(error){
-        throw new InternalServerErrorException('There was an error seeding goals:', error)
+  try {
+    console.log(
+      `\n\n\n 2. SEEDING TABLE GOALS:   (${GoalsData.length} records)\n`,
+    );
+    for (const g of GoalsData) {
+      if (await prisma.usersGoals.create({ data: g }))
+        console.log(`     GOAL ID: ${g.id} created - - - - - - - > OK! `);
+      else console.log(`     GOAL ID: ${g.id} created - - - - - - - > ERROR! `);
     }
-}
+  } catch (error) {
+    throw new InternalServerErrorException(
+      'There was an error seeding goals:',
+      error,
+    );
+  }
+};
 const seedUsers = async () => {
-    try{
-        console.log(`\n\n\n 3. SEEDING TABLE USERS:   (${UsersData.length} records)\n`)
-        for(const user of UsersData){
-            if(await prisma.users.create({data: user}))  
-            console.log(`     USER ID: ${user.id} created - - - - - - - > OK! `) 
-        else
-            console.log(`     USER ID: ${user.id} created - - - - - - - > ERROR! `);
-        }
-    }catch(error){
-        throw new InternalServerErrorException('There was an error seeding users:', error)
+  try {
+    console.log(
+      `\n\n\n 3. SEEDING TABLE USERS:   (${UsersData.length} records)\n`,
+    );
+    for (const user of UsersData) {
+      if (await prisma.users.create({ data: user }))
+        console.log(`     USER ID: ${user.id} created - - - - - - - > OK! `);
+      else
+        console.log(`     USER ID: ${user.id} created - - - - - - - > ERROR! `);
     }
-}
+  } catch (error) {
+    throw new InternalServerErrorException(
+      'There was an error seeding users:',
+      error,
+    );
+  }
+};
+/*
 const seedMentors = async () => {
     try{
         console.log(`\n\n\n 4. SEEDING TABLE MENTORS:   (${MentorsData.length} records)\n`)
@@ -215,19 +250,28 @@ const seedResources = async () => {
         throw new InternalServerErrorException('There was an error seeding resources:', error)
     }
 }
+*/
 const seedInterests = async () => {
-    try{
-        console.log(`\n\n\n 13. SEEDING TABLE INTERESTS:   (${InterestsData.length} records)\n`)
-        for(const i of InterestsData){
-            if(await prisma.interests.create({data: i})) 
-            console.log(`     INTEREST ID: ${i.id} created - - - - - - - > OK! `) 
-        else
-            console.log(`     INTEREST ID: ${i.id} created - - - - - - - > ERROR! `);
-        }
-    }catch(error){
-        throw new InternalServerErrorException('There was an error seeding interests:', error)
+  try {
+    console.log(
+      `\n\n\n 13. SEEDING TABLE INTERESTS:   (${InterestsData.length} records)\n`,
+    );
+    for (const i of InterestsData) {
+      if (await prisma.interests.create({ data: i }))
+        console.log(`     INTEREST ID: ${i.id} created - - - - - - - > OK! `);
+      else
+        console.log(
+          `     INTEREST ID: ${i.id} created - - - - - - - > ERROR! `,
+        );
     }
-}
+  } catch (error) {
+    throw new InternalServerErrorException(
+      'There was an error seeding interests:',
+      error,
+    );
+  }
+};
+/*
 const seedUsersInterests = async () => {
     try{
         console.log(`\n\n\n 14. SEEDING TABLE USERS-INTERESTS:   (${UsersInterestsData.length} records)\n`)
@@ -241,24 +285,26 @@ const seedUsersInterests = async () => {
         throw new InternalServerErrorException('There was an error seeding users-interests:', error)
     }
 }
-
+*/
 const seedAll = async () => {
-    console.log('\n\n         - - - - - - - - - - - - - - \n       | R U N N I N G   S E E D E R | \n         - - - - - - - - - - - - - - \n\n')
+  console.log(
+    '\n\n         - - - - - - - - - - - - - - \n       | R U N N I N G   S E E D E R | \n         - - - - - - - - - - - - - - \n\n',
+  );
 
-    await emptyTables()
-    await seedGoals()
-    await seedUsers()
-    await seedMentors()
-    await seedEventsCategories()
-    await seedEvents()
-    await seedEventsManagers()
-    await seedEventsInvitations()
-    await seedEventsSubscriptions()
-    await seedEventsSubscriptionsUpdates()
-    await seedNews()
-    await seedResources()
-    await seedInterests()
-    await seedUsersInterests()
-}
+  await emptyTables();
+  await seedGoals();
+  await seedUsers();
+  // await seedMentors()
+  // await seedEventsCategories()
+  // await seedEvents()
+  // await seedEventsManagers()
+  // await seedEventsInvitations()
+  // await seedEventsSubscriptions()
+  // await seedEventsSubscriptionsUpdates()
+  // await seedNews()
+  // await seedResources()
+  await seedInterests();
+  // await seedUsersInterests()
+};
 
 seedAll();

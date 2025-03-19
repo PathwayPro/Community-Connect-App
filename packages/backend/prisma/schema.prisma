@@ -75,6 +75,11 @@ model users {
   // NETWORKING - MESSAGES
   messages_sender_id        Messages[]          @relation(name: "MessagesSender")
   messages_recipient_id        Messages[]          @relation(name: "MessagesRecipient")
+  // POSTS
+  posts                       Posts[]
+  posts_comments                       PostsComments[]
+  posts_likes                 PostsLikes[]
+  post_saves                  PostsSaves[]
 
 }
 
@@ -86,9 +91,11 @@ enum users_roles {
 
 model mentors {
   id                 Int            @id @default(autoincrement())
+  resume             String
   max_mentees        Int
   availability       String
-  has_experience     Boolean        @default(false)
+  profession         String
+  experience_years   Int
   experience_details String?
   // STATUS ENUM
   status             mentors_status @default(PENDING)
@@ -108,17 +115,18 @@ enum mentors_status {
 model Events {
   id                    Int                   @id @default(autoincrement())
   title                 String
-  subtitle              String?
   description           String
   location              String?
   link                  String?
   image                 String?
-  price                 Decimal               @default(0) @db.Decimal(10, 2)
+  is_free               Boolean               @default(true)
   type                  EventsTypes           @default(PUBLIC)
   requires_confirmation Boolean               @default(false) // IF SUBSCRIPTIONS ARE ACCEPTED DIRECTLY OR IF THEY REQUIRE AN APPROVAL AFTER REVIEW
   accept_subscriptions  Boolean               @default(true) // IF USERS CAN STILL SUBSCRIBE TO THE EVENT OR IS FULL
   created_at            DateTime              @default(now())
   updated_at            DateTime              @default(now())
+  start_date            DateTime              @default(now())
+  end_date              DateTime              @default(now())
   // RELATIONSHIPS
   category              EventsCategories      @relation(fields: [category_id], references: [id])
   category_id           Int
@@ -227,12 +235,18 @@ model EventsInvitations {
 }
 
 // NEWS
+enum NewsType {
+  FEATURED_POST
+  EDITORS_PICK
+}
+
 model News {
   id         Int      @id @default(autoincrement())
   title      String
-  subtitle   String?
-  keywords   String?
-  content    String
+  details    String
+  type       NewsType
+  link       String
+  image      String?
   published  Boolean  @default(false)
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
@@ -305,6 +319,49 @@ model Messages {
   created_at      DateTime                  @default(now())
 }
 
+// BLOG
+model Posts {
+  id               Int                       @id @default(autoincrement())
+  user_id          Int
+  user             users                     @relation(fields: [user_id], references: [id])
+  message          String
+  image            String?
+  created_at       DateTime                  @default(now())
+  updated_at       DateTime                  @default(now())
+  published        Boolean                   @default(false)
+  comments         PostsComments[]
+  likes            PostsLikes[]
+  saves            PostsSaves[]
+}
+model PostsComments {
+  id               Int                       @id @default(autoincrement())
+  user_id          Int
+  user             users                     @relation(fields: [user_id], references: [id])
+  post_id          Int
+  post             Posts                     @relation(fields: [post_id], references: [id])
+  message          String
+  created_at       DateTime                  @default(now())
+  updated_at       DateTime                  @default(now())
+  published        Boolean                   @default(false)
+}
+model PostsLikes {
+  id               Int                       @id @default(autoincrement())
+  user_id          Int
+  post_id          Int
+  post             Posts                     @relation(fields: [post_id], references: [id])
+  user             users                     @relation(fields: [user_id], references: [id])
+  created_at       DateTime                  @default(now())
+  @@unique([user_id, post_id])
+}
+model PostsSaves {
+  id               Int                       @id @default(autoincrement())
+  user_id          Int
+  user             users                     @relation(fields: [user_id], references: [id])
+  post_id          Int
+  post             Posts                     @relation(fields: [post_id], references: [id])
+  created_at       DateTime                  @default(now())
+  @@unique([user_id, post_id])
+}
 // GOALS
 model UsersGoals {
   id    Int     @id @default(autoincrement())
