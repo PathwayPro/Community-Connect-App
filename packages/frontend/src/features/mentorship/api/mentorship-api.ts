@@ -4,7 +4,7 @@ import { CreateMentorDto, InterestsResponse, MentorResponse } from '../types';
 export const mentorshipApi = {
   getInterests: () => apiMethods.get<InterestsResponse[]>('/interests'),
 
-  createMentor: (data: CreateMentorDto) =>
+  createMentor: (data: FormData) =>
     apiMethods.post<MentorResponse>('/mentors', data),
 
   getMentor: (mentorId: number) =>
