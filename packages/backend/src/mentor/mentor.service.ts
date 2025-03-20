@@ -25,8 +25,11 @@ export class MentorService {
   ) {
     try {
       // TRANSFORM STRING OF INTEREST INTO ARRAY
+      // const interestsToArray = typeof interests === 'string' ? JSON.parse(interests) : interests;
       const interestsToArray =
-        typeof interests === 'string' ? JSON.parse(interests) : interests;
+        typeof interests === 'string'
+          ? JSON.parse(interests).map((item: any) => parseInt(item, 10))
+          : interests.map((item: any) => parseInt(item, 10));
 
       // VALIDATE ONLY THE EXISTING ONES AND RETURN FORMATTED VALUES
       const validInterestsIds = await this.prisma.interests
@@ -208,7 +211,7 @@ export class MentorService {
         max_mentees: createMentorDto.max_mentees,
         availability: createMentorDto.availability,
         user: { connect: { id: user_id } },
-        resume: resumeLink.path,
+        resume: resumeLink.path + '/' + resumeLink.fileName,
         status: mentors_status.PENDING,
       };
 
@@ -232,10 +235,12 @@ export class MentorService {
       }
 
       // INTERESTS
-      const mentorInterests = await this.addUserInterestsFormatted(
-        user_id,
-        createMentorDto.interests,
-      );
+      const mentorInterests = !createMentorDto.interests
+        ? []
+        : await this.addUserInterestsFormatted(
+            user_id,
+            createMentorDto.interests,
+          );
 
       return { ...mentor, interests: mentorInterests };
     } catch (error) {

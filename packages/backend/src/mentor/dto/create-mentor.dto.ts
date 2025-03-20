@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsInt, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -13,7 +13,7 @@ export class CreateMentorDto {
     minimum: 0,
   })
   @IsInt()
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => parseInt(value, 10))
   experience_years: number;
 
   @ApiProperty({
@@ -23,7 +23,7 @@ export class CreateMentorDto {
     maximum: 5,
   })
   @IsInt()
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => parseInt(value, 10))
   max_mentees: number;
 
   @ApiProperty({
@@ -40,11 +40,29 @@ export class CreateMentorDto {
   @IsOptional()
   experience_details?: string;
 
+  // @ApiProperty({
+  //   description: 'Array of interests IDs to match with mentees (String)',
+  //   example: '[1, 2, 3]',
+  // })
+  // @IsString()
+  // @IsOptional()
+  // interests: string;
+
   @ApiProperty({
-    description: 'Array of interests IDs to match with mentees (String)',
-    example: '[1, 2, 3]',
+    description: 'Array of interests IDs to match with mentees (Number[])',
+    example: [1, 2, 3],
   })
-  @IsString()
   @IsOptional()
-  interests: string;
+  @IsArray()
+  @IsInt({ each: true })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return JSON.parse(value).map((item: any) => parseInt(item, 10));
+    } else if (Array.isArray(value)) {
+      return value.map((item: any) => parseInt(item, 10));
+    } else {
+      return [];
+    }
+  })
+  interests?: number[];
 }
