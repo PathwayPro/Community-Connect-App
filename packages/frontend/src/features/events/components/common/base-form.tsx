@@ -1,11 +1,13 @@
 import { useFormContext } from 'react-hook-form';
-import { FormInput } from '@/shared/components/form';
+import { FormInput, FormSelect } from '@/shared/components/form';
 import { FormTextarea } from '@/shared/components/form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EventFormValues, EventTicketTypes } from '../../lib/validation';
 import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
+import { useEventStore } from '../../store';
+import { handleLinkChange } from '@/shared/lib/utils';
 
 const ticketTypeOptions = [
   {
@@ -19,7 +21,19 @@ const ticketTypeOptions = [
 ];
 
 export const BaseForm = () => {
-  const { setValue, watch } = useFormContext<EventFormValues>();
+  const {
+    setValue,
+    watch,
+    formState: { errors }
+  } = useFormContext<EventFormValues>();
+
+  const { eventCategories, fetchEventCategories } = useEventStore();
+
+  console.log('eventCategories', eventCategories);
+
+  useEffect(() => {
+    fetchEventCategories();
+  }, [fetchEventCategories]);
 
   const handleImageUpload = async (files: File[]) => {
     try {
@@ -59,16 +73,20 @@ export const BaseForm = () => {
           name="title"
           label="Event Title"
           placeholder="Enter event title"
-          customError="Event title is required"
+          customError={errors.title?.message}
           required
         />
       </div>
       <div className="flex w-full gap-4">
-        <FormInput
-          name="category"
+        <FormSelect
+          name="category_id"
           label="Event Category"
-          placeholder="Enter event category"
-          customError="Event category is required"
+          placeholder="Select event category"
+          customError={errors.category_id?.message}
+          options={eventCategories?.map((category) => ({
+            value: String(category.id),
+            label: category.name
+          }))}
           required
         />
       </div>
@@ -77,29 +95,31 @@ export const BaseForm = () => {
         name="description"
         label="Event Description"
         placeholder="Describe your event..."
-        customError="Event description is required"
+        customError={errors.description?.message}
         maxLength={400}
         required
       />
 
       <div className="flex w-full gap-4">
         <CustomSwitch
-          name="ticket_type"
-          label="Ticket Type"
+          name="price"
+          label="Free or Paid Event"
           options={ticketTypeOptions}
-          value={watch('ticket_type')}
-          onChange={(value) => setValue('ticket_type', value)}
+          value={watch('price')}
+          onChange={(value) => setValue('price', value)}
           required
         />
       </div>
 
       <div className="flex w-full gap-4">
         <FormInput
-          name="registratom_link"
+          name="link"
           label="Registration Link"
           hasLabelInput={true}
           leftLabel="https://"
-          placeholder="Link text"
+          placeholder="Registration link URL"
+          customError={errors.link?.message}
+          onChange={(e) => setValue('link', handleLinkChange(e.target.value))}
         />
       </div>
     </div>

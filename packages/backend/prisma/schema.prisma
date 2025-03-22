@@ -113,7 +113,10 @@ model Events {
   location              String?
   link                  String?
   image                 String?
-  price                 Decimal               @default(0) @db.Decimal(10, 2)
+  price                 String?
+  date                  String?
+  start_time            String?
+  end_time              String?
   type                  EventsTypes           @default(PUBLIC)
   requires_confirmation Boolean               @default(false) // IF SUBSCRIPTIONS ARE ACCEPTED DIRECTLY OR IF THEY REQUIRE AN APPROVAL AFTER REVIEW
   accept_subscriptions  Boolean               @default(true) // IF USERS CAN STILL SUBSCRIBE TO THE EVENT OR IS FULL

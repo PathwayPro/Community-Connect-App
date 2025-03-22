@@ -4,9 +4,7 @@ import {
   IsOptional,
   IsString,
   IsEnum,
-  IsDecimal,
   IsInt,
-  ValidateIf,
 } from 'class-validator';
 
 export class CreateEventDto {
@@ -35,10 +33,9 @@ export class CreateEventDto {
   @IsOptional()
   image?: string;
 
-  @IsDecimal()
+  @IsString()
   @IsOptional()
-  @ValidateIf((o) => o.price !== undefined)
-  price?: number = 0.0;
+  price?: string;
 
   @IsEnum(EventsTypes)
   type: EventsTypes = 'PUBLIC';
@@ -48,4 +45,16 @@ export class CreateEventDto {
 
   @IsBoolean()
   accept_subscriptions: boolean = true;
+
+  @IsString()
+  @IsOptional()
+  date?: string;
+
+  @IsString()
+  @IsOptional()
+  start_time?: string;
+
+  @IsString()
+  @IsOptional()
+  end_time?: string;
 }

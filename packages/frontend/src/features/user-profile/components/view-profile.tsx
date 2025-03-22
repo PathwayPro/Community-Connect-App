@@ -47,7 +47,7 @@ const InfoGroup = ({ title, items }: InfoGroupProps) => (
                   ? item.value
                   : `https://${item.value}`
               }
-              className="paragraph-lg hover:text-blue-500 hover:underline"
+              className="paragraph-lg text-blue-500 hover:underline"
               target="_blank"
               rel="noopener noreferrer"
             >

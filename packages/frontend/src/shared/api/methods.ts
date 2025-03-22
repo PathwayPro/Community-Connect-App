@@ -17,6 +17,11 @@ export const apiMethods = {
     return response.data;
   },
 
+  patch: async <T>(url: string, data: unknown) => {
+    const response = await api.patch<ApiResponse<T>>(url, data);
+    return response.data;
+  },
+
   delete: async <T>(url: string) => {
     const response = await api.delete<ApiResponse<T>>(url);
     return response.data;

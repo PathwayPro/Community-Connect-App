@@ -10,24 +10,28 @@ export const EventTicketTypes = {
   FREE: 'FREE'
 } as const;
 
+export const trueFalseOptions = [
+  { value: false, label: 'False' },
+  { value: true, label: 'True' }
+];
+
 export const eventFormSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
+  title: z.string().min(1, 'Event title is required'),
   subtitle: z.string().optional(),
-  description: z.string().min(1, 'Description is required'),
-  category_id: z.number().int().positive('Category is required'),
+  description: z.string().min(1, 'Event description is required'),
+  category_id: z.string().min(1, 'Event category is required'),
   location: z.string().optional(),
   link: z.string().url('Must be a valid URL').optional(),
   image: z.string().optional(),
-  price: z.number().min(0).optional().default(0),
+  price: z.enum(Object.values(EventTicketTypes) as [string, ...string[]]),
   type: z
     .enum(Object.values(EventsTypes) as [string, ...string[]])
     .default('PUBLIC'),
-  ticket_type: z
-    .enum(Object.values(EventTicketTypes) as [string, ...string[]])
-    .default('FREE'),
   requires_confirmation: z.boolean().default(false),
   accept_subscriptions: z.boolean().default(true),
-  date: z.date().default(new Date())
+  date: z.string().default(new Date().toISOString()),
+  start_time: z.string().default(new Date().toISOString()).optional(),
+  end_time: z.string().default(new Date().toISOString()).optional()
 });
 
 export type EventFormValues = z.infer<typeof eventFormSchema>;

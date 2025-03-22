@@ -29,10 +29,13 @@ export class EventsController {
       location: createEventDto.location,
       link: createEventDto.link,
       image: createEventDto.image,
-      price: createEventDto.price || 0,
+      price: createEventDto.price || 'FREE',
       type: createEventDto.type || 'PUBLIC',
       requires_confirmation: createEventDto.requires_confirmation || false,
       accept_subscriptions: createEventDto.accept_subscriptions || true,
+      date: createEventDto.date,
+      start_time: createEventDto.start_time,
+      end_time: createEventDto.end_time,
     };
     return this.eventsService.create(newEvent);
   }
@@ -71,6 +74,9 @@ export class EventsController {
       type: updateEventDto.type,
       requires_confirmation: updateEventDto.requires_confirmation || false,
       accept_subscriptions: updateEventDto.accept_subscriptions || true,
+      date: updateEventDto.date,
+      start_time: updateEventDto.start_time,
+      end_time: updateEventDto.end_time,
     };
     return this.eventsService.update(+id, updatedEvent);
   }

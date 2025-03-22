@@ -54,6 +54,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(homePage);
   }
 
+  // Redirect authenticated users to /events if they try to access /events/edit but allow them to access /events/edit/:id or /events/delete/:id or events/:id
+  if (isAuthenticated && pathname === '/events/edit') {
+    return NextResponse.redirect(new URL('/events', request.url));
+  }
+
+  if (isAuthenticated && pathname === '/events/delete') {
+    return NextResponse.redirect(new URL('/events', request.url));
+  }
+
   // Allow access to public paths
   if (publicPaths.includes(pathname)) {
     return NextResponse.next();

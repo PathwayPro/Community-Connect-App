@@ -27,6 +27,9 @@ export function CustomSwitch<T>({
 }: CustomSwitchProps<T>) {
   const activeIndex = options.findIndex((option) => option.value === value);
 
+  // Ensure we always have a defined value for the hidden input
+  const inputValue = value !== undefined ? String(value) : '';
+
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
@@ -45,13 +48,8 @@ export function CustomSwitch<T>({
           className
         )}
       >
-        {/* Hidden input for form functionality */}
-        <input
-          type="hidden"
-          name={name}
-          value={String(value)}
-          {...inputProps}
-        />
+        {/* Hidden input with controlled value */}
+        <input type="hidden" name={name} value={inputValue} {...inputProps} />
 
         {/* Sliding background */}
         <div

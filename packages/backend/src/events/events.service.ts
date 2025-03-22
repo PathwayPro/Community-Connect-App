@@ -55,9 +55,7 @@ export class EventsService {
       formattedFilters.accept_subscriptions = filters.accept_subscriptions;
     }
     if (filters?.price) {
-      formattedFilters.price = {
-        lte: filters.price,
-      };
+      formattedFilters.price = filters.price;
     }
 
     return formattedFilters;
@@ -74,6 +72,8 @@ export class EventsService {
           `The category with ID #${createEventDto.category_id} was not found.`,
         );
       }
+
+      console.log('CREATE EVENT DTO:', createEventDto);
 
       const event = await this.prisma.events.create({
         data: createEventDto,
@@ -95,6 +95,9 @@ export class EventsService {
         where: appliedFilters,
         include: {
           category: true,
+        },
+        orderBy: {
+          created_at: 'desc',
         },
       });
       return events;
