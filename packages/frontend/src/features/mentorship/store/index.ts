@@ -11,7 +11,7 @@ interface MentorshipState {
   mentor: MentorResponse | null;
 
   // Actions
-  createMentor: (mentorData: CreateMentorDto) => Promise<MentorResponse>;
+  createMentor: (mentorData: FormData) => Promise<MentorResponse>;
   fetchInterests: () => Promise<InterestsResponse[]>;
   getMentor: (mentorId: number) => Promise<MentorResponse>;
 }

@@ -10,7 +10,9 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService, EmailService } from './services';
+// import { AuthService, EmailService } from './services';
+import { AuthService } from './services/auth.service';
+import { EmailService } from './services/email.service';
 import { Public } from './decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import {

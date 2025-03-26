@@ -20,6 +20,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { UserProfile } from '@/features/user-profile/types';
 import { useFetchProfile } from '@/features/user-profile/hooks/use-fetch-profile';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
+import { toast } from 'sonner';
 
 interface MentorshipFormProps {
   title: string;
@@ -53,8 +54,24 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
   const { user } = useUserStore();
   const { isLoading, error } = useFetchProfile();
   const { showAlert } = useAlertDialog();
+  const [selectedFile, setSelectedFile] = React.useState<File | null>(null); // NEW: To handle resume file directly with the form
 
   console.log('user details', user);
+
+  const handleFileUploadParent = async (files: File[]) => {
+    try {
+      if (files && files.length > 0) {
+        setSelectedFile(files[0]);
+        toast.success('Resume uploaded successfully');
+      } else {
+        setSelectedFile(null);
+        toast.error('No file selected.');
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      toast.error('Failed to upload profile picture');
+    }
+  };
 
   const methods = useForm<MentorSchema>({
     mode: 'onChange',
@@ -68,16 +85,48 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
 
   const onSubmit = async (data: MentorSchema) => {
     try {
+      /*
+      // ORIGINAL CODE USING JSON FORMAT
+      // CHANGING TO FORM DATA FOR FILE TRANSFERS
       const modifiedData = {
         ...data,
         has_experience: Boolean(data.experience_details),
         experience: Number(data.experience),
         firstName: '',
         lastName: '',
-        profession: ''
+        profession: 'hardcoded profession'
       };
 
       await createMentor(modifiedData);
+      */
+
+      const formData = new FormData();
+
+      // Append file data (resume)
+      if (selectedFile) {
+        formData.append('file', selectedFile);
+      }
+
+      // Rest of the form
+      formData.append('max_mentees', String(data.max_mentees));
+      formData.append('availability', data.availability);
+      formData.append(
+        'has_experience',
+        String(Boolean(data.experience_details))
+      );
+      formData.append('experience_years', String(data.experience));
+      formData.append('profession', 'hardcoded profession'); // Hardcoded
+
+      if (data.experience_details) {
+        formData.append('experience_details', data.experience_details);
+      }
+
+      if (data.interests) {
+        data.interests.forEach((interest) => {
+          formData.append('interests[]', String(interest));
+        });
+      }
+      await createMentor(formData);
 
       showAlert({
         type: 'success',
@@ -144,6 +193,7 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
               isMentor={isMentor}
               interests={interests}
               experienceDetails={description}
+              handleFileUploadParent={handleFileUploadParent}
             />
             <div className="flex w-full flex-col gap-4 pt-5">
               <Button

@@ -1,14 +1,8 @@
-import { IsInt, IsOptional, IsString } from 'class-validator';
-import { EventsSubscriptionsStatus } from '@prisma/client';
+import { IsInt } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateEventsSubscriptionDto {
-  @IsInt()
-  user_id: number;
-
+  @ApiProperty({ description: 'ID of the event to subscribe', example: '1' })
   @IsInt()
   event_id: number;
-
-  @IsString()
-  @IsOptional()
-  status?: EventsSubscriptionsStatus = 'PENDING';
 }

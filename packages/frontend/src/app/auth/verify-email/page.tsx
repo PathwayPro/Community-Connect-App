@@ -4,8 +4,9 @@ import { Icons } from '@/features/auth/components';
 import { VerifyEmail } from '@/features/auth/components';
 import { AccessToken } from '@/features/auth/types';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function VerifyEmailPage() {
+const VerifyEmailPageContent = () => {
   const searchParams = useSearchParams();
   const tokenParam = searchParams.get('token');
   const token = tokenParam ? (tokenParam as unknown as AccessToken) : null;
@@ -18,3 +19,11 @@ export default function VerifyEmailPage() {
     </div>
   );
 }
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyEmailPageContent />
+    </Suspense>
+  );
+};

@@ -7,8 +7,16 @@ export const apiMethods = {
     return response.data;
   },
 
-  post: async <T>(url: string, data?: unknown) => {
-    const response = await api.post<ApiResponse<T>>(url, data);
+  // post: async <T>(url: string, data?: unknown) => {
+  //   const response = await api.post<ApiResponse<T>>(url, data);
+  //   return response.data;
+  // },
+  post: async <T>(
+    url: string,
+    data?: FormData | unknown,
+    headers?: Record<string, string>
+  ) => {
+    const response = await api.post<ApiResponse<T>>(url, data, { headers }); // Passing headers to api.post
     return response.data;
   },
 

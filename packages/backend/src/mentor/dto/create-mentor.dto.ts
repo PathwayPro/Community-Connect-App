@@ -1,35 +1,68 @@
-import {
-  IsBoolean,
-  IsInt,
-  IsOptional,
-  IsString,
-  IsEnum,
-} from 'class-validator';
-import { mentors_status } from '@prisma/client';
+import { IsArray, IsInt, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateMentorDto {
+  @ApiProperty({ description: 'Profession, related to mentoring' })
+  @IsString()
+  profession: string;
+
+  @ApiProperty({
+    description: 'Years of experience as a mentor (greater than 0)',
+    example: 10,
+    minimum: 0,
+  })
   @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
+  experience_years: number;
+
+  @ApiProperty({
+    description: 'Maximum amount of mentees they can handle',
+    example: 5,
+    minimum: 1,
+    maximum: 5,
+  })
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
   max_mentees: number;
 
+  @ApiProperty({
+    description: 'Description of availability for mentorship sessions',
+    example: 'Monday to Friday after 2PM',
+  })
   @IsString()
   availability: string;
 
-  @IsBoolean()
-  has_experience?: boolean = false;
-
+  @ApiPropertyOptional({
+    description: 'Description of previous experience in mentoring others',
+  })
   @IsString()
   @IsOptional()
   experience_details?: string;
 
-  @IsEnum(mentors_status)
-  @IsOptional()
-  status?: mentors_status = 'PENDING';
+  // @ApiProperty({
+  //   description: 'Array of interests IDs to match with mentees (String)',
+  //   example: '[1, 2, 3]',
+  // })
+  // @IsString()
+  // @IsOptional()
+  // interests: string;
 
-  @IsInt()
+  @ApiProperty({
+    description: 'Array of interests IDs to match with mentees (Number[])',
+    example: [1, 2, 3],
+  })
   @IsOptional()
-  user_id?: number;
-
+  @IsArray()
   @IsInt({ each: true })
-  @IsOptional()
-  interests?: Array<number>;
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return JSON.parse(value).map((item: any) => parseInt(item, 10));
+    } else if (Array.isArray(value)) {
+      return value.map((item: any) => parseInt(item, 10));
+    } else {
+      return [];
+    }
+  })
+  interests?: number[];
 }

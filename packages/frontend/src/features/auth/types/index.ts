@@ -21,11 +21,9 @@ export type ChangePasswordCredentials = {
 
 export type AuthResponse = {
   success: boolean;
-  data: {
-    tokens: {
-      accessToken: string;
-      refreshToken: string;
-    };
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
   };
   message: string;
   timestamp: string;
