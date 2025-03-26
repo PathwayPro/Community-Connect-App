@@ -146,7 +146,7 @@ export const ViewProfile = () => {
 
   if (isLoading) {
     return (
-      <Card className="flex w-[840px] flex-col rounded-[24px]">
+      <Card className="flex min-w-[840px] flex-col rounded-[24px]">
         <CardContent className="flex items-center justify-center p-8">
           Loading profile...
         </CardContent>
@@ -165,7 +165,7 @@ export const ViewProfile = () => {
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="container-default mx-auto min-w-[1024px] max-w-4xl">
       <Card className="space-y-8 p-6">
         {/* Edit Profile Button */}
         <div className="flex justify-end">

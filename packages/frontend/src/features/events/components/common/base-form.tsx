@@ -4,21 +4,10 @@ import { FormTextarea } from '@/shared/components/form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
 import React, { useEffect } from 'react';
-import { EventFormValues, EventTicketTypes } from '../../lib/validation';
+import { EventFormValues, FreePaidOptions } from '../../lib/validation';
 import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
 import { useEventStore } from '../../store';
 import { handleLinkChange } from '@/shared/lib/utils';
-
-const ticketTypeOptions = [
-  {
-    value: EventTicketTypes.FREE,
-    label: 'Free Event'
-  },
-  {
-    value: EventTicketTypes.PAID,
-    label: 'Paid Event'
-  }
-];
 
 export const BaseForm = () => {
   const {
@@ -29,7 +18,7 @@ export const BaseForm = () => {
 
   const { eventCategories, fetchEventCategories } = useEventStore();
 
-  console.log('eventCategories', eventCategories);
+  console.log('errors', errors);
 
   useEffect(() => {
     fetchEventCategories();
@@ -102,11 +91,11 @@ export const BaseForm = () => {
 
       <div className="flex w-full gap-4">
         <CustomSwitch
-          name="price"
+          name="is_free"
           label="Free or Paid Event"
-          options={ticketTypeOptions}
-          value={watch('price')}
-          onChange={(value) => setValue('price', value)}
+          options={FreePaidOptions}
+          value={watch('is_free')}
+          onChange={(value) => setValue('is_free', value)}
           required
         />
       </div>

@@ -119,7 +119,6 @@ model Events {
   location              String?
   link                  String?
   image                 String?
-  price                 String?
   is_free               Boolean               @default(true)
   date                  String?
   start_time            String?
@@ -135,9 +134,13 @@ model Events {
   category              EventsCategories      @relation(fields: [category_id], references: [id])
   category_id           Int
   dates                 EventsDates[]
+  // EVENTS SPEAKERS
   speakers              eventsSpeakers[]
+  // EVENTS MANAGERS
   managers              EventsManagers[]
+  // EVENTS SUBSCRIPTIONS
   subscriptions         EventsSubscriptions[]
+  // EVENTS INVITATIONS
   invitations           EventsInvitations[]
 }
 

@@ -62,6 +62,7 @@ export const SocialLinksForm = () => {
 
       <Button
         variant="ghost"
+        type="button"
         className="flex w-[152px] items-center justify-start gap-2 p-0 text-lg font-medium text-primary hover:bg-white"
         onClick={handleAddLink}
       >

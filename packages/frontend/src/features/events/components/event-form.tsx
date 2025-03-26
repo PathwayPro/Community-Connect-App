@@ -14,8 +14,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import {
   eventFormSchema,
   EventFormValues,
-  EventsTypes,
-  EventTicketTypes
+  EventsTypes
 } from '../lib/validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
@@ -63,15 +62,15 @@ export const EventForm = () => {
         title: eventData.title || '',
         subtitle: eventData.subtitle || '',
         description: eventData.description || '',
-        category_id: eventData.category_id?.toString() || '1',
+        category_id: eventData.category_id?.toString() || '',
         location: eventData.location || '',
         link: eventData.link || '',
         image: eventData.image || '',
-        price: eventData.price || EventTicketTypes.FREE,
+        is_free: eventData.is_free || true,
         type: eventData.type || EventsTypes.PUBLIC,
         requires_confirmation: eventData.requires_confirmation || false,
         accept_subscriptions: eventData.accept_subscriptions || true,
-        date: eventData.date || '',
+        start_date: eventData.start_date || new Date().toISOString(),
         start_time: eventData.start_time || '00:00 AM',
         end_time: eventData.end_time || '00:00 AM'
       };
@@ -81,15 +80,15 @@ export const EventForm = () => {
       title: '',
       subtitle: '',
       description: '',
-      category_id: '1',
+      category_id: '',
       location: '',
       link: '',
       image: '',
-      price: EventTicketTypes.FREE,
+      is_free: true,
       type: EventsTypes.PUBLIC,
       requires_confirmation: false,
       accept_subscriptions: true,
-      date: '',
+      start_date: '',
       start_time: '00:00 AM',
       end_time: '00:00 AM'
     };
@@ -107,8 +106,8 @@ export const EventForm = () => {
   const isStepValid = useCallback(async () => {
     const fieldsToValidate =
       activeStep === 1
-        ? (['title', 'category_id', 'description', 'price'] as const)
-        : (['date', 'type'] as const);
+        ? (['title', 'category_id', 'description'] as const)
+        : (['start_date', 'type'] as const);
 
     const result = await trigger(fieldsToValidate);
     return result;
@@ -133,12 +132,13 @@ export const EventForm = () => {
   };
 
   const onSubmit = async (data: EventFormValues) => {
+    console.log('data', data.start_date);
     try {
       const formattedData = {
         ...data,
         category_id: Number(data.category_id),
         type: data.type as EventType,
-        date: `${data.date}, ${year}`
+        start_date: new Date(`${data.start_date}, ${year}`).toISOString()
       };
 
       console.log('formattedData', formattedData);

@@ -27,16 +27,19 @@ export interface Event {
   location?: string;
   link?: string;
   image?: string;
-  price: string;
+  is_free: boolean;
   type: EventType;
   reqConfirm: boolean;
   createdAt: Date;
   updatedAt: Date;
   category_id: number;
   category: EventCategory;
-  date: string;
+  start_date: string;
   start_time: string;
   end_time: string;
+  host_name: string;
+  host_bio: string;
+  host_image: string;
 }
 
 export interface EventCategory {
@@ -107,9 +110,3 @@ export interface EventResponse<T> {
   message?: string;
   data: T;
 }
-
-// export interface EventCategoryResponse {
-//   success: boolean;
-//   message?: string;
-//   data: EventCategory[];
-// }

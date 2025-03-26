@@ -24,7 +24,7 @@ export const TimeLocationForm = () => {
     formState: { errors }
   } = useFormContext();
   const startTime = watch('start_time');
-  const endTime = watch('end_time');
+  // const endTime = watch('end_time');
 
   const validateEndTime = (endTimeValue: string) => {
     if (!startTime || !endTimeValue) return true;
@@ -55,9 +55,9 @@ export const TimeLocationForm = () => {
     <div className="flex w-full flex-col gap-4">
       <div className="flex w-full gap-4">
         <FormDatePicker
-          name="date"
+          name="start_date"
           label="Event Date"
-          customError={errors.date?.message as string}
+          customError={errors.start_date?.message as string}
           required
         />
       </div>

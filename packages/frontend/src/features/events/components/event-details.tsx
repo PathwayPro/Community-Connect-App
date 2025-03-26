@@ -14,7 +14,9 @@ import {
   Lock,
   Users,
   Unlock,
-  DollarSign
+  DollarSign,
+  User,
+  UserIcon
 } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useSearchParams } from 'next/navigation';
@@ -22,6 +24,7 @@ import { useRouter } from 'next/navigation';
 import { Event } from '../types';
 import { EventsTypes } from '../lib/validation';
 import { toSentenceCase } from '@/shared/lib/utils';
+import { formatDate } from 'date-fns';
 
 interface EventDetailsProps {
   onBack?: () => void;
@@ -56,14 +59,17 @@ export const EventDetails = ({
   const {
     title,
     description,
-    date,
+    start_date,
     location,
     start_time,
     image,
     type,
     end_time,
-    price,
-    category
+    is_free,
+    category,
+    host_name,
+    host_bio,
+    host_image
   } = eventData;
 
   return (
@@ -105,8 +111,8 @@ export const EventDetails = ({
           src={image || '/event/placeholder.jpg'}
           alt={title}
           width={1200}
-          height={400}
-          className="mt-6 aspect-[3/1] h-auto w-full rounded-2xl object-cover"
+          height={600}
+          className="mt-6 aspect-[2/1] h-auto w-full rounded-2xl object-cover"
           priority
         />
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
@@ -119,7 +125,9 @@ export const EventDetails = ({
         <div className="grid gap-4 md:grid-cols-3">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-secondary" />
-            <span className="text-primary">{date}</span>
+            <span className="text-primary">
+              {start_date ? formatDate(start_date, 'PP') : 'No date provided'}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-secondary" />
@@ -143,7 +151,7 @@ export const EventDetails = ({
           </div>
           <div className="flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-secondary" />
-            <span className="text-primary">{toSentenceCase(price)}</span>
+            <span className="text-primary">{is_free ? 'Free' : 'Paid'}</span>
           </div>
         </div>
 
@@ -158,7 +166,7 @@ export const EventDetails = ({
         <div className="flex gap-6">
           <Avatar className="h-[100px] w-[100px] bg-warning-500">
             <Image
-              src={'/profile/profile.png'}
+              src={host_image || '/profile/profile.png'}
               alt={'Host'}
               width={100}
               height={100}
@@ -166,8 +174,8 @@ export const EventDetails = ({
             />
           </Avatar>
           <div className="flex flex-col gap-2">
-            <h6 className="font-medium">Host</h6>
-            <p className="text-muted-foreground">Host Bio</p>
+            <h6 className="font-medium">{host_name}</h6>
+            <p className="text-justify text-muted-foreground">{host_bio}</p>
             <div className="mt-4 flex gap-2">
               <Button
                 variant="outline"
@@ -178,7 +186,8 @@ export const EventDetails = ({
                 Connect
               </Button>
               <Button onClick={onFollow} className="h-10 w-[200px]">
-                Follow
+                <UserIcon className="mr-2 h-4 w-4" />
+                View Profile
               </Button>
             </div>
           </div>

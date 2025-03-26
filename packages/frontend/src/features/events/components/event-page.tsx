@@ -2,14 +2,9 @@
 
 import { EventDetails } from '@/features/events/components/event-details';
 
-interface EventPageProps {
-  eventId: string;
-}
-
-export default function EventPage({ eventId }: EventPageProps) {
+export default function EventPage() {
   return (
     <EventDetails
-      eventId={eventId}
       onBack={() => window.history.back()}
       onShare={() => console.log('Share clicked')}
       onFavorite={() => console.log('Favorite clicked')}

@@ -13,8 +13,8 @@ import Image from 'next/image';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { useRouter } from 'next/navigation';
 import { EventType, Event } from '../../types';
-import { EventTicketTypes } from '../../lib/validation';
 import { useEventStore } from '@/features/events/store/index';
+import { formatDate } from 'date-fns';
 
 export const EventCard = ({
   id,
@@ -26,12 +26,15 @@ export const EventCard = ({
   location,
   link,
   image,
-  price,
+  is_free,
   type,
   reqConfirm,
-  date,
+  start_date,
   start_time,
-  end_time
+  end_time,
+  host_name,
+  host_bio,
+  host_image
 }: Event) => {
   const router = useRouter();
   const { deleteEvent } = useEventStore();
@@ -46,12 +49,15 @@ export const EventCard = ({
     location,
     link,
     image,
-    price,
+    is_free,
     type,
     reqConfirm,
-    date,
+    start_date,
     start_time,
-    end_time
+    end_time,
+    host_name,
+    host_bio,
+    host_image
   };
 
   const handleLearnMore = () => {
@@ -92,7 +98,7 @@ export const EventCard = ({
             <h2 className="font-semibold">{title}</h2>
             <div className="flex items-center justify-center rounded-full bg-primary-300 p-3">
               <div className="flex items-center gap-2">
-                {price === EventTicketTypes.PAID && (
+                {is_free === false && (
                   <DollarSign className="h-5 w-5 text-secondary" />
                 )}
                 {type === EventType.PRIVATE ? (
@@ -110,7 +116,9 @@ export const EventCard = ({
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-base">
               <Calendar className="h-4 w-4" />
-              <span>{date}</span>
+              <span>
+                {start_date ? formatDate(start_date, 'PP') : 'No date provided'}
+              </span>
             </div>
             <div className="flex items-center gap-2 text-base">
               <MapPin className="h-4 w-4" />

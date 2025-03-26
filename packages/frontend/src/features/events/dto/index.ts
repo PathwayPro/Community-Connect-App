@@ -9,11 +9,11 @@ export interface CreateEventDto {
   location?: string;
   link?: string;
   image?: string;
-  price?: string;
+  is_free?: boolean;
   type?: EventType;
   requires_confirmation?: boolean;
   accept_subscriptions?: boolean;
-  date?: string;
+  start_date?: string;
   start_time?: string;
   end_time?: string;
 }
@@ -28,11 +28,11 @@ export interface UpdateEventDto {
   location?: string;
   link?: string;
   image?: string;
-  price?: string;
+  is_free?: boolean;
   type?: EventType | null;
   requires_confirmation?: boolean | null;
   accept_subscriptions?: boolean | null;
-  date?: string;
+  start_date?: string;
   start_time?: string;
   end_time?: string;
 }

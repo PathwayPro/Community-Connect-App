@@ -39,7 +39,8 @@ export const EventList = () => {
 
   // Filter events based on tab
   const sortedEvents = [...events].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) =>
+      new Date(b.start_date).getTime() - new Date(a.start_date).getTime()
   );
   const upcomingEvents = getPageEvents(sortedEvents.slice(0, 1));
   const thisMonthEvents = getPageEvents(sortedEvents.slice(1, 4));
@@ -53,6 +54,22 @@ export const EventList = () => {
   console.log('events', events);
 
   const renderEventsList = (eventsList: Event[], totalEvents: Event[]) => {
+    if (eventsList.length === 0) {
+      return (
+        <div className="flex h-full w-full items-center justify-center">
+          <EmptyStateCard
+            title="No events found"
+            description="There are no events for this time period"
+            icon={Ticket}
+            action={{
+              label: 'Create New Event',
+              onClick: () => router.push('/events/create')
+            }}
+          />
+        </div>
+      );
+    }
+
     return (
       <>
         {eventsList.map((event) => (

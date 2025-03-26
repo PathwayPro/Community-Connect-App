@@ -69,8 +69,10 @@ export class EventsController {
         typeof createEventDto.is_free === 'string'
           ? createEventDto.is_free === 'true'
           : createEventDto.is_free,
+      start_time: createEventDto.start_time,
+      end_time: createEventDto.end_time,
       start_date: createEventDto.start_date,
-      end_date: createEventDto.end_date,
+      // end_date: createEventDto.end_date,
       type: createEventDto.type || 'PUBLIC',
       requires_confirmation:
         typeof createEventDto.requires_confirmation === 'string'
@@ -106,10 +108,10 @@ export class EventsController {
     @Query() filters: FilterEventDto,
   ) {
     // Set filter "Date to" to the end of the day if exists
-    const filterDateTo = filters.date_to ? new Date(filters.date_to) : null;
-    if (filterDateTo) {
-      filterDateTo.setUTCHours(23, 59, 59);
-    }
+    // const filterDateTo = filters.date_to ? new Date(filters.date_to) : null;
+    // if (filterDateTo) {
+    //   filterDateTo.setUTCHours(23, 59, 59);
+    // }
 
     const searchFilters: FilterEventDto = {
       title: filters.title,
@@ -120,6 +122,8 @@ export class EventsController {
         typeof filters.is_free === 'string'
           ? filters.is_free === 'true'
           : filters.is_free,
+      start_time: filters.start_time,
+      end_time: filters.end_time,
       type: user?.roles === 'ADMIN' ? filters.type : 'PUBLIC', // USER: public events | MENTOR: Public events | ADMIN: All events
       requires_confirmation:
         typeof filters.requires_confirmation === 'string'
@@ -129,10 +133,10 @@ export class EventsController {
         typeof filters.accept_subscriptions === 'string'
           ? filters.accept_subscriptions === 'true'
           : filters.accept_subscriptions,
-      start_date: filters.start_date ? new Date(filters.start_date) : null,
+      // start_date: filters.start_date ? new Date(filters.start_date) : null,
       //end_date: filters.end_date ? new Date(filters.end_date) : null,
-      date_from: filters.date_from ? new Date(filters.date_from) : new Date(), // If not specified, fetch only future events
-      date_to: filterDateTo ? new Date(filterDateTo.toISOString()) : null,
+      // date_from: filters.date_from ? new Date(filters.date_from) : new Date(), // If not specified, fetch only future events
+      // date_to: filterDateTo ? new Date(filterDateTo.toISOString()) : null,
     };
     return this.eventsService.findAll(searchFilters);
   }
