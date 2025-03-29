@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Tabs,
   TabsContent,
@@ -17,6 +17,10 @@ import { NetworkingFilter } from './networking-filter';
 import { NetworkingCard } from './networking-card';
 import { mockNetworkingProfiles } from '@/features/networking/lib/mock-data.ts';
 import { PaginationComponent } from '@/shared/components/pagination/pagination';
+import { useUserStore } from '@/features/user-profile/store';
+import { EmptyStateCard } from '@/shared/components/empty-state/empty-state-card';
+import { SearchIcon } from 'lucide-react';
+import { useNetworkingStore } from '../store';
 
 interface FilterValues {
   search: string;
@@ -30,6 +34,7 @@ export const Networking = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 12;
 
+  // Filtering
   const [filters, setFilters] = useState<FilterValues>({
     search: '',
     country: [],
@@ -37,7 +42,22 @@ export const Networking = () => {
     professions: []
   });
 
-  const [networkingProfiles] = useState(mockNetworkingProfiles);
+  // get users
+  const { networkingUsers, connections, getNetworkingUsers, isLoading } =
+    useNetworkingStore();
+
+  useEffect(() => {
+    getNetworkingUsers();
+  }, [getNetworkingUsers]);
+
+  console.log(
+    'users hereeeeee :',
+    networkingUsers,
+    'connec tionnnnnss :',
+    connections
+  );
+
+  const [networkingProfiles] = useState(networkingUsers);
 
   const filteredData = useMemo(() => {
     return networkingProfiles.filter((profile) => {
@@ -45,7 +65,7 @@ export const Networking = () => {
       if (activeTab === 'mentor' && profile.role !== 'MENTOR') {
         return false;
       }
-      if (activeTab === 'connection' && !profile.isConnected) {
+      if (activeTab === 'connection' && !profile?.isConnected) {
         return false;
       }
 
@@ -97,6 +117,11 @@ export const Networking = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Loading
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="container h-full w-full space-y-4">
       <Tabs defaultValue="network" onValueChange={setActiveTab}>
@@ -120,9 +145,11 @@ export const Networking = () => {
             <TabsContent value={activeTab} className="mt-6">
               <div className="mt-4 space-y-4">
                 {filteredData.length === 0 ? (
-                  <p className="text-center text-muted-foreground">
-                    No results found
-                  </p>
+                  <EmptyStateCard
+                    title="No results found"
+                    description="We couldn't find any results for your search. Please try again."
+                    icon={SearchIcon}
+                  />
                 ) : (
                   <>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-4">

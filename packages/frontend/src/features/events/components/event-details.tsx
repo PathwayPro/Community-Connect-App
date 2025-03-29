@@ -15,7 +15,6 @@ import {
   Users,
   Unlock,
   DollarSign,
-  User,
   UserIcon
 } from 'lucide-react';
 import Image from 'next/image';

@@ -1,0 +1,24 @@
+export interface CreateResourceDto {
+  title: string;
+  link: string;
+}
+
+export interface FilterResourceDto {
+  title?: string;
+  link?: string;
+  user_id?: number;
+  date_from?: string;
+  date_to?: string;
+}
+
+export interface UpdateResourceDto {
+  title?: string;
+  link?: string;
+}
+
+export interface ResourceDto extends CreateResourceDto {
+  id: number;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+}

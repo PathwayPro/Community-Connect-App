@@ -35,8 +35,8 @@ export interface UserProfile {
   activelySearching?: boolean;
 }
 
-export interface UserResponse {
+export interface UserResponse<T> {
   success: boolean;
   message?: string;
-  data: UserProfile;
+  data: T;
 }

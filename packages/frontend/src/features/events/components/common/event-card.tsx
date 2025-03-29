@@ -109,11 +109,11 @@ export const EventCard = ({
               </div>
             </div>
           </div>
-          <p className="text-justify text-base text-muted-foreground">
+          <p className="line-clamp-2 text-justify text-base text-muted-foreground">
             {description}
           </p>
 
-          <div className="space-y-2">
+          <div className="space-y-2 text-primary">
             <div className="flex items-center gap-2 text-base">
               <Calendar className="h-4 w-4" />
               <span>
