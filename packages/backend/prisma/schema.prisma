@@ -262,9 +262,16 @@ model News {
 }
 
 // RESOURCES
+enum ResourceType {
+  INVOICE
+  RESUME
+  BANNER
+}
 model Resources {
   id         Int      @id @default(autoincrement())
   title      String
+  details    String
+  type       ResourceType
   link       String
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
