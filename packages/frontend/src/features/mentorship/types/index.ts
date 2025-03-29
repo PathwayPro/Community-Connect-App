@@ -9,6 +9,12 @@ export enum MentorStatus {
   INACTIVE = 'INACTIVE'
 }
 
+export enum MenteeStatus {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE'
+}
+
 export interface CreateMentorDto {
   max_mentees: number;
   availability: string;
@@ -25,5 +31,13 @@ export interface MentorResponse {
   experience_details?: string;
   interests?: number[];
   status: MentorStatus;
+  user_id: number;
+}
+
+export interface MenteeResponse {
+  id: number;
+  reason: string;
+  interests?: number[];
+  status: MenteeStatus;
   user_id: number;
 }

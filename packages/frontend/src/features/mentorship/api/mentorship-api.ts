@@ -1,11 +1,19 @@
 import { apiMethods } from '@/shared/api';
-import { CreateMentorDto, InterestsResponse, MentorResponse } from '../types';
+import {
+  CreateMentorDto,
+  InterestsResponse,
+  MentorResponse,
+  MenteeResponse
+} from '../types';
 
 export const mentorshipApi = {
   getInterests: () => apiMethods.get<InterestsResponse[]>('/interests'),
 
   createMentor: (data: FormData) =>
     apiMethods.post<MentorResponse>('/mentors', data),
+
+  createMentee: (data: FormData) =>
+    apiMethods.post<MenteeResponse>('/mentees', data),
 
   getMentor: (mentorId: number) =>
     apiMethods.get<MentorResponse>(`/mentors/${mentorId}`)
