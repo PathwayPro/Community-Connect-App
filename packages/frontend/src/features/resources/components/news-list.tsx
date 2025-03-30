@@ -50,10 +50,16 @@ const filterMostReadNews = (news: NewsItem[]) => {
 export const NewsList = () => {
   const router = useRouter();
 
+  // const canManageResources = user?.roles.some(role =>
+  //   ['ADMIN', 'MENTOR'].includes(role)
+  // );
+
   const [activeTab, setActiveTab] = useState('news');
   const [newsSubTab, setNewsSubTab] = useState('recent');
   // const [resourceType, setResourceType] = useState('resume');
   const [selectedJob, setSelectedJob] = useState<JobCardProps | null>(null);
+
+  console.log(activeTab);
 
   // Filter news items by category
   const newsItems = sampleNews;
@@ -68,33 +74,31 @@ export const NewsList = () => {
   return (
     <div className="container space-y-6">
       <div className="flex items-center justify-between">
-        <Tabs defaultValue="news" className="w-full">
+        <Tabs value={activeTab} defaultValue="news" className="w-full">
           <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center justify-start gap-4">
-              <TabsList className="h-12 w-full">
-                <TabsTrigger
-                  value="news"
-                  className={`h-10`}
-                  onClick={() => setActiveTab('news')}
-                >
-                  News
-                </TabsTrigger>
-                <TabsTrigger
-                  value="contentLibrary"
-                  className={`h-10`}
-                  onClick={() => setActiveTab('contentLibrary')}
-                >
-                  Content Library
-                </TabsTrigger>
-                <TabsTrigger
-                  value="opportunities"
-                  className={`h-10`}
-                  onClick={() => setActiveTab('opportunities')}
-                >
-                  Opportunities
-                </TabsTrigger>
-              </TabsList>
-            </div>
+            <TabsList className="h-12 w-fit">
+              <TabsTrigger
+                value="news"
+                className={`h-10`}
+                onClick={() => setActiveTab('news')}
+              >
+                News
+              </TabsTrigger>
+              <TabsTrigger
+                value="contentLibrary"
+                className={`h-10`}
+                onClick={() => setActiveTab('contentLibrary')}
+              >
+                Content Library
+              </TabsTrigger>
+              <TabsTrigger
+                value="opportunities"
+                className={`h-10`}
+                onClick={() => setActiveTab('opportunities')}
+              >
+                Opportunities
+              </TabsTrigger>
+            </TabsList>
             <IconButton
               leftIcon="plusCircle"
               label={`Create ${activeTab === 'news' ? 'News' : activeTab === 'contentLibrary' ? 'Resource' : 'Opportunity'} Item`}
@@ -103,123 +107,143 @@ export const NewsList = () => {
             />
           </div>
 
-          <TabsContent value="news" className="flex w-full gap-8">
-            <div className="flex w-full flex-col gap-6">
-              <FeaturedNewsCard {...sampleNews[0]} />
+          {/* News Tab Content */}
+          <TabsContent value="news">
+            {activeTab === 'news' && (
+              <div className="flex w-full gap-8">
+                <div className="flex w-full flex-col gap-6">
+                  <FeaturedNewsCard {...sampleNews[0]} />
 
-              <Tabs
-                defaultValue="recent"
-                className="w-full rounded-3xl bg-white p-6"
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">
-                    {newsSubTab === 'recent'
-                      ? 'Recent News'
-                      : newsSubTab === 'editors-pick'
-                        ? "Editor's Pick"
-                        : 'Most Read'}
-                  </h3>
-                  <TabsList className="mb-6">
-                    <TabsTrigger
-                      value="recent"
-                      className={`h-10`}
-                      onClick={() => setNewsSubTab('recent')}
-                    >
-                      Recent News
-                    </TabsTrigger>
-                    <TabsTrigger
+                  <Tabs
+                    defaultValue="recent"
+                    className="w-full rounded-3xl bg-white p-6"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold">
+                        {newsSubTab === 'recent'
+                          ? 'Recent News'
+                          : newsSubTab === 'editors-pick'
+                            ? "Editor's Pick"
+                            : 'Most Read'}
+                      </h3>
+                      <TabsList className="mb-6">
+                        {/* Recent News */}
+                        <TabsTrigger
+                          value="recent"
+                          className={`h-10`}
+                          onClick={() => setNewsSubTab('recent')}
+                        >
+                          Recent News
+                        </TabsTrigger>
+
+                        {/* Editor's Pick */}
+                        <TabsTrigger
+                          value="editors-pick"
+                          className={`h-10`}
+                          onClick={() => setNewsSubTab('editors-pick')}
+                        >
+                          Editor&apos;s Pick
+                        </TabsTrigger>
+
+                        {/* Most Read */}
+                        <TabsTrigger
+                          value="most-read"
+                          className={`h-10`}
+                          onClick={() => setNewsSubTab('most-read')}
+                        >
+                          Most Read
+                        </TabsTrigger>
+                      </TabsList>
+                    </div>
+
+                    <TabsContent value="recent" className="flex w-full gap-6">
+                      {recentNews.map((item) => (
+                        <NewsCard key={item.id} {...item} mode={activeTab} />
+                      ))}
+                    </TabsContent>
+
+                    <TabsContent
                       value="editors-pick"
-                      className={`h-10`}
-                      onClick={() => setNewsSubTab('editors-pick')}
+                      className="flex w-full gap-6"
                     >
-                      Editor&apos;s Pick
-                    </TabsTrigger>
-                    <TabsTrigger
+                      {editorsPickNews.map((item) => (
+                        <NewsCard key={item.id} {...item} mode={activeTab} />
+                      ))}
+                    </TabsContent>
+
+                    <TabsContent
                       value="most-read"
-                      className={`h-10`}
-                      onClick={() => setNewsSubTab('most-read')}
+                      className="flex w-full gap-6"
                     >
-                      Most Read
-                    </TabsTrigger>
-                  </TabsList>
+                      {mostReadNews.map((item) => (
+                        <NewsCard key={item.id} {...item} mode={activeTab} />
+                      ))}
+                    </TabsContent>
+                  </Tabs>
                 </div>
-
-                <TabsContent value="recent" className="flex w-full gap-6">
-                  {recentNews.map((item) => (
-                    <NewsCard key={item.id} {...item} mode={activeTab} />
-                  ))}
-                </TabsContent>
-
-                <TabsContent value="editors-pick" className="flex w-full gap-6">
-                  {editorsPickNews.map((item) => (
-                    <NewsCard key={item.id} {...item} mode={activeTab} />
-                  ))}
-                </TabsContent>
-
-                <TabsContent value="most-read" className="flex w-full gap-6">
-                  {mostReadNews.map((item) => (
-                    <NewsCard key={item.id} {...item} mode={activeTab} />
-                  ))}
-                </TabsContent>
-              </Tabs>
-            </div>
-          </TabsContent>
-
-          <TabsContent
-            value="contentLibrary"
-            className="flex w-full flex-col gap-6 rounded-2xl bg-white p-6"
-          >
-            <div className="flex items-center justify-between">
-              <h2>Templates and Files</h2>
-              <div className="flex w-fit">
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Template" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {resourceTypes.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
-            </div>
-            <div className="flex gap-6">
-              {resourceItems.map((item) => (
-                <NewsCard key={item.id} {...item} mode={activeTab} />
-              ))}
-            </div>
+            )}
           </TabsContent>
 
-          <TabsContent
-            value="opportunities"
-            className="flex w-full flex-col gap-6 rounded-2xl bg-white p-6"
-          >
-            {selectedJob ? (
-              <>
-                <IconButton
-                  leftIcon="chevronLeft"
-                  iconClassName="h-6 w-6 text-primary"
-                  label="Back"
-                  className="h-10 w-fit border border-primary text-primary"
-                  onClick={() => setSelectedJob(null)}
-                  variant="outline"
-                />
-                <ExpandedJobCard {...selectedJob} />
-              </>
-            ) : (
-              <>
-                <h2>Job Opportunities</h2>
-                {opportunityItems.map((item) => (
-                  <JobCard
-                    key={item.id}
-                    {...item}
-                    onLearnMore={() => setSelectedJob(item)}
-                  />
-                ))}
-              </>
+          {/* Content Library Tab Content */}
+          <TabsContent value="contentLibrary">
+            {activeTab === 'contentLibrary' && (
+              <div className="flex w-full flex-col gap-6 rounded-2xl bg-white p-6">
+                <div className="flex items-center justify-between">
+                  <h2>Templates and Files</h2>
+                  <div className="flex w-fit">
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Template" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {resourceTypes.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex gap-6">
+                  {resourceItems.map((item) => (
+                    <NewsCard key={item.id} {...item} mode={activeTab} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Opportunities Tab Content */}
+          <TabsContent value="opportunities">
+            {activeTab === 'opportunities' && (
+              <div className="flex w-full flex-col gap-6 rounded-2xl bg-white p-6">
+                {selectedJob ? (
+                  <>
+                    <IconButton
+                      leftIcon="chevronLeft"
+                      iconClassName="h-6 w-6 text-primary"
+                      label="Back"
+                      className="h-10 w-fit border border-primary text-primary"
+                      onClick={() => setSelectedJob(null)}
+                      variant="outline"
+                    />
+                    <ExpandedJobCard {...selectedJob} />
+                  </>
+                ) : (
+                  <>
+                    <h2>Job Opportunities</h2>
+                    {opportunityItems.map((item) => (
+                      <JobCard
+                        key={item.id}
+                        {...item}
+                        onLearnMore={() => setSelectedJob(item)}
+                      />
+                    ))}
+                  </>
+                )}
+              </div>
             )}
           </TabsContent>
         </Tabs>

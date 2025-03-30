@@ -32,3 +32,26 @@ export interface JobCardProps {
   onApply: () => void;
   onLearnMore?: () => void;
 }
+
+export interface Resource {
+  id: number;
+  title: string;
+  link: string;
+  created_at: Date;
+  updated_at: Date;
+  user_id: number;
+}
+
+export interface ResourceFilters {
+  title?: string;
+  link?: string;
+  user_id?: number;
+  date_from?: Date | null;
+  date_to?: Date | null;
+}
+
+export interface ResourceResponse<T> {
+  success: boolean;
+  message?: string;
+  data: T;
+}
