@@ -23,6 +23,7 @@ import { GoalsModule } from './goals/goals.module';
 import { InterestsModule } from './interests/interests.module';
 import { NetworkingModule } from './networking/networking.module';
 import { BlogModule } from './blog/blog.module';
+import { OpportunitiesModule } from './opportunities/opportunities.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { BlogModule } from './blog/blog.module';
     InterestsModule,
     NetworkingModule,
     BlogModule,
+    OpportunitiesModule,
   ],
   controllers: [AppController],
   providers: [
