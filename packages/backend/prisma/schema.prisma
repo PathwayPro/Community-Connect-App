@@ -262,9 +262,16 @@ model News {
 }
 
 // RESOURCES
+enum ResourceType {
+  INVOICE
+  RESUME
+  BANNER
+}
 model Resources {
   id         Int      @id @default(autoincrement())
   title      String
+  details    String
+  type       ResourceType
   link       String
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
@@ -373,5 +380,34 @@ model PostsSaves {
 model UsersGoals {
   id    Int     @id @default(autoincrement())
   name  String
+}
+
+// OPPORTUNITIES
+enum WorkSettings {
+  REMOTE
+  HYBRID
+  ON_SITE
+}
+model SalaryRanges {
+  id              Int     @id @default(autoincrement())
+  from            Int
+  to              Int
+  opportunities   Opportunities[]
+}
+model Opportunities {
+  id                Int             @id @default(autoincrement())
+  job               String
+  company           String
+  province          String
+  city              String
+  salary_range_id   Int
+  salary_range      SalaryRanges    @relation(fields: [salary_range_id], references: [id])
+  settings          WorkSettings
+  link_apply        String
+  link_post         String
+  description       String
+  image             String
+  created_at        DateTime        @default(now())
+  updated_at        DateTime        @default(now())
 }
 

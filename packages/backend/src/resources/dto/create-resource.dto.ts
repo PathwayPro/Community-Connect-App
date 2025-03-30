@@ -1,9 +1,27 @@
-import {IsString, IsUrl} from 'class-validator';
+import { IsEnum, IsString, IsUrl } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { ResourceType } from '@prisma/client';
 
 export class CreateResourceDto {
-    @IsString()
-    title: string;
+  @ApiProperty({
+    description: 'Title for the resource',
+    example: 'Title for the resource',
+  })
+  @IsString()
+  title: string;
 
-    @IsUrl()
-    link: string;
+  @ApiProperty({ description: 'Resource details', example: 'Resource details' })
+  @IsString()
+  details: string;
+
+  @ApiProperty({
+    description: 'Type of resource [INVOICE | RESUME | BANNER]',
+    example: 'RESUME',
+  })
+  @IsEnum(ResourceType)
+  type: ResourceType;
+
+  @IsString()
+  @IsUrl()
+  link: string;
 }
