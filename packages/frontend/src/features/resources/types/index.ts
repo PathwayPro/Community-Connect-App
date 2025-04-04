@@ -1,12 +1,3 @@
-export interface CreateNewsDTO {
-  title: string;
-  subtitle?: string;
-  keywords?: string;
-  content: string;
-  published?: boolean;
-  user_id?: number;
-}
-
 export interface NewsItem {
   id: string;
   title: string;
@@ -34,7 +25,7 @@ export interface JobCardProps {
 }
 
 export interface Resource {
-  id: number;
+  id: string;
   title: string;
   link: string;
   created_at: Date;
@@ -48,10 +39,4 @@ export interface ResourceFilters {
   user_id?: number;
   date_from?: Date | null;
   date_to?: Date | null;
-}
-
-export interface ResourceResponse<T> {
-  success: boolean;
-  message?: string;
-  data: T;
 }

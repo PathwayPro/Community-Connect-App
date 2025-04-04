@@ -8,38 +8,78 @@ import {
 } from '@/shared/components/ui/card';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { FormProvider, useForm } from 'react-hook-form';
-import { NewsFormValues } from '@/features/resources/lib/validation';
+import {
+  NewsFormValues,
+  ResourceFormValues,
+  OpportunityFormValues
+} from '@/features/resources/lib/validation';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { BaseForm } from './forms/base-form';
 import { ResourceForm } from './forms/resource-form';
 import { OpportunityForm } from './forms/opportunity-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  newsFormSchema,
+  resourceFormSchema,
+  opportunityFormSchema
+} from '@/features/resources/lib/validation';
 
 interface NewsFormProps {
   newsId?: string;
 }
 
+type FormMode = 'news' | 'contentLibrary' | 'opportunities';
+type FormValues = {
+  news: NewsFormValues;
+  contentLibrary: ResourceFormValues;
+  opportunities: OpportunityFormValues;
+};
+
 export const NewsForm = ({ newsId }: NewsFormProps) => {
-  const methods = useForm<NewsFormValues>();
   const searchParams = useSearchParams();
-  const mode = searchParams.get('mode');
+  const mode = searchParams.get('mode') as FormMode;
+
+  const methods = useForm<FormValues[typeof mode]>({
+    resolver: zodResolver(
+      mode === 'news'
+        ? newsFormSchema
+        : mode === 'contentLibrary'
+          ? resourceFormSchema
+          : opportunityFormSchema
+    ),
+    defaultValues:
+      mode === 'news'
+        ? { title: '', content: '', subtitle: '', keywords: '' }
+        : mode === 'contentLibrary'
+          ? { title: '', description: '', link: '' }
+          : {
+              title: '',
+              description: '',
+              link: '',
+              apply_link: '',
+              job_link: ''
+            }
+  });
+
   const router = useRouter();
 
   console.log(mode, newsId);
 
-  const onSubmit = (data: NewsFormValues) => {
+  const onSubmit = (data: FormValues[typeof mode]) => {
     console.log(data);
   };
 
   const getNewsPageContent = () => {
-    if (mode === 'news') {
-      return <BaseForm mode="create" />;
-    }
-    if (mode === 'contentLibrary') {
-      return <ResourceForm />;
-    }
-    if (mode === 'opportunities') {
-      return <OpportunityForm />;
+    switch (mode) {
+      case 'news':
+        return <BaseForm mode="create" />;
+      case 'contentLibrary':
+        return <ResourceForm />;
+      case 'opportunities':
+        return <OpportunityForm />;
+      default:
+        return null;
     }
   };
 

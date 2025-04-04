@@ -263,10 +263,23 @@ model News {
 
 // RESOURCES
 enum ResourceType {
-  INVOICE
   RESUME
+  COVER_LETTER
+  LINKEDIN
+  BUSINESS_CARD
+  EMAIL_SIGNATURE
+  PORTFOLIO
+  PERSONAL_BRANDING
+  JOB_APPLICATION_TRACKER
+  INTERVIEW_PREP
+  NETWORKING_TIPS
+  CAREER_PLANNING
+  SALARY_NEGOTIATION
+  INVOICE
   BANNER
+  OTHER
 }
+
 model Resources {
   id         Int      @id @default(autoincrement())
   title      String

@@ -1,15 +1,31 @@
 import { useFormContext } from 'react-hook-form';
-import { FormInput, FormTextarea } from '@/shared/components/form';
+import { FormInput, FormSelect, FormTextarea } from '@/shared/components/form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
 import React from 'react';
-import {
-  OpportunityFormValues,
-  workModeTypes
-} from '@/features/resources/lib/validation';
-import { FormSelect } from '@/shared/components/form/form-select';
+import { OpportunityFormValues } from '@/features/resources/lib/validation';
 import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
 import { Label } from '@/shared/components/ui/label';
+import { WorkSettings } from '@/features/resources/lib/constants/enums';
+
+// TODO: Get salary ranges from the backend
+const salaryRanges = [
+  { value: '0-50000', label: '$0 - $50,000' },
+  { value: '50000-75000', label: '$50,000 - $75,000' },
+  { value: '75000-100000', label: '$75,000 - $100,000' },
+  { value: '100000-125000', label: '$100,000 - $125,000' },
+  { value: '125000-150000', label: '$125,000 - $150,000' },
+  { value: '150000-175000', label: '$150,000 - $175,000' },
+  { value: '175000-200000', label: '$175,000 - $200,000' },
+  { value: '200000', label: '$200,000+' }
+];
+
+// TODO: Get work mode options from the backend
+const workModeOptions = [
+  { value: WorkSettings.REMOTE, label: 'Remote' },
+  { value: WorkSettings.HYBRID, label: 'Hybrid' },
+  { value: WorkSettings.ON_SITE, label: 'On-site' }
+];
 
 export const OpportunityForm = () => {
   const { setValue, watch } = useFormContext<OpportunityFormValues>();
@@ -25,23 +41,6 @@ export const OpportunityForm = () => {
       toast.error('Failed to upload company logo');
     }
   };
-
-  const salaryRanges = [
-    { value: '0-50000', label: '$0 - $50,000' },
-    { value: '50000-75000', label: '$50,000 - $75,000' },
-    { value: '75000-100000', label: '$75,000 - $100,000' },
-    { value: '100000-125000', label: '$100,000 - $125,000' },
-    { value: '125000-150000', label: '$125,000 - $150,000' },
-    { value: '150000-175000', label: '$150,000 - $175,000' },
-    { value: '175000-200000', label: '$175,000 - $200,000' },
-    { value: '200000', label: '$200,000+' }
-  ];
-
-  const workModeOptions = [
-    { value: workModeTypes.REMOTE, label: 'Remote' },
-    { value: workModeTypes.HYBRID, label: 'Hybrid' },
-    { value: workModeTypes.ON_SITE, label: 'On-site' }
-  ];
 
   return (
     <div className="flex w-full flex-col gap-4">

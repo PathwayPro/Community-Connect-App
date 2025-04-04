@@ -19,13 +19,13 @@ import {
   SelectContent,
   SelectItem
 } from '@/shared/components/ui/select';
-import { resourceTypes } from './forms';
+import { resourceTypes } from '../lib/constants/enums';
 import { ExpandedJobCard } from './common/expanded-job-card';
 import {
   sampleNews,
   sampleResource,
   sampleOpportunity
-} from '../lib/validation/data/mock-data';
+} from '../lib/data/mock-data';
 import { NewsItem, JobCardProps } from '@/features/resources/types';
 
 // Add these filter functions before the NewsList component
@@ -118,7 +118,7 @@ export const NewsList = () => {
                     defaultValue="recent"
                     className="w-full rounded-3xl bg-white p-6"
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex justify-between">
                       <h3 className="font-semibold">
                         {newsSubTab === 'recent'
                           ? 'Recent News'

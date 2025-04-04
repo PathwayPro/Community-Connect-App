@@ -1,22 +1,7 @@
 import { FormSelect } from '@/shared/components/form/form-select';
 import { FormInput } from '@/shared/components/form/form-input';
 import { FormTextarea } from '@/shared/components/form/form-textarea';
-
-export const resourceTypes = [
-  { value: 'resume', label: 'Resume Template' },
-  { value: 'cover_letter', label: 'Cover Letter Template' },
-  { value: 'linkedin', label: 'LinkedIn Banner Template' },
-  { value: 'business_card', label: 'Business Card Template' },
-  { value: 'email_signature', label: 'Email Signature Template' },
-  { value: 'portfolio', label: 'Portfolio Layout Template' },
-  { value: 'personal_branding', label: 'Personal Branding Kit' },
-  { value: 'job_application_tracker', label: 'Job Application Tracker' },
-  { value: 'interview_prep', label: 'Interview Prep Kit' },
-  { value: 'networking_tips', label: 'Networking Tips' },
-  { value: 'career_planning', label: 'Career Planning Guide' },
-  { value: 'salary_negotiation', label: 'Salary Negotiation Guide' },
-  { value: 'other', label: 'Other' }
-];
+import { resourceTypes } from '../../lib/constants/enums';
 
 export const ResourceForm = () => {
   return (

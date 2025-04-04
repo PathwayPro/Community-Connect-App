@@ -1,11 +1,10 @@
-import { useFormContext } from 'react-hook-form';
 import { FormInput } from '@/shared/components/form';
 import { FormTextarea } from '@/shared/components/form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
 import React from 'react';
 import { FormCheckbox } from '@/shared/components/form/form-checkbox';
-import { NewsFormValues } from '@/features/resources/lib/validation';
+import { NewsType } from '../../lib/constants/enums';
 
 interface BaseFormProps {
   mode: 'create' | 'edit';
@@ -13,8 +12,6 @@ interface BaseFormProps {
 }
 
 export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
-  const { setValue, watch } = useFormContext<NewsFormValues>();
-
   console.log(mode, newsId);
 
   const handlePosterUpload = async (files: File[]) => {
@@ -89,8 +86,16 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
           name="news_type"
           label="News Type"
           options={[
-            { value: 'featured', label: 'Featured Post', id: 'featured' },
-            { value: 'editorial', label: "Editor's Pick", id: 'editorial' }
+            {
+              value: NewsType.FEATURED_POST,
+              label: 'Featured Post',
+              id: 'featured'
+            },
+            {
+              value: NewsType.EDITORS_PICK,
+              label: "Editor's Pick",
+              id: 'editorial'
+            }
           ]}
         />
       </div>
