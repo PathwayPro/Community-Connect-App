@@ -24,6 +24,7 @@ import { InterestsModule } from './interests/interests.module';
 import { NetworkingModule } from './networking/networking.module';
 import { BlogModule } from './blog/blog.module';
 import { MenteeModule } from './mentee/mentee.module';
+import { OpportunitiesModule } from './opportunities/opportunities.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { MenteeModule } from './mentee/mentee.module';
     NetworkingModule,
     BlogModule,
     MenteeModule,
+    OpportunitiesModule,
   ],
   controllers: [AppController],
   providers: [

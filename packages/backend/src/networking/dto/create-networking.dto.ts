@@ -1,38 +1,37 @@
-import { ConnectionRequestsStatus } from "@prisma/client";
-import { IsInt, IsOptional, IsString } from "class-validator"
+import { IsInt, IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateConnectionRequestsDto {
-    @IsInt()
-    @IsOptional()
-    sender_id: number;
+  @ApiProperty({ description: 'ID of the user to connect with', example: '9' })
+  @IsInt()
+  recipient_id: number;
 
-    @IsInt()
-    recipient_id: number;
-    
-    @IsString()
-    @IsOptional()
-    message?: string;
-
-    @IsString()
-    @IsOptional()
-    status: ConnectionRequestsStatus = 'PENDING';
+  @ApiProperty({
+    description: 'Optional message to send with the connection request',
+    example: 'Some message to connect',
+  })
+  @IsString()
+  @IsOptional()
+  message?: string;
 }
 
 export class CreateConnectedUsersDto {
-    @IsInt()
-    sender_id: number;
+  @IsInt()
+  sender_id: number;
 
-    @IsInt()
-    recipient_id: number;
+  @IsInt()
+  recipient_id: number;
 }
 
 export class CreateMessagesDto {
-    @IsInt()
-    sender_id: number;
+  @ApiProperty({
+    description: 'ID of the user to send the message',
+    example: '9',
+  })
+  @IsInt()
+  recipient_id: number;
 
-    @IsInt()
-    recipient_id: number;
-
-    @IsString()
-    message?: string;
+  @ApiProperty({ description: 'Message to send', example: 'Some message...' })
+  @IsString()
+  message?: string;
 }
