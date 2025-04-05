@@ -30,9 +30,9 @@ jobs:
             cd packages/frontend
             npm install
             npm run build
-            pm2 stop communect-frontend || true
-            pm2 delete communect-frontend || true
-            pm2 start npm --name "communect-frontend" -- run start
+            pm2 stop communet-frontend || true
+            pm2 delete communet-frontend || true
+            pm2 start npm --name "communet-frontend" -- run start
 
             echo "Installing backend dependencies, generating Prisma client, running migrations, and building..."
             cd ../backend
@@ -40,8 +40,8 @@ jobs:
             npx prisma generate
             npx prisma migrate deploy --schema=./prisma/schema.prisma # Specify schema path if needed
             npm run build
-            pm2 stop communect-backend || true
-            pm2 delete communect-backend || true
-            pm2 start npm --name "communect-backend" -- run start:prod
+            pm2 stop communet-backend || true
+            pm2 delete communet-backend || true
+            pm2 start npm --name "communet-backend" -- run start:prod
 
             echo "Deployment complete!"
