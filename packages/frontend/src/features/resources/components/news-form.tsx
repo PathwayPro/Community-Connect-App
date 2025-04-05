@@ -24,6 +24,13 @@ import {
   resourceFormSchema,
   opportunityFormSchema
 } from '@/features/resources/lib/validation';
+import { useNewsStore } from '../store';
+import { useOpportunityStore } from '../store';
+import { useResourcesStore } from '../store';
+import { useEffect } from 'react';
+import { CreateNewsDto } from '../dto/news-dto';
+import { CreateResourceDto } from '../dto/resource-dto';
+import { CreateOpportunityDto } from '../dto/opportunity-dto';
 
 interface NewsFormProps {
   newsId?: string;
@@ -37,6 +44,19 @@ type FormValues = {
 };
 
 export const NewsForm = ({ newsId }: NewsFormProps) => {
+  const { news, createNews, fetchNews } = useNewsStore();
+  const { resources, createResource, fetchResources } = useResourcesStore();
+  const { opportunities, createOpportunity, fetchOpportunities } =
+    useOpportunityStore();
+
+  useEffect(() => {
+    fetchNews();
+    fetchResources();
+    fetchOpportunities();
+  }, [fetchNews, fetchResources, fetchOpportunities]);
+
+  console.log(news, resources, opportunities);
+
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode') as FormMode;
 
@@ -66,8 +86,30 @@ export const NewsForm = ({ newsId }: NewsFormProps) => {
 
   console.log(mode, newsId);
 
-  const onSubmit = (data: FormValues[typeof mode]) => {
+  const onSubmit = async (data: FormValues[typeof mode]) => {
     console.log(data);
+
+    const newsData = data as CreateNewsDto;
+    const resourceData = data as CreateResourceDto;
+    const opportunityData = data as unknown as CreateOpportunityDto;
+
+    try {
+      if (mode === 'news') {
+        await createNews(newsData);
+      }
+
+      if (mode === 'contentLibrary') {
+        await createResource(resourceData);
+      }
+
+      if (mode === 'opportunities') {
+        await createOpportunity(opportunityData);
+      }
+
+      router.push('/resources');
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const getNewsPageContent = () => {
