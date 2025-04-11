@@ -19,8 +19,8 @@ export const resourceTypes = [
 
 // News Types
 export enum NewsType {
-  FEATURED_POST = 'featured',
-  EDITORS_PICK = 'editorial'
+  FEATURED_POST = 'FEATURED_POST',
+  EDITORS_PICK = 'EDITORS_PICK'
 }
 
 // Work Settings

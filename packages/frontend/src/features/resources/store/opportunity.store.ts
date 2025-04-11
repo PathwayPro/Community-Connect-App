@@ -16,7 +16,9 @@ interface OpportunityState {
   // Actions
   fetchOpportunities: () => Promise<void>;
   fetchOpportunityById: (id: number) => Promise<void>;
-  createOpportunity: (data: CreateOpportunityDto) => Promise<void>;
+  createOpportunity: (
+    data: CreateOpportunityDto
+  ) => Promise<OpportunityResponseDto | null>;
   updateOpportunity: (id: number, data: UpdateOpportunityDto) => Promise<void>;
   editOpportunity: (id: number, data: UpdateOpportunityDto) => Promise<void>;
   deleteOpportunity: (id: number) => Promise<void>;
@@ -61,6 +63,8 @@ export const useOpportunityStore = create<OpportunityState>()(
         set((state) => ({
           opportunities: [...state.opportunities, response.data.data]
         }));
+
+        return response.data.data;
       } catch (error) {
         set({ error: (error as Error).message });
       } finally {

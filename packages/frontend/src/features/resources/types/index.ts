@@ -10,6 +10,18 @@ export interface NewsItem {
   postedBy: string;
 }
 
+export interface News {
+  id: string;
+  title: string;
+  details: string;
+  type: string;
+  link: string;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+  user_id: number;
+}
+
 export interface JobCardProps {
   id?: string;
   companyLogo: string;

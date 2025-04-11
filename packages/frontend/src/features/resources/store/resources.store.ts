@@ -10,7 +10,7 @@ interface ResourcesState {
 
   // Actions
   fetchResources: () => Promise<void>;
-  createResource: (data: CreateResourceDto) => Promise<void>;
+  createResource: (data: CreateResourceDto) => Promise<Resource | undefined>;
   updateResource: (id: string, data: UpdateResourceDto) => Promise<void>;
   deleteResource: (id: string) => Promise<void>;
   getResourceById: (id: string) => Promise<Resource | undefined>;
@@ -39,6 +39,8 @@ export const useResourcesStore = create<ResourcesState>((set) => ({
         resources: [...state.resources, response.data.data],
         isLoading: false
       }));
+
+      return response.data.data;
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
     }

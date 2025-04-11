@@ -1,10 +1,12 @@
+'use client';
+
 import { FormInput } from '@/shared/components/form';
 import { FormTextarea } from '@/shared/components/form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
 import React from 'react';
-import { FormCheckbox } from '@/shared/components/form/form-checkbox';
 import { NewsType } from '../../lib/constants/enums';
+import { FormRadio } from '@/shared/components/form/form-radio';
 
 interface BaseFormProps {
   mode: 'create' | 'edit';
@@ -20,15 +22,14 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
       files.forEach((file) => formData.append('files', file));
       toast.success('News image uploaded successfully');
 
-      //   const response = await fetch('/api/upload', {
-      //     method: 'POST',
-      //     body: formData
-      //   });
-
-      //   if (!response.ok) throw new Error('Upload failed');
-
-      //   const { urls } = await response.json();
-      //   setValue('image', urls[0], { shouldValidate: true });
+      // Uncomment and update when API is ready
+      // const response = await fetch('/api/upload', {
+      //   method: 'POST',
+      //   body: formData
+      // });
+      // if (!response.ok) throw new Error('Upload failed');
+      // const { urls } = await response.json();
+      // setValue('image', urls[0], { shouldValidate: true });
     } catch (error) {
       console.error('Upload failed:', error);
       toast.error('Failed to upload news image');
@@ -56,16 +57,8 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
         />
       </div>
 
-      <div className="flex w-full gap-4">
-        <FormInput
-          name="subtitle"
-          label="Subtitle"
-          placeholder="Enter news subtitle"
-        />
-      </div>
-
       <FormTextarea
-        name="content"
+        name="details"
         label="News Details"
         placeholder="Write your news details..."
         customError="Content is required"
@@ -74,16 +67,8 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
       />
 
       <div className="flex w-full gap-4">
-        <FormInput
-          name="keywords"
-          label="Keywords"
-          placeholder="Enter keywords (comma separated)"
-        />
-      </div>
-
-      <div className="flex w-full gap-4">
-        <FormCheckbox
-          name="news_type"
+        <FormRadio
+          name="type"
           label="News Type"
           options={[
             {
@@ -97,6 +82,8 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
               id: 'editorial'
             }
           ]}
+          customError="News type is required"
+          required
         />
       </div>
 

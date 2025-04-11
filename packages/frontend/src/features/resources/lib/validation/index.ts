@@ -1,23 +1,20 @@
 import { z } from 'zod';
-import { resourceTypes, WorkSettings } from '../constants/enums';
-
-// export const workModeOptions = [
-//   { value: WorkSettings.REMOTE, label: 'Remote' },
-//   { value: WorkSettings.HYBRID, label: 'Hybrid' },
-//   { value: WorkSettings.ON_SITE, label: 'On-site' }
-// ];
+import { NewsType, resourceTypes, WorkSettings } from '../constants/enums';
 
 export const newsFormSchema = z.object({
   title: z.string({
     required_error: 'Title is required'
   }),
-  subtitle: z.string().optional(),
-  keywords: z.string().optional(),
-  content: z.string({
+  // subtitle: z.string().optional(),
+  // keywords: z.string().optional(),
+  details: z.string({
     required_error: 'Content is required'
   }),
-  published: z.boolean().optional().default(false),
-  user_id: z.number().int().optional()
+  type: z.enum(Object.values(NewsType) as [string, ...string[]]),
+  link: z.string({
+    required_error: 'Link is required'
+  }),
+  published: z.boolean().optional().default(true)
 });
 
 export type NewsFormValues = z.infer<typeof newsFormSchema>;

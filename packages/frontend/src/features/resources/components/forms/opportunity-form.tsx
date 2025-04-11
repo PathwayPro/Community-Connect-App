@@ -1,3 +1,5 @@
+'use client';
+
 import { useFormContext } from 'react-hook-form';
 import { FormInput, FormSelect, FormTextarea } from '@/shared/components/form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
@@ -45,14 +47,14 @@ export const OpportunityForm = () => {
   return (
     <div className="flex w-full flex-col gap-4">
       <FormInput
-        name="jobTitle"
+        name="title"
         label="Job Title"
         placeholder="Enter job title"
         customError="Job title is required"
         required
       />
       <FormInput
-        name="companyName"
+        name="company"
         label="Company Name"
         placeholder="Enter company name"
         customError="Company name is required"
@@ -76,7 +78,7 @@ export const OpportunityForm = () => {
         <FormInput name="city" label="City" placeholder="Enter city" />
       </div>
       <FormSelect
-        name="salaryRange"
+        name="salary_range"
         label="Annual Salary Range"
         placeholder="Select salary range"
         options={salaryRanges}
@@ -91,16 +93,16 @@ export const OpportunityForm = () => {
           required
         />
       </div>
-      nb
+
       <FormInput
-        name="applyLink"
+        name="apply_link"
         label="Link to Apply"
         placeholder="Enter application URL"
         hasLabelInput={true}
         leftLabel="https://"
       />
       <FormInput
-        name="jobPostingLink"
+        name="job_link"
         label="Job Posting Link"
         placeholder="Enter job posting URL"
         hasLabelInput={true}

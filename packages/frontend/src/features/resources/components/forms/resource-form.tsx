@@ -1,3 +1,5 @@
+'use client';
+
 import { FormSelect } from '@/shared/components/form/form-select';
 import { FormInput } from '@/shared/components/form/form-input';
 import { FormTextarea } from '@/shared/components/form/form-textarea';
@@ -7,14 +9,14 @@ export const ResourceForm = () => {
   return (
     <div className="flex w-full flex-col gap-4">
       <FormSelect
-        name="template_type"
+        name="type"
         label="Template Type"
         placeholder="Select template type"
         options={resourceTypes}
         required
       />
 
-      <div className="g ap-4 flex w-full">
+      <div className="flex w-full gap-4">
         <FormInput
           name="title"
           label="Template Title"
@@ -35,7 +37,7 @@ export const ResourceForm = () => {
 
       <div className="flex w-full gap-4">
         <FormInput
-          name="resource_link"
+          name="link"
           label="Resource Link"
           hasLabelInput={true}
           leftLabel="https://"

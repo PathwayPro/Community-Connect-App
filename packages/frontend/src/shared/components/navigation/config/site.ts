@@ -35,6 +35,11 @@ export const MainSiteNav = [
     // ]
   },
   {
+    name: 'Messages',
+    href: '/messages',
+    icon: 'messageSquare'
+  },
+  {
     name: 'Analytics',
     href: '/analytics',
     icon: 'analytics'
