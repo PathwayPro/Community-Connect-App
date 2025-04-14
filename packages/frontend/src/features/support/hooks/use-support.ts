@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { ApiError } from '@/shared/types';
 import { supportApi } from '@/features/support/api/support-api';
 import { ContactFormData } from '@/features/support/types';
 
 export function useSupport() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { showAlert } = useAlertDialog();
   const [error, setError] = useState<string | null>(null);
@@ -23,14 +21,9 @@ export function useSupport() {
           title: 'Message Sent Successfully!',
           description:
             'Thank you for contacting us. We will get back to you soon.',
-          type: 'success'
+          type: 'success',
+          redirect: '/'
         });
-
-        // Optionally redirect after successful submission
-        setTimeout(() => {
-          router.push('/');
-          router.refresh();
-        }, 3000);
       }
     } catch (error) {
       console.error('Contact form submission error:', error);

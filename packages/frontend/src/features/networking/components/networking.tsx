@@ -14,10 +14,8 @@ import {
   CardTitle
 } from '@/shared/components/ui/card';
 import { NetworkingFilter } from './networking-filter';
-import { NetworkingCard, NetworkingProfile } from './networking-card';
-import { mockNetworkingProfiles } from '@/features/networking/lib/mock-data.ts';
+import { NetworkingCard } from './networking-card';
 import { PaginationComponent } from '@/shared/components/pagination/pagination';
-import { useUserStore } from '@/features/user-profile/store';
 import { EmptyStateCard } from '@/shared/components/empty-state/empty-state-card';
 import { SearchIcon } from 'lucide-react';
 import { useNetworkingStore } from '../store';
@@ -57,15 +55,16 @@ export const Networking = () => {
     connections
   );
 
-  const [networkingProfiles] = useState(networkingUsers);
-
   const filteredData = useMemo(() => {
-    return networkingProfiles.filter((profile) => {
+    console.log('networkingProfiles in filteredData', networkingUsers);
+
+    return networkingUsers.filter((profile) => {
       // Filter by tab
       if (activeTab === 'mentor' && profile.role !== 'MENTOR') {
         return false;
       }
-      if (activeTab === 'connection' && !profile?.isConnected) {
+
+      if (activeTab === 'connection' && !profile.isConnected) {
         return false;
       }
 
@@ -80,7 +79,7 @@ export const Networking = () => {
       // Filter by country
       if (
         filters.country.length > 0 &&
-        !filters.country.includes(profile?.country ?? '')
+        !filters.country.includes(profile?.countryOfOrigin ?? '')
       ) {
         return false;
       }
@@ -103,7 +102,7 @@ export const Networking = () => {
 
       return true;
     });
-  }, [filters, networkingProfiles, activeTab]);
+  }, [filters, networkingUsers, activeTab]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
@@ -116,6 +115,8 @@ export const Networking = () => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  console.log('filteredData', filteredData);
 
   // Loading
   if (isLoading) {

@@ -27,7 +27,7 @@ export const useFetchProfile = (): UseFetchProfileResult => {
 
       showAlert({
         title: 'Profile Error',
-        description: errorMessage,
+        description: errorMessage || 'Failed to fetch profile',
         type: 'error'
       });
     } finally {

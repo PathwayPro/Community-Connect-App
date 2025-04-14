@@ -31,7 +31,9 @@ import { useEffect } from 'react';
 import { CreateNewsDto } from '../dto/news-dto';
 import { CreateResourceDto } from '../dto/resource-dto';
 import { CreateOpportunityDto } from '../dto/opportunity-dto';
-import { toast } from 'sonner';
+import { WorkSettings } from '../lib/constants/enums';
+import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 
 type FormMode = 'news' | 'contentLibrary' | 'opportunities';
 type FormValues = {
@@ -44,26 +46,45 @@ export const NewsForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode') as FormMode;
+  const { showAlert } = useAlertDialog();
 
   const { createNews, fetchNews } = useNewsStore();
   const { createResource, fetchResources } = useResourcesStore();
-  const { createOpportunity, fetchOpportunities } = useOpportunityStore();
+  const {
+    createOpportunity,
+    fetchOpportunities,
+    fetchSalaryRanges,
+    salaryRanges
+  } = useOpportunityStore();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await Promise.all([
-          fetchNews(),
-          fetchResources(),
-          fetchOpportunities()
-        ]);
+        if (mode === 'opportunities') {
+          await Promise.all([fetchOpportunities(), fetchSalaryRanges()]);
+        } else if (mode === 'news') {
+          await fetchNews();
+        } else if (mode === 'contentLibrary') {
+          await fetchResources();
+        }
       } catch (error) {
         console.error('Failed to fetch data:', error);
-        toast.error('Failed to fetch data. Please try again.');
+        showAlert({
+          title: 'Error',
+          description: 'Failed to fetch data. Please try again.',
+          type: 'error'
+        });
       }
     };
     fetchData();
-  }, [fetchNews, fetchResources, fetchOpportunities]);
+  }, [
+    mode,
+    fetchNews,
+    fetchResources,
+    fetchOpportunities,
+    fetchSalaryRanges,
+    showAlert
+  ]);
 
   const formSchema = {
     news: newsFormSchema,
@@ -75,16 +96,15 @@ export const NewsForm = () => {
     news: { title: '', details: '', type: '', link: '' },
     contentLibrary: { title: '', details: '', type: '', link: '' },
     opportunities: {
-      title: '',
+      job: '',
+      salary_range_id: '',
       description: '',
-      link: '',
-      apply_link: '',
-      job_link: '',
+      link_post: '',
+      link_apply: '',
       company: '',
       province: '',
       city: '',
-      salary_range: '',
-      work_mode: ''
+      settings: WorkSettings.REMOTE
     }
   }[mode || 'news'];
 
@@ -101,63 +121,67 @@ export const NewsForm = () => {
 
   const { isSubmitting, errors } = methods.formState;
 
+  console.log('errors from the form :', errors);
+
   const onSubmit = async (data: FormValues[typeof mode]) => {
-    console.log('data from the form :', data);
     try {
       const actions = {
         news: async () => {
-          const response = await createNews(data as CreateNewsDto);
+          const result = await createNews(data as CreateNewsDto);
 
-          console.log('response from the news :', response);
-
-          if (!response) {
-            toast.error('Failed to create news');
-            return;
+          if (result) {
+            showAlert({
+              title: 'Success',
+              description: 'News created successfully',
+              type: 'success',
+              redirect: '/resources'
+            });
           }
-
-          toast.success('News published successfully');
-          router.push('/resources');
-          return response;
         },
         contentLibrary: async () => {
-          const response = await createResource(data as CreateResourceDto);
-          if (response) {
-            toast.success('Resource uploaded successfully');
-            router.push('/resources');
+          const result = await createResource(data as CreateResourceDto);
+          if (result) {
+            showAlert({
+              title: 'Success',
+              description: 'Resource created successfully',
+              type: 'success',
+              redirect: '/resources'
+            });
           }
-          return response;
         },
         opportunities: async () => {
-          const formattedData = {
-            ...data
-          } as unknown as CreateOpportunityDto;
+          console.log('data from the form :', data);
 
-          const response = await createOpportunity(formattedData);
-          if (response) {
-            toast.success('Opportunity posted successfully');
-            router.push('/resources');
+          const result = await createOpportunity(data as CreateOpportunityDto);
+          if (result) {
+            showAlert({
+              title: 'Success',
+              description: 'Opportunity created successfully',
+              type: 'success',
+              redirect: '/resources'
+            });
           }
-          return response;
         }
       };
 
       if (mode && actions[mode]) {
         await actions[mode]();
-      } else {
-        throw new Error('Invalid form mode');
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to submit form';
-      toast.error(errorMessage);
-      console.error('Error submitting form:', error);
+      showAlert({
+        title: 'Error',
+        description: errorMessage,
+        type: 'error'
+      });
     }
   };
 
   const formComponents = {
     news: <BaseForm mode="create" />,
     contentLibrary: <ResourceForm />,
-    opportunities: <OpportunityForm />
+    opportunities: <OpportunityForm salaryRanges={salaryRanges} />
   };
 
   const titles = {
@@ -174,6 +198,7 @@ export const NewsForm = () => {
 
   return (
     <Card className="flex h-full w-[840px] flex-col rounded-[24px]">
+      <AlertDialogUI />
       <CardHeader className="justify-center p-8">
         <CardTitle className="flex flex-col space-y-6 text-center">
           <div className="relative flex items-center justify-center gap-2">

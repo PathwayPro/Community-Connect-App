@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import React from 'react';
 import { NewsType } from '../../lib/constants/enums';
 import { FormRadio } from '@/shared/components/form/form-radio';
+import { useFormContext } from 'react-hook-form';
 
 interface BaseFormProps {
   mode: 'create' | 'edit';
@@ -15,6 +16,9 @@ interface BaseFormProps {
 
 export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
   console.log(mode, newsId);
+  const {
+    formState: { errors }
+  } = useFormContext();
 
   const handlePosterUpload = async (files: File[]) => {
     try {
@@ -94,6 +98,7 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
           hasLabelInput={true}
           leftLabel="https://"
           placeholder="Link text"
+          customError={errors.link?.message as string}
         />
       </div>
     </div>

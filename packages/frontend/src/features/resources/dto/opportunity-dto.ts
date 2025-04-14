@@ -2,14 +2,19 @@ import { WorkSettings } from '../lib/constants/enums';
 
 export interface OpportunityDto {
   job: string;
+  salary_range_id: string;
   company: string;
   province: string;
   city: string;
-  salary_range_id: number;
   settings: WorkSettings;
   link_apply: string;
   link_post: string;
   description: string;
+  experience: string;
+  salary_range: {
+    from: number;
+    to: number;
+  };
   file?: File;
 }
 
@@ -22,19 +27,30 @@ export interface UpdateOpportunityDto extends Partial<CreateOpportunityDto> {
 }
 
 export interface OpportunityResponseDto extends OpportunityDto {
-  id: number;
+  id: string;
   created_at: string;
   updated_at: string;
 }
 
 export interface FilterOpportunityDto {
   job?: string;
+  salary_range_id?: string;
   company?: string;
   province?: string;
   city?: string;
-  salary_range_id?: number;
   settings?: WorkSettings;
+  salary_range?: {
+    from: number;
+    to: number;
+  };
   description?: string;
   date_from?: string; // ISO 8601 date string
   date_to?: string; // ISO 8601 date string
+  experience?: string;
+}
+
+export interface SalaryRangeResponseDto {
+  id: string;
+  from: number;
+  to: number;
 }

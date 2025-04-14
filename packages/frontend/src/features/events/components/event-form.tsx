@@ -148,20 +148,18 @@ export const EventForm = () => {
         showAlert({
           type: 'success',
           title: 'Event Updated Successfully!',
-          description: 'Your event has been successfully updated.'
+          description: 'Your event has been successfully updated.',
+          redirect: '/events'
         });
       } else {
         await createEvent(formattedData);
         showAlert({
           type: 'success',
           title: 'Event Created Successfully!',
-          description: 'Your event has been successfully created.'
+          description: 'Your event has been successfully created.',
+          redirect: '/events'
         });
       }
-
-      setTimeout(() => {
-        router.push('/events');
-      }, 3000);
     } catch (error) {
       console.error('error', error);
       showAlert({

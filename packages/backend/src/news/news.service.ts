@@ -92,7 +92,18 @@ export class NewsService {
         },
       };
 
-      const newNews = await this.prisma.news.create({ data });
+      const newNews = await this.prisma.news.create({
+        data,
+        include: {
+          user: {
+            select: {
+              first_name: true,
+              last_name: true,
+              picture_upload_link: true,
+            },
+          },
+        },
+      });
 
       return newNews;
     } catch (error) {
@@ -109,6 +120,15 @@ export class NewsService {
 
       const filteredNews = this.prisma.news.findMany({
         where: formattedFilters,
+        include: {
+          user: {
+            select: {
+              first_name: true,
+              last_name: true,
+              picture_upload_link: true,
+            },
+          },
+        },
       });
 
       return filteredNews;
@@ -126,7 +146,18 @@ export class NewsService {
         published: true,
       };
 
-      const news = await this.prisma.news.findFirst({ where });
+      const news = await this.prisma.news.findFirst({
+        where,
+        include: {
+          user: {
+            select: {
+              first_name: true,
+              last_name: true,
+              picture_upload_link: true,
+            },
+          },
+        },
+      });
 
       if (!news) {
         throw new NotFoundException(`There is no News with ID #${id}`);
@@ -143,7 +174,18 @@ export class NewsService {
 
   async findOne(id: number) {
     try {
-      const news = await this.prisma.news.findFirst({ where: { id } });
+      const news = await this.prisma.news.findFirst({
+        where: { id },
+        include: {
+          user: {
+            select: {
+              first_name: true,
+              last_name: true,
+              picture_upload_link: true,
+            },
+          },
+        },
+      });
 
       if (!news) {
         throw new NotFoundException(`There is no News with ID #${id}`);
@@ -183,6 +225,15 @@ export class NewsService {
       const updatedNews = await this.prisma.news.update({
         where: { id },
         data: data,
+        include: {
+          user: {
+            select: {
+              first_name: true,
+              last_name: true,
+              picture_upload_link: true,
+            },
+          },
+        },
       });
 
       return updatedNews;

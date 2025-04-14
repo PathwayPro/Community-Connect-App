@@ -55,6 +55,8 @@ export class OpportunitiesController {
     @Body() createOpportunityDto: CreateOpportunityDto,
     @UploadedFile() file: Express.Multer.File | null,
   ) {
+    console.log('createOpportunityDto :', createOpportunityDto);
+
     const newOpportunity: CreateOpportunityDto = {
       job: createOpportunityDto.job,
       company: createOpportunityDto.company,
@@ -65,8 +67,10 @@ export class OpportunitiesController {
       link_apply: createOpportunityDto.link_apply,
       link_post: createOpportunityDto.link_post,
       description: createOpportunityDto.description,
+      experience: createOpportunityDto.experience,
     };
-    console.log('CREATE OPPORTUNITY:', newOpportunity);
+
+    console.log('newOpportunity :', newOpportunity);
     return this.opportunitiesService.create(newOpportunity, file);
   }
 
@@ -147,6 +151,7 @@ export class OpportunitiesController {
       company: updateOpportunityDto.company,
       province: updateOpportunityDto.province,
       city: updateOpportunityDto.city,
+      experience: updateOpportunityDto.experience,
       salary_range_id: +updateOpportunityDto.salary_range_id,
       settings: updateOpportunityDto.settings,
       link_apply: updateOpportunityDto.link_apply,

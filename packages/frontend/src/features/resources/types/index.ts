@@ -20,6 +20,11 @@ export interface News {
   created_at: string;
   updated_at: string;
   user_id: number;
+  user: {
+    first_name: string;
+    last_name: string;
+    picture_upload_link: string;
+  };
 }
 
 export interface JobCardProps {
@@ -40,15 +45,21 @@ export interface Resource {
   id: string;
   title: string;
   link: string;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
   user_id: number;
+  user: {
+    first_name: string;
+    last_name: string;
+    picture_upload_link: string;
+  };
+  type: string;
 }
 
 export interface ResourceFilters {
   title?: string;
   link?: string;
   user_id?: number;
-  date_from?: Date | null;
-  date_to?: Date | null;
+  date_from?: string | null;
+  date_to?: string | null;
 }

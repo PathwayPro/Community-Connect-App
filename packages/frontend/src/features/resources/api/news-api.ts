@@ -1,22 +1,19 @@
 import { apiMethods } from '@/shared/api';
 import { News } from '../types';
 import { CreateNewsDto, UpdateNewsDto } from '../dto/news-dto';
-import { ApiResponse } from '@/shared/types';
 
 export const newsApi = {
-  createNews: (data: CreateNewsDto) =>
-    apiMethods.post<ApiResponse<News>>('/news', data),
+  createNews: (data: CreateNewsDto) => apiMethods.post<News>('/news', data),
 
-  getNews: () => apiMethods.get<ApiResponse<News[]>>('/news'),
+  getNews: () => apiMethods.get<News[]>('/news'),
 
-  getNewsById: (id: string) => apiMethods.get<ApiResponse<News>>(`/news/${id}`),
+  getNewsById: (id: string) => apiMethods.get<News>(`/news/${id}`),
 
   updateNews: (id: string, data: UpdateNewsDto) =>
-    apiMethods.patch<ApiResponse<News>>(`/news/${id}`, data),
+    apiMethods.patch<News>(`/news/${id}`, data),
 
   editNews: (id: string, data: UpdateNewsDto) =>
-    apiMethods.put<ApiResponse<News>>(`/news/${id}`, data),
+    apiMethods.put<News>(`/news/${id}`, data),
 
-  deleteNews: (id: string) =>
-    apiMethods.delete<ApiResponse<News>>(`/news/${id}`)
+  deleteNews: (id: string) => apiMethods.delete<News>(`/news/${id}`)
 };

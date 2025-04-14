@@ -21,8 +21,8 @@ export const ChatTabs = ({ messages }: ChatTabsProps) => {
     <Tabs defaultValue="all" className="pt-6">
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="all">All</TabsTrigger>
-        <TabsTrigger value="unread">Unread</TabsTrigger>
-        <TabsTrigger value="drafts">Drafts</TabsTrigger>
+        <TabsTrigger value="connections">Connections</TabsTrigger>
+        <TabsTrigger value="pending">Pending</TabsTrigger>
       </TabsList>
 
       <TabsContent value="all" className="mt-4 focus-visible:outline-none">
@@ -50,31 +50,34 @@ export const ChatTabs = ({ messages }: ChatTabsProps) => {
         </ScrollArea>
       </TabsContent>
 
-      <TabsContent value="unread" className="mt-4 focus-visible:outline-none">
+      <TabsContent
+        value="connections"
+        className="mt-4 focus-visible:outline-none"
+      >
         <h3 className="px-4 text-sm font-medium text-muted-foreground">
-          UNREAD MESSAGES
+          CONNECTIONS
         </h3>
         <ScrollArea className="h-[calc(100vh-200px)]">
           <div className="flex h-full flex-1 items-center justify-center p-4">
             <EmptyStateCard
               icon={MessageCircleOff}
-              title="No unread messages"
-              description="You're all caught up!"
+              title="No connections yet"
+              description="Connect with someone to start a conversation"
             />
           </div>
         </ScrollArea>
       </TabsContent>
 
-      <TabsContent value="drafts" className="mt-4 focus-visible:outline-none">
+      <TabsContent value="pending" className="mt-4 focus-visible:outline-none">
         <h3 className="px-4 text-sm font-medium text-muted-foreground">
-          DRAFT MESSAGES
+          PENDING MESSAGES
         </h3>
         <ScrollArea className="h-[calc(100vh-200px)]">
           <div className="flex h-full flex-1 items-center justify-center p-4">
             <EmptyStateCard
               icon={FileEdit}
-              title="No draft messages"
-              description="Your drafts will appear here"
+              title="No pending messages"
+              description="Your pending messages will appear here"
             />
           </div>
         </ScrollArea>

@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { NewsType, resourceTypes, WorkSettings } from '../constants/enums';
 
+// URL regex pattern that checks for common URL formats
+const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+
 export const newsFormSchema = z.object({
   title: z.string({
     required_error: 'Title is required'
@@ -11,43 +14,50 @@ export const newsFormSchema = z.object({
     required_error: 'Content is required'
   }),
   type: z.enum(Object.values(NewsType) as [string, ...string[]]),
-  link: z.string({
-    required_error: 'Link is required'
-  }),
+  link: z
+    .string({
+      required_error: 'Link is required'
+    })
+    .regex(urlPattern, 'Must be a valid URL'),
   published: z.boolean().optional().default(true)
 });
 
 export type NewsFormValues = z.infer<typeof newsFormSchema>;
 
 export const opportunityFormSchema = z.object({
-  title: z.string({
-    required_error: 'Title is required'
+  job: z.string({
+    required_error: 'Job title is required'
   }),
-  company_name: z.string({
+  company: z.string({
     required_error: 'Company name is required'
   }),
   description: z.string({
     required_error: 'Description is required'
   }),
-  salary_range: z.string({
+  experience: z.string({
+    required_error: 'Experience is required'
+  }),
+  salary_range_id: z.string({
     required_error: 'Salary range is required'
   }),
-  work_mode: z.enum(Object.values(WorkSettings) as [string, ...string[]]),
+  settings: z.enum(Object.values(WorkSettings) as [string, ...string[]]),
   province: z.string({
     required_error: 'Province is required'
   }),
   city: z.string({
     required_error: 'City is required'
   }),
-  link: z.string({
-    required_error: 'Link is required'
-  }),
-  apply_link: z.string({
-    required_error: 'Apply link is required'
-  }),
-  job_link: z.string({
-    required_error: 'Job link is required'
-  })
+  link_apply: z
+    .string({
+      required_error: 'Apply link is required'
+    })
+    .regex(urlPattern, 'Must be a valid URL'),
+  link_post: z
+    .string({
+      required_error: 'Job post link is required'
+    })
+    .regex(urlPattern, 'Must be a valid URL'),
+  file: z.instanceof(File).optional()
 });
 
 export type OpportunityFormValues = z.infer<typeof opportunityFormSchema>;
@@ -72,7 +82,7 @@ export const resourceFormSchema = z.object({
     .string({
       required_error: 'Link is required'
     })
-    .url('Must be a valid URL')
+    .regex(urlPattern, 'Must be a valid URL')
 });
 
 export type ResourceFormValues = z.infer<typeof resourceFormSchema>;

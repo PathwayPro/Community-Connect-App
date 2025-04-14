@@ -43,6 +43,10 @@ export class CreateOpportunityDto {
   @IsString()
   description: string;
 
+  @ApiProperty({ description: 'Experience level' })
+  @IsString()
+  experience: string;
+
   @ApiPropertyOptional({
     description: 'Uploaded file. Will use validation for logos (OPTIONAL)',
   })

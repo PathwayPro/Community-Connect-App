@@ -5,18 +5,17 @@ import { Card } from '@/shared/components/ui/card';
 import Image from 'next/image';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { Badge } from '@/shared/components/ui/badge';
-import { ExpandedNewsModal } from './expanded-news-modal';
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { ResourcePreviewCard } from './resource-preview-card';
 
-interface NewsCardProps {
+interface ResourceCardProps {
   id?: string;
   title: string;
-  details: string;
-  type: string;
-  image?: string;
   link?: string;
+  details?: string;
   created_at: string;
+  type: string;
   user: {
     first_name: string;
     last_name: string;
@@ -24,16 +23,20 @@ interface NewsCardProps {
   };
 }
 
-export const NewsCard = ({
+export const ResourceCard = ({
   title,
-  details,
-  type,
-  image,
   link,
+  details,
   created_at,
+  type,
   user
-}: NewsCardProps) => {
+}: ResourceCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const ensureAbsoluteUrl = (url: string) => {
+    if (!url) return '#';
+    return url.match(/^https?:\/\//) ? url : `https://${url}`;
+  };
 
   return (
     <Card className="w-full overflow-hidden">
@@ -51,7 +54,7 @@ export const NewsCard = ({
         {/* Image */}
         <div className="relative h-[320px] w-full">
           <Image
-            src={image || '/event/placeholder-2.jpg'}
+            src={'/event/placeholder-2.jpg'}
             alt={title}
             className="object-cover"
             fill
@@ -87,22 +90,37 @@ export const NewsCard = ({
           </div>
 
           {/* Action Button */}
-          <IconButton
-            label="Read More"
-            leftIcon="squareArrowTopRight"
-            iconClassName="text-white"
-            className="w-full"
-            onClick={() => setIsOpen(true)}
-          />
+          <div className="flex flex-col gap-2">
+            <IconButton
+              label="Preview Resource"
+              //   rightIcon="arrowRight"
+              leftIcon="eye"
+              iconClassName="text-white"
+              className="w-full"
+              onClick={() => setIsOpen(true)}
+            />
+            <IconButton
+              label="Get Resource"
+              //   rightIcon="arrowRight"
+              leftIcon="squareArrowTopRight"
+              iconClassName="text-white"
+              className="w-full"
+              onClick={() => {
+                window.open(ensureAbsoluteUrl(link || ''), '_blank');
+              }}
+            />
+          </div>
         </div>
       </div>
-      <ExpandedNewsModal
+
+      <ResourcePreviewCard
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        image={image || ''}
-        newsTitle={title}
-        description={details}
-        articleUrl={link || ''}
+        image={'/event/placeholder-2.jpg'}
+        title={title}
+        details={details || ''}
+        link={link || ''}
+        type={type}
       />
     </Card>
   );

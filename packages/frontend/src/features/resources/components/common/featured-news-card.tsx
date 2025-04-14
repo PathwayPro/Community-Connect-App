@@ -1,42 +1,61 @@
 'use client';
 
-import { Clock } from 'lucide-react';
+import { Clock, PenBox, Trash2 } from 'lucide-react';
 import { Card } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 import Image from 'next/image';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { ExpandedNewsModal } from './expanded-news-modal';
 import { useState } from 'react';
+import { format } from 'date-fns';
 
 interface FeaturedNewsCardProps {
-  id: string;
+  id?: string;
   title: string;
-  description: string;
-  imageUrl?: string;
-  postedAt: string;
-  postedBy: string;
-  keywords?: string[];
+  details: string;
+  type: string;
+  image?: string;
+  link?: string;
+  created_at: string;
+  user: {
+    first_name: string;
+    last_name: string;
+    picture_upload_link: string;
+  };
 }
 
 export const FeaturedNewsCard = ({
   title,
-  description,
-  imageUrl,
-  postedAt,
-  postedBy,
-  keywords = []
+  details,
+  image,
+  created_at,
+  user,
+  type,
+  link
 }: FeaturedNewsCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const fullName = `${user.first_name} ${user.last_name}`;
+
   return (
-    <Card className="w-full bg-primary-300 p-6 text-white">
-      <h2 className="mb-6 text-2xl font-bold text-white">Featured News</h2>
+    <Card className="mx-auto w-full bg-primary-300 p-6 text-white">
+      <div className="flex justify-between">
+        <h2 className="mb-6 text-2xl font-bold text-white">Featured News</h2>
+        <div className="flex h-8 gap-3">
+          <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary">
+            <PenBox className="h-4 w-4 text-white" />
+          </div>
+          <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive">
+            <Trash2 className="h-4 w-4 text-white" />
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-6">
         {/* Left Column - Image */}
         <div className="relative h-[280px] w-full">
           <Image
-            src={imageUrl || '/event/placeholder-2.jpg'}
+            src={image || '/event/placeholder-2.jpg'}
             alt={title}
             className="rounded-[20px] object-cover"
             fill
@@ -50,24 +69,20 @@ export const FeaturedNewsCard = ({
           <h1 className="text-3xl font-semibold text-white">{title}</h1>
 
           <p className="font-regular line-clamp-3 text-justify text-base text-white">
-            {description}
+            {details}
           </p>
 
-          {/* Keywords */}
+          {/* Type Badge */}
           <div className="flex flex-wrap gap-2">
-            {keywords.map((keyword) => (
-              <Badge key={keyword} variant="secondary">
-                {keyword}
-              </Badge>
-            ))}
+            <Badge variant="secondary">{type}</Badge>
           </div>
 
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              <span>{postedAt}</span>
+              <span>{format(created_at, 'MMM d, yyyy')}</span>
             </div>
-            <span>by {postedBy}</span>
+            <span>by {fullName}</span>
           </div>
 
           <IconButton
@@ -80,10 +95,10 @@ export const FeaturedNewsCard = ({
           <ExpandedNewsModal
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
-            imageUrl={imageUrl || ''}
+            image={image || ''}
             newsTitle={title}
-            description={description}
-            articleUrl={''}
+            description={details}
+            articleUrl={link || ''}
           />
         </div>
       </div>

@@ -4,8 +4,13 @@ import { FormSelect } from '@/shared/components/form/form-select';
 import { FormInput } from '@/shared/components/form/form-input';
 import { FormTextarea } from '@/shared/components/form/form-textarea';
 import { resourceTypes } from '../../lib/constants/enums';
+import { useFormContext } from 'react-hook-form';
 
 export const ResourceForm = () => {
+  const {
+    formState: { errors }
+  } = useFormContext();
+
   return (
     <div className="flex w-full flex-col gap-4">
       <FormSelect
@@ -42,6 +47,8 @@ export const ResourceForm = () => {
           hasLabelInput={true}
           leftLabel="https://"
           placeholder="Enter resource link"
+          customError={errors.link?.message as string}
+          required
         />
       </div>
     </div>

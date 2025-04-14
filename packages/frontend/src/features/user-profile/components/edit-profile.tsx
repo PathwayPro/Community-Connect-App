@@ -134,12 +134,9 @@ export const EditProfile = () => {
       showAlert({
         title: 'Profile Updated',
         description: 'Your profile has been successfully updated.',
-        type: 'success'
+        type: 'success',
+        redirect: '/profile'
       });
-
-      setTimeout(() => {
-        router.push('/profile');
-      }, 3000);
     } catch (error) {
       console.error('Submit error:', error);
       showAlert({
