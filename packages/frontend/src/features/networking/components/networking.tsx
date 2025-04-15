@@ -15,9 +15,7 @@ import {
 } from '@/shared/components/ui/card';
 import { NetworkingFilter } from './networking-filter';
 import { NetworkingCard } from './networking-card';
-import { mockNetworkingProfiles } from '@/features/networking/lib/mock-data.ts';
 import { PaginationComponent } from '@/shared/components/pagination/pagination';
-import { useUserStore } from '@/features/user-profile/store';
 import { EmptyStateCard } from '@/shared/components/empty-state/empty-state-card';
 import { SearchIcon } from 'lucide-react';
 import { useNetworkingStore } from '../store';
@@ -57,15 +55,16 @@ export const Networking = () => {
     connections
   );
 
-  const [networkingProfiles] = useState(networkingUsers);
-
   const filteredData = useMemo(() => {
-    return networkingProfiles.filter((profile) => {
+    console.log('networkingProfiles in filteredData', networkingUsers);
+
+    return networkingUsers.filter((profile) => {
       // Filter by tab
       if (activeTab === 'mentor' && profile.role !== 'MENTOR') {
         return false;
       }
-      if (activeTab === 'connection' && !profile?.isConnected) {
+
+      if (activeTab === 'connection' && !profile.isConnected) {
         return false;
       }
 
@@ -80,7 +79,7 @@ export const Networking = () => {
       // Filter by country
       if (
         filters.country.length > 0 &&
-        !filters.country.includes(profile.country)
+        !filters.country.includes(profile?.countryOfOrigin ?? '')
       ) {
         return false;
       }
@@ -88,7 +87,7 @@ export const Networking = () => {
       // Filter by skills
       if (
         filters.skills.length > 0 &&
-        !filters.skills.some((skill) => profile.skills.includes(skill))
+        !filters.skills.some((skill) => profile.skills?.includes(skill))
       ) {
         return false;
       }
@@ -96,14 +95,14 @@ export const Networking = () => {
       // Filter by profession
       if (
         filters.professions.length > 0 &&
-        !filters.professions.includes(profile.profession)
+        !filters.professions.includes(profile.profession ?? '')
       ) {
         return false;
       }
 
       return true;
     });
-  }, [filters, networkingProfiles, activeTab]);
+  }, [filters, networkingUsers, activeTab]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
@@ -117,9 +116,50 @@ export const Networking = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  console.log('filteredData', filteredData);
+
   // Loading
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="container h-full w-full space-y-4">
+        <Card>
+          <CardHeader className="flex animate-pulse flex-row items-center justify-between space-y-0 pb-4">
+            <div className="h-8 w-32 rounded-md bg-muted" />
+            <div className="h-10 w-64 rounded-md bg-muted" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <div className="h-10 w-full rounded-md bg-muted" />
+              <div className="grid grid-cols-3 gap-4">
+                <div className="h-10 rounded-md bg-muted" />
+                <div className="h-10 rounded-md bg-muted" />
+                <div className="h-10 rounded-md bg-muted" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="mt-6">
+          <CardContent>
+            <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+              {[...Array(8)].map((_, index) => (
+                <div
+                  key={index}
+                  className="flex h-[300px] animate-pulse flex-col space-y-3 rounded-lg bg-muted p-4"
+                >
+                  <div className="h-24 w-24 rounded-full bg-muted-foreground/20" />
+                  <div className="h-4 w-3/4 rounded bg-muted-foreground/20" />
+                  <div className="h-4 w-1/2 rounded bg-muted-foreground/20" />
+                  <div className="mt-auto space-y-2">
+                    <div className="h-4 w-full rounded bg-muted-foreground/20" />
+                    <div className="h-4 w-full rounded bg-muted-foreground/20" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

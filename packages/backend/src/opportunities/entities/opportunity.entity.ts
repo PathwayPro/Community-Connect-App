@@ -56,6 +56,10 @@ export class Opportunity {
   @ApiProperty()
   @IsNotEmpty()
   updated_at: Date;
+
+  @ApiProperty()
+  @IsString()
+  experience: string;
 }
 
 export class OpportunityCard {
@@ -95,4 +99,8 @@ export class OpportunityCard {
   @ApiProperty()
   @IsString()
   salary_range_id: number;
+
+  @ApiProperty()
+  @IsString()
+  experience: string;
 }

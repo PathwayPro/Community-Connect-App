@@ -89,7 +89,14 @@ export class UsersService {
 
   async getUsersPublicInfo(): Promise<PublicReadUserDto[]> {
     const users = await this.prisma.users.findMany();
-    return users.map(this.mapToPublicReadUserDto);
+
+    console.log('users in public', users);
+
+    const publicUsers = users.map((user) => this.mapToPublicReadUserDto(user));
+
+    console.log('publicUsers', publicUsers);
+
+    return publicUsers;
   }
 
   async getUserPublicInfoById(
@@ -349,15 +356,29 @@ export class UsersService {
     return readUser;
   }
 
-  private mapToPublicReadUserDto(user: PublicReadUserDto): PublicReadUserDto {
+  private mapToPublicReadUserDto(user: any): PublicReadUserDto {
     const publicUser = new PublicReadUserDto();
     Object.assign(publicUser, {
-      firstName: user.firstName,
-      middleName: user.middleName,
-      lastName: user.lastName,
+      id: user.id,
+      firstName: user.first_name,
+      middleName: user.middle_name,
+      lastName: user.last_name,
       email: user.email,
-      arrivalInCanada: user.arrivalInCanada,
+      arrivalInCanada: user.arrival_in_canada,
       role: user.role as 'USER' | 'ADMIN' | 'MENTOR',
+      countryOfOrigin: user.country_of_origin,
+      companyName: user.company_name,
+      bio: user.bio,
+      skills: user.skills,
+      profession: user.profession,
+      experience: user.experience,
+      linkedinLink: user.linkedin_link,
+      githubLink: user.github_link,
+      twitterLink: user.twitter_link,
+      portfolioLink: user.portfolio_link,
+      otherLinks: user.other_links,
+      additionalLinks: user.additional_links,
+      languages: user.languages,
     });
     return publicUser;
   }

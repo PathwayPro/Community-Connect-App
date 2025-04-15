@@ -56,15 +56,13 @@ export function useAuth() {
         console.log('responseUserData', responseUserData);
 
         if (responseUserData.success) {
+          loginContext(responseUserData.data);
           showAlert({
             title: 'Login successful!',
             description: 'Welcome back to the app!',
-            type: 'success'
+            type: 'success',
+            redirect: '/home'
           });
-
-          loginContext(responseUserData.data);
-          router.push('/home');
-          router.refresh();
         }
       }
     } catch (error) {
@@ -92,7 +90,8 @@ export function useAuth() {
           title: 'Registration successful!',
           description:
             'Welcome to the app! Please check your email for a verification link.',
-          type: 'success'
+          type: 'success',
+          redirect: '/auth/login'
         });
 
         setTimeout(() => {
@@ -124,7 +123,8 @@ export function useAuth() {
           title: 'Email verified successfully!',
           description:
             'Your email has been verified. You will be redirected to login.',
-          type: 'success'
+          type: 'success',
+          redirect: '/auth/login'
         });
 
         setTimeout(() => {
@@ -159,7 +159,8 @@ export function useAuth() {
           title: 'Password updated successfully!',
           description:
             'You have successfully reset your password. You can now login using the new password. ',
-          type: 'success'
+          type: 'success',
+          redirect: '/auth/login'
         });
         setTimeout(() => {
           router.push('/auth/login');
@@ -189,7 +190,8 @@ export function useAuth() {
           title: 'Email Sent!',
           description:
             'A password reset link has been sent to your registered Email ID.',
-          type: 'success'
+          type: 'success',
+          redirect: '/auth/login'
         });
         setTimeout(() => {
           router.push('/auth/login');
@@ -255,7 +257,8 @@ export function useAuth() {
         showAlert({
           title: 'Logged out successfully!',
           description: 'See you soon!',
-          type: 'success'
+          type: 'success',
+          redirect: '/'
         });
 
         router.push('/');

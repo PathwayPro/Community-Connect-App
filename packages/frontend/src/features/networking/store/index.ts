@@ -51,63 +51,41 @@ export const useNetworkingStore = create<NetworkingState>((set) => ({
 
   getNetworkingUsers: async () => {
     set({ isLoading: true, error: null });
-    const response = await userApi.getUsersPublicData();
 
     try {
+      const response = await userApi.getUsersPublicData();
+
+      console.log('response of all users', response.data);
       if (response.success) {
+        const networkingUsers = response.data.map((user) => ({
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          companyName: user.companyName,
+          bio: user.bio,
+          role: user.role,
+          skills: user.skills,
+          profession: user.profession,
+          experience: user.experience,
+          languages: user.languages,
+          country: user.countryOfOrigin,
+          pictureUploadLink: user.pictureUploadLink,
+          linkedinLink: user.linkedinLink,
+          githubLink: user.githubLink,
+          twitterLink: user.twitterLink,
+          portfolioLink: user.portfolioLink,
+          isConnected: false
+        }));
+
+        console.log('networkingUsers', networkingUsers);
+
         const currentUser = await userApi.getUserProfile();
 
-        // NetworkingProfile {
-        //     id: number;
-        //     firstName: string;
-        //     lastName: string;
-        //     companyName: string;
-        //     bio: string;
-        //     role: 'USER' | 'MENTOR' | 'ADMIN';
-        //     skills: string[];
-        //     profession: string;
-        //     country: string;
-        //     pictureUploadLink: string;
-        //     linkedinLink?: string;
-        //     githubLink?: string;
-        //     twitterLink?: string;
-        //     portfolioLink?: string;
-        //     isConnected: boolean;
-        //   }
-
-        // interface UserProfile {
-        //     id?: number;
-        //     firstName: string;
-        //     lastName: string;
-        //     email?: string;
-        //     dob?: string;
-        //     ageRange?: string;
-        //     arrivalInCanada?: string;
-        //     goalId?: string;
-        //     role?: RoleEnum;
-        //     province?: string;
-        //     city?: string;
-        //     profession?: string;
-        //     experience?: string;
-        //     bio?: string;
-        //     pictureUploadLink?: string;
-        //     resumeUploadLink?: string;
-        //     linkedinLink?: string;
-        //     githubLink?: string;
-        //     twitterLink?: string;
-        //     portfolioLink?: string;
-        //     otherLinks?: string;
-        //     additionalLinks?: string[];
-        //     languages?: string;
-        //     countryOfOrigin?: string;
-        //     workStatus?: string;
-        //     companyName?: string;
-        //     skills?: string[];
-        //     activelySearching?: boolean;
-        //   }
+        console.log('currentUser', currentUser);
 
         // remove current user from the list
-        const usersWithoutCurrentUser = response.data.filter(
+        const usersWithoutCurrentUser = networkingUsers.filter(
           (user) => user.id !== currentUser.data.id
         );
 
