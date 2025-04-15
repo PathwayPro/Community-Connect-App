@@ -8,6 +8,7 @@ import { Card } from '@/shared/components/ui/card';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { Link, PenBox, Trash2 } from 'lucide-react';
 import { OpportunityResponseDto } from '../../dto/opportunity-dto';
+import { useRouter } from 'next/navigation';
 
 interface ExpandedJobCardProps {
   opportunity: OpportunityResponseDto;
@@ -18,8 +19,32 @@ export function ExpandedJobCard({
   opportunity,
   onApply
 }: ExpandedJobCardProps) {
+  const router = useRouter();
   const location = `${opportunity.city}, ${opportunity.province}`;
   const salaryRange = `$${opportunity.salary_range.from.toLocaleString()} - $${opportunity.salary_range.to.toLocaleString()}`;
+
+  const formData = {
+    id: opportunity.id,
+    job: opportunity.job,
+    company: opportunity.company,
+    province: opportunity.province,
+    city: opportunity.city,
+    salary_range_id: opportunity.salary_range_id,
+    description: opportunity.description,
+    link_post: opportunity.link_post,
+    link_apply: opportunity.link_apply,
+    settings: opportunity.settings,
+    experience: opportunity.experience,
+    file: opportunity.file
+  };
+
+  const handleEdit = () => {
+    router.push(
+      `/resources/edit/${opportunity.id}?mode=opportunities&data=${encodeURIComponent(
+        JSON.stringify(formData)
+      )}`
+    );
+  };
 
   return (
     <Card className="relative w-full min-w-full bg-neutral-light-100 p-4">
@@ -28,7 +53,10 @@ export function ExpandedJobCard({
 
         {/* Action Buttons */}
         <div className="absolute right-4 top-1 z-20 flex gap-3">
-          <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary">
+          <div
+            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary"
+            onClick={handleEdit}
+          >
             <PenBox className="h-4 w-4 text-white" />
           </div>
           <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive">

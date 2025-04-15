@@ -42,49 +42,19 @@ type FormValues = {
   opportunities: OpportunityFormValues;
 };
 
-export const NewsForm = () => {
+export const EditNewsForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode') as FormMode;
+  const id = searchParams.get('id');
+  const formData = searchParams.get('data')
+    ? JSON.parse(decodeURIComponent(searchParams.get('data')!))
+    : null;
   const { showAlert } = useAlertDialog();
 
-  const { createNews, fetchNews } = useNewsStore();
-  const { createResource, fetchResources } = useResourcesStore();
-  const {
-    createOpportunity,
-    fetchOpportunities,
-    fetchSalaryRanges,
-    salaryRanges
-  } = useOpportunityStore();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (mode === 'opportunities') {
-          await Promise.all([fetchOpportunities(), fetchSalaryRanges()]);
-        } else if (mode === 'news') {
-          await fetchNews();
-        } else if (mode === 'contentLibrary') {
-          await fetchResources();
-        }
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-        showAlert({
-          title: 'Error',
-          description: 'Failed to fetch data. Please try again.',
-          type: 'error'
-        });
-      }
-    };
-    fetchData();
-  }, [
-    mode,
-    fetchNews,
-    fetchResources,
-    fetchOpportunities,
-    fetchSalaryRanges,
-    showAlert
-  ]);
+  const { updateNews } = useNewsStore();
+  const { updateResource } = useResourcesStore();
+  const { updateOpportunity, salaryRanges } = useOpportunityStore();
 
   const formSchema = {
     news: newsFormSchema,
@@ -92,75 +62,61 @@ export const NewsForm = () => {
     opportunities: opportunityFormSchema
   }[mode || 'news'];
 
-  const defaultValues = {
-    news: { title: '', details: '', type: '', link: '' },
-    contentLibrary: { title: '', details: '', type: '', link: '' },
-    opportunities: {
-      job: '',
-      salary_range_id: '',
-      description: '',
-      link_post: '',
-      link_apply: '',
-      company: '',
-      province: '',
-      city: '',
-      settings: WorkSettings.REMOTE
-    }
-  }[mode || 'news'];
+  const defaultValues =
+    formData ||
+    {
+      news: { title: '', details: '', type: '', link: '' },
+      contentLibrary: { title: '', details: '', type: '', link: '' },
+      opportunities: {
+        job: '',
+        salary_range_id: '',
+        description: '',
+        link_post: '',
+        link_apply: '',
+        company: '',
+        province: '',
+        city: '',
+        settings: WorkSettings.REMOTE
+      }
+    }[mode || 'news'];
 
   const methods = useForm<FormValues[typeof mode]>({
     resolver: zodResolver(formSchema),
-    defaultValues
+    defaultValues,
+    values: formData
   });
 
-  // Validation after all hooks
-  if (!mode || !['news', 'contentLibrary', 'opportunities'].includes(mode)) {
-    router.push('/resources');
-    return null;
-  }
-
   const { isSubmitting, errors } = methods.formState;
-
-  console.log('errors from the form :', errors);
 
   const onSubmit = async (data: FormValues[typeof mode]) => {
     try {
       const actions = {
         news: async () => {
-          const result = await createNews(data as CreateNewsDto);
-
-          if (result) {
-            showAlert({
-              title: 'Success',
-              description: 'News created successfully',
-              type: 'success',
-              redirect: '/resources'
-            });
-          }
+          await updateNews(id!, data as CreateNewsDto);
+          showAlert({
+            title: 'Success',
+            description: 'News updated successfully',
+            type: 'success',
+            redirect: '/resources'
+          });
         },
         contentLibrary: async () => {
-          const result = await createResource(data as CreateResourceDto);
-          if (result) {
-            showAlert({
-              title: 'Success',
-              description: 'Resource created successfully',
-              type: 'success',
-              redirect: '/resources'
-            });
-          }
+          await updateResource(id!, data as CreateResourceDto);
+          showAlert({
+            title: 'Success',
+            description: 'Resource updated successfully',
+            type: 'success',
+            redirect: '/resources'
+          });
         },
         opportunities: async () => {
-          console.log('data from the form :', data);
-
-          const result = await createOpportunity(data as CreateOpportunityDto);
-          if (result) {
-            showAlert({
-              title: 'Success',
-              description: 'Opportunity created successfully',
-              type: 'success',
-              redirect: '/resources'
-            });
-          }
+          await updateOpportunity(Number(id!), data as CreateOpportunityDto);
+          showAlert({
+            title: 'Success',
+            description: 'Opportunity updated successfully',
+            type: 'success',
+            redirect: '/resources'
+          });
         }
       };
 
@@ -185,15 +141,9 @@ export const NewsForm = () => {
   };
 
   const titles = {
-    news: { create: 'News', info: 'News Information' },
-    contentLibrary: { create: 'Resource', info: 'Resource Information' },
-    opportunities: { create: 'Opportunity', info: 'Opportunity Information' }
-  };
-
-  const submitLabels = {
-    news: 'Publish News',
-    contentLibrary: 'Upload Resource',
-    opportunities: 'Post Opportunity'
+    news: 'Edit News',
+    contentLibrary: 'Edit Resource',
+    opportunities: 'Edit Opportunity'
   };
 
   return (
@@ -208,9 +158,8 @@ export const NewsForm = () => {
               className="absolute left-0 h-10 w-10"
               onClick={() => router.back()}
             />
-            <h2 className="font-semibold">Create {titles[mode].create}</h2>
+            <h2 className="font-semibold">{titles[mode]}</h2>
           </div>
-          <h4>{titles[mode].info}</h4>
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col justify-center gap-4">
@@ -227,7 +176,7 @@ export const NewsForm = () => {
                 className="w-full"
                 type="submit"
                 disabled={isSubmitting}
-                label={submitLabels[mode]}
+                label={`Update ${mode === 'contentLibrary' ? 'Resource' : mode}`}
               />
             </div>
           </form>

@@ -108,9 +108,11 @@ export const NetworkingCard = ({
               {profile.linkedinLink && (
                 <Linkedin className="h-4 w-4 text-neutral-dark-100" />
               )}
-              {profile.githubLink && <SharedIcons.github className="h-5 w-5" />}
+              {profile.githubLink && (
+                <SharedIcons.github className="h-4 w-4 text-neutral-dark-100" />
+              )}
               {profile.twitterLink && (
-                <SharedIcons.twitter className="h-5 w-5" />
+                <SharedIcons.twitter className="h-5 w-5 text-neutral-dark-100" />
               )}
             </div>
           </div>

@@ -10,12 +10,11 @@ import { FormRadio } from '@/shared/components/form/form-radio';
 import { useFormContext } from 'react-hook-form';
 
 interface BaseFormProps {
-  mode: 'create' | 'edit';
   newsId?: string;
 }
 
-export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
-  console.log(mode, newsId);
+export const BaseForm = ({ newsId }: BaseFormProps) => {
+  console.log(newsId);
   const {
     formState: { errors }
   } = useFormContext();

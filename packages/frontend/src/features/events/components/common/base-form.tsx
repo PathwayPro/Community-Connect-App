@@ -18,7 +18,7 @@ export const BaseForm = () => {
 
   const { eventCategories, fetchEventCategories } = useEventStore();
 
-  console.log('errors', errors);
+  console.log('errors', errors, eventCategories);
 
   useEffect(() => {
     fetchEventCategories();
@@ -108,7 +108,6 @@ export const BaseForm = () => {
           leftLabel="https://"
           placeholder="Registration link URL"
           customError={errors.link?.message}
-          onChange={(e) => setValue('link', handleLinkChange(e.target.value))}
         />
       </div>
     </div>

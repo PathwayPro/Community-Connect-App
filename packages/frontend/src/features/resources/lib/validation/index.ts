@@ -2,7 +2,8 @@ import { z } from 'zod';
 import { NewsType, resourceTypes, WorkSettings } from '../constants/enums';
 
 // URL regex pattern that checks for common URL formats
-const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+export const urlPattern =
+  /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
 
 export const newsFormSchema = z.object({
   title: z.string({

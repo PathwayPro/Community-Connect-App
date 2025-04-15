@@ -8,6 +8,7 @@ import { Badge } from '@/shared/components/ui/badge';
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { ResourcePreviewCard } from './resource-preview-card';
+import { useRouter } from 'next/navigation';
 
 interface ResourceCardProps {
   id?: string;
@@ -24,6 +25,7 @@ interface ResourceCardProps {
 }
 
 export const ResourceCard = ({
+  id,
   title,
   link,
   details,
@@ -32,10 +34,27 @@ export const ResourceCard = ({
   user
 }: ResourceCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   const ensureAbsoluteUrl = (url: string) => {
     if (!url) return '#';
     return url.match(/^https?:\/\//) ? url : `https://${url}`;
+  };
+
+  const formData = {
+    id,
+    title,
+    link,
+    details,
+    type
+  };
+
+  const handleEdit = () => {
+    router.push(
+      `/resources/edit/${id}?mode=contentLibrary&data=${encodeURIComponent(
+        JSON.stringify(formData)
+      )}`
+    );
   };
 
   return (
@@ -43,7 +62,10 @@ export const ResourceCard = ({
       <div className="relative flex flex-col">
         {/* Action Buttons */}
         <div className="absolute right-4 top-4 z-20 flex gap-3">
-          <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary">
+          <div
+            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary"
+            onClick={handleEdit}
+          >
             <PenBox className="h-4 w-4 text-white" />
           </div>
           <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive">

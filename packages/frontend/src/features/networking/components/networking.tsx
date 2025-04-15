@@ -120,7 +120,46 @@ export const Networking = () => {
 
   // Loading
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="container h-full w-full space-y-4">
+        <Card>
+          <CardHeader className="flex animate-pulse flex-row items-center justify-between space-y-0 pb-4">
+            <div className="h-8 w-32 rounded-md bg-muted" />
+            <div className="h-10 w-64 rounded-md bg-muted" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <div className="h-10 w-full rounded-md bg-muted" />
+              <div className="grid grid-cols-3 gap-4">
+                <div className="h-10 rounded-md bg-muted" />
+                <div className="h-10 rounded-md bg-muted" />
+                <div className="h-10 rounded-md bg-muted" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="mt-6">
+          <CardContent>
+            <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+              {[...Array(8)].map((_, index) => (
+                <div
+                  key={index}
+                  className="flex h-[300px] animate-pulse flex-col space-y-3 rounded-lg bg-muted p-4"
+                >
+                  <div className="h-24 w-24 rounded-full bg-muted-foreground/20" />
+                  <div className="h-4 w-3/4 rounded bg-muted-foreground/20" />
+                  <div className="h-4 w-1/2 rounded bg-muted-foreground/20" />
+                  <div className="mt-auto space-y-2">
+                    <div className="h-4 w-full rounded bg-muted-foreground/20" />
+                    <div className="h-4 w-full rounded bg-muted-foreground/20" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

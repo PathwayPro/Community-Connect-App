@@ -56,75 +56,60 @@ export const EventForm = () => {
 
   const [activeStep, setActiveStep] = React.useState(1);
 
-  const defaultEventValues = (): EventFormValues => {
-    if (isEdit && eventData) {
-      return {
-        title: eventData.title || '',
-        subtitle: eventData.subtitle || '',
-        description: eventData.description || '',
-        category_id: eventData.category_id?.toString() || '',
-        location: eventData.location || '',
-        link: eventData.link || '',
-        image: eventData.image || '',
-        is_free: eventData.is_free || true,
-        type: eventData.type || EventsTypes.PUBLIC,
-        requires_confirmation: eventData.requires_confirmation || false,
-        accept_subscriptions: eventData.accept_subscriptions || true,
-        start_date: eventData.start_date || new Date().toISOString(),
-        start_time: eventData.start_time || '00:00 AM',
-        end_time: eventData.end_time || '00:00 AM'
-      };
-    }
-
-    return {
-      title: '',
-      subtitle: '',
-      description: '',
-      category_id: '',
-      location: '',
-      link: '',
-      image: '',
-      is_free: true,
-      type: EventsTypes.PUBLIC,
-      requires_confirmation: false,
-      accept_subscriptions: true,
-      start_date: '',
-      start_time: '00:00 AM',
-      end_time: '00:00 AM'
-    };
+  const defaultValues = {
+    title: '',
+    subtitle: '',
+    description: '',
+    category_id: '',
+    location: '',
+    link: '',
+    is_free: true,
+    type: EventsTypes.PUBLIC,
+    requires_confirmation: false,
+    accept_subscriptions: true,
+    start_date: '',
+    start_time: '',
+    end_time: ''
   };
 
   const methods = useForm<EventFormValues>({
-    mode: 'onChange',
     resolver: zodResolver(eventFormSchema),
-    defaultValues: defaultEventValues()
+    defaultValues
   });
-
-  const { trigger } = methods;
-
-  // Function to check if current step is valid
-  const isStepValid = useCallback(async () => {
-    const fieldsToValidate =
-      activeStep === 1
-        ? (['title', 'category_id', 'description'] as const)
-        : (['start_date', 'type'] as const);
-
-    const result = await trigger(fieldsToValidate);
-    return result;
-  }, [activeStep, trigger]);
 
   const [isCurrentStepValid, setIsCurrentStepValid] = React.useState(false);
 
   // Update step validity whenever fields change
   useEffect(() => {
-    isStepValid().then((valid) => setIsCurrentStepValid(valid));
-  }, [methods.formState.isDirty, methods.formState.errors, isStepValid]);
+    const step1Fields = [
+      'title',
+      'subtitle',
+      'description',
+      'category_id',
+      'type'
+    ];
+    const step2Fields = ['location', 'start_date', 'start_time', 'end_time'];
+
+    const relevantFields = activeStep === 1 ? step1Fields : step2Fields;
+
+    // Check if all relevant fields are valid
+    const hasErrors = relevantFields.some(
+      (field) => methods.formState.errors[field as keyof EventFormValues]
+    );
+    const isDirty = relevantFields.some(
+      (field) => methods.getFieldState(field as keyof EventFormValues).isDirty
+    );
+
+    setIsCurrentStepValid(isDirty && !hasErrors);
+  }, [
+    activeStep,
+    methods.formState.errors,
+    methods.formState.dirtyFields,
+    methods.getFieldState
+  ]);
 
   const handleNext = async () => {
-    const isValid = await isStepValid();
-    if (isValid) {
-      setActiveStep(activeStep + 1);
-    }
+    setActiveStep(activeStep + 1);
   };
 
   const handlePrevious = () => {
@@ -207,7 +192,7 @@ export const EventForm = () => {
               <IconButton
                 className="w-full"
                 type="button"
-                disabled={!isCurrentStepValid}
+                disabled={!isCurrentStepValid || methods.formState.isSubmitting}
                 rightIcon="arrowRight"
                 label={activeStep === 1 ? 'Next' : eventButtonText}
                 onClick={

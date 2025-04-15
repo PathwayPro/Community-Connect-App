@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { urlPattern } from '@/features/resources/lib/validation';
 
 export const EventsTypes = {
   PUBLIC: 'PUBLIC',
@@ -23,7 +24,11 @@ export const eventFormSchema = z.object({
     .min(20, 'Event description must be at least 20 characters'),
   category_id: z.string().min(1, 'Event category is required'),
   location: z.string().optional(),
-  link: z.string().url('Must be a valid URL').optional(),
+  link: z
+    .string({
+      required_error: 'Link is required'
+    })
+    .regex(urlPattern, 'Must be a valid URL'),
   image: z.string().optional(),
   is_free: z.boolean().default(true),
   type: z

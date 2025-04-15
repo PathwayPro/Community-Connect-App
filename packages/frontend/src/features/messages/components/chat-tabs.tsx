@@ -12,10 +12,17 @@ import { Message } from '@/features/messages/types';
 
 interface ChatTabsProps {
   messages: Message[];
+  searchQuery: string;
 }
 
-export const ChatTabs = ({ messages }: ChatTabsProps) => {
-  const hasMessages = messages.length > 0;
+export const ChatTabs = ({ messages, searchQuery }: ChatTabsProps) => {
+  const filteredMessages = messages.filter(
+    (message) =>
+      message.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      message.sender.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const hasMessages = filteredMessages.length > 0;
 
   return (
     <Tabs defaultValue="all" className="pt-6">
@@ -31,20 +38,28 @@ export const ChatTabs = ({ messages }: ChatTabsProps) => {
         </h3>
         <ScrollArea className="h-[calc(100vh-200px)]">
           {hasMessages ? (
-            messages.map((message) => (
+            filteredMessages.map((message) => (
               <MessageItem key={message.id} message={message} />
             ))
           ) : (
             <EmptyStateCard
               icon={MessagesSquare}
-              title="No messages yet"
-              description="Start a conversation with someone"
-              action={{
-                label: 'Start Chat',
-                onClick: () => {
-                  /* Handle new chat */
-                }
-              }}
+              title={searchQuery ? 'No matches found' : 'No messages yet'}
+              description={
+                searchQuery
+                  ? 'Try adjusting your search terms'
+                  : 'Start a conversation with someone'
+              }
+              action={
+                !searchQuery
+                  ? {
+                      label: 'Start Chat',
+                      onClick: () => {
+                        /* Handle new chat */
+                      }
+                    }
+                  : undefined
+              }
             />
           )}
         </ScrollArea>

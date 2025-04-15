@@ -15,10 +15,11 @@ import { EmptyStateCard } from '@/shared/components/empty-state/empty-state-card
 import { Ticket } from 'lucide-react';
 import { PaginationComponent } from '@/shared/components/pagination/pagination';
 import { Event } from '../types';
+import { Skeleton } from '@/shared/components/ui/skeleton';
 
 export const EventList = () => {
   const router = useRouter();
-  const { events, fetchEvents } = useEventStore();
+  const { events, fetchEvents, isLoading } = useEventStore();
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 5;
 
@@ -52,6 +53,42 @@ export const EventList = () => {
   };
 
   console.log('events', events);
+
+  if (isLoading) {
+    return (
+      <div className="container space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="w-full">
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center justify-start gap-4">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-[400px] rounded-lg" />
+              </div>
+              <Skeleton className="h-10 w-[236px] rounded-lg" />
+            </div>
+
+            <div className="flex flex-col gap-6">
+              {[...Array(3)].map((_, index) => (
+                <div key={index} className="rounded-lg border p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-4">
+                      <Skeleton className="h-6 w-[200px]" />
+                      <div className="flex gap-4">
+                        <Skeleton className="h-4 w-[100px]" />
+                        <Skeleton className="h-4 w-[100px]" />
+                      </div>
+                      <Skeleton className="h-4 w-[300px]" />
+                    </div>
+                    <Skeleton className="h-10 w-[120px] rounded-lg" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const renderEventsList = (eventsList: Event[], totalEvents: Event[]) => {
     if (eventsList.length === 0) {

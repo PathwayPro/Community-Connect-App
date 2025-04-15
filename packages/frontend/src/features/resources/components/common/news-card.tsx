@@ -8,6 +8,7 @@ import { Badge } from '@/shared/components/ui/badge';
 import { ExpandedNewsModal } from './expanded-news-modal';
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 interface NewsCardProps {
   id?: string;
@@ -25,6 +26,7 @@ interface NewsCardProps {
 }
 
 export const NewsCard = ({
+  id,
   title,
   details,
   type,
@@ -34,13 +36,34 @@ export const NewsCard = ({
   user
 }: NewsCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+
+  const handleEdit = () => {
+    const newsData = {
+      id,
+      title,
+      details,
+      type,
+      image,
+      link,
+      created_at,
+      user
+    };
+
+    router.push(
+      `/resources/edit/${id}?mode=news&data=${encodeURIComponent(JSON.stringify(newsData))}`
+    );
+  };
 
   return (
     <Card className="w-full overflow-hidden">
       <div className="relative flex flex-col">
         {/* Action Buttons */}
         <div className="absolute right-4 top-4 z-20 flex gap-3">
-          <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary">
+          <div
+            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary"
+            onClick={handleEdit}
+          >
             <PenBox className="h-4 w-4 text-white" />
           </div>
           <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive">

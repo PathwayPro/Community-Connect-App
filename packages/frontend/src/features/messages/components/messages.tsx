@@ -9,9 +9,11 @@ import { ChatHeader } from './chat-header';
 import { ChatInput } from './chat-input';
 import { messages } from '../lib/mock-data/message';
 import { ChatBubble } from './common/chat-bubble';
+import { useState } from 'react';
 
 export const Messages = () => {
   const hasSelectedChat = true;
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="flex h-screen w-full rounded-2xl bg-white">
@@ -22,9 +24,11 @@ export const Messages = () => {
             leftIcon="search"
             className="w-full rounded-full bg-neutral-light-200"
             placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <ChatTabs messages={messages} />
+        <ChatTabs messages={messages} searchQuery={searchQuery} />
       </div>
 
       {/* Main Chat Area */}

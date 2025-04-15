@@ -67,9 +67,18 @@ const filterResources = (resources: Resource[], type: string) => {
 
 export const NewsList = () => {
   const router = useRouter();
-  const { news, fetchNews } = useNewsStore();
-  const { resources, fetchResources } = useResourcesStore();
-  const { opportunities, fetchOpportunities } = useOpportunityStore();
+  const { news, fetchNews, isLoading: isNewsLoading } = useNewsStore();
+  const {
+    resources,
+    fetchResources,
+    isLoading: isResourcesLoading
+  } = useResourcesStore();
+
+  const {
+    opportunities,
+    fetchOpportunities,
+    isLoading: isOpportunitiesLoading
+  } = useOpportunityStore();
 
   useEffect(() => {
     fetchNews();
@@ -104,8 +113,12 @@ export const NewsList = () => {
 
   console.log('featuredNews', featuredNews);
 
+  // Replace single newsPage with separate states for each tab
+  const [recentNewsPage, setRecentNewsPage] = useState(1);
+  const [editorsPickPage, setEditorsPickPage] = useState(1);
+  const [mostReadPage, setMostReadPage] = useState(1);
+
   // Add pagination state
-  const [newsPage, setNewsPage] = useState(1);
   const [resourcePage, setResourcePage] = useState(1);
   const [opportunityPage, setOpportunityPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
@@ -117,10 +130,13 @@ export const NewsList = () => {
     return items.slice(startIndex, endIndex);
   };
 
-  // Get paginated items
-  const paginatedRecentNews = paginateItems(recentNews, newsPage);
-  const paginatedEditorsPickNews = paginateItems(editorsPickNews, newsPage);
-  const paginatedMostReadNews = paginateItems(mostReadNews, newsPage);
+  // Get paginated items with separate pages
+  const paginatedRecentNews = paginateItems(recentNews, recentNewsPage);
+  const paginatedEditorsPickNews = paginateItems(
+    editorsPickNews,
+    editorsPickPage
+  );
+  const paginatedMostReadNews = paginateItems(mostReadNews, mostReadPage);
   const paginatedOpportunities = paginateItems(
     opportunityItems,
     opportunityPage
@@ -171,6 +187,17 @@ export const NewsList = () => {
     />
   );
 
+  const renderLoadingState = () => (
+    <div className="grid grid-cols-2 gap-6">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div
+          key={index}
+          className="h-[300px] animate-pulse rounded-lg bg-gray-100"
+        />
+      ))}
+    </div>
+  );
+
   return (
     <div className="container-wide w-full space-y-6">
       <div className="flex items-center justify-between">
@@ -213,7 +240,9 @@ export const NewsList = () => {
               <div className="flex w-full gap-8">
                 <div className="flex w-full flex-col gap-6">
                   <div className="relative w-full">
-                    {featuredNews.length > 0 ? (
+                    {isNewsLoading ? (
+                      <div className="h-[400px] w-full animate-pulse rounded-lg bg-gray-100" />
+                    ) : featuredNews.length > 0 ? (
                       <Carousel
                         opts={{
                           align: 'start',
@@ -280,7 +309,11 @@ export const NewsList = () => {
                       value="recent"
                       className="flex w-full flex-col gap-6"
                     >
-                      {paginatedRecentNews.length > 0 ? (
+                      {isNewsLoading ? (
+                        renderLoadingState()
+                      ) : paginatedRecentNews.length === 0 && !isNewsLoading ? (
+                        renderNewsEmptyState()
+                      ) : (
                         <>
                           <div className="grid grid-cols-2 gap-6">
                             {paginatedRecentNews.map((item) => (
@@ -288,15 +321,13 @@ export const NewsList = () => {
                             ))}
                           </div>
                           <PaginationComponent
-                            currentPage={newsPage}
+                            currentPage={recentNewsPage}
                             totalPages={Math.ceil(
                               recentNews.length / ITEMS_PER_PAGE
                             )}
-                            onPageChange={setNewsPage}
+                            onPageChange={setRecentNewsPage}
                           />
                         </>
-                      ) : (
-                        renderNewsEmptyState()
                       )}
                     </TabsContent>
 
@@ -304,36 +335,54 @@ export const NewsList = () => {
                       value="editors-pick"
                       className="flex w-full flex-col gap-6"
                     >
-                      <div className="grid grid-cols-2 gap-6">
-                        {paginatedEditorsPickNews.map((item) => (
-                          <NewsCard key={item.id} {...item} />
-                        ))}
-                      </div>
-                      <PaginationComponent
-                        currentPage={newsPage}
-                        totalPages={Math.ceil(
-                          editorsPickNews.length / ITEMS_PER_PAGE
-                        )}
-                        onPageChange={setNewsPage}
-                      />
+                      {isNewsLoading ? (
+                        renderLoadingState()
+                      ) : paginatedEditorsPickNews.length === 0 &&
+                        !isNewsLoading ? (
+                        renderNewsEmptyState()
+                      ) : (
+                        <>
+                          <div className="grid grid-cols-2 gap-6">
+                            {paginatedEditorsPickNews.map((item) => (
+                              <NewsCard key={item.id} {...item} />
+                            ))}
+                          </div>
+                          <PaginationComponent
+                            currentPage={editorsPickPage}
+                            totalPages={Math.ceil(
+                              editorsPickNews.length / ITEMS_PER_PAGE
+                            )}
+                            onPageChange={setEditorsPickPage}
+                          />
+                        </>
+                      )}
                     </TabsContent>
 
                     <TabsContent
                       value="most-read"
                       className="flex w-full flex-col gap-6"
                     >
-                      <div className="grid grid-cols-2 gap-6">
-                        {paginatedMostReadNews.map((item) => (
-                          <NewsCard key={item.id} {...item} />
-                        ))}
-                      </div>
-                      <PaginationComponent
-                        currentPage={newsPage}
-                        totalPages={Math.ceil(
-                          mostReadNews.length / ITEMS_PER_PAGE
-                        )}
-                        onPageChange={setNewsPage}
-                      />
+                      {isNewsLoading ? (
+                        renderLoadingState()
+                      ) : paginatedMostReadNews.length === 0 &&
+                        !isNewsLoading ? (
+                        renderNewsEmptyState()
+                      ) : (
+                        <>
+                          <div className="grid grid-cols-2 gap-6">
+                            {paginatedMostReadNews.map((item) => (
+                              <NewsCard key={item.id} {...item} />
+                            ))}
+                          </div>
+                          <PaginationComponent
+                            currentPage={mostReadPage}
+                            totalPages={Math.ceil(
+                              mostReadNews.length / ITEMS_PER_PAGE
+                            )}
+                            onPageChange={setMostReadPage}
+                          />
+                        </>
+                      )}
                     </TabsContent>
                   </Tabs>
                 </div>
@@ -368,7 +417,11 @@ export const NewsList = () => {
                     </div>
                   )}
                 </div>
-                {paginatedResources.length > 0 ? (
+                {isResourcesLoading ? (
+                  renderLoadingState()
+                ) : paginatedResources.length === 0 && !isResourcesLoading ? (
+                  renderResourcesEmptyState()
+                ) : (
                   <>
                     <div className="grid grid-cols-2 gap-6">
                       {paginatedResources.map((item) => (
@@ -383,8 +436,6 @@ export const NewsList = () => {
                       onPageChange={setResourcePage}
                     />
                   </>
-                ) : (
-                  renderResourcesEmptyState()
                 )}
               </div>
             )}
@@ -394,7 +445,16 @@ export const NewsList = () => {
           <TabsContent value="opportunities">
             {activeTab === 'opportunities' && (
               <div className="flex w-full flex-col gap-6 rounded-2xl bg-white p-6">
-                {selectedJob ? (
+                {isOpportunitiesLoading ? (
+                  <div className="space-y-4">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="h-[200px] animate-pulse rounded-lg bg-gray-100"
+                      />
+                    ))}
+                  </div>
+                ) : selectedJob ? (
                   <>
                     <IconButton
                       leftIcon="chevronLeft"
@@ -412,7 +472,10 @@ export const NewsList = () => {
                 ) : (
                   <>
                     <h2>Job Opportunities</h2>
-                    {paginatedOpportunities.length > 0 ? (
+                    {paginatedOpportunities.length === 0 &&
+                    !isOpportunitiesLoading ? (
+                      renderOpportunitiesEmptyState()
+                    ) : (
                       <>
                         {paginatedOpportunities.map((item) => (
                           <JobCard
@@ -429,8 +492,6 @@ export const NewsList = () => {
                           onPageChange={setOpportunityPage}
                         />
                       </>
-                    ) : (
-                      renderOpportunitiesEmptyState()
                     )}
                   </>
                 )}
