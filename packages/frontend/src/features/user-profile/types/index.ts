@@ -6,7 +6,7 @@ export enum RoleEnum {
 
 export interface UserProfile {
   country?: string;
-  isConnected: boolean;
+  isConnected?: boolean;
   id?: number;
   firstName: string;
   lastName: string;
@@ -35,7 +35,6 @@ export interface UserProfile {
   companyName?: string;
   skills?: string[];
   activelySearching?: boolean;
-  isConnected?: boolean;
 }
 
 export interface UserResponse<T> {

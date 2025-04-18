@@ -103,7 +103,7 @@ export const useNetworkingStore = create<NetworkingState>((set) => ({
     try {
       set({ isLoading: true, error: null });
       const response = await networkingApi.getConnections();
-      set({ connections: response.data.data, isLoading: false });
+      set({ connections: response.data, isLoading: false });
     } catch (error) {
       set({
         error:
@@ -119,7 +119,7 @@ export const useNetworkingStore = create<NetworkingState>((set) => ({
     try {
       set({ isLoading: true, error: null });
       const response = await networkingApi.getConnectionRequests(filters);
-      set({ connectionRequests: response.data.data, isLoading: false });
+      set({ connectionRequests: response.data, isLoading: false });
     } catch (error) {
       set({
         error:
@@ -136,7 +136,7 @@ export const useNetworkingStore = create<NetworkingState>((set) => ({
       set({ error: null, isLoading: true });
       const response = await networkingApi.createConnectionRequest(data);
       set((state) => ({
-        connectionRequests: [...state.connectionRequests, response.data.data],
+        connectionRequests: [...state.connectionRequests, response.data],
         isLoading: false
       }));
     } catch (error) {
@@ -155,7 +155,7 @@ export const useNetworkingStore = create<NetworkingState>((set) => ({
       const response = await networkingApi.updateConnectionRequest(id, data);
       set((state) => ({
         connectionRequests: state.connectionRequests.map((request) =>
-          request.id === response.data.data.id ? response.data.data : request
+          request.id === response.data.id ? response.data : request
         ),
         isLoading: false
       }));
@@ -174,7 +174,7 @@ export const useNetworkingStore = create<NetworkingState>((set) => ({
     try {
       set({ isLoading: true, error: null });
       const response = await networkingApi.getChatList();
-      set({ chatList: response.data.data, isLoading: false });
+      set({ chatList: response.data, isLoading: false });
     } catch (error) {
       set({
         error:
@@ -188,7 +188,7 @@ export const useNetworkingStore = create<NetworkingState>((set) => ({
     try {
       set({ isLoading: true, error: null });
       const response = await networkingApi.getChat(userId);
-      set({ currentChat: response.data.data, isLoading: false });
+      set({ currentChat: response.data, isLoading: false });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Failed to fetch chat',
@@ -202,7 +202,7 @@ export const useNetworkingStore = create<NetworkingState>((set) => ({
       set({ error: null, isLoading: true });
       const response = await networkingApi.sendMessage(data);
       set((state) => ({
-        currentChat: [...state.currentChat, response.data.data],
+        currentChat: [...state.currentChat, response.data],
         isLoading: false
       }));
     } catch (error) {

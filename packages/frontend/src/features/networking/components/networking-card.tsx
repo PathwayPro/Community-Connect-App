@@ -10,19 +10,19 @@ import { cn } from '@/shared/lib/utils';
 import { UserProfile } from '@/features/user-profile/types';
 import { ConnectRequest } from '@/features/messages/components/common/connect-request';
 import { useState } from 'react';
-// export interface NetworkingProfile {
-//   id: string;
-//   firstName: string;
-//   lastName: string;
-//   company: string;
-//   bio: string;
-//   avatarUrl: string;
-//   isConnected: boolean;
-//   role: 'USER' | 'MENTOR' | 'ADMIN';
-//   skills: string[];
-//   profession: string;
-//   countryOfOrigin: string;
-// }
+export interface NetworkingProfile {
+  id: number;
+  firstName: string;
+  lastName: string;
+  company: string;
+  bio: string;
+  avatarUrl: string;
+  isConnected: boolean;
+  role: 'USER' | 'MENTOR' | 'ADMIN';
+  skills: string[];
+  profession: string;
+  countryOfOrigin: string;
+}
 
 interface NetworkingCardProps {
   profile: UserProfile;
