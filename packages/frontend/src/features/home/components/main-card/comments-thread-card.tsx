@@ -29,7 +29,8 @@ interface ThreadCardProps {
 
 interface CommentCardProps {
   id: number;
-  authorUserName: string;
+  authorUsername: string;
+  authorName: string;
   content: string;
   avatarUrl: string;
   timeAgo: string;
@@ -39,7 +40,8 @@ const transformCommentResponseToCommentCardProps = (
   response: PostCommentResponse
 ): CommentCardProps => ({
   id: response.id,
-  authorUserName: `${response.user.first_name} ${response.user.last_name}`,
+  authorUsername: `${response.user.first_name} ${response.user.last_name}`,
+  authorName: `${response.user.first_name} ${response.user.last_name}`,
   content: response.message,
   avatarUrl: '',
   timeAgo: response.created_at

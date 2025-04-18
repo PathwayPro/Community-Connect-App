@@ -80,7 +80,7 @@ export const Networking = () => {
       // Filter by country
       if (
         filters.country.length > 0 &&
-        !filters.country.includes(profile.country)
+        !filters.country.includes(profile.country ? profile.country : '')
       ) {
         return false;
       }
@@ -88,7 +88,9 @@ export const Networking = () => {
       // Filter by skills
       if (
         filters.skills.length > 0 &&
-        !filters.skills.some((skill) => profile.skills.includes(skill))
+        !filters.skills.some((skill) =>
+          profile.skills ? profile.skills.includes(skill) : []
+        )
       ) {
         return false;
       }
@@ -96,7 +98,9 @@ export const Networking = () => {
       // Filter by profession
       if (
         filters.professions.length > 0 &&
-        !filters.professions.includes(profile.profession)
+        !filters.professions.includes(
+          profile.profession ? profile.profession : ''
+        )
       ) {
         return false;
       }

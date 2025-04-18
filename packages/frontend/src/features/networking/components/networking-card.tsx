@@ -9,17 +9,17 @@ import { UserRoundIcon, MessageSquare, Linkedin } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 
 export interface NetworkingProfile {
-  id: string;
+  id?: number;
   firstName: string;
   lastName: string;
-  company: string;
-  bio: string;
-  avatarUrl: string;
+  company?: string;
+  bio?: string;
+  avatarUrl?: string;
   isConnected: boolean;
-  role: 'USER' | 'MENTOR' | 'ADMIN';
-  skills: string[];
-  profession: string;
-  country: string;
+  role?: 'USER' | 'MENTOR' | 'ADMIN';
+  skills?: string[];
+  profession?: string;
+  country?: string;
 }
 
 interface NetworkingCardProps {
@@ -82,7 +82,7 @@ export const NetworkingCard = ({
             </p>
 
             <p className="line-clamp-3 max-w-full text-center text-sm text-neutral-dark-100">
-              &ldquo;{truncateBio(profile.bio)}&rdquo;
+              &ldquo;{truncateBio(profile.bio ? profile.bio : '')}&rdquo;
             </p>
 
             {/* Social Icons */}

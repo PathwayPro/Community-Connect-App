@@ -66,7 +66,7 @@ export const getCountries = () => {
 
 export const mockNetworkingProfiles: NetworkingProfile[] = [
   {
-    id: '1',
+    id: 1,
     firstName: 'Sarah',
     lastName: 'Chen',
     company: 'TechForward Solutions',
@@ -85,7 +85,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'United States'
   },
   {
-    id: '2',
+    id: 2,
     firstName: 'James',
     lastName: 'Rodriguez',
     company: 'Innovation Hub',
@@ -98,7 +98,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'Spain'
   },
   {
-    id: '3',
+    id: 3,
     firstName: 'Emily',
     lastName: 'Thompson',
     company: 'DesignCraft Co',
@@ -111,7 +111,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'United Kingdom'
   },
   {
-    id: '4',
+    id: 4,
     firstName: 'Michael',
     lastName: 'Patel',
     company: 'DataMinds Analytics',
@@ -124,7 +124,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'India'
   },
   {
-    id: '5',
+    id: 5,
     firstName: 'Lisa',
     lastName: 'Wong',
     company: 'GrowthBase',
@@ -137,7 +137,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'Singapore'
   },
   {
-    id: '6',
+    id: 6,
     firstName: 'David',
     lastName: 'Kim',
     company: 'WebFlow Interactive',
@@ -150,7 +150,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'South Korea'
   },
   {
-    id: '7',
+    id: 7,
     firstName: 'Rachel',
     lastName: 'Martinez',
     company: 'Strategic Solutions Inc',
@@ -163,7 +163,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'Mexico'
   },
   {
-    id: '8',
+    id: 8,
     firstName: 'Thomas',
     lastName: 'Anderson',
     company: 'CloudScale Systems',
@@ -176,7 +176,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'Germany'
   },
   {
-    id: '9',
+    id: 9,
     firstName: 'Anna',
     lastName: 'Kowalski',
     company: 'ContentFirst Media',
@@ -189,7 +189,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'Poland'
   },
   {
-    id: '10',
+    id: 10,
     firstName: 'Kevin',
     lastName: 'Zhang',
     company: 'ServerLogic Pro',
@@ -202,7 +202,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'China'
   },
   {
-    id: '11',
+    id: 11,
     firstName: 'Nina',
     lastName: 'Patel',
     company: 'Agile Dynamics',
@@ -215,7 +215,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'United Arab Emirates'
   },
   {
-    id: '12',
+    id: 12,
     firstName: 'Robert',
     lastName: 'Lee',
     company: 'CyberShield Security',
@@ -228,7 +228,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'Canada'
   },
   {
-    id: '13',
+    id: 13,
     firstName: 'Maria',
     lastName: 'Garcia',
     company: 'PixelPerfect Design',
@@ -241,7 +241,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'Brazil'
   },
   {
-    id: '14',
+    id: 14,
     firstName: 'John',
     lastName: 'Murphy',
     company: 'Enterprise Solutions',
@@ -254,7 +254,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'Ireland'
   },
   {
-    id: '15',
+    id: 15,
     firstName: 'Sophie',
     lastName: 'Bernard',
     company: 'UserFirst Products',
@@ -267,7 +267,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'France'
   },
   {
-    id: '16',
+    id: 16,
     firstName: 'Alex',
     lastName: 'Taylor',
     company: 'CodeCraft Labs',
@@ -280,7 +280,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'Australia'
   },
   {
-    id: '17',
+    id: 17,
     firstName: 'Olivia',
     lastName: 'Brown',
     company: 'TalentHub Global',
@@ -293,7 +293,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'New Zealand'
   },
   {
-    id: '18',
+    id: 18,
     firstName: 'Daniel',
     lastName: 'Wilson',
     company: 'InfraCore Technologies',
@@ -306,7 +306,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'Sweden'
   },
   {
-    id: '19',
+    id: 19,
     firstName: 'Emma',
     lastName: 'Davies',
     company: 'FutureScale Digital',
@@ -319,7 +319,7 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     country: 'Denmark'
   },
   {
-    id: '20',
+    id: 20,
     firstName: 'Marcus',
     lastName: 'Johnson',
     company: 'Neural Dynamics',

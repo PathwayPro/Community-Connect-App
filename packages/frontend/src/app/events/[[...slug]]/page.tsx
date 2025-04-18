@@ -51,7 +51,7 @@ export default async function EventPage({ params }: EventPageProps) {
         return (
           <Suspense fallback={<EventDetailsSkeleton />}>
             <div className="flex w-full justify-center">
-              <EventDetails eventId={action} />
+              {/* <EventDetails eventId={action} /> */}
             </div>
           </Suspense>
         );
