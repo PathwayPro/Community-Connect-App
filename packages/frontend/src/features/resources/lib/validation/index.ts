@@ -1,61 +1,89 @@
 import { z } from 'zod';
+import { NewsType, resourceTypes, WorkSettings } from '../constants/enums';
 
-export const workModeOptions = [
-  { value: 'remote', label: 'Remote' },
-  { value: 'hybrid', label: 'Hybrid' },
-  { value: 'onsite', label: 'On-site' }
-];
+// URL regex pattern that checks for common URL formats
+export const urlPattern =
+  /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
 
-export const workModeTypes = {
-  REMOTE: 'REMOTE',
-  HYBRID: 'HYBRID',
-  ON_SITE: 'ON_SITE'
-} as const;
-
-export const newsSchema = z.object({
+export const newsFormSchema = z.object({
   title: z.string({
     required_error: 'Title is required'
   }),
-  subtitle: z.string().optional(),
-  keywords: z.string().optional(),
-  content: z.string({
+  // subtitle: z.string().optional(),
+  // keywords: z.string().optional(),
+  details: z.string({
     required_error: 'Content is required'
   }),
-  published: z.boolean().optional().default(false),
-  user_id: z.number().int().optional()
+  type: z.enum(Object.values(NewsType) as [string, ...string[]]),
+  link: z
+    .string({
+      required_error: 'Link is required'
+    })
+    .regex(urlPattern, 'Must be a valid URL'),
+  published: z.boolean().optional().default(true)
 });
 
-export type NewsFormValues = z.infer<typeof newsSchema>;
+export type NewsFormValues = z.infer<typeof newsFormSchema>;
 
-export const opportunitySchema = z.object({
-  title: z.string({
-    required_error: 'Title is required'
+export const opportunityFormSchema = z.object({
+  job: z.string({
+    required_error: 'Job title is required'
   }),
-  company_name: z.string({
+  company: z.string({
     required_error: 'Company name is required'
   }),
   description: z.string({
     required_error: 'Description is required'
   }),
-  salary_range: z.string({
+  experience: z.string({
+    required_error: 'Experience is required'
+  }),
+  salary_range_id: z.string({
     required_error: 'Salary range is required'
   }),
-  work_mode: z.enum(Object.values(workModeTypes) as [string, ...string[]]),
+  settings: z.enum(Object.values(WorkSettings) as [string, ...string[]]),
   province: z.string({
     required_error: 'Province is required'
   }),
   city: z.string({
     required_error: 'City is required'
   }),
-  link: z.string({
-    required_error: 'Link is required'
-  }),
-  apply_link: z.string({
-    required_error: 'Apply link is required'
-  }),
-  job_link: z.string({
-    required_error: 'Job link is required'
-  })
+  link_apply: z
+    .string({
+      required_error: 'Apply link is required'
+    })
+    .regex(urlPattern, 'Must be a valid URL'),
+  link_post: z
+    .string({
+      required_error: 'Job post link is required'
+    })
+    .regex(urlPattern, 'Must be a valid URL'),
+  file: z.instanceof(File).optional()
 });
 
-export type OpportunityFormValues = z.infer<typeof opportunitySchema>;
+export type OpportunityFormValues = z.infer<typeof opportunityFormSchema>;
+
+const resourceTypeValues = Object.values(resourceTypes).map(
+  (type) => type.value
+) as [string, ...string[]];
+
+export const resourceFormSchema = z.object({
+  title: z
+    .string({
+      required_error: 'Title is required'
+    })
+    .min(3, 'Title must be at least 3 characters'),
+  details: z
+    .string({
+      required_error: 'Details are required'
+    })
+    .min(10, 'Details must be at least 10 characters'),
+  type: z.enum(resourceTypeValues),
+  link: z
+    .string({
+      required_error: 'Link is required'
+    })
+    .regex(urlPattern, 'Must be a valid URL')
+});
+
+export type ResourceFormValues = z.infer<typeof resourceFormSchema>;

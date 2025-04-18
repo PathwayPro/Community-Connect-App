@@ -1,46 +1,80 @@
 'use client';
 
-import { Clock } from 'lucide-react';
+import { Clock, PenBox, Trash2 } from 'lucide-react';
 import { Card } from '@/shared/components/ui/card';
 import Image from 'next/image';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { Badge } from '@/shared/components/ui/badge';
 import { ExpandedNewsModal } from './expanded-news-modal';
 import { useState } from 'react';
+import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 interface NewsCardProps {
   id?: string;
   title: string;
-  subtitle?: string;
   details: string;
-  keywords: string[];
-  imageUrl?: string;
-  postedAt: string;
-  postedBy: string;
-  onEdit?: () => void;
-  onDelete?: () => void;
-  mode: string;
+  type: string;
+  image?: string;
+  link?: string;
+  created_at: string;
+  user: {
+    first_name: string;
+    last_name: string;
+    picture_upload_link: string;
+  };
 }
 
 export const NewsCard = ({
+  id,
   title,
-  subtitle,
   details,
-  keywords,
-  imageUrl,
-  postedAt,
-  postedBy,
-  mode
+  type,
+  image,
+  link,
+  created_at,
+  user
 }: NewsCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+
+  const handleEdit = () => {
+    const newsData = {
+      id,
+      title,
+      details,
+      type,
+      image,
+      link,
+      created_at,
+      user
+    };
+
+    router.push(
+      `/resources/edit/${id}?mode=news&data=${encodeURIComponent(JSON.stringify(newsData))}`
+    );
+  };
 
   return (
     <Card className="w-full overflow-hidden">
-      <div className="flex flex-col">
+      <div className="relative flex flex-col">
+        {/* Action Buttons */}
+        <div className="absolute right-4 top-4 z-20 flex gap-3">
+          <div
+            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary"
+            onClick={handleEdit}
+          >
+            <PenBox className="h-4 w-4 text-white" />
+          </div>
+          <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive">
+            <Trash2 className="h-4 w-4 text-white" />
+          </div>
+        </div>
+
         {/* Image */}
         <div className="relative h-[320px] w-full">
           <Image
-            src={imageUrl || '/event/placeholder-2.jpg'}
+            src={image || '/event/placeholder-2.jpg'}
             alt={title}
             className="object-cover"
             fill
@@ -52,9 +86,6 @@ export const NewsCard = ({
         {/* Content */}
         <div className="flex flex-col gap-3 p-4">
           <h2 className="text-xl font-semibold">{title}</h2>
-          {subtitle && (
-            <p className="text-sm text-muted-foreground">{subtitle}</p>
-          )}
 
           <p className="line-clamp-3 text-justify text-sm text-muted-foreground">
             {details}
@@ -62,33 +93,26 @@ export const NewsCard = ({
 
           {/* Keywords */}
           <div className="flex flex-wrap gap-2">
-            {keywords.map((keyword) => (
-              <Badge key={keyword} variant="secondary">
-                {keyword}
-              </Badge>
-            ))}
+            <Badge key={type} variant="secondary">
+              {type}
+            </Badge>
           </div>
 
           {/* Posted Info */}
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              <span>{postedAt}</span>
+              <span>{format(new Date(created_at), 'MMM d, yyyy')}</span>
             </div>
-            <span>by {postedBy}</span>
+            <span>
+              by {user.first_name} {user.last_name}
+            </span>
           </div>
 
           {/* Action Button */}
           <IconButton
-            label={
-              mode === 'news'
-                ? 'Read More'
-                : mode === 'contentLibrary'
-                  ? 'Get Resource'
-                  : 'View Opportunity'
-            }
-            rightIcon={mode === 'news' ? 'arrowRight' : ''}
-            leftIcon={mode === 'contentLibrary' ? 'squareArrowTopRight' : ''}
+            label="Read More"
+            leftIcon="squareArrowTopRight"
             iconClassName="text-white"
             className="w-full"
             onClick={() => setIsOpen(true)}
@@ -98,10 +122,10 @@ export const NewsCard = ({
       <ExpandedNewsModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        imageUrl={imageUrl || ''}
+        image={image || ''}
         newsTitle={title}
         description={details}
-        articleUrl={''}
+        articleUrl={link || ''}
       />
     </Card>
   );

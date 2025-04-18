@@ -24,13 +24,14 @@ import { Event } from '../types';
 import { EventsTypes } from '../lib/validation';
 import { toSentenceCase } from '@/shared/lib/utils';
 import { formatDate } from 'date-fns';
+import { ConnectRequest } from '@/features/messages/components/common/connect-request';
+import { useState } from 'react';
 
 interface EventDetailsProps {
   onBack?: () => void;
   onShare?: () => void;
   onFavorite?: () => void;
   onRegister?: () => void;
-  onConnect?: () => void;
   onFollow?: () => void;
 }
 
@@ -38,10 +39,10 @@ export const EventDetails = ({
   onShare,
   onFavorite,
   onRegister,
-  onConnect,
   onFollow
 }: EventDetailsProps) => {
   const router = useRouter();
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
 
   const searchParams = useSearchParams();
 
@@ -52,6 +53,11 @@ export const EventDetails = ({
   if (!eventData) {
     notFound();
   }
+
+  const handleConnectSubmit = (message: string) => {
+    console.log('Connect message:', message);
+    setIsConnectModalOpen(false);
+  };
 
   console.log('eventData', eventData);
 
@@ -73,6 +79,13 @@ export const EventDetails = ({
 
   return (
     <div className="container mx-auto max-w-4xl space-y-6 rounded-[24px] bg-white px-6 py-6 shadow-md">
+      {/* Connect Request Modal  */}
+      <ConnectRequest
+        isOpen={isConnectModalOpen}
+        onClose={() => setIsConnectModalOpen(false)}
+        onSubmit={handleConnectSubmit}
+      />
+
       {/* Top Navigation */}
       <div className="flex items-center justify-between">
         <Button
@@ -178,7 +191,7 @@ export const EventDetails = ({
             <div className="mt-4 flex gap-2">
               <Button
                 variant="outline"
-                onClick={onConnect}
+                onClick={() => setIsConnectModalOpen(true)}
                 className="h-10 w-[200px] border-primary text-primary"
               >
                 <Users className="mr-2 h-4 w-4" />

@@ -35,6 +35,7 @@ export interface UserProfile {
   companyName?: string;
   skills?: string[];
   activelySearching?: boolean;
+  isConnected?: boolean;
 }
 
 export interface UserResponse<T> {

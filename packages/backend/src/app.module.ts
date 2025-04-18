@@ -25,6 +25,7 @@ import { NetworkingModule } from './networking/networking.module';
 import { BlogModule } from './blog/blog.module';
 import { MenteeModule } from './mentee/mentee.module';
 import { OpportunitiesModule } from './opportunities/opportunities.module';
+import { SalaryRangesModule } from './salary_ranges/salary_ranges.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { OpportunitiesModule } from './opportunities/opportunities.module';
     BlogModule,
     MenteeModule,
     OpportunitiesModule,
+    SalaryRangesModule,
   ],
   controllers: [AppController],
   providers: [

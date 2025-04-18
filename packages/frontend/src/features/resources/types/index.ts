@@ -1,12 +1,3 @@
-export interface CreateNewsDTO {
-  title: string;
-  subtitle?: string;
-  keywords?: string;
-  content: string;
-  published?: boolean;
-  user_id?: number;
-}
-
 export interface NewsItem {
   id: string;
   title: string;
@@ -17,6 +8,23 @@ export interface NewsItem {
   keywords: string[];
   postedAt: string;
   postedBy: string;
+}
+
+export interface News {
+  id: string;
+  title: string;
+  details: string;
+  type: string;
+  link: string;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+  user_id: number;
+  user: {
+    first_name: string;
+    last_name: string;
+    picture_upload_link: string;
+  };
 }
 
 export interface JobCardProps {
@@ -34,24 +42,24 @@ export interface JobCardProps {
 }
 
 export interface Resource {
-  id: number;
+  id: string;
   title: string;
   link: string;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
   user_id: number;
+  user: {
+    first_name: string;
+    last_name: string;
+    picture_upload_link: string;
+  };
+  type: string;
 }
 
 export interface ResourceFilters {
   title?: string;
   link?: string;
   user_id?: number;
-  date_from?: Date | null;
-  date_to?: Date | null;
-}
-
-export interface ResourceResponse<T> {
-  success: boolean;
-  message?: string;
-  data: T;
+  date_from?: string | null;
+  date_to?: string | null;
 }

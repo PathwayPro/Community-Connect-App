@@ -68,6 +68,14 @@ export class FilterOpportunityDto {
   description?: string;
 
   @ApiPropertyOptional({
+    description: 'Experience level',
+    example: 'experience = "search"',
+  })
+  @IsOptional()
+  @IsString()
+  experience?: string;
+
+  @ApiPropertyOptional({
     description:
       '`created_at` greater than inserted date, ignoring time. `Y-m-d 00:00:00.000`',
     example: '2025-01-02',

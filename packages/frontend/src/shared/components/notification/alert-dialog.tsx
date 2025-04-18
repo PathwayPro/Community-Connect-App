@@ -9,6 +9,9 @@ import {
 import { Button } from '@/shared/components/ui/button';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { cn } from '@/shared/lib/utils';
+import { useEffect } from 'react';
+
+export type AlertType = 'success' | 'error' | 'warning' | 'info';
 
 const iconMap = {
   success: <Icons.checkCircle className="h-12 w-12 text-success-500" />,
@@ -18,13 +21,31 @@ const iconMap = {
 };
 
 export function AlertDialogUI() {
-  const {
-    isOpen,
-    title,
-    description,
-    type = 'info',
-    hideAlert
-  } = useAlertDialog();
+  const { isOpen, title, description, type, hideAlert, redirect } =
+    useAlertDialog();
+
+  useEffect(() => {
+    if (isOpen && type) {
+      const timer = setTimeout(() => {
+        if (redirect) {
+          window.location.href = redirect;
+        }
+        hideAlert();
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, type, hideAlert, redirect]);
+
+  const handleClose = () => {
+    if (redirect) {
+      window.location.href = redirect;
+    }
+    hideAlert();
+  };
+
+  // Only render when we have both isOpen and a type
+  if (!isOpen || !type) return null;
 
   return (
     <AlertDialog open={isOpen} onOpenChange={hideAlert}>
@@ -32,7 +53,9 @@ export function AlertDialogUI() {
         className="min-h-[260px] min-w-[598px] rounded-[24px] bg-white dark:bg-slate-900"
         onEscapeKeyDown={hideAlert}
       >
-        <div className="flex items-center justify-center">{iconMap[type]}</div>
+        <div className="flex items-center justify-center">
+          {iconMap[type as AlertType]}
+        </div>
         <AlertDialogTitle
           className={cn(
             'mt-4 text-center text-[28px] font-semibold leading-tight',
@@ -47,7 +70,7 @@ export function AlertDialogUI() {
           {description}
         </AlertDialogDescription>
         <AlertDialogFooter className="mt-8 flex justify-center sm:justify-start">
-          <Button variant="outline" onClick={hideAlert} className="w-full">
+          <Button variant="outline" onClick={handleClose} className="w-full">
             Close
           </Button>
         </AlertDialogFooter>

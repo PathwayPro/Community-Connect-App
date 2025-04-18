@@ -1,18 +1,47 @@
+'use client';
+
 import { useFormContext } from 'react-hook-form';
-import { FormInput, FormTextarea } from '@/shared/components/form';
+import { FormInput, FormSelect, FormTextarea } from '@/shared/components/form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
 import React from 'react';
-import {
-  OpportunityFormValues,
-  workModeTypes
-} from '@/features/resources/lib/validation';
-import { FormSelect } from '@/shared/components/form/form-select';
+import { OpportunityFormValues } from '@/features/resources/lib/validation';
 import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
 import { Label } from '@/shared/components/ui/label';
+import { WorkSettings } from '@/features/resources/lib/constants/enums';
+import { SalaryRangeResponseDto } from '../../dto/opportunity-dto';
 
-export const OpportunityForm = () => {
-  const { setValue, watch } = useFormContext<OpportunityFormValues>();
+// TODO: Get work mode options from the backend
+const workModeOptions = [
+  { value: WorkSettings.REMOTE, label: 'Remote' },
+  { value: WorkSettings.HYBRID, label: 'Hybrid' },
+  { value: WorkSettings.ON_SITE, label: 'On-site' }
+];
+
+const experienceOptions = [
+  { value: '1 - 3 years', label: '1 - 3 years' },
+  { value: '3 - 5 years', label: '3 - 5 years' },
+  { value: '5 - 10 years', label: '5 - 10 years' },
+  { value: '10+ years', label: '10+ years' }
+];
+
+export const OpportunityForm = ({
+  salaryRanges
+}: {
+  salaryRanges: SalaryRangeResponseDto[];
+}) => {
+  const {
+    setValue,
+    watch,
+    formState: { errors }
+  } = useFormContext<OpportunityFormValues>();
+
+  // Ensure salary range options are properly formatted
+  const formattedSalaryRanges =
+    salaryRanges?.map((range) => ({
+      label: `$${range.from} - $${range.to}`,
+      value: range.id.toString() // Ensure value is string
+    })) || [];
 
   const handleCompanyLogoUpload = async (files: File[]) => {
     try {
@@ -26,34 +55,17 @@ export const OpportunityForm = () => {
     }
   };
 
-  const salaryRanges = [
-    { value: '0-50000', label: '$0 - $50,000' },
-    { value: '50000-75000', label: '$50,000 - $75,000' },
-    { value: '75000-100000', label: '$75,000 - $100,000' },
-    { value: '100000-125000', label: '$100,000 - $125,000' },
-    { value: '125000-150000', label: '$125,000 - $150,000' },
-    { value: '150000-175000', label: '$150,000 - $175,000' },
-    { value: '175000-200000', label: '$175,000 - $200,000' },
-    { value: '200000', label: '$200,000+' }
-  ];
-
-  const workModeOptions = [
-    { value: workModeTypes.REMOTE, label: 'Remote' },
-    { value: workModeTypes.HYBRID, label: 'Hybrid' },
-    { value: workModeTypes.ON_SITE, label: 'On-site' }
-  ];
-
   return (
     <div className="flex w-full flex-col gap-4">
       <FormInput
-        name="jobTitle"
+        name="job"
         label="Job Title"
         placeholder="Enter job title"
         customError="Job title is required"
         required
       />
       <FormInput
-        name="companyName"
+        name="company"
         label="Company Name"
         placeholder="Enter company name"
         customError="Company name is required"
@@ -76,42 +88,56 @@ export const OpportunityForm = () => {
         />
         <FormInput name="city" label="City" placeholder="Enter city" />
       </div>
+
       <FormSelect
-        name="salaryRange"
+        name="experience"
+        label="Experience"
+        placeholder="Select experience"
+        options={experienceOptions}
+        required
+      />
+
+      <FormSelect
+        name="salary_range_id"
         label="Annual Salary Range"
         placeholder="Select salary range"
-        options={salaryRanges}
+        options={formattedSalaryRanges}
+        required
       />
       <div className="flex w-full gap-4">
         <CustomSwitch
-          name="work_mode"
+          name="settings"
           label="Work Mode"
           options={workModeOptions}
-          value={watch('work_mode')}
-          onChange={(value) => setValue('work_mode', value)}
+          value={watch('settings') || WorkSettings.REMOTE}
+          onChange={(value) => setValue('settings', value)}
           required
         />
       </div>
-      nb
+
       <FormInput
-        name="applyLink"
+        name="link_apply"
         label="Link to Apply"
         placeholder="Enter application URL"
         hasLabelInput={true}
         leftLabel="https://"
+        customError={errors.link_apply?.message as string}
+        required
       />
       <FormInput
-        name="jobPostingLink"
+        name="link_post"
         label="Job Posting Link"
         placeholder="Enter job posting URL"
         hasLabelInput={true}
         leftLabel="https://"
+        customError={errors.link_post?.message as string}
+        required
       />
       <FormTextarea
         name="description"
         label="Job Description"
         placeholder="Write the job description..."
-        customError="Job description is required"
+        customError={errors.description?.message as string}
         required
       />
     </div>

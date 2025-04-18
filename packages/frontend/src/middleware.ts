@@ -59,6 +59,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/events', request.url));
   }
 
+  // Redirect authenticated users to /resources if they try to access /resources/edit but allow them to access /resources/edit/:id or /resources/delete/:id or resources/:id
+  if (isAuthenticated && pathname === '/resources/edit') {
+    return NextResponse.redirect(new URL('/resources', request.url));
+  }
+
   if (isAuthenticated && pathname === '/events/delete') {
     return NextResponse.redirect(new URL('/events', request.url));
   }

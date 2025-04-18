@@ -7,23 +7,25 @@ import {
 import { Button } from '@/shared/components/ui/button';
 import { UserRoundIcon, MessageSquare, Linkedin } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
-
-export interface NetworkingProfile {
-  id?: number;
-  firstName: string;
-  lastName: string;
-  company?: string;
-  bio?: string;
-  avatarUrl?: string;
-  isConnected: boolean;
-  role?: 'USER' | 'MENTOR' | 'ADMIN';
-  skills?: string[];
-  profession?: string;
-  country?: string;
-}
+import { UserProfile } from '@/features/user-profile/types';
+import { ConnectRequest } from '@/features/messages/components/common/connect-request';
+import { useState } from 'react';
+// export interface NetworkingProfile {
+//   id: string;
+//   firstName: string;
+//   lastName: string;
+//   company: string;
+//   bio: string;
+//   avatarUrl: string;
+//   isConnected: boolean;
+//   role: 'USER' | 'MENTOR' | 'ADMIN';
+//   skills: string[];
+//   profession: string;
+//   countryOfOrigin: string;
+// }
 
 interface NetworkingCardProps {
-  profile: NetworkingProfile;
+  profile: UserProfile;
   onViewProfile?: () => void;
 }
 
@@ -36,9 +38,22 @@ export const NetworkingCard = ({
     return `${bio?.slice(0, maxLength)}...`;
   };
 
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+
+  const handleConnectSubmit = (message: string) => {
+    console.log('Connect message:', message);
+    setIsConnectModalOpen(false);
+  };
+
   return (
     <div className="flex h-[440px] w-full overflow-hidden rounded-2xl border border-neutral-light-500">
       <div className="relative flex w-full flex-col">
+        <ConnectRequest
+          isOpen={isConnectModalOpen}
+          onClose={() => setIsConnectModalOpen(false)}
+          onSubmit={handleConnectSubmit}
+        />
+
         {/* Header Background */}
         <div
           className={cn(
@@ -60,7 +75,7 @@ export const NetworkingCard = ({
           {/* Avatar - positioned to overlap with header */}
           <Avatar className="-mt-14 h-[110px] w-[110px] border-4 border-white bg-warning-500">
             <AvatarImage
-              src={profile.avatarUrl}
+              src={profile.pictureUploadLink}
               alt={`${profile.firstName} ${profile.lastName}`}
               className="h-full w-full object-cover"
             />
@@ -78,19 +93,27 @@ export const NetworkingCard = ({
               {profile.profession}
             </p>
             <p className="max-w-full truncate text-sm text-neutral-dark-100">
-              @{profile.company}
+              @{profile.companyName}
             </p>
 
             <p className="line-clamp-3 max-w-full text-center text-sm text-neutral-dark-100">
-              &ldquo;{truncateBio(profile.bio ? profile.bio : '')}&rdquo;
+              &ldquo;{truncateBio(profile.bio ?? '')}&rdquo;
             </p>
 
             {/* Social Icons */}
             <div className="mt-2 flex items-center gap-4">
-              <SharedIcons.briefcase className="h-5 w-5" />
-              <Linkedin className="h-4 w-4 text-neutral-dark-100" />
-              <SharedIcons.ball className="h-4 w-4" />
-              <SharedIcons.twitter className="h-5 w-5" />
+              {profile.portfolioLink && (
+                <SharedIcons.briefcase className="h-5 w-5" />
+              )}
+              {profile.linkedinLink && (
+                <Linkedin className="h-4 w-4 text-neutral-dark-100" />
+              )}
+              {profile.githubLink && (
+                <SharedIcons.github className="h-4 w-4 text-neutral-dark-100" />
+              )}
+              {profile.twitterLink && (
+                <SharedIcons.twitter className="h-5 w-5 text-neutral-dark-100" />
+              )}
             </div>
           </div>
 
@@ -110,7 +133,16 @@ export const NetworkingCard = ({
                 View
               </Button>
             </div>
-            <Button className="h-10 w-full">
+            <Button
+              className="h-10 w-full"
+              onClick={() => {
+                if (profile.isConnected) {
+                  console.log('Connected');
+                } else {
+                  setIsConnectModalOpen(true);
+                }
+              }}
+            >
               {profile.isConnected ? 'Connected' : 'Connect'}
             </Button>
           </div>

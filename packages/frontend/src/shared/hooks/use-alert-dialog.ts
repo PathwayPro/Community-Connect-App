@@ -9,8 +9,10 @@ interface AlertDialogState {
     title: string;
     description: string;
     type?: 'success' | 'error' | 'info' | 'warning';
+    redirect?: string;
   }) => void;
   hideAlert: () => void;
+  redirect?: string;
 }
 
 export const useAlertDialog = create<AlertDialogState>((set) => ({
@@ -18,8 +20,15 @@ export const useAlertDialog = create<AlertDialogState>((set) => ({
   title: '',
   description: '',
   type: 'info',
-  showAlert: ({ title, description, type = 'info' }) =>
-    set({ isOpen: true, title, description, type }),
+  redirect: '',
+  showAlert: ({ title, description, type = 'info', redirect }) =>
+    set({ isOpen: true, title, description, type, redirect }),
   hideAlert: () =>
-    set({ isOpen: false, title: '', description: '', type: 'info' })
+    set({
+      isOpen: false,
+      title: '',
+      description: '',
+      type: 'info',
+      redirect: ''
+    })
 }));

@@ -207,17 +207,20 @@ export class DeleteUserDto {
 }
 
 export class PublicReadUserDto {
-  @IsOptional()
-  @IsString()
-  firstName?: string;
+  @IsNumber()
+  id: number;
 
   @IsOptional()
   @IsString()
-  middleName?: string;
+  first_name?: string;
 
   @IsOptional()
   @IsString()
-  lastName?: string;
+  middle_name?: string;
+
+  @IsOptional()
+  @IsString()
+  last_name?: string;
 
   @IsOptional()
   @IsEmail()
@@ -225,11 +228,63 @@ export class PublicReadUserDto {
 
   @IsOptional()
   @IsDate() // Ensures arrival_in_canada is a valid Date object
-  arrivalInCanada?: Date;
+  arrival_in_canada?: Date;
 
   @IsOptional()
   @IsEnum(['USER', 'ADMIN', 'MENTOR'])
   role?: 'USER' | 'ADMIN' | 'MENTOR';
+
+  @IsOptional()
+  @IsString()
+  country_of_origin?: string;
+
+  @IsOptional()
+  @IsString()
+  company_name?: string;
+
+  @IsOptional()
+  @IsString()
+  bio?: string;
+
+  @IsOptional()
+  @IsString()
+  skills?: string[];
+
+  @IsOptional()
+  @IsString()
+  profession?: string;
+
+  @IsOptional()
+  @IsString()
+  experience?: string;
+
+  @IsOptional()
+  @IsString()
+  linkedin_link?: string;
+
+  @IsOptional()
+  @IsString()
+  github_link?: string;
+
+  @IsOptional()
+  @IsString()
+  twitter_link?: string;
+
+  @IsOptional()
+  @IsString()
+  portfolio_link?: string;
+
+  @IsOptional()
+  @IsString()
+  other_links?: string;
+
+  @IsOptional()
+  @IsArray()
+  additional_links?: string[];
+
+  @IsOptional()
+  @IsString()
+  languages?: string;
 }
 
 export class LoginUserDto {

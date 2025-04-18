@@ -62,7 +62,20 @@ export class ResourcesService {
         ...createResourceDto,
         user_id: user.sub,
       };
-      const newResource = await this.prisma.resources.create({ data });
+      const newResource = await this.prisma.resources.create({
+        data,
+        include: {
+          user: {
+            select: {
+              id: true,
+              first_name: true,
+              middle_name: true,
+              last_name: true,
+              role: true,
+            },
+          },
+        },
+      });
 
       return newResource;
     } catch (error) {

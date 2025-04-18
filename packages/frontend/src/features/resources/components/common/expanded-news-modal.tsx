@@ -13,16 +13,21 @@ import Image from 'next/image';
 interface ExpandedNewsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  imageUrl: string;
+  image: string;
   newsTitle: string;
   description: string;
   articleUrl: string;
 }
 
+const ensureAbsoluteUrl = (url: string) => {
+  if (!url) return '#';
+  return url.match(/^https?:\/\//) ? url : `https://${url}`;
+};
+
 export function ExpandedNewsModal({
   isOpen,
   onClose,
-  imageUrl,
+  image,
   newsTitle,
   description,
   articleUrl
@@ -31,8 +36,8 @@ export function ExpandedNewsModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="min-w-[1000px]">
         <DialogHeader>
-          <DialogTitle className="self-center">
-            <h4 className="font-semibold">News</h4>
+          <DialogTitle className="self-center text-base font-semibold">
+            News
           </DialogTitle>
           <DialogDescription className="sr-only">
             This is a news article
@@ -42,14 +47,14 @@ export function ExpandedNewsModal({
         <div className="flex flex-col gap-4 rounded-2xl bg-neutral-light-200 p-4">
           <div className="relative aspect-video h-[300px] w-full">
             <Image
-              src={imageUrl}
+              src={image || '/event/placeholder-2.jpg'}
               alt={newsTitle}
               fill
               className="rounded-2xl object-cover"
             />
           </div>
 
-          <h3 className="text-h3 self-center font-semibold">{newsTitle}</h3>
+          <h2 className="text-h3 self-center font-semibold">{newsTitle}</h2>
 
           <ScrollArea className="h-[250px]">
             <p className="paragraph-lg text-justify font-normal">
@@ -62,13 +67,16 @@ export function ExpandedNewsModal({
           <Button variant="outline" onClick={onClose} className="h-12 w-full">
             Back to News
           </Button>
-          <Button
-            variant="default"
-            onClick={() => window.open(articleUrl, '_blank')}
-            className="h-12 w-full"
-          >
-            <LinkIcon className="mr-2 h-6 w-6" />
-            Read Full Article
+          <Button variant="default" asChild className="h-12 w-full">
+            <a
+              href={ensureAbsoluteUrl(articleUrl)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center"
+            >
+              <LinkIcon className="mr-2 h-6 w-6" />
+              Read Full Article
+            </a>
           </Button>
         </div>
       </DialogContent>

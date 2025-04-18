@@ -104,6 +104,7 @@ export class OpportunitiesService {
         link_apply: createOpportunityDto.link_apply,
         link_post: createOpportunityDto.link_post,
         description: createOpportunityDto.description,
+        experience: createOpportunityDto.experience,
         created_at: new Date(),
         updated_at: new Date(),
         image: image ? image.path + '/' + image.fileName : null,
@@ -134,10 +135,12 @@ export class OpportunitiesService {
           job: true,
           company: true,
           province: true,
+          experience: true,
           city: true,
           settings: true,
           link_apply: true,
           image: true,
+          description: true,
           salary_range: {
             select: {
               from: true,

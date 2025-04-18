@@ -1,35 +1,27 @@
+'use client';
+
 import { FormSelect } from '@/shared/components/form/form-select';
 import { FormInput } from '@/shared/components/form/form-input';
 import { FormTextarea } from '@/shared/components/form/form-textarea';
-
-export const resourceTypes = [
-  { value: 'resume', label: 'Resume Template' },
-  { value: 'cover_letter', label: 'Cover Letter Template' },
-  { value: 'linkedin', label: 'LinkedIn Banner Template' },
-  { value: 'business_card', label: 'Business Card Template' },
-  { value: 'email_signature', label: 'Email Signature Template' },
-  { value: 'portfolio', label: 'Portfolio Layout Template' },
-  { value: 'personal_branding', label: 'Personal Branding Kit' },
-  { value: 'job_application_tracker', label: 'Job Application Tracker' },
-  { value: 'interview_prep', label: 'Interview Prep Kit' },
-  { value: 'networking_tips', label: 'Networking Tips' },
-  { value: 'career_planning', label: 'Career Planning Guide' },
-  { value: 'salary_negotiation', label: 'Salary Negotiation Guide' },
-  { value: 'other', label: 'Other' }
-];
+import { resourceTypes } from '../../lib/constants/enums';
+import { useFormContext } from 'react-hook-form';
 
 export const ResourceForm = () => {
+  const {
+    formState: { errors }
+  } = useFormContext();
+
   return (
     <div className="flex w-full flex-col gap-4">
       <FormSelect
-        name="template_type"
+        name="type"
         label="Template Type"
         placeholder="Select template type"
         options={resourceTypes}
         required
       />
 
-      <div className="g ap-4 flex w-full">
+      <div className="flex w-full gap-4">
         <FormInput
           name="title"
           label="Template Title"
@@ -50,11 +42,13 @@ export const ResourceForm = () => {
 
       <div className="flex w-full gap-4">
         <FormInput
-          name="resource_link"
+          name="link"
           label="Resource Link"
           hasLabelInput={true}
           leftLabel="https://"
           placeholder="Enter resource link"
+          customError={errors.link?.message as string}
+          required
         />
       </div>
     </div>

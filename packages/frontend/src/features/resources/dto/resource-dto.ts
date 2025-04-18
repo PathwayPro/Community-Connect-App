@@ -17,7 +17,7 @@ export interface UpdateResourceDto {
 }
 
 export interface ResourceDto extends CreateResourceDto {
-  id: number;
+  id: string;
   user_id: number;
   created_at: string;
   updated_at: string;

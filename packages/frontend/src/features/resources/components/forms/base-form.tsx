@@ -1,21 +1,23 @@
-import { useFormContext } from 'react-hook-form';
+'use client';
+
 import { FormInput } from '@/shared/components/form';
 import { FormTextarea } from '@/shared/components/form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
 import React from 'react';
-import { FormCheckbox } from '@/shared/components/form/form-checkbox';
-import { NewsFormValues } from '@/features/resources/lib/validation';
+import { NewsType } from '../../lib/constants/enums';
+import { FormRadio } from '@/shared/components/form/form-radio';
+import { useFormContext } from 'react-hook-form';
 
 interface BaseFormProps {
-  mode: 'create' | 'edit';
   newsId?: string;
 }
 
-export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
-  const { setValue, watch } = useFormContext<NewsFormValues>();
-
-  console.log(mode, newsId);
+export const BaseForm = ({ newsId }: BaseFormProps) => {
+  console.log(newsId);
+  const {
+    formState: { errors }
+  } = useFormContext();
 
   const handlePosterUpload = async (files: File[]) => {
     try {
@@ -23,15 +25,14 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
       files.forEach((file) => formData.append('files', file));
       toast.success('News image uploaded successfully');
 
-      //   const response = await fetch('/api/upload', {
-      //     method: 'POST',
-      //     body: formData
-      //   });
-
-      //   if (!response.ok) throw new Error('Upload failed');
-
-      //   const { urls } = await response.json();
-      //   setValue('image', urls[0], { shouldValidate: true });
+      // Uncomment and update when API is ready
+      // const response = await fetch('/api/upload', {
+      //   method: 'POST',
+      //   body: formData
+      // });
+      // if (!response.ok) throw new Error('Upload failed');
+      // const { urls } = await response.json();
+      // setValue('image', urls[0], { shouldValidate: true });
     } catch (error) {
       console.error('Upload failed:', error);
       toast.error('Failed to upload news image');
@@ -59,16 +60,8 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
         />
       </div>
 
-      <div className="flex w-full gap-4">
-        <FormInput
-          name="subtitle"
-          label="Subtitle"
-          placeholder="Enter news subtitle"
-        />
-      </div>
-
       <FormTextarea
-        name="content"
+        name="details"
         label="News Details"
         placeholder="Write your news details..."
         customError="Content is required"
@@ -77,21 +70,23 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
       />
 
       <div className="flex w-full gap-4">
-        <FormInput
-          name="keywords"
-          label="Keywords"
-          placeholder="Enter keywords (comma separated)"
-        />
-      </div>
-
-      <div className="flex w-full gap-4">
-        <FormCheckbox
-          name="news_type"
+        <FormRadio
+          name="type"
           label="News Type"
           options={[
-            { value: 'featured', label: 'Featured Post', id: 'featured' },
-            { value: 'editorial', label: "Editor's Pick", id: 'editorial' }
+            {
+              value: NewsType.FEATURED_POST,
+              label: 'Featured Post',
+              id: 'featured'
+            },
+            {
+              value: NewsType.EDITORS_PICK,
+              label: "Editor's Pick",
+              id: 'editorial'
+            }
           ]}
+          customError="News type is required"
+          required
         />
       </div>
 
@@ -102,6 +97,7 @@ export const BaseForm = ({ mode, newsId }: BaseFormProps) => {
           hasLabelInput={true}
           leftLabel="https://"
           placeholder="Link text"
+          customError={errors.link?.message as string}
         />
       </div>
     </div>

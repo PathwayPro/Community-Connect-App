@@ -138,7 +138,8 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
         type: 'success',
         title: 'Applied Successfully!',
         description:
-          'Your application has been successfully submitted and is currently under review.'
+          'Your application has been successfully submitted and is currently under review.',
+        redirect: '/mentorship/waitlist'
       });
 
       setTimeout(() => {
