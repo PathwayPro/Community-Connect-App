@@ -8,13 +8,8 @@ import {
 } from '@/shared/components/ui/popover';
 import { Calendar as CalendarIcon } from 'lucide-react';
 
-interface DateSelection {
-  day: number;
-  month: string;
-}
-
 interface DayMonthPickerProps {
-  onSelect?: (date: DateSelection) => void;
+  onSelect?: (date: string) => void;
   className?: string;
 }
 
@@ -43,17 +38,14 @@ const DayMonthPicker: React.FC<DayMonthPickerProps> = ({
   const formatDate = (date: Date): string => {
     const day = date.getDate().toString().padStart(2, '0');
     const month = months[date.getMonth()];
-    return `${day} ${month}`;
+    return `${month} ${day}`;
   };
 
   const handleSelect = (selectedDate: Date | undefined): void => {
     if (!selectedDate) return;
     setDate(selectedDate);
     setIsOpen(false);
-    onSelect?.({
-      day: selectedDate.getDate(),
-      month: months[selectedDate.getMonth()]
-    });
+    onSelect?.(formatDate(selectedDate));
   };
 
   return (

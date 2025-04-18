@@ -1,6 +1,12 @@
 import { Icons } from '@/features/auth/components/icons';
 import { cn } from '@/shared/lib/utils';
-import { FieldValues, useFormContext, Control, Path } from 'react-hook-form';
+import {
+  FieldValues,
+  useFormContext,
+  Control,
+  Path,
+  RegisterOptions
+} from 'react-hook-form';
 
 import {
   FormField,
@@ -28,6 +34,10 @@ interface FormSelectProps<T extends FieldValues> {
     readonly value: string | number;
   }>;
   transform?: (value: string) => number;
+  rules?: Omit<
+    RegisterOptions<T, Path<T>>,
+    'setValueAs' | 'disabled' | 'valueAsNumber' | 'valueAsDate'
+  >;
 }
 
 export const FormSelect = <T extends FieldValues>({
@@ -37,7 +47,8 @@ export const FormSelect = <T extends FieldValues>({
   customError,
   control: controlProp,
   required = false,
-  options
+  options,
+  rules
 }: FormSelectProps<T>) => {
   const formContext = useFormContext<T>();
   const control = controlProp || formContext?.control;
@@ -56,6 +67,7 @@ export const FormSelect = <T extends FieldValues>({
     <FormField
       control={control}
       name={name}
+      rules={rules}
       render={({ field }) => (
         <FormItem>
           <FormLabel
@@ -75,7 +87,7 @@ export const FormSelect = <T extends FieldValues>({
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
               <SelectContent>
-                {options.map((option) => (
+                {options?.map((option) => (
                   <SelectItem
                     key={option.value}
                     value={option.value.toString()}

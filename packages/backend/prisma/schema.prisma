@@ -43,8 +43,17 @@ model users {
   additional_links     String[]
   province             String?
   city                 String?
+  country_of_origin    String?
+  work_status          String?
+  company_name         String?
+  actively_searching   Boolean?
+  skills               String[]
+  age_range            String?
+  goal_id              String?
   // MENTOR RELATIONSHIP
   mentor               mentors?
+  // MENTEE RELATIONSHIP
+  mentee               mentees?
   // EVENTS MANAGERS RELATIONSHIP
   event_manager        EventsManagers[]
   // EVENTS SUBSCRIPTIONS RELATIONSHIP
@@ -57,9 +66,6 @@ model users {
   news                 News[]
   //RESOURCES RELATIONSHIP
   resources            Resources[]
-  // GOALS RELATIONSHIP
-  goal                 UsersGoals?                   @relation(fields: [goal_id], references: [id])
-  goal_id              Int?
   // INTERESTS RELATIONSHIP
   interests            UsersInterests[]
   // NETWORKING - CONNECTION REQUESTS
@@ -107,6 +113,24 @@ enum mentors_status {
   SUSPENDED
 }
 
+model mentees {
+  id                 Int            @id @default(autoincrement())
+  resume             String
+  reason             String
+  // STATUS ENUM
+  status             mentees_status @default(PENDING)
+  // USER RELATIONSHIP
+  user               users          @relation(fields: [user_id], references: [id])
+  user_id            Int            @unique
+}
+
+enum mentees_status {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
 // EVENTS FLOW
 model Events {
   id                    Int                   @id @default(autoincrement())
@@ -116,6 +140,9 @@ model Events {
   link                  String?
   image                 String?
   is_free               Boolean               @default(true)
+  date                  String?
+  start_time            String?
+  end_time              String?
   type                  EventsTypes           @default(PUBLIC)
   requires_confirmation Boolean               @default(false) // IF SUBSCRIPTIONS ARE ACCEPTED DIRECTLY OR IF THEY REQUIRE AN APPROVAL AFTER REVIEW
   accept_subscriptions  Boolean               @default(true) // IF USERS CAN STILL SUBSCRIBE TO THE EVENT OR IS FULL
@@ -127,9 +154,13 @@ model Events {
   category              EventsCategories      @relation(fields: [category_id], references: [id])
   category_id           Int
   dates                 EventsDates[]
+  // EVENTS SPEAKERS
   speakers              eventsSpeakers[]
+  // EVENTS MANAGERS
   managers              EventsManagers[]
+  // EVENTS SUBSCRIPTIONS
   subscriptions         EventsSubscriptions[]
+  // EVENTS INVITATIONS
   invitations           EventsInvitations[]
 }
 
@@ -251,21 +282,21 @@ model News {
 }
 
 // RESOURCES
+enum ResourceType {
+  INVOICE
+  RESUME
+  BANNER
+}
 model Resources {
   id         Int      @id @default(autoincrement())
   title      String
+  details    String
+  type       ResourceType
   link       String
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
   user       users    @relation(fields: [user_id], references: [id])
   user_id    Int
-}
-
-// GOALS
-model UsersGoals {
-  id    Int     @id @default(autoincrement())
-  name  String
-  users users[]
 }
 
 // INTERESTS
@@ -365,3 +396,38 @@ model PostsSaves {
   created_at       DateTime                  @default(now())
   @@unique([user_id, post_id])
 }
+// GOALS
+model UsersGoals {
+  id    Int     @id @default(autoincrement())
+  name  String
+}
+
+// OPPORTUNITIES
+enum WorkSettings {
+  REMOTE
+  HYBRID
+  ON_SITE
+}
+model SalaryRanges {
+  id              Int     @id @default(autoincrement())
+  from            Int
+  to              Int
+  opportunities   Opportunities[]
+}
+model Opportunities {
+  id                Int             @id @default(autoincrement())
+  job               String
+  company           String
+  province          String
+  city              String
+  salary_range_id   Int
+  salary_range      SalaryRanges    @relation(fields: [salary_range_id], references: [id])
+  settings          WorkSettings
+  link_apply        String
+  link_post         String
+  description       String
+  image             String
+  created_at        DateTime        @default(now())
+  updated_at        DateTime        @default(now())
+}
+

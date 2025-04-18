@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Stepper from '@/shared/components/stepper/stepper';
 import {
   PersonalInfoForm,
@@ -56,13 +56,14 @@ export const EditProfile = () => {
         province: user?.province || '',
         city: user?.city || '',
         dob: user?.dob || '',
+        ageRange: user?.ageRange || '',
         languages: user?.languages || '',
         profession: user?.profession || '',
         experience: user?.experience || '',
         bio: user?.bio || '',
         pictureUploadLink: user?.pictureUploadLink || '',
         arrivalInCanada: user?.arrivalInCanada || '',
-        goalId: user?.goalId || '',
+        goalId: user?.goalId || undefined,
         linkedinLink: user?.linkedinLink || '',
         githubLink: user?.githubLink || '',
         twitterLink: user?.twitterLink || '',
@@ -72,7 +73,7 @@ export const EditProfile = () => {
         workStatus: user?.workStatus || '',
         companyName: user?.companyName || '',
         countryOfOrigin: user?.countryOfOrigin || '',
-        ageRange: user?.ageRange || ''
+        activelySearching: user?.activelySearching || false
       }),
       [user]
     )

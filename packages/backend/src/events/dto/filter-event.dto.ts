@@ -101,30 +101,46 @@ export class FilterEventDto {
   })
   accept_subscriptions: boolean;
 
-  @ApiPropertyOptional({
-    description:
-      'Events for a specific date | format `YYYY-MM-DD` | Filter `event.start_date BETWEEN "{date}T00:00:00.000" AND "{date}T23:59:59.999"`',
-    example: '2025-01-02',
-  })
-  @IsDateString()
-  @IsOptional()
-  start_date: Date;
+  // @ApiPropertyOptional({
+  //   description:
+  //     'Events for a specific date | format `YYYY-MM-DD` | Filter `event.start_date BETWEEN "{date}T00:00:00.000" AND "{date}T23:59:59.999"`',
+  //   example: '2025-01-02',
+  // })
+  // @IsDateString()
+  // @IsOptional()
+  // start_date: Date;
+
+  // @ApiPropertyOptional({
+  //   description:
+  //     'Events coming AFTER a specific date | format `YYYY-MM-DD` | Filter `event.start_date >= "{date}T00:00:00.000"`',
+  //   example: '2025-01-02',
+  // })
+  // @IsDateString()
+  // @IsOptional()
+  // date_from: Date;
+
+  // @ApiPropertyOptional({
+  //   description:
+  //     'Events coming BEFORE a specific date | format `YYYY-MM-DD` | Filter `event.start_date <= "{date}T23:59:59.999"`',
+  //   example: '2025-01-05',
+  // })
+  // @IsDateString()
+  // @IsOptional()
+  // date_to?: Date;
 
   @ApiPropertyOptional({
-    description:
-      'Events coming AFTER a specific date | format `YYYY-MM-DD` | Filter `event.start_date >= "{date}T00:00:00.000"`',
-    example: '2025-01-02',
+    description: 'Event start time',
+    example: '09:00 AM',
   })
-  @IsDateString()
+  @IsString()
   @IsOptional()
-  date_from: Date;
+  start_time?: string;
 
   @ApiPropertyOptional({
-    description:
-      'Events coming BEFORE a specific date | format `YYYY-MM-DD` | Filter `event.start_date <= "{date}T23:59:59.999"`',
-    example: '2025-01-05',
+    description: 'Event end time',
+    example: '09:00 AM',
   })
-  @IsDateString()
+  @IsString()
   @IsOptional()
-  date_to?: Date;
+  end_time?: string;
 }

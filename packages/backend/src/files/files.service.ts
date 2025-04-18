@@ -63,6 +63,10 @@ export class FilesService {
         allowedMimeTypes: commonImageTypes,
         maxSizeInBytes: 2 * 1024 * 1024, // 2MB
       },
+      LOGO: {
+        allowedMimeTypes: commonImageTypes,
+        maxSizeInBytes: 2 * 1024 * 1024, // 2MB
+      },
     };
   }
 
@@ -82,6 +86,8 @@ export class FilesService {
         return this.configService.get<string>('UPLOAD_DIR_RESUME');
       case 'POST':
         return this.configService.get<string>('UPLOAD_DIR_POST');
+      case 'LOGO':
+        return this.configService.get<string>('UPLOAD_DIR_LOGO');
       default:
         throw new BadRequestException(
           'You must specify a valid use for this file.',

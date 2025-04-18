@@ -1,0 +1,80 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - vps # Trigger only on pushes to the VPS branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # This runner will primarily be used to SSH
+
+    steps:
+      - name: Checkout code (Optional but Recommended)
+        uses: actions/checkout@v3
+
+      - name: SSH to VPS and Deploy
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_PRIVATE_KEY }}
+          envs: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            EMAIL_BODY=${{ secrets.EMAIL_BODY }}
+            EMAIL_CERTIFICATE_VALIDATION=${{ secrets.EMAIL_CERTIFICATE_VALIDATION }}
+            EMAIL_HOST=${{ secrets.EMAIL_HOST }}
+            EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+            EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+            EMAIL_SUBJECT=${{ secrets.EMAIL_SUBJECT }}
+            EMAIL_USER=${{ secrets.EMAIL_USER }}
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
+            PORT=${{ secrets.PORT }}
+            PRISMA_LOGS=${{ secrets.PRISMA_LOGS }}
+            UPLOAD_DIR_EVENTS=${{ secrets.UPLOAD_DIR_EVENTS }}
+            UPLOAD_DIR_NEWS=${{ secrets.UPLOAD_DIR_NEWS }}
+            UPLOAD_DIR_POST=${{ secrets.UPLOAD_DIR_POST }}
+            UPLOAD_DIR_PROFILE_PICTURE=${{ secrets.UPLOAD_DIR_PROFILE_PICTURE }}
+            UPLOAD_DIR_RESOURCES=${{ secrets.UPLOAD_DIR_RESOURCES }}
+            UPLOAD_DIR_RESUME=${{ secrets.UPLOAD_DIR_RESUME }}
+            UPLOAD_DIR_ROOT=${{ secrets.UPLOAD_DIR_ROOT }}
+            VPS_DEPLOY_PATH=${{ secrets.VPS_DEPLOY_PATH }}
+          script: |
+            echo "Starting deployment process on VPS..."
+            cd /var/www/projects/communet.ca/Community-Connect-App
+
+            echo "Pulling the latest changes..."
+            git pull origin vps
+
+            echo "Installing frontend dependencies and building..."
+            cd packages/frontend
+            npm install
+            npm run build
+            pm2 stop communet-frontend || true
+            pm2 delete communet-frontend || true
+            pm2 start npm --name "communet-frontend" -- run start
+
+            echo "Installing backend dependencies, generating Prisma client, running migrations, and building..."
+            cd ../backend
+            npm install
+            npx prisma generate
+            npx prisma migrate deploy --schema=./prisma/schema.prisma # Specify schema path if needed
+            npm run build
+            pm2 stop communet-backend || true
+            pm2 delete communet-backend || true
+            pm2 start npm --name "communet-backend" -- run start:prod
+
+            echo "Deployment complete!"

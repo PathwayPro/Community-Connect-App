@@ -1,5 +1,5 @@
 import { type NetworkingProfile } from '@/features/networking/components/networking-card';
-import { COUNTRIES } from '@/shared/lib/constants/networking';
+import { COUNTRIES } from '@/features/networking/lib/mock-data.ts/constants/networking';
 
 export const skillsList = [
   'JavaScript',

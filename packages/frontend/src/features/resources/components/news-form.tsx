@@ -58,7 +58,7 @@ export const NewsForm = ({ newsId }: NewsFormProps) => {
               Create{' '}
               {mode === 'news'
                 ? 'News'
-                : mode === 'resources'
+                : mode === 'contentLibrary'
                   ? 'Resource'
                   : 'Opportunity'}
             </h2>
@@ -66,7 +66,7 @@ export const NewsForm = ({ newsId }: NewsFormProps) => {
           <h4>
             {mode === 'news'
               ? 'News Information'
-              : mode === 'resources'
+              : mode === 'contentLibrary'
                 ? 'Resource Information'
                 : 'Opportunity Information'}
           </h4>
@@ -85,7 +85,7 @@ export const NewsForm = ({ newsId }: NewsFormProps) => {
                 label={
                   mode === 'news'
                     ? 'Publish News'
-                    : mode === 'resources'
+                    : mode === 'contentLibrary'
                       ? 'Upload Resource'
                       : 'Post Opportunity'
                 }

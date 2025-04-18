@@ -3,17 +3,26 @@ import { FormInput, FormSelect } from '@/shared/components/form';
 import { FormTextarea } from '@/shared/components/form';
 import { FormDatePicker } from '@/shared/components/form/form-date-picker';
 import { FileUpload } from '@/shared/components/upload/file-upload';
-import { ageRangeData, provinceData } from '@/shared/lib/constants/profile';
+import {
+  ageRangeData,
+  provinceData
+} from '@/features/user-profile/lib/constants/profile';
 import { toast } from 'sonner';
 import React from 'react';
 import { UserProfileFormData } from '../../lib/validations';
 
 export const PersonalInfoForm = () => {
-  const { setValue, watch } = useFormContext<UserProfileFormData>();
+  const {
+    setValue,
+    watch,
+    formState: { errors }
+  } = useFormContext<UserProfileFormData>();
 
   // Watch values for debugging
   const firstName = watch('firstName');
   const lastName = watch('lastName');
+
+  console.log('errors', errors);
 
   React.useEffect(() => {
     console.log('Current form values:', {
@@ -94,7 +103,7 @@ export const PersonalInfoForm = () => {
         <div className="flex-1">
           <FormDatePicker
             name="dob"
-            label="Date of Birth"
+            label="Date of Birth (Select birth month and day)"
             customError="Date of birth is required"
             required
           />

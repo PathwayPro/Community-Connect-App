@@ -1,11 +1,24 @@
 import { FileUpload } from '@/shared/components/upload/file-upload';
-import { skillsOptions, workStatusData } from '@/shared/lib/constants/profile';
+import {
+  skillsOptions,
+  workStatusData
+} from '@/features/user-profile/lib/constants/profile';
 import { FormMultiSelect } from '@/shared/components/form/form-multiselect';
 import { FormInput } from '@/shared/components/form/form-input';
 import { FormSelect } from '@/shared/components/form/form-select';
 import { Switch } from '@/shared/components/ui/switch';
+import { useFormContext } from 'react-hook-form';
+import { UserProfileFormData } from '../../lib/validations';
 
 export const UploadResume = () => {
+  const {
+    setValue,
+    formState: { errors },
+    getValues
+  } = useFormContext<UserProfileFormData>();
+
+  console.log(errors);
+  console.log(getValues());
   return (
     <div>
       <FileUpload
@@ -67,7 +80,13 @@ export const UploadResume = () => {
         </div>
         <div className="my-2 flex w-full items-center justify-end gap-4">
           <p>Actively Searching</p>
-          <Switch name="activelySearching" />
+          <Switch
+            name="activelySearching"
+            onCheckedChange={(checked) => {
+              setValue('activelySearching', checked);
+            }}
+            checked={getValues('activelySearching')}
+          />
         </div>
         <FormMultiSelect
           name="skills"

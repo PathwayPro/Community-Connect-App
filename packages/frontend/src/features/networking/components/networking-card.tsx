@@ -32,8 +32,8 @@ export const NetworkingCard = ({
   onViewProfile
 }: NetworkingCardProps) => {
   const truncateBio = (bio: string, maxLength: number = 50) => {
-    if (bio.length <= maxLength) return bio;
-    return `${bio.slice(0, maxLength)}...`;
+    if (bio?.length <= maxLength) return bio;
+    return `${bio?.slice(0, maxLength)}...`;
   };
 
   return (

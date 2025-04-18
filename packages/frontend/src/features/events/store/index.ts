@@ -1,25 +1,21 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  location: string;
-  ticket_type: string;
-  type: string;
-  link: string;
-  // Add other event properties as needed
-}
+import { CreateEventDto, UpdateEventDto } from '../dto';
+import { eventApi } from '../api/event-api';
+import { Event, EventCategory } from '../types';
 
 interface EventState {
   events: Event[];
+  eventCategories: EventCategory[];
+  event: Event | null;
   isLoading: boolean;
   error: string | null;
-  createEvent: (event: Omit<Event, 'id'>) => Promise<void>;
+  createEvent: (event: CreateEventDto) => Promise<void>;
   fetchEvents: () => Promise<void>;
-  editEvent: (id: string, updatedEvent: Partial<Event>) => Promise<void>;
+  editEvent: (id: number, updatedEvent: UpdateEventDto) => Promise<void>;
+  fetchEvent: (id: number) => Promise<void>;
+  fetchEventCategories: () => Promise<void>;
+  deleteEvent: (id: number) => Promise<void>;
 }
 
 export const useEventStore = create<EventState>()(
@@ -27,25 +23,19 @@ export const useEventStore = create<EventState>()(
     events: [],
     isLoading: false,
     error: null,
-
+    event: null,
     createEvent: async (event) => {
       try {
         set({ isLoading: true, error: null });
-        const response = await fetch('/api/events', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(event)
-        });
+        const response = await eventApi.createEvent(event);
 
-        if (!response.ok) {
+        if (!response.success) {
           throw new Error('Failed to create event');
         }
 
-        const newEvent = await response.json();
+        const newEvent = response.data;
         set((state) => ({
-          events: [...state.events, newEvent],
+          events: [...state.events, newEvent as unknown as Event],
           isLoading: false
         }));
       } catch (error) {
@@ -56,14 +46,49 @@ export const useEventStore = create<EventState>()(
     fetchEvents: async () => {
       try {
         set({ isLoading: true, error: null });
-        const response = await fetch('/api/events');
+        const response = await eventApi.getEvents();
 
-        if (!response.ok) {
+        if (!response.success) {
           throw new Error('Failed to fetch events');
         }
 
-        const events = await response.json();
-        set({ events, isLoading: false });
+        const events = response.data;
+        set({ events: events as unknown as Event[], isLoading: false });
+      } catch (error) {
+        set({ error: (error as Error).message, isLoading: false });
+      }
+    },
+
+    fetchEvent: async (id) => {
+      try {
+        set({ isLoading: true, error: null });
+        const response = await eventApi.getEventById(id);
+
+        if (!response.success) {
+          throw new Error('Failed to fetch event');
+        }
+
+        const event = response.data;
+        set({ event: event as unknown as Event, isLoading: false });
+      } catch (error) {
+        set({ error: (error as Error).message, isLoading: false });
+      }
+    },
+
+    fetchEventCategories: async () => {
+      try {
+        set({ isLoading: true, error: null });
+        const response = await eventApi.getEventCategories();
+
+        if (!response.success) {
+          throw new Error('Failed to fetch event categories');
+        }
+
+        const eventCategories = response.data;
+        set({
+          eventCategories: eventCategories as unknown as EventCategory[],
+          isLoading: false
+        });
       } catch (error) {
         set({ error: (error as Error).message, isLoading: false });
       }
@@ -72,23 +97,35 @@ export const useEventStore = create<EventState>()(
     editEvent: async (id, updatedEvent) => {
       try {
         set({ isLoading: true, error: null });
-        const response = await fetch(`/api/events/${id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(updatedEvent)
-        });
+        const response = await eventApi.updateEvent(id, updatedEvent);
 
-        if (!response.ok) {
+        if (!response.success) {
           throw new Error('Failed to update event');
         }
 
-        const updated = await response.json();
+        const updated = response.data;
         set((state) => ({
           events: state.events.map((event) =>
             event.id === id ? { ...event, ...updated } : event
           ),
+          isLoading: false
+        }));
+      } catch (error) {
+        set({ error: (error as Error).message, isLoading: false });
+      }
+    },
+
+    deleteEvent: async (id) => {
+      try {
+        set({ isLoading: true, error: null });
+        const response = await eventApi.deleteEvent(id);
+
+        if (!response.success) {
+          throw new Error('Failed to delete event');
+        }
+
+        set((state) => ({
+          events: state.events.filter((event) => event.id !== id),
           isLoading: false
         }));
       } catch (error) {

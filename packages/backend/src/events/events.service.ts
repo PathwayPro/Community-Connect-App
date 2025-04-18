@@ -66,23 +66,23 @@ export class EventsService {
 
     // IF IS SET `start_date` filters only events for that specific date.
     // IF NOT `start_date` can filter for a date range with `date_from` and `date_to`
-    if (filters?.start_date) {
-      const date_from = new Date(filters.start_date);
-      const date_to = new Date(date_from);
-      date_to.setUTCHours(23, 59, 59, 999);
-      formattedFilters.start_date = { gte: date_from, lte: date_to };
-    } else {
-      if (filters?.date_from && filters?.date_to) {
-        formattedFilters.start_date = {
-          gte: filters.date_from,
-          lte: filters.date_to,
-        };
-      } else if (filters?.date_from) {
-        formattedFilters.start_date = { gte: filters.date_from };
-      } else if (filters?.date_to) {
-        formattedFilters.start_date = { lte: filters.date_to };
-      }
-    }
+    // if (filters?.start_date) {
+    //   const date_from = new Date(filters.start_date);
+    //   const date_to = new Date(date_from);
+    //   date_to.setUTCHours(23, 59, 59, 999);
+    //   formattedFilters.start_date = { gte: date_from, lte: date_to };
+    // } else {
+    //   if (filters?.date_from && filters?.date_to) {
+    //     formattedFilters.start_date = {
+    //       gte: filters.date_from,
+    //       lte: filters.date_to,
+    //     };
+    //   } else if (filters?.date_from) {
+    //     formattedFilters.start_date = { gte: filters.date_from };
+    //   } else if (filters?.date_to) {
+    //     formattedFilters.start_date = { lte: filters.date_to };
+    //   }
+    // }
 
     return formattedFilters;
   }
@@ -182,9 +182,34 @@ export class EventsService {
         where: appliedFilters,
         include: {
           category: true,
+          managers: true,
+        },
+        orderBy: {
+          created_at: 'desc',
         },
       });
-      return events;
+
+      // add manager first name and last name and bio to the event
+      const eventsWithManagers = await Promise.all(
+        events.map(async (event) => {
+          const manager_id = event.managers[0].user_id;
+
+          const user = await this.prisma.users.findUnique({
+            where: { id: manager_id },
+          });
+
+          return {
+            ...event,
+            host_name: `${user.first_name} ${user.last_name}`,
+            host_bio: user.bio,
+            host_image: user.picture_upload_link,
+          };
+        }),
+      );
+
+      console.log('eventsWithManagers:', eventsWithManagers);
+
+      return eventsWithManagers;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

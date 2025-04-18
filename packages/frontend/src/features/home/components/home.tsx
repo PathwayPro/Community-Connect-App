@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { HomeInfobar } from './infobar/home-infobar';
 import { HomeSidebar } from './sidebar/home-sidebar';
-import { mockThreads, sortOptions, Thread } from '../lib/mock-data';
+import { mockThreads, sortOptions, Thread } from '../lib/mock-data'; // SACAR MOCK THREADS SOALMENTE
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { ThreadSearchbar, SortComponent } from './common';
 import {
@@ -12,6 +12,22 @@ import {
   CommentsThreadCard,
   TagComponent
 } from './main-card';
+import { useBlogStore } from '../store';
+import { ThreadResponse, PostCommentResponse } from '../types';
+
+const transformThreadResponseToThread = (response: ThreadResponse): Thread => ({
+  id: response.id,
+  authorName: response.user.first_name + ' ' + response.user.last_name,
+  authorUsername: response.user.first_name,
+  timeAgo: response.created_at,
+  content: response.content,
+  avatarUrl: '',
+  imageUrl: '',
+  likes: 14,
+  comments: 21,
+  tags: [],
+  isSaved: false
+});
 
 export const Home = () => {
   const [sort, setSort] = useState<string>('newest');
@@ -22,6 +38,19 @@ export const Home = () => {
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
   const [showCommentSection, setShowCommentSection] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  const {
+    threads: rawThreads,
+    fetchThreads,
+    isLoading,
+    error
+  } = useBlogStore(); // Get threads, loading, and error from store
+  const threads: Thread[] = rawThreads.map(transformThreadResponseToThread); // Transform the API response
+
+  useEffect(() => {
+    console.log('POR LO MENOS LLEGA AL USE EFFECT!');
+    fetchThreads();
+  }, [activeTab, sort, selectedTags, fetchThreads]); // Include fetchThreads in the dependency array
 
   const handleThreadSubmit = async (content: string, attachments: File[]) => {
     try {
@@ -45,18 +74,33 @@ export const Home = () => {
     setViewThreads(true);
   };
 
-  const filteredThreads = mockThreads.filter((thread) => {
+  const filteredThreads = threads.filter((thread) => {
     if (activeTab === 'Tags') {
-      // Filter by selected tags
       if (selectedTags.length === 0) return true;
-      return thread?.tags?.some((tag: string) => selectedTags.includes(tag));
+      return thread?.tags?.some((tag: string) => selectedTags.includes(tag)); // Adjust if your API returns tags differently
     } else if (activeTab === 'Saved') {
-      // Filter saved threads
-      return thread.isSaved;
+      return thread.isSaved; // Adjust if your API returns saved status
     }
-    // Show all threads for other tabs
     return true;
   });
+
+  // console.log('| - - - - - - - > FILTERED THREADS 2: ', filteredThreads2)
+
+  // ORIGINAL CJ
+  // const filteredThreads = mockThreads.filter((thread) => {
+  //   if (activeTab === 'Tags') {
+  //     // Filter by selected tags
+  //     if (selectedTags.length === 0) return true;
+  //     return thread?.tags?.some((tag: string) => selectedTags.includes(tag));
+  //   } else if (activeTab === 'Saved') {
+  //     // Filter saved threads
+  //     return thread.isSaved;
+  //   }
+  //   // Show all threads for other tabs
+  //   return true;
+  // });
+
+  console.log('| - - - - - - - > FILTERED THREADS 1: ', filteredThreads);
 
   return (
     <div className="container-wide px-0" onClick={handleOutsideClick}>

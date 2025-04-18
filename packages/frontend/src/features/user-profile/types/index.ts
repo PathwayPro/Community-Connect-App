@@ -11,7 +11,6 @@ export interface UserProfile {
   email?: string;
   dob?: string;
   ageRange?: string;
-  showDob?: boolean;
   arrivalInCanada?: string;
   goalId?: string;
   role?: RoleEnum;
@@ -33,10 +32,11 @@ export interface UserProfile {
   workStatus?: string;
   companyName?: string;
   skills?: string[];
+  activelySearching?: boolean;
 }
 
-export interface UserResponse {
+export interface UserResponse<T> {
   success: boolean;
   message?: string;
-  data: UserProfile;
+  data: T;
 }

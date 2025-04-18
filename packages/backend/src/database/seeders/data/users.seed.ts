@@ -25,6 +25,12 @@ const GeneralUsersData = {
   portfolio_link: '',
   other_links: '',
   additional_links: [],
+  skills: [],
+  work_status: '',
+  company_name: '',
+  country_of_origin: '',
+  actively_searching: false,
+  age_range: '',
 };
 
 export const UsersData: users[] = [
@@ -87,11 +93,39 @@ export const UsersData: users[] = [
 ];
 
 export const MentorsData: mentors[] = [
-  /*
-    {id: 1,max_mentees: 20,availability: "Mondays around 8PM MST",has_experience: true,experience_details: "I have experience...",status: "PENDING",user_id: 7},
-    {id: 2,max_mentees: 50,availability: "Tuesday to Saturday, anytime",has_experience: true,experience_details: "Some experience details...",status: "APPROVED",user_id: 8},
-    {id: 5,max_mentees: 50,availability: "EDITED: Monday to Friday after 3PM MST",has_experience: true,experience_details: "Some details about a experience",status: "APPROVED",user_id: 9},
-    */
+  {
+    id: 1,
+    max_mentees: 20,
+    availability: 'Mondays around 8PM MST',
+    experience_years: 5,
+    experience_details: 'I have experience...',
+    status: 'PENDING',
+    user_id: 7,
+    profession: '',
+    resume: '',
+  },
+  {
+    id: 2,
+    max_mentees: 50,
+    availability: 'Tuesday to Saturday, anytime',
+    experience_years: 5,
+    experience_details: 'Some experience details...',
+    status: 'APPROVED',
+    user_id: 8,
+    profession: '',
+    resume: '',
+  },
+  {
+    id: 5,
+    max_mentees: 50,
+    availability: 'EDITED: Monday to Friday after 3PM MST',
+    experience_years: 5,
+    experience_details: 'Some details about a experience',
+    status: 'APPROVED',
+    user_id: 9,
+    profession: '',
+    resume: '',
+  },
 ];
 
 export const UsersInterestsData: UsersInterests[] = [

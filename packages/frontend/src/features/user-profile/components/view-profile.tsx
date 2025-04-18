@@ -8,8 +8,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '../store';
 import { useFetchProfile } from '../hooks/use-fetch-profile';
-import { arrivalInCanadaOptions } from '@/shared/lib/constants/profile';
 import { formatDate } from 'date-fns';
+import {
+  getArrivalInCanadaLabel,
+  getSkillLabel
+} from '@/features/user-profile/lib/utils';
 
 interface StatItemProps {
   label: string;
@@ -44,14 +47,16 @@ const InfoGroup = ({ title, items }: InfoGroupProps) => (
                   ? item.value
                   : `https://${item.value}`
               }
-              className="paragraph-lg hover:text-blue-500 hover:underline"
+              className="paragraph-lg text-blue-500 hover:underline"
               target="_blank"
               rel="noopener noreferrer"
             >
               {item.value}
             </Link>
           ) : (
-            <span className="paragraph-lg">{item.value}</span>
+            <div className="flex w-[50%] justify-end">
+              <span className="paragraph-lg text-right">{item.value}</span>
+            </div>
           )}
         </div>
       ))}
@@ -63,6 +68,8 @@ export const ViewProfile = () => {
   const router = useRouter();
   const { user } = useUserStore();
   const { isLoading, error } = useFetchProfile();
+
+  console.log('user data', user);
 
   // view profile data builder
   const profileData = {
@@ -87,10 +94,9 @@ export const ViewProfile = () => {
       },
       {
         label: 'Years in Canada',
-        value:
-          arrivalInCanadaOptions.find(
-            (option) => option.value === user?.arrivalInCanada
-          )?.label || 'Not specified'
+        value: user?.arrivalInCanada
+          ? getArrivalInCanadaLabel(user.arrivalInCanada)
+          : 'Not specified'
       },
       {
         label: 'Country of Origin',
@@ -107,7 +113,12 @@ export const ViewProfile = () => {
       { label: 'Profession', value: user?.profession || 'Not specified' },
       { label: 'Company', value: user?.companyName || 'Not specified' },
       { label: 'Experience', value: `${user?.experience || 0} years` },
-      { label: 'Skills', value: user?.skills?.join(', ') || 'Not specified' }
+      {
+        label: 'Skills',
+        value: user?.skills
+          ? user.skills.map((skill) => getSkillLabel(skill)).join(', ')
+          : 'Not specified'
+      }
     ],
     links: [
       ...(user?.linkedinLink
@@ -135,7 +146,7 @@ export const ViewProfile = () => {
 
   if (isLoading) {
     return (
-      <Card className="flex w-[840px] flex-col rounded-[24px]">
+      <Card className="flex min-w-[840px] flex-col rounded-[24px]">
         <CardContent className="flex items-center justify-center p-8">
           Loading profile...
         </CardContent>
@@ -154,7 +165,7 @@ export const ViewProfile = () => {
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="container-default mx-auto min-w-[1024px] max-w-4xl">
       <Card className="space-y-8 p-6">
         {/* Edit Profile Button */}
         <div className="flex justify-end">

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import {
   Card,
@@ -10,12 +10,19 @@ import {
 } from '@/shared/components/ui/card';
 import { BaseForm } from './common/base-form';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
-import { eventFormSchema, EventFormValues } from '../lib/validation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import {
+  eventFormSchema,
+  EventFormValues,
+  EventsTypes
+} from '../lib/validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { useEventStore } from '../store';
 import { TimeLocationForm } from './common/time-location-form';
+import { EventType } from '../types';
+import { UpdateEventDto } from '../dto';
+import { year } from '../lib/constants';
 
 function getStepContent(step: number) {
   switch (step) {
@@ -28,28 +35,64 @@ function getStepContent(step: number) {
   }
 }
 
-const defaultEventValues = (): EventFormValues => ({
-  title: '',
-  subtitle: '',
-  description: '',
-  category_id: 0,
-  location: '',
-  link: '',
-  image: '',
-  price: 0,
-  type: 'PUBLIC',
-  ticket_type: 'FREE',
-  requires_confirmation: false,
-  accept_subscriptions: true,
-  date: new Date()
-});
-
 export const EventForm = () => {
   const router = useRouter();
-  const { createEvent, fetchEvents } = useEventStore();
+  const { createEvent, editEvent } = useEventStore();
   const { showAlert } = useAlertDialog();
 
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const eventData: UpdateEventDto = searchParams.get('data')
+    ? JSON.parse(decodeURIComponent(searchParams.get('data')!))
+    : null;
+
+  // Get the state from router if it exists
+  const isEdit = pathname.startsWith('/events/edit');
+
+  const eventButtonText = isEdit ? 'Update Event' : 'Publish Event';
+
+  console.log('isEdit', eventData);
+
   const [activeStep, setActiveStep] = React.useState(1);
+
+  const defaultEventValues = (): EventFormValues => {
+    if (isEdit && eventData) {
+      return {
+        title: eventData.title || '',
+        subtitle: eventData.subtitle || '',
+        description: eventData.description || '',
+        category_id: eventData.category_id?.toString() || '',
+        location: eventData.location || '',
+        link: eventData.link || '',
+        image: eventData.image || '',
+        is_free: eventData.is_free || true,
+        type: eventData.type || EventsTypes.PUBLIC,
+        requires_confirmation: eventData.requires_confirmation || false,
+        accept_subscriptions: eventData.accept_subscriptions || true,
+        start_date: eventData.start_date || new Date().toISOString(),
+        start_time: eventData.start_time || '00:00 AM',
+        end_time: eventData.end_time || '00:00 AM'
+      };
+    }
+
+    return {
+      title: '',
+      subtitle: '',
+      description: '',
+      category_id: '',
+      location: '',
+      link: '',
+      image: '',
+      is_free: true,
+      type: EventsTypes.PUBLIC,
+      requires_confirmation: false,
+      accept_subscriptions: true,
+      start_date: '',
+      start_time: '00:00 AM',
+      end_time: '00:00 AM'
+    };
+  };
 
   const methods = useForm<EventFormValues>({
     mode: 'onChange',
@@ -57,12 +100,31 @@ export const EventForm = () => {
     defaultValues: defaultEventValues()
   });
 
-  React.useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+  const { trigger } = methods;
 
-  const handleNext = () => {
-    setActiveStep(activeStep + 1);
+  // Function to check if current step is valid
+  const isStepValid = useCallback(async () => {
+    const fieldsToValidate =
+      activeStep === 1
+        ? (['title', 'category_id', 'description'] as const)
+        : (['start_date', 'type'] as const);
+
+    const result = await trigger(fieldsToValidate);
+    return result;
+  }, [activeStep, trigger]);
+
+  const [isCurrentStepValid, setIsCurrentStepValid] = React.useState(false);
+
+  // Update step validity whenever fields change
+  useEffect(() => {
+    isStepValid().then((valid) => setIsCurrentStepValid(valid));
+  }, [methods.formState.isDirty, methods.formState.errors, isStepValid]);
+
+  const handleNext = async () => {
+    const isValid = await isStepValid();
+    if (isValid) {
+      setActiveStep(activeStep + 1);
+    }
   };
 
   const handlePrevious = () => {
@@ -70,19 +132,32 @@ export const EventForm = () => {
   };
 
   const onSubmit = async (data: EventFormValues) => {
+    console.log('data', data.start_date);
     try {
-      await createEvent({
+      const formattedData = {
         ...data,
-        date: data.date.toISOString(),
-        location: data.location || '',
-        link: data.link || ''
-      });
+        category_id: Number(data.category_id),
+        type: data.type as EventType,
+        start_date: new Date(`${data.start_date}, ${year}`).toISOString()
+      };
 
-      showAlert({
-        type: 'success',
-        title: 'Event Created Successfully!',
-        description: 'Your event has been successfully created.'
-      });
+      console.log('formattedData', formattedData);
+
+      if (isEdit && eventData) {
+        await editEvent(eventData.id, { ...formattedData, id: eventData.id });
+        showAlert({
+          type: 'success',
+          title: 'Event Updated Successfully!',
+          description: 'Your event has been successfully updated.'
+        });
+      } else {
+        await createEvent(formattedData);
+        showAlert({
+          type: 'success',
+          title: 'Event Created Successfully!',
+          description: 'Your event has been successfully created.'
+        });
+      }
 
       setTimeout(() => {
         router.push('/events');
@@ -91,7 +166,7 @@ export const EventForm = () => {
       console.error('error', error);
       showAlert({
         type: 'error',
-        title: 'Event Creation Failed',
+        title: isEdit ? 'Event Update Failed' : 'Event Creation Failed',
         description: 'Please check your input and try again.'
       });
     }
@@ -108,7 +183,9 @@ export const EventForm = () => {
               className="absolute left-0 h-10 w-10"
               onClick={() => router.back()}
             />
-            <h2 className="font-semibold">Create New Event</h2>
+            <h2 className="font-semibold">
+              {isEdit ? 'Edit Event' : 'Create New Event'}
+            </h2>
           </div>
           <h4>Event Information</h4>
         </CardTitle>
@@ -121,6 +198,7 @@ export const EventForm = () => {
               {activeStep === 2 && (
                 <IconButton
                   className="w-full"
+                  type="button"
                   disabled={methods.formState.isSubmitting}
                   rightIcon="arrowLeft"
                   label="Previous"
@@ -130,11 +208,13 @@ export const EventForm = () => {
               )}
               <IconButton
                 className="w-full"
-                type={activeStep === 2 ? 'submit' : 'button'}
-                disabled={methods.formState.isSubmitting}
+                type="button"
+                disabled={!isCurrentStepValid}
                 rightIcon="arrowRight"
-                label={activeStep === 1 ? 'Next' : 'Publish Event'}
-                onClick={activeStep === 1 ? handleNext : undefined}
+                label={activeStep === 1 ? 'Next' : eventButtonText}
+                onClick={
+                  activeStep === 1 ? handleNext : methods.handleSubmit(onSubmit)
+                }
               />
             </div>
           </form>

@@ -91,6 +91,20 @@ export class CreateEventDto {
   end_date?: Date; // Format ISO 8601
 
   @ApiProperty({
+    description: 'Event start time',
+    example: '09:00 AM',
+  })
+  @IsString()
+  start_time: string;
+
+  @ApiProperty({
+    description: 'Event end time',
+    example: '09:00 AM',
+  })
+  @IsString()
+  end_time: string;
+
+  @ApiProperty({
     description: 'Uploaded file. Will use validation for events (OPTIONAL)',
   })
   @IsOptional()
@@ -124,13 +138,5 @@ export class CreateEventDto {
       'DEFAULT: TRUE. To allow or prevent users to send subscriptions',
   })
   @IsBoolean()
-  @IsOptional()
-  @Type(() => Boolean)
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      return value.toLowerCase() === 'true';
-    }
-    return value;
-  })
-  accept_subscriptions?: boolean = true;
+  accept_subscriptions: boolean = true;
 }

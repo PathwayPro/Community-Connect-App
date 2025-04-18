@@ -1,8 +1,9 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateMentorDto } from './create-mentor.dto';
-import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { mentors_status } from '@prisma/client';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class UpdateMentorDto extends PartialType(CreateMentorDto) {
   @ApiPropertyOptional({ description: 'Profession, related to mentoring' })
@@ -44,13 +45,31 @@ export class UpdateMentorDto extends PartialType(CreateMentorDto) {
   @IsOptional()
   experience_details?: string;
 
+  // @ApiPropertyOptional({
+  //   description: 'Array of interests IDs to match with mentees (String)',
+  //   example: '[1, 2, 3]',
+  // })
+  // @IsString()
+  // @IsOptional()
+  // interests?: string;
+
   @ApiPropertyOptional({
-    description: 'Array of interests IDs to match with mentees (String)',
-    example: '[1, 2, 3]',
+    description: 'Array of interests IDs to match with mentees (Number[])',
+    example: [1, 2, 3],
   })
-  @IsString()
   @IsOptional()
-  interests?: string;
+  @IsArray()
+  @IsInt({ each: true })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return JSON.parse(value).map((item: any) => parseInt(item, 10));
+    } else if (Array.isArray(value)) {
+      return value.map((item: any) => parseInt(item, 10));
+    } else {
+      return [];
+    }
+  })
+  interests?: number[];
 }
 
 export class UpdateMentorStatusDto extends PartialType(CreateMentorDto) {

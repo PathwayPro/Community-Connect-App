@@ -12,12 +12,14 @@ interface BaseFormProps {
   isMentor: boolean;
   interests: InterestsResponse[];
   experienceDetails: string;
+  handleFileUploadParent?: (files: File[]) => Promise<void>;
 }
 
 export const BaseForm = ({
   isMentor,
   interests,
-  experienceDetails
+  experienceDetails,
+  handleFileUploadParent
 }: BaseFormProps) => {
   const { setValue, watch } = useFormContext<MentorSchema>();
 
@@ -35,29 +37,32 @@ export const BaseForm = ({
     [interests]
   );
 
-  const handleFileUpload = async (files: File[]) => {
-    try {
-      const formData = new FormData();
-      files.forEach((file) => formData.append('files', file));
+  const handleFileUpload =
+    handleFileUploadParent !== null
+      ? handleFileUploadParent
+      : async (files: File[]) => {
+          try {
+            const formData = new FormData();
+            files.forEach((file) => formData.append('files', file));
 
-      console.log('formData', formData);
+            console.log('formData', formData);
 
-      toast.success('Resume uploaded successfully');
+            toast.success('Resume uploaded successfully');
 
-      //   const response = await fetch('/api/upload', {
-      //     method: 'POST',
-      //     body: formData
-      //   });
+            //   const response = await fetch('/api/upload', {
+            //     method: 'POST',
+            //     body: formData
+            //   });
 
-      //   if (!response.ok) throw new Error('Upload failed');
+            //   if (!response.ok) throw new Error('Upload failed');
 
-      //   const { urls } = await response.json();
-      //   setValue('resume_upload_link', urls[0], { shouldValidate: true });
-    } catch (error) {
-      console.error('Upload failed:', error);
-      toast.error('Failed to upload profile picture');
-    }
-  };
+            //   const { urls } = await response.json();
+            //   setValue('resume_upload_link', urls[0], { shouldValidate: true });
+          } catch (error) {
+            console.error('Upload failed:', error);
+            toast.error('Failed to upload profile picture');
+          }
+        };
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -98,7 +103,6 @@ export const BaseForm = ({
               placeholder="Enter your profession"
               customError="Profession is required"
               required
-              disabled
             />
             <FormInput
               name="experience"
