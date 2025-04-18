@@ -59,6 +59,40 @@ jobs:
             echo "Pulling the latest changes..."
             git pull origin vps
 
+            echo "Setting environment variables..."
+            export NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            export DATABASE_URL=${{ secrets.DATABASE_URL }}
+            export DB_HOST=${{ secrets.DB_HOST }}
+            export DB_NAME=${{ secrets.DB_NAME }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            export DB_PORT=${{ secrets.DB_PORT }}
+            export DB_USERNAME=${{ secrets.DB_USERNAME }}
+            export EMAIL_BODY=${{ secrets.EMAIL_BODY }}
+            export EMAIL_CERTIFICATE_VALIDATION=${{ secrets.EMAIL_CERTIFICATE_VALIDATION }}
+            export EMAIL_HOST=${{ secrets.EMAIL_HOST }}
+            export EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+            export EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+            export EMAIL_SUBJECT=${{ secrets.EMAIL_SUBJECT }}
+            export EMAIL_USER=${{ secrets.EMAIL_USER }}
+            export FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            export GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
+            export GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            export GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            export JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION }}
+            export JWT_SECRET=${{ secrets.JWT_SECRET }}
+            export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            export MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
+            export PORT=${{ secrets.PORT }}
+            export PRISMA_LOGS=${{ secrets.PRISMA_LOGS }}
+            export UPLOAD_DIR_EVENTS=${{ secrets.UPLOAD_DIR_EVENTS }}
+            export UPLOAD_DIR_NEWS=${{ secrets.UPLOAD_DIR_NEWS }}
+            export UPLOAD_DIR_POST=${{ secrets.UPLOAD_DIR_POST }}
+            export UPLOAD_DIR_PROFILE_PICTURE=${{ secrets.UPLOAD_DIR_PROFILE_PICTURE }}
+            export UPLOAD_DIR_RESOURCES=${{ secrets.UPLOAD_DIR_RESOURCES }}
+            export UPLOAD_DIR_RESUME=${{ secrets.UPLOAD_DIR_RESUME }}
+            export UPLOAD_DIR_ROOT=${{ secrets.UPLOAD_DIR_ROOT }}
+            export VPS_DEPLOY_PATH=${{ secrets.VPS_DEPLOY_PATH }}
+
             echo "Installing frontend dependencies and building..."
             cd packages/frontend
             npm install
