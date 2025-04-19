@@ -430,24 +430,69 @@ export class NetworkingService {
 
   async chat(userId: number, userChat: number) {
     try {
-      // VALIDATE LOGGED USER AND CHAT USER ARE DIFFERENET
       if (userId === userChat) {
         throw new BadRequestException('There is no conversation with yourself');
       }
 
-      const messages = await this.prisma.messages.findMany({
-        where: {
-          OR: [
-            { AND: [{ sender_id: userId }, { recipient_id: userChat }] },
-            { AND: [{ sender_id: userChat }, { recipient_id: userId }] },
-          ],
-        },
-        orderBy: {
-          created_at: 'desc',
-        },
-      });
+      const chatHistory = await this.prisma.$queryRaw`
+        SELECT 
+          'MESSAGE' as type,
+          m.id,
+          m.sender_id,
+          m.recipient_id,
+          m.message,
+          m.created_at,
+          NULL as status,
+          -- Sender details
+          s.first_name as sender_first_name,
+          s.last_name as sender_last_name,
+          s.picture_upload_link as sender_picture_upload_link,
+          s.role as sender_role,
+          -- Recipient details
+          r.first_name as recipient_first_name,
+          r.last_name as recipient_last_name,
+          r.picture_upload_link as recipient_picture_upload_link,
+          r.role as recipient_role
+        FROM "Messages" m
+        JOIN "users" s ON m.sender_id = s.id
+        JOIN "users" r ON m.recipient_id = r.id
+        WHERE 
+          (m.sender_id = ${userId} AND m.recipient_id = ${userChat})
+          OR 
+          (m.sender_id = ${userChat} AND m.recipient_id = ${userId})
+        
+        UNION ALL
+        
+        SELECT 
+          'CONNECTION_REQUEST' as type,
+          cr.id,
+          cr.sender_id,
+          cr.recipient_id,
+          cr.message,
+          cr.created_at,
+          cr.status::text,
+          -- Sender details
+          s.first_name as sender_first_name,
+          s.last_name as sender_last_name,
+          s.picture_upload_link as sender_picture_upload_link,
+          s.role as sender_role,
+          -- Recipient details
+          r.first_name as recipient_first_name,
+          r.last_name as recipient_last_name,
+          r.picture_upload_link as recipient_picture_upload_link,
+          r.role as recipient_role
+        FROM "ConnectionRequests" cr
+        JOIN "users" s ON cr.sender_id = s.id
+        JOIN "users" r ON cr.recipient_id = r.id
+        WHERE 
+          (cr.sender_id = ${userId} AND cr.recipient_id = ${userChat})
+          OR 
+          (cr.sender_id = ${userChat} AND cr.recipient_id = ${userId})
+        
+        ORDER BY created_at DESC
+      `;
 
-      return messages;
+      return chatHistory;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

@@ -6,16 +6,12 @@ import {
 import { cn } from '@/shared/lib/utils';
 import { format } from 'date-fns';
 import Image from 'next/image';
-import { Message } from '@/features/messages/types';
+import { MessageBubble } from '../../types';
+import * as React from 'react';
 
 interface ChatBubbleProps {
-  message: Message;
+  message: MessageBubble;
   isCurrentUser: boolean;
-  sender: {
-    first_name: string;
-    last_name: string;
-    picture_upload_link?: string;
-  };
 }
 
 function ImageGallery({ images }: { images: string[] }) {
@@ -58,14 +54,34 @@ function MessageTimestamp({
   );
 }
 
-export function ChatBubble({
-  message,
-  isCurrentUser,
-  sender
-}: ChatBubbleProps) {
-  const fullName = [sender.first_name, sender.last_name]
-    .filter(Boolean)
-    .join(' ');
+export function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) {
+  const sender = React.useMemo(
+    () => ({
+      first_name: isCurrentUser
+        ? message.recipient_first_name
+        : message.sender_first_name,
+      last_name: isCurrentUser
+        ? message.recipient_last_name
+        : message.sender_last_name,
+      picture_upload_link: isCurrentUser
+        ? message.recipient_picture_upload_link
+        : message.sender_picture_upload_link
+    }),
+    [
+      isCurrentUser,
+      message.recipient_first_name,
+      message.recipient_last_name,
+      message.recipient_picture_upload_link,
+      message.sender_first_name,
+      message.sender_last_name,
+      message.sender_picture_upload_link
+    ]
+  );
+
+  const fullName = React.useMemo(
+    () => [sender.first_name, sender.last_name].filter(Boolean).join(' '),
+    [sender.first_name, sender.last_name]
+  );
 
   // Assuming message attachments would be handled separately in the future
   const hasImages = false; // For now, no image handling
@@ -73,6 +89,7 @@ export function ChatBubble({
 
   return (
     <div
+      key={`${message.id}-${isCurrentUser ? 'current' : 'other'}`}
       className={cn(
         'my-6 flex items-center gap-2',
         isCurrentUser ? 'flex-row-reverse' : 'flex-row'
@@ -110,7 +127,7 @@ export function ChatBubble({
               {message.message}
             </p>
             <MessageTimestamp
-              timestamp={message.created_at}
+              timestamp={new Date(message.created_at)}
               isCurrentUser={isCurrentUser}
             />
           </div>

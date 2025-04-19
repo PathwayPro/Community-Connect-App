@@ -23,6 +23,10 @@ export const ChatTabs = ({
   onChatSelect,
   selectedUserId
 }: ChatTabsProps) => {
+  const handleChatClick = (userId: string) => {
+    onChatSelect(userId);
+  };
+
   const filteredChats = chatList.filter(
     (chat) =>
       chat.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -56,7 +60,7 @@ export const ChatTabs = ({
                 key={chat.user_chat}
                 chat={chat}
                 isSelected={selectedUserId === String(chat.user_chat)}
-                onClick={() => onChatSelect(String(chat.user_chat))}
+                onClick={() => handleChatClick(String(chat.user_chat))}
               />
             ))
           ) : (
@@ -87,7 +91,7 @@ export const ChatTabs = ({
                 key={chat.user_chat}
                 chat={chat}
                 isSelected={selectedUserId === String(chat.user_chat)}
-                onClick={() => onChatSelect(String(chat.user_chat))}
+                onClick={() => handleChatClick(String(chat.user_chat))}
               />
             ))
           ) : (
@@ -111,7 +115,7 @@ export const ChatTabs = ({
                 key={chat.user_chat}
                 chat={chat}
                 isSelected={selectedUserId === String(chat.user_chat)}
-                onClick={() => onChatSelect(String(chat.user_chat))}
+                onClick={() => handleChatClick(String(chat.user_chat))}
               />
             ))
           ) : (

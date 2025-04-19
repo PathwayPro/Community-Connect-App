@@ -12,9 +12,15 @@ import { useState, useEffect } from 'react';
 import { useMessageStore } from '../store';
 
 export const Messages = () => {
-  const { chatList, currentChat, getChatList, getChat } = useMessageStore();
+  const {
+    chatList,
+    currentChat,
+    getChatList,
+    getChat,
+    selectedUserId,
+    setSelectedUserId
+  } = useMessageStore();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     getChatList();
@@ -73,8 +79,7 @@ export const Messages = () => {
                   <ChatBubble
                     key={message.id}
                     message={message}
-                    isCurrentUser={message.sender_id === Number(selectedUserId)}
-                    sender={message.sender}
+                    isCurrentUser={message.sender_id !== Number(selectedUserId)}
                   />
                 ))}
               </div>

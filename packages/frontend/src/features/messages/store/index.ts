@@ -2,15 +2,11 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { messageApi } from '../api/message-api';
 import { CreateMessageDto } from '@/features/networking/dto/networking-dto';
-import {
-  Message,
-  ChatPreview,
-  ConnectionRequestsStatus
-} from '@/features/messages/types';
+import { Message, ChatPreview, MessageBubble } from '@/features/messages/types';
 
 export interface MessageState {
   chatList: ChatPreview[];
-  currentChat: Message[];
+  currentChat: MessageBubble[];
   selectedUserId: string | null;
   isLoading: boolean;
   error: string | null;
@@ -82,9 +78,11 @@ export const useMessageStore = create<MessageState>()(
           set({ isLoading: true, error: null });
           const response = await messageApi.getChat(userId);
 
+          console.log('this is the response for getChat', response.data);
+
           if (response.success) {
             set({
-              currentChat: response.data as unknown as Message[],
+              currentChat: response.data as unknown as MessageBubble[],
               selectedUserId: userId,
               isLoading: false
             });
@@ -112,7 +110,7 @@ export const useMessageStore = create<MessageState>()(
             set((state: MessageState) => ({
               currentChat: [
                 ...state.currentChat,
-                response.data as unknown as Message
+                response.data as unknown as MessageBubble
               ],
               isLoading: false
             }));

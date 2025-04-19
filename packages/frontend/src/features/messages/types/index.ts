@@ -13,16 +13,6 @@ export interface Message {
   };
 }
 
-// export interface ChatPreview {
-//   user_chat: number;
-//   last_message: Date;
-//   first_name: string;
-//   last_name: string;
-//   last_message_type: 'MESSAGE' | 'CONNECTION_REQUEST';
-//   last_message_content: string;
-//   last_message_status: string;
-// }
-
 export type ConnectionRequestsStatus =
   | 'PENDING'
   | 'APPROVED'
@@ -39,4 +29,22 @@ export interface ChatPreview {
   last_message_type: 'MESSAGE' | 'CONNECTION_REQUEST';
   last_message_content: string | null;
   connection_status: ConnectionRequestsStatus | null;
+}
+
+export interface MessageBubble {
+  type: 'CONNECTION_REQUEST' | string;
+  id: number;
+  sender_id: number;
+  recipient_id: number;
+  message: string;
+  created_at: string;
+  status: 'PENDING' | string;
+  sender_first_name: string;
+  sender_last_name: string;
+  sender_picture_upload_link: string;
+  sender_role: 'ADMIN' | 'MENTOR' | string;
+  recipient_first_name: string;
+  recipient_last_name: string;
+  recipient_picture_upload_link: string;
+  recipient_role: 'ADMIN' | 'MENTOR' | string;
 }
