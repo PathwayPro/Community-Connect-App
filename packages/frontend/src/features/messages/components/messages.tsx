@@ -7,13 +7,35 @@ import { EmptyStateCard } from '@/shared/components/empty-state/empty-state-card
 import { ChatTabs } from './chat-tabs';
 import { ChatHeader } from './chat-header';
 import { ChatInput } from './chat-input';
-import { messages } from '../lib/mock-data/message';
 import { ChatBubble } from './common/chat-bubble';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useMessageStore } from '../store';
 
 export const Messages = () => {
-  const hasSelectedChat = true;
+  const { chatList, currentChat, getChatList, getChat } = useMessageStore();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    getChatList();
+  }, [getChatList]);
+
+  useEffect(() => {
+    if (selectedUserId) {
+      getChat(selectedUserId);
+    }
+  }, [selectedUserId, getChat]);
+
+  console.log(
+    'this is the chat detail :',
+    currentChat,
+    'chat list :',
+    chatList
+  );
+
+  const handleChatSelect = (userId: string) => {
+    setSelectedUserId(userId);
+  };
 
   return (
     <div className="flex h-screen w-full rounded-2xl bg-white">
@@ -28,22 +50,31 @@ export const Messages = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <ChatTabs messages={messages} searchQuery={searchQuery} />
+        <ChatTabs
+          chatList={chatList}
+          searchQuery={searchQuery}
+          onChatSelect={handleChatSelect}
+          selectedUserId={selectedUserId}
+        />
       </div>
 
       {/* Main Chat Area */}
       <div className="flex flex-1 flex-col">
-        {hasSelectedChat ? (
+        {selectedUserId ? (
           <>
-            <ChatHeader />
+            <ChatHeader
+              selectedChat={chatList.find(
+                (chat) => chat.user_chat === Number(selectedUserId)
+              )}
+            />
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
-                {messages.map((message) => (
+                {currentChat.map((message) => (
                   <ChatBubble
                     key={message.id}
                     message={message}
-                    isCurrentUser={message.isSentByMe}
-                    timestamp={message.timestamp}
+                    isCurrentUser={message.sender_id === Number(selectedUserId)}
+                    sender={message.sender}
                   />
                 ))}
               </div>

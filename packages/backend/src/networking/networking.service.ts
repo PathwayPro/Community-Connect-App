@@ -189,14 +189,70 @@ export class NetworkingService {
     filters: FilterConnectionRequestsDto,
   ) {
     try {
-      const appliedFilters: Prisma.ConnectionRequestsWhereInput =
-        this.getFormattedFilters_CR(userId, filters);
-      const connectionRequests: ConnectionRequest[] =
-        await this.prisma.connectionRequests.findMany({
-          where: appliedFilters,
-        });
+      // Get all users except the logged-in user
+      const users = await this.prisma.users.findMany({
+        where: {
+          id: { not: userId },
+        },
+        select: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          picture_upload_link: true,
+          profession: true,
+          company_name: true,
+          country_of_origin: true,
+          skills: true,
+          role: true,
+          bio: true,
+          linkedin_link: true,
+          github_link: true,
+          twitter_link: true,
+          portfolio_link: true,
+        },
+        orderBy: {
+          first_name: 'asc',
+        },
+      });
 
-      return connectionRequests;
+      // Get all connection requests for the logged-in user
+      const connectionRequests = await this.prisma.connectionRequests.findMany({
+        where: {
+          OR: [{ sender_id: userId }, { recipient_id: userId }],
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+
+      // Create a map of connection request status for each user
+      const statusMap = new Map();
+      connectionRequests.forEach((request) => {
+        const otherUserId =
+          request.sender_id === userId
+            ? request.recipient_id
+            : request.sender_id;
+
+        statusMap.set(otherUserId, {
+          status: request.status,
+          requestId: request.id,
+          isIncoming: request.recipient_id === userId,
+          isSender: request.sender_id === userId,
+        });
+      });
+
+      // Combine user data with connection status
+      const enrichedUsers = users.map((user) => ({
+        ...user,
+        connectionStatus: statusMap.get(user.id) || {
+          status: 'NO_REQUEST',
+          requestId: null,
+          isIncoming: null,
+          isSender: null,
+        },
+      }));
+
+      return enrichedUsers;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -225,7 +281,7 @@ export class NetworkingService {
 
   async connections(userId: number) {
     try {
-      const connectedUsers = this.prisma.connectedUsers.findMany({
+      const connectedUsers = await this.prisma.connectedUsers.findMany({
         where: {
           OR: [{ sender_id: userId }, { recipient_id: userId }],
         },
@@ -238,7 +294,6 @@ export class NetworkingService {
             select: {
               id: true,
               first_name: true,
-              middle_name: true,
               last_name: true,
             },
           },
@@ -246,7 +301,6 @@ export class NetworkingService {
             select: {
               id: true,
               first_name: true,
-              middle_name: true,
               last_name: true,
             },
           },
@@ -306,25 +360,66 @@ export class NetworkingService {
   async chatList(userId: number) {
     try {
       const chats = await this.prisma.$queryRaw<ChatList>`
-        SELECT
-          CASE 
-            WHEN sender_id = ${userId} THEN recipient_id
-            ELSE sender_id
-          END AS user_chat,
-          MAX(created_at) AS last_message,
-          u.first_name,
-          u.middle_name,
-          u.last_name
-        FROM 
-          "Messages" m
-        JOIN 
-          "users" u ON 
+        WITH CombinedMessages AS (
+          SELECT
             CASE 
-              WHEN sender_id = ${userId} THEN u.id = m.recipient_id
-              ELSE u.id = m.sender_id
-            END
-        WHERE (recipient_id = ${userId} OR sender_id = ${userId})
-        GROUP BY user_chat, u.first_name, u.middle_name, u.last_name;
+              WHEN sender_id = ${userId} THEN recipient_id
+              ELSE sender_id
+            END AS user_chat,
+            created_at,
+            'MESSAGE' as type,
+            message as message,
+            NULL as status
+          FROM "Messages" m
+          WHERE (recipient_id = ${userId} OR sender_id = ${userId})
+
+          UNION ALL
+
+          SELECT
+            CASE 
+              WHEN sender_id = ${userId} THEN recipient_id
+              ELSE sender_id
+            END AS user_chat,
+            created_at,
+            'CONNECTION_REQUEST' as type,
+            message,
+            status::text
+          FROM "ConnectionRequests" cr
+          WHERE (recipient_id = ${userId} OR sender_id = ${userId})
+        )
+        SELECT
+          cm.user_chat,
+          MAX(cm.created_at) AS last_message,
+          u.first_name,
+          u.last_name,
+          u.picture_upload_link,
+          FIRST_VALUE(cm.type) OVER (
+            PARTITION BY cm.user_chat 
+            ORDER BY cm.created_at DESC
+          ) as last_message_type,
+          FIRST_VALUE(cm.message) OVER (
+            PARTITION BY cm.user_chat 
+            ORDER BY cm.created_at DESC
+          ) as last_message_content,
+          FIRST_VALUE(cm.status) OVER (
+            PARTITION BY cm.user_chat 
+            ORDER BY cm.created_at DESC
+          ) as connection_status
+        FROM 
+          CombinedMessages cm
+        JOIN 
+          "users" u ON u.id = cm.user_chat
+        GROUP BY 
+          cm.user_chat, 
+          u.first_name, 
+          u.last_name,
+          u.picture_upload_link,
+          u.role,
+          cm.type,
+          cm.message,
+          cm.status,
+          cm.created_at
+        ORDER BY MAX(cm.created_at) DESC;
       `;
 
       return chats;

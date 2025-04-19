@@ -6,35 +6,16 @@ import {
 import { cn } from '@/shared/lib/utils';
 import { format } from 'date-fns';
 import Image from 'next/image';
-
-interface ChatBubbleProps {
-  message: {
-    content: string;
-    images?: string[];
-    sender: {
-      id: string;
-      name: string;
-      avatar?: string;
-    };
-  };
-  isCurrentUser: boolean;
-  timestamp: string;
-}
-
-interface Message {
-  content: string;
-  images?: string[];
-  sender: {
-    id: string;
-    name: string;
-    avatar?: string;
-  };
-}
+import { Message } from '@/features/messages/types';
 
 interface ChatBubbleProps {
   message: Message;
   isCurrentUser: boolean;
-  timestamp: string;
+  sender: {
+    first_name: string;
+    last_name: string;
+    picture_upload_link?: string;
+  };
 }
 
 function ImageGallery({ images }: { images: string[] }) {
@@ -62,7 +43,7 @@ function MessageTimestamp({
   timestamp,
   isCurrentUser
 }: {
-  timestamp: string;
+  timestamp: Date;
   isCurrentUser: boolean;
 }) {
   return (
@@ -72,7 +53,7 @@ function MessageTimestamp({
         isCurrentUser ? 'text-white' : 'text-muted-foreground'
       )}
     >
-      {format(timestamp, 'h:mm a')}
+      {format(new Date(timestamp), 'h:mm a')}
     </span>
   );
 }
@@ -80,10 +61,15 @@ function MessageTimestamp({
 export function ChatBubble({
   message,
   isCurrentUser,
-  timestamp
+  sender
 }: ChatBubbleProps) {
-  const { content, images, sender } = message;
-  const hasImages = images && images.length > 0;
+  const fullName = [sender.first_name, sender.last_name]
+    .filter(Boolean)
+    .join(' ');
+
+  // Assuming message attachments would be handled separately in the future
+  const hasImages = false; // For now, no image handling
+  const images: string[] = []; // For future implementation
 
   return (
     <div
@@ -93,8 +79,11 @@ export function ChatBubble({
       )}
     >
       <Avatar className="h-8 w-8">
-        <AvatarImage src={sender.avatar} alt={sender.name} />
-        <AvatarFallback>{sender.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+        <AvatarImage
+          src={sender.picture_upload_link || '/profile/profile.png'}
+          alt={fullName}
+        />
+        <AvatarFallback>{sender.first_name.charAt(0)}</AvatarFallback>
       </Avatar>
 
       <div
@@ -111,22 +100,20 @@ export function ChatBubble({
           )}
         >
           {hasImages && <ImageGallery images={images} />}
-          {content && (
-            <div className="flex flex-col">
-              <p
-                className={cn(
-                  'break-words text-sm',
-                  isCurrentUser && 'text-white'
-                )}
-              >
-                {content}
-              </p>
-              <MessageTimestamp
-                timestamp={timestamp}
-                isCurrentUser={isCurrentUser}
-              />
-            </div>
-          )}
+          <div className="flex flex-col">
+            <p
+              className={cn(
+                'break-words text-sm',
+                isCurrentUser && 'text-white'
+              )}
+            >
+              {message.message}
+            </p>
+            <MessageTimestamp
+              timestamp={message.created_at}
+              isCurrentUser={isCurrentUser}
+            />
+          </div>
         </div>
       </div>
     </div>

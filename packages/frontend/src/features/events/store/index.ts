@@ -10,12 +10,13 @@ interface EventState {
   event: Event | null;
   isLoading: boolean;
   error: string | null;
-  createEvent: (event: CreateEventDto) => Promise<void>;
+  createEvent: (event: CreateEventDto) => Promise<Event>;
   fetchEvents: () => Promise<void>;
-  editEvent: (id: number, updatedEvent: UpdateEventDto) => Promise<void>;
+  editEvent: (id: number, updatedEvent: UpdateEventDto) => Promise<Event>;
   fetchEvent: (id: number) => Promise<void>;
   fetchEventCategories: () => Promise<void>;
-  deleteEvent: (id: number) => Promise<void>;
+  deleteEvent: (id: number) => Promise<boolean | undefined>;
+  revalidate: () => void;
 }
 
 export const useEventStore = create<EventState>()(
@@ -33,11 +34,17 @@ export const useEventStore = create<EventState>()(
           throw new Error('Failed to create event');
         }
 
-        const newEvent = response.data;
-        set((state) => ({
-          events: [...state.events, newEvent as unknown as Event],
-          isLoading: false
-        }));
+        const newEvent = response.data as unknown as Event;
+        set((state) => {
+          const newState = {
+            ...state,
+            events: [...state.events, newEvent],
+            isLoading: false
+          } as EventState;
+          newState.revalidate();
+          return newState;
+        });
+        return newEvent;
       } catch (error) {
         set({ error: (error as Error).message, isLoading: false });
       }
@@ -110,6 +117,12 @@ export const useEventStore = create<EventState>()(
           ),
           isLoading: false
         }));
+        set((state) => {
+          const newState = { ...state, isLoading: false };
+          newState.revalidate();
+          return newState;
+        });
+        return updated;
       } catch (error) {
         set({ error: (error as Error).message, isLoading: false });
       }
@@ -128,9 +141,19 @@ export const useEventStore = create<EventState>()(
           events: state.events.filter((event) => event.id !== id),
           isLoading: false
         }));
+        set((state) => {
+          const newState = { ...state, isLoading: false };
+          newState.revalidate();
+          return newState;
+        });
+        return response.success;
       } catch (error) {
         set({ error: (error as Error).message, isLoading: false });
       }
+    },
+
+    revalidate: () => {
+      set((state) => ({ ...state }));
     }
   }))
 );

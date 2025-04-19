@@ -25,20 +25,18 @@ export const eventFormSchema = z.object({
   category_id: z.string().min(1, 'Event category is required'),
   location: z.string().optional(),
   link: z
-    .string({
-      required_error: 'Link is required'
-    })
-    .regex(urlPattern, 'Must be a valid URL'),
+    .string()
+    .regex(urlPattern, 'Must be a valid URL without "https://" prefix'),
   image: z.string().optional(),
   is_free: z.boolean().default(true),
   type: z
     .enum(Object.values(EventsTypes) as [string, ...string[]])
-    .default('PUBLIC'),
+    .default(EventsTypes.PUBLIC),
   requires_confirmation: z.boolean().default(false),
   accept_subscriptions: z.boolean().default(true),
-  start_date: z.string().default(new Date().toISOString()),
-  start_time: z.string().default(new Date().toISOString()).optional(),
-  end_time: z.string().default(new Date().toISOString()).optional()
+  start_date: z.string().min(1, 'Event date is required'),
+  start_time: z.string().min(1, 'Start time is required'),
+  end_time: z.string().min(1, 'End time is required')
 });
 
 export type EventFormValues = z.infer<typeof eventFormSchema>;

@@ -8,21 +8,34 @@ import {
 } from '@/shared/components/ui/tabs';
 import { EmptyStateCard } from '@/shared/components/empty-state/empty-state-card';
 import { MessageItem } from './common/message-item';
-import { Message } from '@/features/messages/types';
+import { ChatPreview } from '@/features/messages/types';
 
 interface ChatTabsProps {
-  messages: Message[];
+  chatList: ChatPreview[];
   searchQuery: string;
+  onChatSelect: (userId: string) => void;
+  selectedUserId: string | null;
 }
 
-export const ChatTabs = ({ messages, searchQuery }: ChatTabsProps) => {
-  const filteredMessages = messages.filter(
-    (message) =>
-      message.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      message.sender.name.toLowerCase().includes(searchQuery.toLowerCase())
+export const ChatTabs = ({
+  chatList,
+  searchQuery,
+  onChatSelect,
+  selectedUserId
+}: ChatTabsProps) => {
+  const filteredChats = chatList.filter(
+    (chat) =>
+      chat.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (chat.last_name &&
+        chat.last_name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const hasMessages = filteredMessages.length > 0;
+  const connectedChats = filteredChats.filter(
+    (chat) => chat.connection_status === 'APPROVED'
+  );
+  const pendingChats = filteredChats.filter(
+    (chat) => chat.connection_status === 'PENDING'
+  );
 
   return (
     <Tabs defaultValue="all" className="pt-6">
@@ -34,12 +47,17 @@ export const ChatTabs = ({ messages, searchQuery }: ChatTabsProps) => {
 
       <TabsContent value="all" className="mt-4 focus-visible:outline-none">
         <h3 className="px-4 text-sm font-medium text-muted-foreground">
-          PAST CHATS
+          ALL CHATS
         </h3>
         <ScrollArea className="h-[calc(100vh-200px)]">
-          {hasMessages ? (
-            filteredMessages.map((message) => (
-              <MessageItem key={message.id} message={message} />
+          {filteredChats.length > 0 ? (
+            filteredChats.map((chat) => (
+              <MessageItem
+                key={chat.user_chat}
+                chat={chat}
+                isSelected={selectedUserId === String(chat.user_chat)}
+                onClick={() => onChatSelect(String(chat.user_chat))}
+              />
             ))
           ) : (
             <EmptyStateCard
@@ -49,16 +67,6 @@ export const ChatTabs = ({ messages, searchQuery }: ChatTabsProps) => {
                 searchQuery
                   ? 'Try adjusting your search terms'
                   : 'Start a conversation with someone'
-              }
-              action={
-                !searchQuery
-                  ? {
-                      label: 'Start Chat',
-                      onClick: () => {
-                        /* Handle new chat */
-                      }
-                    }
-                  : undefined
               }
             />
           )}
@@ -73,28 +81,46 @@ export const ChatTabs = ({ messages, searchQuery }: ChatTabsProps) => {
           CONNECTIONS
         </h3>
         <ScrollArea className="h-[calc(100vh-200px)]">
-          <div className="flex h-full flex-1 items-center justify-center p-4">
+          {connectedChats.length > 0 ? (
+            connectedChats.map((chat) => (
+              <MessageItem
+                key={chat.user_chat}
+                chat={chat}
+                isSelected={selectedUserId === String(chat.user_chat)}
+                onClick={() => onChatSelect(String(chat.user_chat))}
+              />
+            ))
+          ) : (
             <EmptyStateCard
               icon={MessageCircleOff}
-              title="No connections yet"
+              title="No connected chats"
               description="Connect with someone to start a conversation"
             />
-          </div>
+          )}
         </ScrollArea>
       </TabsContent>
 
       <TabsContent value="pending" className="mt-4 focus-visible:outline-none">
         <h3 className="px-4 text-sm font-medium text-muted-foreground">
-          PENDING MESSAGES
+          PENDING CHATS
         </h3>
         <ScrollArea className="h-[calc(100vh-200px)]">
-          <div className="flex h-full flex-1 items-center justify-center p-4">
+          {pendingChats.length > 0 ? (
+            pendingChats.map((chat) => (
+              <MessageItem
+                key={chat.user_chat}
+                chat={chat}
+                isSelected={selectedUserId === String(chat.user_chat)}
+                onClick={() => onChatSelect(String(chat.user_chat))}
+              />
+            ))
+          ) : (
             <EmptyStateCard
               icon={FileEdit}
-              title="No pending messages"
+              title="No pending chats"
               description="Your pending messages will appear here"
             />
-          </div>
+          )}
         </ScrollArea>
       </TabsContent>
     </Tabs>

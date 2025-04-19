@@ -24,14 +24,14 @@ const OAuthHandlerContent = () => {
       toast({
         title: 'Authentication Error!',
         description: 'Authentication failed. Please try again.',
-        variant: 'destructive',
+        variant: 'destructive'
       });
       return;
     }
 
     tokens.set({
       accessToken,
-      refreshToken,
+      refreshToken
     });
 
     const handleAuth = async () => {
@@ -44,7 +44,7 @@ const OAuthHandlerContent = () => {
           if (!responseUserData) {
             toast({
               title: 'Login failed!',
-              description: 'Please try again.',
+              description: 'Please try again.'
             });
             return;
           }
@@ -53,11 +53,11 @@ const OAuthHandlerContent = () => {
 
           toast({
             title: 'Login successful!',
-            description: 'Welcome back to the app!',
+            description: 'Welcome back to the app!'
           });
 
           router.push('/home');
-          router.refresh();
+          // router.refresh();
         }
       } catch (error) {
         console.error('Authentication error:', error);
@@ -65,7 +65,7 @@ const OAuthHandlerContent = () => {
         toast({
           title: 'Authentication Error!',
           description: 'Authentication failed. Please try again.',
-          variant: 'destructive',
+          variant: 'destructive'
         });
 
         router.push('/auth/login');

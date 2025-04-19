@@ -5,32 +5,31 @@ export interface Connection {
   created_at: Date;
 }
 
-export interface ConnectionRequest {
-  id: number;
-  sender_id: number;
-  recipient_id: number;
-  message: string;
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
-  created_at: Date;
-}
-
-export interface Message {
-  id: number;
-  sender_id: number;
-  recipient_id: number;
-  message: string;
-  created_at: Date;
-}
-
-export interface ChatPreview {
-  user_id: number;
-  last_message: string;
-  last_message_time: Date;
-  unread_count?: number;
-}
-
 export interface ConnectionRequestResponse<T> {
   success: boolean;
   message?: string;
   data: T;
+}
+
+export interface ConnectionRequest {
+  id: number;
+  first_name: string;
+  last_name: string;
+  picture_upload_link: string | null;
+  profession: string | null;
+  company_name: string | null;
+  country_of_origin: string | null;
+  skills: string[] | null;
+  role: 'MENTOR' | 'USER' | 'ADMIN';
+  bio: string | null;
+  linkedin_link: string | null;
+  github_link: string | null;
+  twitter_link: string | null;
+  portfolio_link: string | null;
+  connectionStatus: {
+    status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'NO_REQUEST';
+    requestId: number | null;
+    isIncoming: boolean | null;
+    isSender: boolean | null;
+  };
 }

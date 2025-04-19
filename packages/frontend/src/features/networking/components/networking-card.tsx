@@ -7,25 +7,21 @@ import {
 import { Button } from '@/shared/components/ui/button';
 import { UserRoundIcon, MessageSquare, Linkedin } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
-import { UserProfile } from '@/features/user-profile/types';
 import { ConnectRequest } from '@/features/messages/components/common/connect-request';
 import { useState } from 'react';
-// export interface NetworkingProfile {
-//   id: string;
-//   firstName: string;
-//   lastName: string;
-//   company: string;
-//   bio: string;
-//   avatarUrl: string;
-//   isConnected: boolean;
-//   role: 'USER' | 'MENTOR' | 'ADMIN';
-//   skills: string[];
-//   profession: string;
-//   countryOfOrigin: string;
-// }
+import { useNetworkingStore } from '../store';
+import { ConnectionRequest } from '../types';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/shared/components/ui/dialog';
 
 interface NetworkingCardProps {
-  profile: UserProfile;
+  profile: ConnectionRequest;
   onViewProfile?: () => void;
 }
 
@@ -38,10 +34,91 @@ export const NetworkingCard = ({
     return `${bio?.slice(0, maxLength)}...`;
   };
 
+  const { createConnectionRequest, updateConnectionRequest } =
+    useNetworkingStore();
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+  const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
+  const [isRejectionModalOpen, setIsRejectionModalOpen] = useState(false);
+
+  const getConnectionButton = () => {
+    const status = profile?.connectionStatus?.status;
+    const isSender = profile?.connectionStatus?.isSender;
+
+    if (status === 'PENDING' && isSender) {
+      return (
+        <Button className="h-10 w-full" disabled>
+          Request Sent
+        </Button>
+      );
+    }
+
+    if (status === 'PENDING' && !isSender) {
+      return (
+        <Button
+          className="h-10 w-full"
+          onClick={() => setIsResponseModalOpen(true)}
+        >
+          Request Received
+        </Button>
+      );
+    }
+
+    if (status === 'NO_REQUEST') {
+      return (
+        <Button className="h-10 w-full" onClick={handleConnect}>
+          Connect
+        </Button>
+      );
+    }
+
+    if (status === 'REJECTED') {
+      return (
+        <Button
+          className="h-10 w-full bg-error-500 text-white hover:bg-error-600 hover:text-white"
+          disabled
+        >
+          Rejected
+        </Button>
+      );
+    }
+
+    if (status === 'APPROVED') {
+      return (
+        <Button
+          className="h-10 w-full"
+          onClick={() => setIsRejectionModalOpen(true)}
+        >
+          Connected
+        </Button>
+      );
+    }
+    return null;
+  };
+
+  const handleResponseSubmit = async (status: string) => {
+    await updateConnectionRequest(
+      profile.connectionStatus?.requestId?.toString() ?? '',
+      {
+        status: status as 'PENDING' | 'REJECTED' | 'ACCEPTED'
+      }
+    );
+    setIsResponseModalOpen(false);
+  };
+
+  const handleConnect = () => {
+    if (profile?.connectionStatus?.status === 'NO_REQUEST') {
+      setIsConnectModalOpen(true);
+    }
+  };
 
   const handleConnectSubmit = (message: string) => {
     console.log('Connect message:', message);
+
+    createConnectionRequest({
+      recipient_id: profile.id,
+      message: message
+    });
+
     setIsConnectModalOpen(false);
   };
 
@@ -52,6 +129,25 @@ export const NetworkingCard = ({
           isOpen={isConnectModalOpen}
           onClose={() => setIsConnectModalOpen(false)}
           onSubmit={handleConnectSubmit}
+        />
+
+        <ResponseModal
+          isOpen={isResponseModalOpen}
+          onClose={() => setIsResponseModalOpen(false)}
+          onAccept={() => handleResponseSubmit('APPROVED')}
+          onReject={() => handleResponseSubmit('REJECTED')}
+          senderName={`${profile.first_name} ${profile.last_name}`}
+          message={profile.connectionStatus?.status}
+        />
+
+        <RejectionModal
+          isOpen={isRejectionModalOpen}
+          onClose={() => setIsRejectionModalOpen(false)}
+          onConfirm={() => {
+            handleResponseSubmit('REJECTED');
+            setIsRejectionModalOpen(false);
+          }}
+          userName={`${profile.first_name} ${profile.last_name}`}
         />
 
         {/* Header Background */}
@@ -75,8 +171,8 @@ export const NetworkingCard = ({
           {/* Avatar - positioned to overlap with header */}
           <Avatar className="-mt-14 h-[110px] w-[110px] border-4 border-white bg-warning-500">
             <AvatarImage
-              src={profile.pictureUploadLink}
-              alt={`${profile.firstName} ${profile.lastName}`}
+              src={profile.picture_upload_link ?? ''}
+              alt={`${profile.first_name} ${profile.last_name}`}
               className="h-full w-full object-cover"
             />
             <AvatarFallback>
@@ -87,13 +183,13 @@ export const NetworkingCard = ({
           {/* Profile Info */}
           <div className="mt-4 flex flex-1 flex-col items-center gap-2">
             <h6 className="max-w-full truncate text-lg font-medium">
-              {profile.firstName} {profile.lastName}
+              {profile.first_name} {profile.last_name}
             </h6>
             <p className="max-w-full truncate text-sm text-neutral-dark-100">
               {profile.profession}
             </p>
             <p className="max-w-full truncate text-sm text-neutral-dark-100">
-              @{profile.companyName}
+              @{profile.company_name}
             </p>
 
             <p className="line-clamp-3 max-w-full text-center text-sm text-neutral-dark-100">
@@ -102,16 +198,16 @@ export const NetworkingCard = ({
 
             {/* Social Icons */}
             <div className="mt-2 flex items-center gap-4">
-              {profile.portfolioLink && (
+              {profile.portfolio_link && (
                 <SharedIcons.briefcase className="h-5 w-5" />
               )}
-              {profile.linkedinLink && (
+              {profile.linkedin_link && (
                 <Linkedin className="h-4 w-4 text-neutral-dark-100" />
               )}
-              {profile.githubLink && (
+              {profile.github_link && (
                 <SharedIcons.github className="h-4 w-4 text-neutral-dark-100" />
               )}
-              {profile.twitterLink && (
+              {profile.twitter_link && (
                 <SharedIcons.twitter className="h-5 w-5 text-neutral-dark-100" />
               )}
             </div>
@@ -133,21 +229,109 @@ export const NetworkingCard = ({
                 View
               </Button>
             </div>
-            <Button
-              className="h-10 w-full"
-              onClick={() => {
-                if (profile.isConnected) {
-                  console.log('Connected');
-                } else {
-                  setIsConnectModalOpen(true);
-                }
-              }}
-            >
-              {profile.isConnected ? 'Connected' : 'Connect'}
-            </Button>
+
+            {getConnectionButton()}
           </div>
         </div>
       </div>
     </div>
+  );
+};
+
+interface ResponseModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAccept: () => void;
+  onReject: () => void;
+  senderName: string;
+  message?: string;
+}
+
+const ResponseModal = ({
+  isOpen,
+  onClose,
+  onAccept,
+  onReject,
+  senderName,
+  message
+}: ResponseModalProps) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Connection Request</DialogTitle>
+          <DialogDescription className="sr-only">
+            description of the modal
+          </DialogDescription>
+        </DialogHeader>
+
+        {message && (
+          <div className="my-4">
+            <p className="pb-4 text-base text-neutral-dark-100">
+              {senderName} would like to connect with you
+            </p>
+            <p className="text-base text-neutral-dark-100">
+              Current Status:{' '}
+              <span className="font-bold text-warning-500">{message}</span>
+            </p>
+          </div>
+        )}
+
+        <DialogFooter className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={onReject}
+            className="h-10 w-1/2 border-none bg-error-500 text-white hover:bg-error-600 hover:text-white"
+          >
+            Reject
+          </Button>
+          <Button
+            onClick={onAccept}
+            className="h-10 w-1/2 border-none bg-success-500 text-white hover:bg-success-600"
+          >
+            Accept
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+interface RejectionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  userName: string;
+}
+
+const RejectionModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  userName
+}: RejectionModalProps) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Remove Connection</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to remove your connection with {userName}?
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter className="flex gap-2">
+          <Button variant="outline" onClick={onClose} className="h-10 w-1/2">
+            Cancel
+          </Button>
+          <Button
+            onClick={onConfirm}
+            className="h-10 w-1/2 border-none bg-error-500 text-white hover:bg-error-600"
+          >
+            Remove Connection
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

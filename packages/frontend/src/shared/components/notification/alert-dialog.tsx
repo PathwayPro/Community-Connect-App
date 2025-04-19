@@ -10,6 +10,7 @@ import { Button } from '@/shared/components/ui/button';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { cn } from '@/shared/lib/utils';
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export type AlertType = 'success' | 'error' | 'warning' | 'info';
 
@@ -21,6 +22,7 @@ const iconMap = {
 };
 
 export function AlertDialogUI() {
+  const router = useRouter();
   const { isOpen, title, description, type, hideAlert, redirect } =
     useAlertDialog();
 
@@ -28,18 +30,18 @@ export function AlertDialogUI() {
     if (isOpen && type) {
       const timer = setTimeout(() => {
         if (redirect) {
-          window.location.href = redirect;
+          router.push(redirect);
         }
         hideAlert();
       }, 5000);
 
       return () => clearTimeout(timer);
     }
-  }, [isOpen, type, hideAlert, redirect]);
+  }, [isOpen, type, hideAlert, redirect, router]);
 
   const handleClose = () => {
     if (redirect) {
-      window.location.href = redirect;
+      router.push(redirect);
     }
     hideAlert();
   };

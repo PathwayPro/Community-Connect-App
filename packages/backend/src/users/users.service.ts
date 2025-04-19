@@ -72,9 +72,17 @@ export class UsersService {
   }
 
   // User Retrieval Methods
-  async getUserById(userIdNumber: string): Promise<ReadUserDto> {
+  async getUserById(
+    userIdNumber: string,
+  ): Promise<{ message: string; data: ReadUserDto }> {
     const user = await findUserById(this.prisma, Number(userIdNumber));
-    return this.mapToReadUserDto(user);
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userIdNumber} not found`);
+    }
+
+    const userData = this.mapToReadUserDto(user);
+    return { message: 'User found', data: userData };
   }
 
   async getUserByUsername(email: string): Promise<ReadUserDto> {
