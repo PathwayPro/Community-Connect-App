@@ -359,7 +359,7 @@ export class NetworkingService {
 
   async chatList(userId: number) {
     try {
-      const chats = await this.prisma.$queryRaw<ChatList>`
+      const chats = await this.prisma.$queryRaw<any[]>`
         WITH CombinedMessages AS (
           SELECT
             CASE 
@@ -387,42 +387,30 @@ export class NetworkingService {
           FROM "ConnectionRequests" cr
           WHERE (recipient_id = ${userId} OR sender_id = ${userId})
         )
-        SELECT
+        SELECT DISTINCT ON (cm.user_chat)
           cm.user_chat,
-          MAX(cm.created_at) AS last_message,
+          cm.created_at AS last_message,
           u.first_name,
           u.last_name,
           u.picture_upload_link,
-          FIRST_VALUE(cm.type) OVER (
-            PARTITION BY cm.user_chat 
-            ORDER BY cm.created_at DESC
-          ) as last_message_type,
-          FIRST_VALUE(cm.message) OVER (
-            PARTITION BY cm.user_chat 
-            ORDER BY cm.created_at DESC
-          ) as last_message_content,
-          FIRST_VALUE(cm.status) OVER (
-            PARTITION BY cm.user_chat 
-            ORDER BY cm.created_at DESC
-          ) as connection_status
+          cm.type as last_message_type,
+          cm.message as last_message_content,
+          cm.status as connection_status
         FROM 
           CombinedMessages cm
         JOIN 
           "users" u ON u.id = cm.user_chat
-        GROUP BY 
-          cm.user_chat, 
-          u.first_name, 
-          u.last_name,
-          u.picture_upload_link,
-          u.role,
-          cm.type,
-          cm.message,
-          cm.status,
-          cm.created_at
-        ORDER BY MAX(cm.created_at) DESC;
+        ORDER BY 
+          cm.user_chat,
+          cm.created_at DESC;
       `;
 
-      return chats;
+      // Sort the results by last_message in descending order
+      return chats.sort(
+        (a, b) =>
+          new Date(b.last_message).getTime() -
+          new Date(a.last_message).getTime(),
+      );
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -435,61 +423,62 @@ export class NetworkingService {
       }
 
       const chatHistory = await this.prisma.$queryRaw`
-        SELECT 
-          'MESSAGE' as type,
-          m.id,
-          m.sender_id,
-          m.recipient_id,
-          m.message,
-          m.created_at,
-          NULL as status,
-          -- Sender details
-          s.first_name as sender_first_name,
-          s.last_name as sender_last_name,
-          s.picture_upload_link as sender_picture_upload_link,
-          s.role as sender_role,
-          -- Recipient details
-          r.first_name as recipient_first_name,
-          r.last_name as recipient_last_name,
-          r.picture_upload_link as recipient_picture_upload_link,
-          r.role as recipient_role
-        FROM "Messages" m
-        JOIN "users" s ON m.sender_id = s.id
-        JOIN "users" r ON m.recipient_id = r.id
-        WHERE 
-          (m.sender_id = ${userId} AND m.recipient_id = ${userChat})
-          OR 
-          (m.sender_id = ${userChat} AND m.recipient_id = ${userId})
-        
-        UNION ALL
-        
-        SELECT 
-          'CONNECTION_REQUEST' as type,
-          cr.id,
-          cr.sender_id,
-          cr.recipient_id,
-          cr.message,
-          cr.created_at,
-          cr.status::text,
-          -- Sender details
-          s.first_name as sender_first_name,
-          s.last_name as sender_last_name,
-          s.picture_upload_link as sender_picture_upload_link,
-          s.role as sender_role,
-          -- Recipient details
-          r.first_name as recipient_first_name,
-          r.last_name as recipient_last_name,
-          r.picture_upload_link as recipient_picture_upload_link,
-          r.role as recipient_role
-        FROM "ConnectionRequests" cr
-        JOIN "users" s ON cr.sender_id = s.id
-        JOIN "users" r ON cr.recipient_id = r.id
-        WHERE 
-          (cr.sender_id = ${userId} AND cr.recipient_id = ${userChat})
-          OR 
-          (cr.sender_id = ${userChat} AND cr.recipient_id = ${userId})
-        
-        ORDER BY created_at DESC
+        SELECT * FROM (
+          SELECT 
+            'MESSAGE' as type,
+            m.id,
+            m.sender_id,
+            m.recipient_id,
+            m.message,
+            m.created_at,
+            NULL as status,
+            -- Sender details
+            s.first_name as sender_first_name,
+            s.last_name as sender_last_name,
+            s.picture_upload_link as sender_picture_upload_link,
+            s.role as sender_role,
+            -- Recipient details
+            r.first_name as recipient_first_name,
+            r.last_name as recipient_last_name,
+            r.picture_upload_link as recipient_picture_upload_link,
+            r.role as recipient_role
+          FROM "Messages" m
+          JOIN "users" s ON m.sender_id = s.id
+          JOIN "users" r ON m.recipient_id = r.id
+          WHERE 
+            (m.sender_id = ${userId} AND m.recipient_id = ${userChat})
+            OR 
+            (m.sender_id = ${userChat} AND m.recipient_id = ${userId})
+          
+          UNION ALL
+          
+          SELECT 
+            'CONNECTION_REQUEST' as type,
+            cr.id,
+            cr.sender_id,
+            cr.recipient_id,
+            cr.message,
+            cr.created_at,
+            cr.status::text,
+            -- Sender details
+            s.first_name as sender_first_name,
+            s.last_name as sender_last_name,
+            s.picture_upload_link as sender_picture_upload_link,
+            s.role as sender_role,
+            -- Recipient details
+            r.first_name as recipient_first_name,
+            r.last_name as recipient_last_name,
+            r.picture_upload_link as recipient_picture_upload_link,
+            r.role as recipient_role
+          FROM "ConnectionRequests" cr
+          JOIN "users" s ON cr.sender_id = s.id
+          JOIN "users" r ON cr.recipient_id = r.id
+          WHERE 
+            (cr.sender_id = ${userId} AND cr.recipient_id = ${userChat})
+            OR 
+            (cr.sender_id = ${userChat} AND cr.recipient_id = ${userId})
+        ) combined
+        ORDER BY created_at ASC
       `;
 
       return chatHistory;

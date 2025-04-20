@@ -107,16 +107,9 @@ export const useMessageStore = create<MessageState>()(
           const response = await messageApi.sendMessage(data);
 
           if (response.success) {
-            set((state: MessageState) => ({
-              currentChat: [
-                ...state.currentChat,
-                response.data as unknown as MessageBubble
-              ],
-              isLoading: false
-            }));
-
-            // Refresh chat list to update last message
+            await get().getChat(data.recipient_id.toString());
             await get().getChatList();
+            set({ isLoading: false });
           } else {
             set({
               error: response.message || 'Failed to send message',

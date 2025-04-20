@@ -9,15 +9,39 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/shared/components/ui/dialog';
-
+import { useMessageStore } from '../store';
+import { ConnectionRequestsStatus } from '../types';
 interface ImagePreview {
   url: string;
   file: File;
 }
 
-export const ChatInput = () => {
+interface ChatInputProps {
+  recipientId: number;
+  connectionStatus: ConnectionRequestsStatus;
+}
+
+export const ChatInput = ({
+  recipientId,
+  connectionStatus
+}: ChatInputProps) => {
+  const { sendMessage } = useMessageStore();
+  const [messageInputs, setMessageInputs] = useState<Record<number, string>>(
+    {}
+  );
   const [imagePreview, setImagePreview] = useState<ImagePreview | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isDisabled = connectionStatus !== 'APPROVED';
+
+  const currentMessage = messageInputs[recipientId] || '';
+
+  const handleMessageChange = (value: string) => {
+    setMessageInputs((prev) => ({
+      ...prev,
+      [recipientId]: value
+    }));
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -37,6 +61,20 @@ export const ChatInput = () => {
     setImagePreview(null);
   };
 
+  const handleSendMessage = () => {
+    if (currentMessage.trim()) {
+      sendMessage({
+        message: currentMessage,
+        recipient_id: recipientId
+      });
+      // Clear only the current recipient's message
+      setMessageInputs((prev) => ({
+        ...prev,
+        [recipientId]: ''
+      }));
+    }
+  };
+
   return (
     <div className="border-t p-4">
       <input
@@ -45,22 +83,34 @@ export const ChatInput = () => {
         className="hidden"
         ref={fileInputRef}
         onChange={handleFileSelect}
+        disabled={isDisabled}
       />
 
       <div className="relative flex items-center gap-2">
-        <Input placeholder="Type something..." className="flex-1" />
+        <Input
+          placeholder={
+            isDisabled
+              ? "Can't send messages until connection is approved"
+              : 'Type something...'
+          }
+          className="flex-1"
+          value={currentMessage}
+          onChange={(e) => handleMessageChange(e.target.value)}
+          disabled={isDisabled}
+        />
         <div className="absolute right-0 flex items-center gap-2 pr-2">
-          <Button size="icon" variant="ghost">
+          <Button size="icon" variant="ghost" disabled={isDisabled}>
             <SmileIcon className="h-5 w-5" />
           </Button>
           <Button
             size="icon"
             variant="ghost"
             onClick={() => fileInputRef.current?.click()}
+            disabled={isDisabled}
           >
             <PaperclipIcon className="h-5 w-5" />
           </Button>
-          <Button size="icon">
+          <Button size="icon" onClick={handleSendMessage} disabled={isDisabled}>
             <Send className="h-5 w-5" />
           </Button>
         </div>

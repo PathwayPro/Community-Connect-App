@@ -35,7 +35,9 @@ export const ChatTabs = ({
   );
 
   const connectedChats = filteredChats.filter(
-    (chat) => chat.connection_status === 'APPROVED'
+    (chat) =>
+      chat.connection_status === 'APPROVED' ||
+      chat.last_message_type === 'MESSAGE'
   );
   const pendingChats = filteredChats.filter(
     (chat) => chat.connection_status === 'PENDING'

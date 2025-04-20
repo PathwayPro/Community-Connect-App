@@ -35,7 +35,25 @@ function ImageGallery({ images }: { images: string[] }) {
   );
 }
 
-function MessageTimestamp({
+export function formatMessageTimestamp(timestamp: Date) {
+  const now = new Date();
+  const messageDate = new Date(timestamp);
+  const diffInDays = Math.floor(
+    (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (diffInDays === 0) {
+    return format(messageDate, 'h:mm a'); // Today: 3:45 PM
+  } else if (diffInDays === 1) {
+    return 'Yesterday';
+  } else if (diffInDays < 7) {
+    return `${diffInDays} days ago`;
+  } else {
+    return format(messageDate, 'MMM d, yyyy'); // Mar 17, 2024
+  }
+}
+
+export function MessageTimestamp({
   timestamp,
   isCurrentUser
 }: {
@@ -45,11 +63,11 @@ function MessageTimestamp({
   return (
     <span
       className={cn(
-        'mt-4 self-end text-xs',
+        'self-start text-xs',
         isCurrentUser ? 'text-white' : 'text-muted-foreground'
       )}
     >
-      {format(new Date(timestamp), 'h:mm a')}
+      {formatMessageTimestamp(timestamp)}
     </span>
   );
 }
@@ -117,7 +135,7 @@ export function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) {
           )}
         >
           {hasImages && <ImageGallery images={images} />}
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-2">
             <p
               className={cn(
                 'break-words text-sm',

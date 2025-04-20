@@ -84,7 +84,14 @@ export const Messages = () => {
                 ))}
               </div>
             </ScrollArea>
-            <ChatInput />
+            <ChatInput
+              recipientId={Number(selectedUserId)}
+              connectionStatus={
+                chatList.find(
+                  (chat) => chat.user_chat === Number(selectedUserId)
+                )?.connection_status || 'NO_REQUEST'
+              }
+            />
           </>
         ) : (
           <div className="flex flex-1 items-center justify-center p-4">

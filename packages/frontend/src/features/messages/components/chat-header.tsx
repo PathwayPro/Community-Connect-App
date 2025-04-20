@@ -11,9 +11,16 @@ interface ChatHeaderProps {
 export const ChatHeader = ({ selectedChat }: ChatHeaderProps) => {
   if (!selectedChat) return null;
 
+  const pending = selectedChat.connection_status === 'PENDING';
+  const approved =
+    selectedChat.connection_status === 'APPROVED' ||
+    selectedChat.last_message_type === 'MESSAGE';
+
   const fullName = [selectedChat.first_name, selectedChat.last_name]
     .filter(Boolean)
     .join(' ');
+
+  console.log('selectedChat', selectedChat, approved);
 
   return (
     <div className="flex items-center gap-3 border-b p-4">
@@ -32,12 +39,16 @@ export const ChatHeader = ({ selectedChat }: ChatHeaderProps) => {
             variant="outline"
             className={cn(
               'rounded-full border-none px-2 py-0.5 text-xs',
-              selectedChat.connection_status === 'PENDING'
+              pending
                 ? 'bg-warning-100 text-warning-700'
-                : 'bg-success-100 text-success-700'
+                : approved
+                  ? 'bg-success-100 text-success-700'
+                  : 'bg-error-100 text-error-700'
             )}
           >
-            {selectedChat.connection_status}
+            {approved
+              ? selectedChat.connection_status || 'APPROVED'
+              : selectedChat.connection_status}
           </Badge>
           <span className="text-sm text-muted-foreground">
             {selectedChat.role}

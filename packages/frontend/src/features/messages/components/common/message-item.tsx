@@ -5,8 +5,8 @@ import {
   AvatarFallback,
   AvatarImage
 } from '@/shared/components/ui/avatar';
-import { format } from 'date-fns';
 import { ChatPreview } from '@/features/messages/types';
+import { MessageTimestamp } from './chat-bubble';
 
 interface MessageItemProps {
   chat: ChatPreview;
@@ -32,12 +32,13 @@ export const MessageItem = ({
         <AvatarImage src={chat.picture_upload_link || '/profile/profile.png'} />
         <AvatarFallback>{chat.first_name.charAt(0)}</AvatarFallback>
       </Avatar>
-      <div className="flex flex-1 flex-col">
-        <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-1 flex-col gap-2">
+        <div className="flex items-start justify-between gap-2">
           <p className="text-sm font-semibold">{fullName}</p>
-          <p className="text-xs text-muted-foreground">
-            {format(new Date(chat.last_message), 'MMM d, yyyy')}
-          </p>
+          <MessageTimestamp
+            timestamp={new Date(chat.last_message)}
+            isCurrentUser={false}
+          />
         </div>
 
         <div className="flex items-center justify-between">
