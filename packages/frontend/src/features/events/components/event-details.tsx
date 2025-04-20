@@ -25,7 +25,6 @@ import { toSentenceCase } from '@/shared/lib/utils';
 import { formatDate } from 'date-fns';
 import { ConnectRequest } from '@/features/messages/components/common/connect-request';
 import { useState } from 'react';
-import { useUserStore } from '@/features/user-profile/store';
 
 interface EventDetailsProps {
   onBack?: () => void;

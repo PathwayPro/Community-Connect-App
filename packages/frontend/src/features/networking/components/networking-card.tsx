@@ -19,19 +19,22 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/shared/components/ui/dialog';
+import { useRouter } from 'next/navigation';
 
 interface NetworkingCardProps {
   profile: ConnectionRequest;
-  onViewProfile?: () => void;
 }
 
-export const NetworkingCard = ({
-  profile,
-  onViewProfile
-}: NetworkingCardProps) => {
+export const NetworkingCard = ({ profile }: NetworkingCardProps) => {
+  const router = useRouter();
+
   const truncateBio = (bio: string, maxLength: number = 50) => {
     if (bio?.length <= maxLength) return bio;
     return `${bio?.slice(0, maxLength)}...`;
+  };
+
+  const handleViewProfile = () => {
+    router.push(`/profile/${profile.id}`);
   };
 
   const { createConnectionRequest, updateConnectionRequest } =
@@ -216,13 +219,17 @@ export const NetworkingCard = ({
           {/* Action Buttons - Fixed at bottom */}
           <div className="w-full space-y-2 py-4">
             <div className="flex gap-2">
-              <Button variant="outline" className="h-10 flex-1 gap-2 px-0">
+              <Button
+                variant="outline"
+                className="h-10 flex-1 gap-2 px-0"
+                onClick={() => router.push(`/messages`)}
+              >
                 <MessageSquare className="h-5 w-5" />
                 Message
               </Button>
               <Button
                 className="h-10 flex-1 gap-2 px-0"
-                onClick={onViewProfile}
+                onClick={handleViewProfile}
                 variant="outline"
               >
                 <UserRoundIcon className="h-4 w-4" />

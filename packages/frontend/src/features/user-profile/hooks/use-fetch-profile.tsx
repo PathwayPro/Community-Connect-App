@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useUserStore } from '../store';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { UserProfile } from '../types';
-import { userApi } from '../api/user-api';
 
 interface UseFetchProfileResult {
   isLoading: boolean;
@@ -24,11 +23,8 @@ export const useFetchProfile = (userId?: string): UseFetchProfileResult => {
       setIsLoading(true);
       setError(null);
 
-      console.log('userIdwwwwwwwwwwwwwwwwwwwww', userId);
-
       if (!userId) {
         // Fetch current user's profile
-
         console.log('fetching current user profile');
         const response = await fetchUserProfile();
 
@@ -37,6 +33,9 @@ export const useFetchProfile = (userId?: string): UseFetchProfileResult => {
         }
 
         const userData = response.data;
+
+        console.log('userData for the current user', userData);
+
         setData(userData);
       } else {
         // Fetch other user's profile

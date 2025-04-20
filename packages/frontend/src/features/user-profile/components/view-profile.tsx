@@ -5,7 +5,7 @@ import { IconButton } from '@/shared/components/ui/icon-button';
 import { Separator } from '@/shared/components/ui/separator';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useUserStore } from '../store';
 import { useFetchProfile } from '../hooks/use-fetch-profile';
 import { formatDate } from 'date-fns';
@@ -80,7 +80,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
   const isOwnProfile = !userId || Number(userId) === user?.id;
   const displayedUser = isOwnProfile ? user : profileData;
 
-  console.log('profile data', displayedUser);
+  console.log('profile data', displayedUser, isOwnProfile);
 
   // view profile data builder
   const profileDataBuilder = {
