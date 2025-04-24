@@ -16,6 +16,7 @@ interface SettingsState {
 
   // Actions
   getSettings: () => Promise<void>;
+  getSettingsById: (id: number) => Promise<void>;
   updateSettings: (data: UpdateSettingsDto) => Promise<void>;
   clearError: () => void;
 }
@@ -34,6 +35,24 @@ export const useSettingsStore = create<SettingsState>()(
           set({ isLoading: true, error: null });
           const response = await settingsApi.getSettings();
 
+          if (response.success) {
+            set({ settings: response.data, isLoading: false });
+          }
+        } catch (error) {
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Failed to fetch settings',
+            isLoading: false
+          });
+        }
+      },
+
+      getSettingsById: async (id: number) => {
+        try {
+          set({ isLoading: true, error: null });
+          const response = await settingsApi.getSettingsById(id);
           if (response.success) {
             set({ settings: response.data, isLoading: false });
           }

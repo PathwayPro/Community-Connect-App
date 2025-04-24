@@ -14,6 +14,7 @@ import {
   getSkillLabel
 } from '@/features/user-profile/lib/utils';
 import { useSettingsStore } from '@/features/settings/store';
+import { useEffect } from 'react';
 
 interface StatItemProps {
   label: string;
@@ -72,7 +73,7 @@ interface ViewProfileProps {
 export const ViewProfile = ({ slug }: ViewProfileProps) => {
   const router = useRouter();
   const { user } = useUserStore();
-  const { settings } = useSettingsStore();
+  const { settings, getSettingsById } = useSettingsStore();
 
   const userId = slug;
 
@@ -80,6 +81,12 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
 
   const isOwnProfile = !userId || Number(userId) === user?.id;
   const displayedUser = isOwnProfile ? user : profileData;
+
+  useEffect(() => {
+    if (!isOwnProfile) {
+      getSettingsById(Number(userId));
+    }
+  }, [isOwnProfile, userId, getSettingsById]);
 
   // view profile data builder
   const profileDataBuilder = {

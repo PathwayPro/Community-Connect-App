@@ -1,4 +1,12 @@
-import { Controller, Get, Body, UseGuards, Post, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Body,
+  UseGuards,
+  Post,
+  Put,
+  Param,
+} from '@nestjs/common';
 import { SettingsService } from './settings.services';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { JwtAuthGuard } from 'src/auth/guards';
@@ -64,5 +72,17 @@ export class SettingsController {
     return await this.settingsService.createSettingsForExistingUsers(
       createSettingsDto,
     );
+  }
+
+  @Roles('ADMIN', 'MENTOR', 'USER')
+  @Get(':id')
+  @ApiOkResponse({ description: 'Successfully retrieved user settings' })
+  @ApiNotFoundResponse({ description: 'Settings not found' })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to retrieve settings',
+  })
+  @ApiOperation({ summary: 'Get user settings' })
+  async getSettingsById(@Param('id') id: string) {
+    return await this.settingsService.getUserSettings(Number(id));
   }
 }
