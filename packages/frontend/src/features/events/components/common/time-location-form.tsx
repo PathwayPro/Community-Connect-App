@@ -1,8 +1,12 @@
 import { FormInput, FormSelect } from '@/shared/components/form';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
 import { useFormContext } from 'react-hook-form';
-import { EventsTypes, trueFalseOptions } from '../../lib/validation';
+import {
+  EventFormValues,
+  EventsTypes,
+  trueFalseOptions
+} from '../../lib/validation';
 import { FormDatePicker } from '@/shared/components/form/form-date-picker';
 import { timeOptions } from '../../lib/constants';
 
@@ -21,10 +25,19 @@ export const TimeLocationForm = () => {
   const {
     setValue,
     watch,
-    formState: { errors }
-  } = useFormContext();
+    formState: { errors },
+    trigger
+  } = useFormContext<EventFormValues>();
+
   const startTime = watch('start_time');
-  // const endTime = watch('end_time');
+  const endTime = watch('end_time');
+
+  // Validate end time whenever start time or end time changes
+  useEffect(() => {
+    if (startTime && endTime) {
+      trigger('end_time');
+    }
+  }, [startTime, endTime, trigger]);
 
   const validateEndTime = (endTimeValue: string) => {
     if (!startTime || !endTimeValue) return true;
@@ -32,21 +45,18 @@ export const TimeLocationForm = () => {
     const [startHour, startMinute, startPeriod] = startTime.split(/[:\s]/);
     const [endHour, endMinute, endPeriod] = endTimeValue.split(/[:\s]/);
 
-    const start = new Date(
-      2000,
-      0,
-      1,
-      startPeriod === 'PM' ? parseInt(startHour) + 12 : parseInt(startHour),
-      parseInt(startMinute)
-    );
+    let startHourNum = parseInt(startHour);
+    let endHourNum = parseInt(endHour);
 
-    const end = new Date(
-      2000,
-      0,
-      1,
-      endPeriod === 'PM' ? parseInt(endHour) + 12 : parseInt(endHour),
-      parseInt(endMinute)
-    );
+    // Convert to 24-hour format for comparison
+    if (startPeriod === 'PM' && startHourNum < 12) startHourNum += 12;
+    if (startPeriod === 'AM' && startHourNum === 12) startHourNum = 0;
+    if (endPeriod === 'PM' && endHourNum < 12) endHourNum += 12;
+    if (endPeriod === 'AM' && endHourNum === 12) endHourNum = 0;
+
+    const start = new Date(2000, 0, 1, startHourNum, parseInt(startMinute));
+
+    const end = new Date(2000, 0, 1, endHourNum, parseInt(endMinute));
 
     return end > start;
   };
@@ -68,17 +78,36 @@ export const TimeLocationForm = () => {
           placeholder="00:00 AM"
           customError={errors.start_time?.message as string}
           options={timeOptions}
+          onChange={(e) => {
+            setValue('start_time', e, { shouldValidate: true });
+            if (watch('end_time')) {
+              trigger('end_time');
+            }
+          }}
           required
         />
         <FormSelect
           name="end_time"
           label="Event End Time"
           placeholder="00:00 AM"
-          customError={errors.end_time?.message as string}
+          customError={
+            (errors.end_time?.message as string) ||
+            (validateEndTime(watch('end_time'))
+              ? undefined
+              : 'End time must be later than start time')
+          }
           options={timeOptions}
+          onChange={(e) => {
+            setValue('end_time', e, { shouldValidate: true });
+            if (watch('start_time')) {
+              trigger('start_time');
+            }
+          }}
           required
           rules={{
-            validate: validateEndTime
+            validate: {
+              isAfterStart: validateEndTime
+            }
           }}
         />
       </div>
@@ -89,7 +118,9 @@ export const TimeLocationForm = () => {
           label="Event Type"
           options={eventTypeOptions}
           value={watch('type')}
-          onChange={(value) => setValue('type', value)}
+          onChange={(value) =>
+            setValue('type', value, { shouldValidate: true })
+          }
           required
         />
       </div>
@@ -100,7 +131,9 @@ export const TimeLocationForm = () => {
           label="Requires Confirmation"
           options={trueFalseOptions}
           value={watch('requires_confirmation')}
-          onChange={(value) => setValue('requires_confirmation', value)}
+          onChange={(value) =>
+            setValue('requires_confirmation', value, { shouldValidate: true })
+          }
           required
         />
       </div>
@@ -111,7 +144,9 @@ export const TimeLocationForm = () => {
           label="Accept Subscriptions"
           options={trueFalseOptions}
           value={watch('accept_subscriptions')}
-          onChange={(value) => setValue('accept_subscriptions', value)}
+          onChange={(value) =>
+            setValue('accept_subscriptions', value, { shouldValidate: true })
+          }
           required
         />
       </div>
@@ -123,6 +158,9 @@ export const TimeLocationForm = () => {
           hasInputIcon
           leftIcon="map"
           placeholder="Enter event location"
+          onChange={(e) =>
+            setValue('location', e.target.value, { shouldValidate: true })
+          }
         />
       </div>
     </div>

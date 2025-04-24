@@ -116,7 +116,7 @@ export const NewsList = () => {
   // Replace single newsPage with separate states for each tab
   const [recentNewsPage, setRecentNewsPage] = useState(1);
   const [editorsPickPage, setEditorsPickPage] = useState(1);
-  const [mostReadPage, setMostReadPage] = useState(1);
+  // const [mostReadPage, setMostReadPage] = useState(1);
 
   // Add pagination state
   const [resourcePage, setResourcePage] = useState(1);
@@ -136,7 +136,7 @@ export const NewsList = () => {
     editorsPickNews,
     editorsPickPage
   );
-  const paginatedMostReadNews = paginateItems(mostReadNews, mostReadPage);
+  // const paginatedMostReadNews = paginateItems(mostReadNews, mostReadPage);
   const paginatedOpportunities = paginateItems(
     opportunityItems,
     opportunityPage
@@ -295,13 +295,13 @@ export const NewsList = () => {
                         </TabsTrigger>
 
                         {/* Most Read */}
-                        <TabsTrigger
+                        {/* <TabsTrigger
                           value="most-read"
                           className={`h-10`}
                           onClick={() => setNewsSubTab('most-read')}
                         >
                           Most Read
-                        </TabsTrigger>
+                        </TabsTrigger> */}
                       </TabsList>
                     </div>
 
@@ -358,7 +358,7 @@ export const NewsList = () => {
                       )}
                     </TabsContent>
 
-                    <TabsContent
+                    {/* <TabsContent
                       value="most-read"
                       className="flex w-full flex-col gap-6"
                     >
@@ -383,7 +383,7 @@ export const NewsList = () => {
                           />
                         </>
                       )}
-                    </TabsContent>
+                    </TabsContent> */}
                   </Tabs>
                 </div>
               </div>

@@ -16,8 +16,6 @@ export const userApi = {
   getUserByEmail: (email: string) =>
     apiMethods.get<UserProfile>(`/users/email/${email}`),
 
-  getUsersProfile: () => apiMethods.get<UserProfile>(`/users/profile`),
-
   updateUserProfile: (data: UserProfile, id: number) =>
     apiMethods.put<UserProfile>(`/users/${id}`, data),
 

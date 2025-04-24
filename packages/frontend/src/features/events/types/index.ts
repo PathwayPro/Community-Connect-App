@@ -37,9 +37,14 @@ export interface Event {
   start_date: string;
   start_time: string;
   end_time: string;
+  host_id: number;
   host_name: string;
   host_bio: string;
   host_image: string;
+}
+
+export interface EventWithHost extends Event {
+  isHost: boolean;
 }
 
 export interface EventCategory {

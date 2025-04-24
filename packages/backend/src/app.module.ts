@@ -26,6 +26,7 @@ import { BlogModule } from './blog/blog.module';
 import { MenteeModule } from './mentee/mentee.module';
 import { OpportunitiesModule } from './opportunities/opportunities.module';
 import { SalaryRangesModule } from './salary_ranges/salary_ranges.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { SalaryRangesModule } from './salary_ranges/salary_ranges.module';
     MenteeModule,
     OpportunitiesModule,
     SalaryRangesModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [

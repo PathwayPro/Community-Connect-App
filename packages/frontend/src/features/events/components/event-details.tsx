@@ -10,7 +10,6 @@ import {
   Clock,
   ArrowLeft,
   Share2,
-  Heart,
   Lock,
   Users,
   Unlock,
@@ -20,7 +19,7 @@ import {
 import Image from 'next/image';
 import { notFound, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { Event } from '../types';
+import { EventWithHost } from '../types';
 import { EventsTypes } from '../lib/validation';
 import { toSentenceCase } from '@/shared/lib/utils';
 import { formatDate } from 'date-fns';
@@ -30,23 +29,16 @@ import { useState } from 'react';
 interface EventDetailsProps {
   onBack?: () => void;
   onShare?: () => void;
-  onFavorite?: () => void;
   onRegister?: () => void;
-  onFollow?: () => void;
 }
 
-export const EventDetails = ({
-  onShare,
-  onFavorite,
-  onRegister,
-  onFollow
-}: EventDetailsProps) => {
+export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
   const router = useRouter();
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
 
   const searchParams = useSearchParams();
 
-  const eventData: Event = searchParams.get('data')
+  const eventData: EventWithHost = searchParams.get('data')
     ? JSON.parse(decodeURIComponent(searchParams.get('data')!))
     : null;
 
@@ -59,8 +51,6 @@ export const EventDetails = ({
     setIsConnectModalOpen(false);
   };
 
-  console.log('eventData', eventData);
-
   const {
     title,
     description,
@@ -72,10 +62,16 @@ export const EventDetails = ({
     end_time,
     is_free,
     category,
+    host_id,
     host_name,
     host_bio,
-    host_image
+    host_image,
+    isHost
   } = eventData;
+
+  const handleViewProfile = () => {
+    router.push(`/profile/${host_id}`);
+  };
 
   return (
     <div className="container mx-auto max-w-4xl space-y-6 rounded-[24px] bg-white px-6 py-6 shadow-md">
@@ -97,18 +93,14 @@ export const EventDetails = ({
           Back
         </Button>
         <div className="flex gap-2">
-          <Button
-            onClick={onShare}
-            className="h-10 border-primary text-primary"
-            variant="outline"
-          >
+          <Button onClick={onShare} className="h-10">
             <Share2 className="h-5 w-5" />
             Share
           </Button>
-          <Button onClick={onFavorite} className="h-10">
+          {/* <Button onClick={onFavorite} className="h-10">
             <Heart className="h-5 w-5" />
             Favourite
-          </Button>
+          </Button> */}
           {/* <Button onClick={onCreateEvent} className="bg-secondary-500">
             <PlusCircle className="mr-2 h-5 w-5" />
             Create New Event
@@ -185,19 +177,24 @@ export const EventDetails = ({
               priority
             />
           </Avatar>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <h6 className="font-medium">{host_name}</h6>
             <p className="text-justify text-muted-foreground">{host_bio}</p>
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex gap-4">
+              {!isHost && (
+                <Button
+                  onClick={() => setIsConnectModalOpen(true)}
+                  className="h-10 w-[200px]"
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Connect
+                </Button>
+              )}
               <Button
+                onClick={handleViewProfile}
+                className="h-10 w-[200px]"
                 variant="outline"
-                onClick={() => setIsConnectModalOpen(true)}
-                className="h-10 w-[200px] border-primary text-primary"
               >
-                <Users className="mr-2 h-4 w-4" />
-                Connect
-              </Button>
-              <Button onClick={onFollow} className="h-10 w-[200px]">
                 <UserIcon className="mr-2 h-4 w-4" />
                 View Profile
               </Button>

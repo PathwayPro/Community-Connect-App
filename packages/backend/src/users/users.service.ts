@@ -74,7 +74,13 @@ export class UsersService {
   // User Retrieval Methods
   async getUserById(userIdNumber: string): Promise<ReadUserDto> {
     const user = await findUserById(this.prisma, Number(userIdNumber));
-    return this.mapToReadUserDto(user);
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userIdNumber} not found`);
+    }
+
+    const userData = this.mapToReadUserDto(user);
+    return userData;
   }
 
   async getUserByUsername(email: string): Promise<ReadUserDto> {
@@ -101,7 +107,7 @@ export class UsersService {
 
   async getUserPublicInfoById(
     userIdNumber: string,
-  ): Promise<{ message: string; data: PublicReadUserDto }> {
+  ): Promise<PublicReadUserDto> {
     const user = await findUserById(this.prisma, Number(userIdNumber));
 
     if (!user) {
@@ -109,12 +115,10 @@ export class UsersService {
     }
 
     const publicUser = this.mapToPublicReadUserDto(user);
-    return { message: 'User found', data: publicUser };
+    return publicUser;
   }
 
-  async getUserByEmail(
-    email: string,
-  ): Promise<{ message: string; data: PublicReadUserDto }> {
+  async getUserByEmail(email: string): Promise<PublicReadUserDto> {
     try {
       const user = await findUserByEmail(this.prisma, email);
 
@@ -124,7 +128,7 @@ export class UsersService {
 
       const publicUser = this.mapToPublicReadUserDto(user);
 
-      return { message: 'User found', data: publicUser };
+      return publicUser;
     } catch (error) {
       this.logger.error(
         `Error fetching user by email: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -137,16 +141,14 @@ export class UsersService {
   }
 
   // User Management Methods
-  async addUser(
-    user: CreateUserDto,
-  ): Promise<{ message: string; data: ReadUserDto }> {
+  async addUser(user: CreateUserDto): Promise<ReadUserDto> {
     try {
       const newUser = await this.createUserInDatabase(user);
 
       await this.setupEmailVerification(newUser);
 
       const newUserDto = this.mapToReadUserDto(newUser);
-      return { message: 'User added successfully', data: newUserDto };
+      return newUserDto;
     } catch (error) {
       this.logger.error(
         `Error adding user: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -162,7 +164,7 @@ export class UsersService {
     currentUserId: number,
     targetUserId: number,
     updateData: UpdateUserDto,
-  ): Promise<{ message: string; data: ReadUserDto }> {
+  ): Promise<ReadUserDto> {
     try {
       const existingUser = await this.prisma.users.findUnique({
         where: { id: targetUserId },
@@ -213,7 +215,7 @@ export class UsersService {
       });
 
       const updatedUserDto = this.mapToReadUserDto(updatedUser);
-      return { message: 'User updated successfully', data: updatedUserDto };
+      return updatedUserDto;
     } catch (error) {
       this.logger.error(
         `Error updating user: ${error instanceof Error ? error.message : 'Unknown error'}`,

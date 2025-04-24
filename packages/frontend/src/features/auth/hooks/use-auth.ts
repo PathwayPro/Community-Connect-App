@@ -93,11 +93,6 @@ export function useAuth() {
           type: 'success',
           redirect: '/auth/login'
         });
-
-        setTimeout(() => {
-          router.push('/auth/login');
-          router.refresh();
-        }, 3000);
       }
     } catch (error) {
       console.log('error in register', error);
@@ -126,11 +121,6 @@ export function useAuth() {
           type: 'success',
           redirect: '/auth/login'
         });
-
-        setTimeout(() => {
-          router.push('/auth/login');
-          router.refresh();
-        }, 300000);
       }
     } catch (error) {
       const apiError = error as ApiError;
@@ -140,10 +130,6 @@ export function useAuth() {
         description: apiError.response?.data?.message || 'Please try again.',
         type: 'error'
       });
-      setTimeout(() => {
-        router.push('/auth/login');
-        router.refresh();
-      }, 300000);
     } finally {
       setIsLoading(false);
     }
@@ -162,10 +148,6 @@ export function useAuth() {
           type: 'success',
           redirect: '/auth/login'
         });
-        setTimeout(() => {
-          router.push('/auth/login');
-          router.refresh();
-        }, 3000);
       }
     } catch (error) {
       const apiError = error as ApiError;
@@ -193,10 +175,6 @@ export function useAuth() {
           type: 'success',
           redirect: '/auth/login'
         });
-        setTimeout(() => {
-          router.push('/auth/login');
-          router.refresh();
-        }, 3000);
       }
     } catch (error) {
       const apiError = error as ApiError;
@@ -215,13 +193,24 @@ export function useAuth() {
     try {
       setIsLoading(true);
       const response = await authApi.resetPassword(credentials);
+
+      if (response.success) {
+        showAlert({
+          title: 'Password reset successful!',
+          description: 'You can now login with your new password.',
+          type: 'success',
+          redirect: '/auth/login'
+        });
+      }
+
       return response;
     } catch (error) {
       const apiError = error as ApiError;
       showAlert({
         title: 'Failed to reset password',
         description: apiError.response?.data?.message || 'Please try again.',
-        type: 'error'
+        type: 'error',
+        redirect: '/auth/login'
       });
       throw error;
     } finally {
@@ -233,6 +222,16 @@ export function useAuth() {
     try {
       setIsLoading(true);
       const response = await authApi.changePassword(credentials);
+
+      if (response.success) {
+        showAlert({
+          title: 'Password updated successfully!',
+          description: 'You can now login with your new password.',
+          type: 'success',
+          redirect: '/auth/login'
+        });
+      }
+
       return response;
     } catch (error) {
       const apiError = error as ApiError;
@@ -252,7 +251,7 @@ export function useAuth() {
       setIsLoading(true);
       const response = await authApi.logout();
 
-      if (response.message === 'Logout successful') {
+      if (response.success) {
         logoutContext();
         showAlert({
           title: 'Logged out successfully!',
@@ -260,9 +259,6 @@ export function useAuth() {
           type: 'success',
           redirect: '/'
         });
-
-        router.push('/');
-        router.refresh();
       }
     } catch (error) {
       const apiError = error as ApiError;
@@ -281,6 +277,16 @@ export function useAuth() {
     try {
       setIsLoading(true);
       const response = await authApi.refreshToken(credentials);
+
+      if (response.success) {
+        showAlert({
+          title: 'Token refreshed successfully!',
+          description: 'You can now login with your new password.',
+          type: 'success',
+          redirect: '/'
+        });
+      }
+
       return response;
     } catch (error) {
       const apiError = error as ApiError;

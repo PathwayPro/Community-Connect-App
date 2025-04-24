@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { ChangePasswordForm } from '@/features/settings/components/change-password';
 import { Button } from '@/shared/components/ui/button';
@@ -8,8 +8,15 @@ import { Separator } from '@/shared/components/ui/separator';
 import GeneralSettings from './general-settings';
 import ReasonModal from './modals/reason-modal';
 
+interface GeneralSettingsProps {
+  onHasChanges: (hasChanges: boolean) => void;
+  onSave: (saveFunction: () => void) => void;
+}
+
 export const Settings = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [hasPrivacyChanges, setHasPrivacyChanges] = useState(false);
+  const savePrivacySettingsRef = useRef<() => void>(() => {});
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -22,6 +29,18 @@ export const Settings = () => {
   const handleConfirm = () => {
     console.log('Confirm');
   };
+
+  const handlePrivacyChanges = useCallback((hasChanges: boolean) => {
+    setHasPrivacyChanges(hasChanges);
+  }, []);
+
+  const handleSavePrivacySettings = useCallback(() => {
+    savePrivacySettingsRef.current();
+  }, []);
+
+  const setSaveFunction = useCallback((saveFunction: () => void) => {
+    savePrivacySettingsRef.current = saveFunction;
+  }, []);
 
   return (
     <div className="container-wide grid min-h-full w-full grid-cols-1 gap-6 md:grid-cols-2">
@@ -65,9 +84,14 @@ export const Settings = () => {
             label="Save Changes"
             leftIcon="save"
             className="h-10 w-fit"
+            disabled={!hasPrivacyChanges}
+            onClick={handleSavePrivacySettings}
           />
         </div>
-        <GeneralSettings />
+        <GeneralSettings
+          onHasChanges={handlePrivacyChanges}
+          // onSave={setSaveFunction}
+        />
       </div>
     </div>
   );

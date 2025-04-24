@@ -19,8 +19,9 @@ interface NewsStore {
   createNews: (data: CreateNewsDto) => Promise<News | null>;
   updateNews: (id: string, data: UpdateNewsDto) => Promise<void>;
   editNews: (id: string, data: UpdateNewsDto) => Promise<void>;
-  deleteNews: (id: string) => Promise<void>;
+  deleteNews: (id: string) => Promise<boolean | undefined>;
   clearError: () => void;
+  revalidate: () => void;
 }
 
 export const useNewsStore = create<NewsStore>()(
@@ -76,13 +77,17 @@ export const useNewsStore = create<NewsStore>()(
           }
 
           const newNews = response.data;
-          set((state) => ({
-            news: Array.isArray(state.news)
-              ? [...state.news, newNews]
-              : [newNews],
-            isLoading: false
-          }));
-
+          set((state) => {
+            const newState = {
+              ...state,
+              news: Array.isArray(state.news)
+                ? [...state.news, newNews]
+                : [newNews],
+              isLoading: false
+            };
+            newState.revalidate();
+            return newState;
+          });
           return newNews;
         } catch (error) {
           const errorMessage =
@@ -120,11 +125,16 @@ export const useNewsStore = create<NewsStore>()(
           if (response.success) {
             set((state) => ({
               news: state.news.map((item) =>
-                item.id === id ? response.data : item
+                item.id === id ? { ...item, ...data } : item
               ),
               currentNews: response.data,
               isLoading: false
             }));
+            set((state) => {
+              const newState = { ...state, isLoading: false };
+              newState.revalidate();
+              return newState;
+            });
           }
         } catch (error) {
           set({ error: (error as Error).message, isLoading: false });
@@ -141,24 +151,31 @@ export const useNewsStore = create<NewsStore>()(
               news: state.news.filter((item) => item.id !== id),
               isLoading: false
             }));
+            set((state) => {
+              const newState = { ...state, isLoading: false };
+              newState.revalidate();
+              return newState;
+            });
           }
+
+          return response.success;
         } catch (error) {
           const errorMessage = (error as Error).message;
           set({ error: errorMessage, isLoading: false });
         }
       },
 
-      clearError: () => set({ error: null })
+      clearError: () => set({ error: null }),
+
+      revalidate: () => {
+        set((state) => ({ ...state }));
+      }
     }),
     {
-      name: 'news-storage', // unique name for this store
+      name: 'news-storage',
       partialize: (state) => ({
         news: state.news,
         currentNews: state.currentNews
-        // We don't persist these states
-        // isLoading: false,
-        // error: null,
-        // router: undefined,
       })
     }
   )

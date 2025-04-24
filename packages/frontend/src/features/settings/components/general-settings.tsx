@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -16,6 +16,7 @@ import {
   SelectValue
 } from '@/shared/components/ui/select';
 import { Label } from '@/shared/components/ui/label';
+import { useSettingsStore } from '../store';
 
 interface PrivacyOption {
   id: string;
@@ -34,38 +35,88 @@ interface VisibilitySection {
   onChange: (value: string) => void;
 }
 
-export default function GeneralSettings() {
-  const [privacyStates, setPrivacyStates] = useState({
-    birthDate: false,
-    contactDetails: false,
-    socialLinks: false
+interface GeneralSettingsProps {
+  onHasChanges: (hasChanges: boolean) => void;
+  // onSave: () => void;
+}
+
+export default function GeneralSettings({
+  onHasChanges
+  // onSave
+}: GeneralSettingsProps) {
+  const { settings, updateSettings } = useSettingsStore();
+  const [localSettings, setLocalSettings] = useState({
+    shareBirthDate: settings?.shareBirthDate || false,
+    shareContactDetails: settings?.shareContactDetails || false,
+    shareSocialLinks: settings?.shareSocialLinks || false,
+    profileVisibility: settings?.profileVisibility || 'public',
+    messageSettings: settings?.messageSettings || 'everyone'
   });
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Update local settings when store settings change
+  useEffect(() => {
+    if (settings) {
+      setLocalSettings({
+        shareBirthDate: settings.shareBirthDate || false,
+        shareContactDetails: settings.shareContactDetails || false,
+        shareSocialLinks: settings.shareSocialLinks || false,
+        profileVisibility: settings.profileVisibility || 'public',
+        messageSettings: settings.messageSettings || 'everyone'
+      });
+    }
+  }, [settings]);
+
+  // Notify parent component about changes
+  useEffect(() => {
+    onHasChanges(hasChanges);
+  }, [hasChanges, onHasChanges]);
+
+  // Expose save function to parent
+  useEffect(() => {
+    // Create and pass the save handler to parent
+    const saveHandler = () => {
+      if (settings?.id) {
+        updateSettings(settings.id, localSettings);
+        setHasChanges(false);
+        console.log('Settings updated:', localSettings);
+      }
+    };
+
+    // Store the handler in a ref or context that the parent can access
+    // onSave = saveHandler;
+  }, [localSettings, settings, updateSettings]);
+
+  const updateLocalSettings = (updates: Partial<typeof localSettings>) => {
+    setLocalSettings((prev) => ({ ...prev, ...updates }));
+    setHasChanges(true);
+  };
 
   const privacyOptions: PrivacyOption[] = [
     {
       id: 'birthDate',
       label: 'Share Birth Date',
-      value: privacyStates.birthDate,
+      value: localSettings.shareBirthDate,
       onToggle: (value) => {
-        setPrivacyStates(prev => ({ ...prev, birthDate: value }));
+        updateLocalSettings({ shareBirthDate: value });
         console.log('Birth date visibility:', value);
       }
     },
     {
       id: 'contactDetails',
       label: 'Share Contact Details',
-      value: privacyStates.contactDetails,
+      value: localSettings.shareContactDetails,
       onToggle: (value) => {
-        setPrivacyStates(prev => ({ ...prev, contactDetails: value }));
+        updateLocalSettings({ shareContactDetails: value });
         console.log('Contact details visibility:', value);
       }
     },
     {
       id: 'socialLinks',
       label: 'Share Social Links',
-      value: privacyStates.socialLinks,
+      value: localSettings.shareSocialLinks,
       onToggle: (value) => {
-        setPrivacyStates(prev => ({ ...prev, socialLinks: value }));
+        updateLocalSettings({ shareSocialLinks: value });
         console.log('Social links visibility:', value);
       }
     }
@@ -76,24 +127,34 @@ export default function GeneralSettings() {
       id: 'profileVisibility',
       label: 'Profile Visibility',
       description: 'Manage who can view your profile information.',
-      value: 'public',
+      value: localSettings.profileVisibility,
       options: [
         { value: 'public', label: 'Public' },
         { value: 'private', label: 'Private' },
         { value: 'connections', label: 'Connections Only' }
       ],
-      onChange: (value) => console.log('Profile visibility:', value)
+      onChange: (value) => {
+        updateLocalSettings({
+          profileVisibility: value as 'public' | 'private' | 'connections'
+        });
+        console.log('Profile visibility:', value);
+      }
     },
     {
       id: 'messages',
       label: 'Messages',
       description: 'Manage who is allowed to message you.',
-      value: 'everyone',
+      value: localSettings.messageSettings,
       options: [
         { value: 'everyone', label: 'Everyone' },
         { value: 'connections', label: 'Only Connections' }
       ],
-      onChange: (value) => console.log('Messages settings:', value)
+      onChange: (value) => {
+        updateLocalSettings({
+          messageSettings: value as 'everyone' | 'connections'
+        });
+        console.log('Messages settings:', value);
+      }
     }
   ];
 

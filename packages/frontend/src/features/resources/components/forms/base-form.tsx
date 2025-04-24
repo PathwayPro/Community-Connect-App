@@ -9,12 +9,7 @@ import { NewsType } from '../../lib/constants/enums';
 import { FormRadio } from '@/shared/components/form/form-radio';
 import { useFormContext } from 'react-hook-form';
 
-interface BaseFormProps {
-  newsId?: string;
-}
-
-export const BaseForm = ({ newsId }: BaseFormProps) => {
-  console.log(newsId);
+export const BaseForm = () => {
   const {
     formState: { errors }
   } = useFormContext();

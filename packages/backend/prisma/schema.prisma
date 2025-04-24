@@ -82,7 +82,7 @@ model users {
   posts_comments                       PostsComments[]
   posts_likes                 PostsLikes[]
   post_saves                  PostsSaves[]
-
+  userSettings          UserSettings?               
 }
 
 enum users_roles {
@@ -443,5 +443,28 @@ model Opportunities {
   image             String?
   created_at        DateTime        @default(now())
   updated_at        DateTime        @default(now())
+}
+
+enum ProfileVisibility {
+  PUBLIC
+  CONNECTIONS_ONLY
+  PRIVATE
+}
+
+enum MessageSettings {
+  EVERYONE
+  CONNECTIONS_ONLY
+  NOBODY
+}
+
+model UserSettings {
+  id                Int               @id @default(autoincrement())
+  user              users             @relation(fields: [userId], references: [id])
+  userId            Int               @unique
+  shareBirthDate    Boolean           @default(true)
+  shareContactDetails Boolean         @default(true)
+  shareSocialLinks  Boolean           @default(true)
+  profileVisibility ProfileVisibility @default(PUBLIC)
+  messageSettings   MessageSettings   @default(EVERYONE)
 }
 

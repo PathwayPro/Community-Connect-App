@@ -5,8 +5,6 @@ export enum RoleEnum {
 }
 
 export interface UserProfile {
-  country?: string;
-  isConnected?: boolean;
   id?: number;
   firstName: string;
   lastName: string;
