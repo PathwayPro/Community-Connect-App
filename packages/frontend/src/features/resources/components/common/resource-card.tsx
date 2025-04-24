@@ -9,6 +9,10 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { ResourcePreviewCard } from './resource-preview-card';
 import { useRouter } from 'next/navigation';
+import { useResourcesStore } from '../../store';
+import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
+import { DeleteModal } from '../../../../shared/components/modal/delete-modal';
 
 interface ResourceCardProps {
   id?: string;
@@ -34,7 +38,11 @@ export const ResourceCard = ({
   user
 }: ResourceCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const router = useRouter();
+  const { deleteResource } = useResourcesStore();
+  const { showAlert } = useAlertDialog();
 
   const ensureAbsoluteUrl = (url: string) => {
     if (!url) return '#';
@@ -57,8 +65,46 @@ export const ResourceCard = ({
     );
   };
 
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!id) return;
+    try {
+      setIsDeleting(true);
+      await deleteResource(id);
+      showAlert({
+        title: 'Success',
+        description: 'Resource deleted successfully',
+        type: 'success'
+      });
+
+      await fetch('/api/revalidate?path=/resources');
+    } catch (error) {
+      console.error('Error deleting resource:', error);
+      showAlert({
+        title: 'Error',
+        description: 'An error occurred while deleting the resource',
+        type: 'error'
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
   return (
     <Card className="w-full overflow-hidden">
+      <AlertDialogUI />
+      <DeleteModal
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={confirmDelete}
+        isDeleting={isDeleting}
+        title="Delete Resource"
+        description="Are you sure you want to delete this resource? This action cannot be undone."
+      />
       <div className="relative flex flex-col">
         {/* Action Buttons */}
         <div className="absolute right-4 top-4 z-20 flex gap-3">
@@ -68,8 +114,13 @@ export const ResourceCard = ({
           >
             <PenBox className="h-4 w-4 text-white" />
           </div>
-          <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive">
-            <Trash2 className="h-4 w-4 text-white" />
+          <div
+            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive"
+            onClick={handleDelete}
+          >
+            <Trash2
+              className={`h-4 w-4 text-white ${isDeleting ? 'animate-spin' : ''}`}
+            />
           </div>
         </div>
 

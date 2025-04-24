@@ -49,9 +49,9 @@ export class UsersController {
     return await this.usersService.getUserById(userId);
   }
 
-  @Get('id/:userId')
-  async getUserById(@Param('userId') userId: string) {
-    return await this.usersService.getUserPublicInfoById(userId);
+  @Get(':id')
+  async getUserById(@Param('id') userId: string) {
+    return await this.usersService.getUserById(userId);
   }
 
   @Get('email/:email')

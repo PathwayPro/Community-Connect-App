@@ -46,7 +46,6 @@ export const EditNewsForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode') as FormMode;
-  const id = searchParams.get('id');
   const formData = searchParams.get('data')
     ? JSON.parse(decodeURIComponent(searchParams.get('data')!))
     : null;
@@ -54,7 +53,7 @@ export const EditNewsForm = () => {
 
   const { updateNews } = useNewsStore();
   const { updateResource } = useResourcesStore();
-  const { updateOpportunity, salaryRanges } = useOpportunityStore();
+  const { editOpportunity, salaryRanges } = useOpportunityStore();
 
   const formSchema = {
     news: newsFormSchema,
@@ -92,7 +91,7 @@ export const EditNewsForm = () => {
     try {
       const actions = {
         news: async () => {
-          await updateNews(id!, data as CreateNewsDto);
+          await updateNews(formData.id, data as CreateNewsDto);
           showAlert({
             title: 'Success',
             description: 'News updated successfully',
@@ -101,7 +100,7 @@ export const EditNewsForm = () => {
           });
         },
         contentLibrary: async () => {
-          await updateResource(id!, data as CreateResourceDto);
+          await updateResource(formData.id, data as CreateResourceDto);
           showAlert({
             title: 'Success',
             description: 'Resource updated successfully',
@@ -110,7 +109,10 @@ export const EditNewsForm = () => {
           });
         },
         opportunities: async () => {
-          await updateOpportunity(Number(id!), data as CreateOpportunityDto);
+          await editOpportunity(
+            Number(formData.id),
+            data as CreateOpportunityDto
+          );
           showAlert({
             title: 'Success',
             description: 'Opportunity updated successfully',

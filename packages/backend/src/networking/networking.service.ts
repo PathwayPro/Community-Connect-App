@@ -189,14 +189,70 @@ export class NetworkingService {
     filters: FilterConnectionRequestsDto,
   ) {
     try {
-      const appliedFilters: Prisma.ConnectionRequestsWhereInput =
-        this.getFormattedFilters_CR(userId, filters);
-      const connectionRequests: ConnectionRequest[] =
-        await this.prisma.connectionRequests.findMany({
-          where: appliedFilters,
-        });
+      // Get all users except the logged-in user
+      const users = await this.prisma.users.findMany({
+        where: {
+          id: { not: userId },
+        },
+        select: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          picture_upload_link: true,
+          profession: true,
+          company_name: true,
+          country_of_origin: true,
+          skills: true,
+          role: true,
+          bio: true,
+          linkedin_link: true,
+          github_link: true,
+          twitter_link: true,
+          portfolio_link: true,
+        },
+        orderBy: {
+          first_name: 'asc',
+        },
+      });
 
-      return connectionRequests;
+      // Get all connection requests for the logged-in user
+      const connectionRequests = await this.prisma.connectionRequests.findMany({
+        where: {
+          OR: [{ sender_id: userId }, { recipient_id: userId }],
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+
+      // Create a map of connection request status for each user
+      const statusMap = new Map();
+      connectionRequests.forEach((request) => {
+        const otherUserId =
+          request.sender_id === userId
+            ? request.recipient_id
+            : request.sender_id;
+
+        statusMap.set(otherUserId, {
+          status: request.status,
+          requestId: request.id,
+          isIncoming: request.recipient_id === userId,
+          isSender: request.sender_id === userId,
+        });
+      });
+
+      // Combine user data with connection status
+      const enrichedUsers = users.map((user) => ({
+        ...user,
+        connectionStatus: statusMap.get(user.id) || {
+          status: 'NO_REQUEST',
+          requestId: null,
+          isIncoming: null,
+          isSender: null,
+        },
+      }));
+
+      return enrichedUsers;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -225,7 +281,7 @@ export class NetworkingService {
 
   async connections(userId: number) {
     try {
-      const connectedUsers = this.prisma.connectedUsers.findMany({
+      const connectedUsers = await this.prisma.connectedUsers.findMany({
         where: {
           OR: [{ sender_id: userId }, { recipient_id: userId }],
         },
@@ -238,7 +294,6 @@ export class NetworkingService {
             select: {
               id: true,
               first_name: true,
-              middle_name: true,
               last_name: true,
             },
           },
@@ -246,7 +301,6 @@ export class NetworkingService {
             select: {
               id: true,
               first_name: true,
-              middle_name: true,
               last_name: true,
             },
           },
@@ -305,29 +359,58 @@ export class NetworkingService {
 
   async chatList(userId: number) {
     try {
-      const chats = await this.prisma.$queryRaw<ChatList>`
-        SELECT
-          CASE 
-            WHEN sender_id = ${userId} THEN recipient_id
-            ELSE sender_id
-          END AS user_chat,
-          MAX(created_at) AS last_message,
-          u.first_name,
-          u.middle_name,
-          u.last_name
-        FROM 
-          "Messages" m
-        JOIN 
-          "users" u ON 
+      const chats = await this.prisma.$queryRaw<any[]>`
+        WITH CombinedMessages AS (
+          SELECT
             CASE 
-              WHEN sender_id = ${userId} THEN u.id = m.recipient_id
-              ELSE u.id = m.sender_id
-            END
-        WHERE (recipient_id = ${userId} OR sender_id = ${userId})
-        GROUP BY user_chat, u.first_name, u.middle_name, u.last_name;
+              WHEN sender_id = ${userId} THEN recipient_id
+              ELSE sender_id
+            END AS user_chat,
+            created_at,
+            'MESSAGE' as type,
+            message as message,
+            NULL as status
+          FROM "Messages" m
+          WHERE (recipient_id = ${userId} OR sender_id = ${userId})
+
+          UNION ALL
+
+          SELECT
+            CASE 
+              WHEN sender_id = ${userId} THEN recipient_id
+              ELSE sender_id
+            END AS user_chat,
+            created_at,
+            'CONNECTION_REQUEST' as type,
+            message,
+            status::text
+          FROM "ConnectionRequests" cr
+          WHERE (recipient_id = ${userId} OR sender_id = ${userId})
+        )
+        SELECT DISTINCT ON (cm.user_chat)
+          cm.user_chat,
+          cm.created_at AS last_message,
+          u.first_name,
+          u.last_name,
+          u.picture_upload_link,
+          cm.type as last_message_type,
+          cm.message as last_message_content,
+          cm.status as connection_status
+        FROM 
+          CombinedMessages cm
+        JOIN 
+          "users" u ON u.id = cm.user_chat
+        ORDER BY 
+          cm.user_chat,
+          cm.created_at DESC;
       `;
 
-      return chats;
+      // Sort the results by last_message in descending order
+      return chats.sort(
+        (a, b) =>
+          new Date(b.last_message).getTime() -
+          new Date(a.last_message).getTime(),
+      );
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -335,24 +418,70 @@ export class NetworkingService {
 
   async chat(userId: number, userChat: number) {
     try {
-      // VALIDATE LOGGED USER AND CHAT USER ARE DIFFERENET
       if (userId === userChat) {
         throw new BadRequestException('There is no conversation with yourself');
       }
 
-      const messages = await this.prisma.messages.findMany({
-        where: {
-          OR: [
-            { AND: [{ sender_id: userId }, { recipient_id: userChat }] },
-            { AND: [{ sender_id: userChat }, { recipient_id: userId }] },
-          ],
-        },
-        orderBy: {
-          created_at: 'desc',
-        },
-      });
+      const chatHistory = await this.prisma.$queryRaw`
+        SELECT * FROM (
+          SELECT 
+            'MESSAGE' as type,
+            m.id,
+            m.sender_id,
+            m.recipient_id,
+            m.message,
+            m.created_at,
+            NULL as status,
+            -- Sender details
+            s.first_name as sender_first_name,
+            s.last_name as sender_last_name,
+            s.picture_upload_link as sender_picture_upload_link,
+            s.role as sender_role,
+            -- Recipient details
+            r.first_name as recipient_first_name,
+            r.last_name as recipient_last_name,
+            r.picture_upload_link as recipient_picture_upload_link,
+            r.role as recipient_role
+          FROM "Messages" m
+          JOIN "users" s ON m.sender_id = s.id
+          JOIN "users" r ON m.recipient_id = r.id
+          WHERE 
+            (m.sender_id = ${userId} AND m.recipient_id = ${userChat})
+            OR 
+            (m.sender_id = ${userChat} AND m.recipient_id = ${userId})
+          
+          UNION ALL
+          
+          SELECT 
+            'CONNECTION_REQUEST' as type,
+            cr.id,
+            cr.sender_id,
+            cr.recipient_id,
+            cr.message,
+            cr.created_at,
+            cr.status::text,
+            -- Sender details
+            s.first_name as sender_first_name,
+            s.last_name as sender_last_name,
+            s.picture_upload_link as sender_picture_upload_link,
+            s.role as sender_role,
+            -- Recipient details
+            r.first_name as recipient_first_name,
+            r.last_name as recipient_last_name,
+            r.picture_upload_link as recipient_picture_upload_link,
+            r.role as recipient_role
+          FROM "ConnectionRequests" cr
+          JOIN "users" s ON cr.sender_id = s.id
+          JOIN "users" r ON cr.recipient_id = r.id
+          WHERE 
+            (cr.sender_id = ${userId} AND cr.recipient_id = ${userChat})
+            OR 
+            (cr.sender_id = ${userChat} AND cr.recipient_id = ${userId})
+        ) combined
+        ORDER BY created_at ASC
+      `;
 
-      return messages;
+      return chatHistory;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

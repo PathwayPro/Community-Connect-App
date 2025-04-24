@@ -6,35 +6,12 @@ import {
 import { cn } from '@/shared/lib/utils';
 import { format } from 'date-fns';
 import Image from 'next/image';
+import { MessageBubble } from '../../types';
+import * as React from 'react';
 
 interface ChatBubbleProps {
-  message: {
-    content: string;
-    images?: string[];
-    sender: {
-      id: string;
-      name: string;
-      avatar?: string;
-    };
-  };
+  message: MessageBubble;
   isCurrentUser: boolean;
-  timestamp: string;
-}
-
-interface Message {
-  content: string;
-  images?: string[];
-  sender: {
-    id: string;
-    name: string;
-    avatar?: string;
-  };
-}
-
-interface ChatBubbleProps {
-  message: Message;
-  isCurrentUser: boolean;
-  timestamp: string;
 }
 
 function ImageGallery({ images }: { images: string[] }) {
@@ -58,43 +35,93 @@ function ImageGallery({ images }: { images: string[] }) {
   );
 }
 
-function MessageTimestamp({
+export function formatMessageTimestamp(timestamp: Date) {
+  const now = new Date();
+  const messageDate = new Date(timestamp);
+  const diffInDays = Math.floor(
+    (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (diffInDays === 0) {
+    return format(messageDate, 'h:mm a'); // Today: 3:45 PM
+  } else if (diffInDays === 1) {
+    return 'Yesterday';
+  } else if (diffInDays < 7) {
+    return `${diffInDays} days ago`;
+  } else {
+    return format(messageDate, 'MMM d, yyyy'); // Mar 17, 2024
+  }
+}
+
+export function MessageTimestamp({
   timestamp,
   isCurrentUser
 }: {
-  timestamp: string;
+  timestamp: Date;
   isCurrentUser: boolean;
 }) {
   return (
     <span
       className={cn(
-        'mt-4 self-end text-xs',
+        'self-start text-xs',
         isCurrentUser ? 'text-white' : 'text-muted-foreground'
       )}
     >
-      {format(timestamp, 'h:mm a')}
+      {formatMessageTimestamp(timestamp)}
     </span>
   );
 }
 
-export function ChatBubble({
-  message,
-  isCurrentUser,
-  timestamp
-}: ChatBubbleProps) {
-  const { content, images, sender } = message;
-  const hasImages = images && images.length > 0;
+export function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) {
+  // Safely extract sender/recipient information with fallbacks
+  const sender = React.useMemo(
+    () => ({
+      first_name: isCurrentUser
+        ? message.recipient_first_name || 'User'
+        : message.sender_first_name || 'User',
+      last_name: isCurrentUser
+        ? message.recipient_last_name || ''
+        : message.sender_last_name || '',
+      picture_upload_link: isCurrentUser
+        ? message.recipient_picture_upload_link || '/profile/profile.png'
+        : message.sender_picture_upload_link || '/profile/profile.png'
+    }),
+    [
+      isCurrentUser,
+      message.recipient_first_name,
+      message.recipient_last_name,
+      message.recipient_picture_upload_link,
+      message.sender_first_name,
+      message.sender_last_name,
+      message.sender_picture_upload_link
+    ]
+  );
+
+  const fullName = React.useMemo(
+    () => [sender.first_name, sender.last_name].filter(Boolean).join(' '),
+    [sender.first_name, sender.last_name]
+  );
+
+  // Convert timestamp to Date object safely
+  const messageDate = message.created_at
+    ? new Date(message.created_at)
+    : new Date();
+
+  // Assuming message attachments would be handled separately in the future
+  const hasImages = false; // For now, no image handling
+  const images: string[] = []; // For future implementation
 
   return (
     <div
+      key={`${message.id}-${isCurrentUser ? 'current' : 'other'}`}
       className={cn(
         'my-6 flex items-center gap-2',
         isCurrentUser ? 'flex-row-reverse' : 'flex-row'
       )}
     >
       <Avatar className="h-8 w-8">
-        <AvatarImage src={sender.avatar} alt={sender.name} />
-        <AvatarFallback>{sender.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+        <AvatarImage src={sender.picture_upload_link} alt={fullName} />
+        <AvatarFallback>{sender.first_name.charAt(0)}</AvatarFallback>
       </Avatar>
 
       <div
@@ -111,22 +138,20 @@ export function ChatBubble({
           )}
         >
           {hasImages && <ImageGallery images={images} />}
-          {content && (
-            <div className="flex flex-col">
-              <p
-                className={cn(
-                  'break-words text-sm',
-                  isCurrentUser && 'text-white'
-                )}
-              >
-                {content}
-              </p>
-              <MessageTimestamp
-                timestamp={timestamp}
-                isCurrentUser={isCurrentUser}
-              />
-            </div>
-          )}
+          <div className="flex flex-col gap-2">
+            <p
+              className={cn(
+                'break-words text-sm',
+                isCurrentUser && 'text-white'
+              )}
+            >
+              {message.message}
+            </p>
+            <MessageTimestamp
+              timestamp={messageDate}
+              isCurrentUser={isCurrentUser}
+            />
+          </div>
         </div>
       </div>
     </div>

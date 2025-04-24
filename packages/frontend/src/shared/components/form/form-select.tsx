@@ -38,6 +38,7 @@ interface FormSelectProps<T extends FieldValues> {
     RegisterOptions<T, Path<T>>,
     'setValueAs' | 'disabled' | 'valueAsNumber' | 'valueAsDate'
   >;
+  onChange?: (value: string) => void;
 }
 
 export const FormSelect = <T extends FieldValues>({
@@ -48,7 +49,8 @@ export const FormSelect = <T extends FieldValues>({
   control: controlProp,
   required = false,
   options,
-  rules
+  rules,
+  onChange
 }: FormSelectProps<T>) => {
   const formContext = useFormContext<T>();
   const control = controlProp || formContext?.control;
@@ -80,7 +82,10 @@ export const FormSelect = <T extends FieldValues>({
           </FormLabel>
           <FormControl>
             <Select
-              onValueChange={field.onChange}
+              onValueChange={(value) => {
+                field.onChange(value);
+                onChange?.(value);
+              }}
               defaultValue={field.value?.toString()}
             >
               <SelectTrigger className="w-full bg-neutral-light-100">

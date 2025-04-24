@@ -41,37 +41,44 @@ export const Networking = () => {
   });
 
   // get users
-  const { networkingUsers, connections, getNetworkingUsers, isLoading } =
-    useNetworkingStore();
+  const {
+    connections,
+    connectionRequests,
+    getConnections,
+    getConnectionRequests,
+    isLoading
+  } = useNetworkingStore();
 
   useEffect(() => {
-    getNetworkingUsers();
-  }, [getNetworkingUsers]);
+    getConnections();
+    getConnectionRequests();
+  }, [getConnections, getConnectionRequests]);
 
   console.log(
-    'users hereeeeee :',
-    networkingUsers,
     'connec tionnnnnss :',
-    connections
+    connections,
+    'connection requests :',
+    connectionRequests
   );
 
   const filteredData = useMemo(() => {
-    console.log('networkingProfiles in filteredData', networkingUsers);
-
-    return networkingUsers.filter((profile) => {
+    return connectionRequests.filter((request) => {
       // Filter by tab
-      if (activeTab === 'mentor' && profile.role !== 'MENTOR') {
+      if (activeTab === 'mentor' && request.role !== 'MENTOR') {
         return false;
       }
 
-      if (activeTab === 'connection' && !profile.isConnected) {
+      if (
+        activeTab === 'connection' &&
+        request.connectionStatus.status !== 'APPROVED'
+      ) {
         return false;
       }
 
       // Filter by search term
       if (
         filters.search &&
-        !profile.firstName.toLowerCase().includes(filters.search.toLowerCase())
+        !request.first_name.toLowerCase().includes(filters.search.toLowerCase())
       ) {
         return false;
       }
@@ -79,7 +86,7 @@ export const Networking = () => {
       // Filter by country
       if (
         filters.country.length > 0 &&
-        !filters.country.includes(profile?.countryOfOrigin ?? '')
+        !filters.country.includes(request.country_of_origin ?? '')
       ) {
         return false;
       }
@@ -87,7 +94,7 @@ export const Networking = () => {
       // Filter by skills
       if (
         filters.skills.length > 0 &&
-        !filters.skills.some((skill) => profile.skills?.includes(skill))
+        !filters.skills.some((skill) => request.skills?.includes(skill))
       ) {
         return false;
       }
@@ -95,14 +102,14 @@ export const Networking = () => {
       // Filter by profession
       if (
         filters.professions.length > 0 &&
-        !filters.professions.includes(profile.profession ?? '')
+        !filters.professions.includes(request.profession ?? '')
       ) {
         return false;
       }
 
       return true;
     });
-  }, [filters, networkingUsers, activeTab]);
+  }, [filters, connectionRequests, activeTab]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
@@ -193,8 +200,8 @@ export const Networking = () => {
                 ) : (
                   <>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                      {paginatedData.map((profile) => (
-                        <NetworkingCard key={profile.id} profile={profile} />
+                      {paginatedData.map((request) => (
+                        <NetworkingCard key={request.id} profile={request} />
                       ))}
                     </div>
                     {totalPages > 1 && (

@@ -176,8 +176,6 @@ export class EventsService {
       const appliedFilters: Prisma.EventsWhereInput =
         this.getFormattedFilters(filters);
 
-      console.log('filters:', appliedFilters);
-
       const events = await this.prisma.events.findMany({
         where: appliedFilters,
         include: {
@@ -189,7 +187,6 @@ export class EventsService {
         },
       });
 
-      // add manager first name and last name and bio to the event
       const eventsWithManagers = await Promise.all(
         events.map(async (event) => {
           const manager_id = event.managers[0].user_id;
@@ -200,14 +197,13 @@ export class EventsService {
 
           return {
             ...event,
+            host_id: user.id,
             host_name: `${user.first_name} ${user.last_name}`,
             host_bio: user.bio,
             host_image: user.picture_upload_link,
           };
         }),
       );
-
-      console.log('eventsWithManagers:', eventsWithManagers);
 
       return eventsWithManagers;
     } catch (error) {

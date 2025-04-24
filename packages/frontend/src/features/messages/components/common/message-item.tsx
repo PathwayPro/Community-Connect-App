@@ -5,38 +5,52 @@ import {
   AvatarFallback,
   AvatarImage
 } from '@/shared/components/ui/avatar';
-import { format } from 'date-fns';
-import { Message } from '@/features/messages/types';
+import { ChatPreview } from '@/features/messages/types';
+import { MessageTimestamp } from './chat-bubble';
 
 interface MessageItemProps {
-  message: Message;
+  chat: ChatPreview;
+  isSelected?: boolean;
+  onClick: () => void;
 }
 
-export const MessageItem = ({ message }: MessageItemProps) => {
-  const handleClick = () => {
-    console.log('clicked');
-  };
+export const MessageItem = ({
+  chat,
+  isSelected,
+  onClick
+}: MessageItemProps) => {
+  const fullName = [chat.first_name, chat.last_name].filter(Boolean).join(' ');
 
   return (
     <div
-      className="flex cursor-pointer items-center gap-2 border-b p-4 last:border-b-0 hover:bg-neutral-100"
-      onClick={handleClick}
+      className={`flex cursor-pointer items-center gap-2 border-b p-4 last:border-b-0 hover:bg-neutral-100 ${
+        isSelected ? 'bg-neutral-100' : ''
+      }`}
+      onClick={onClick}
     >
       <Avatar className="size-10">
-        <AvatarImage src={message.sender.avatar} />
-        <AvatarFallback>{message.sender.name.charAt(0)}</AvatarFallback>
+        <AvatarImage src={chat.picture_upload_link || '/profile/profile.png'} />
+        <AvatarFallback>{chat.first_name.charAt(0)}</AvatarFallback>
       </Avatar>
-      <div className="flex flex-col">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-sm font-semibold">{message.sender.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {format(new Date(message.timestamp), 'MMM d, yyyy')}
-          </p>
+      <div className="flex flex-1 flex-col gap-2">
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm font-semibold">{fullName}</p>
+          <MessageTimestamp
+            timestamp={new Date(chat.last_message)}
+            isCurrentUser={false}
+          />
         </div>
 
-        <p className="line-clamp-1 text-paragraph-sm text-muted-foreground">
-          {message.content}
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="line-clamp-1 text-paragraph-sm text-muted-foreground">
+            {chat.last_message_content}
+          </p>
+          {chat.connection_status === 'PENDING' && (
+            <span className="rounded-full bg-warning-100 px-2 py-0.5 text-xs text-warning-700">
+              Pending
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

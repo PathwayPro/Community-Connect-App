@@ -1,10 +1,10 @@
 import { apiMethods } from '@/shared/api';
-import { Connection, ConnectionRequest, Message, ChatPreview } from '../types';
+import { Connection, ConnectionRequest } from '../types';
+import { Message, ChatPreview } from '@/features/messages/types';
 import {
   CreateConnectionRequestDto,
   UpdateConnectionRequestDto,
-  CreateMessageDto,
-  FilterConnectionRequestDto
+  CreateMessageDto
 } from '../dto/networking-dto';
 
 export const networkingApi = {
@@ -15,8 +15,8 @@ export const networkingApi = {
   updateConnectionRequest: (id: string, data: UpdateConnectionRequestDto) =>
     apiMethods.put<ConnectionRequest>(`/networking/connect/${id}`, data),
 
-  getConnectionRequests: (filters: FilterConnectionRequestDto) =>
-    apiMethods.get<ConnectionRequest[]>(`/networking/connect?${filters}`),
+  getConnectionRequests: () =>
+    apiMethods.get<ConnectionRequest[]>(`/networking/connect`),
 
   getConnectionRequest: (id: string) =>
     apiMethods.get<ConnectionRequest>(`/networking/connect/${id}`),

@@ -8,6 +8,11 @@ import { IconButton } from '@/shared/components/ui/icon-button';
 import { ExpandedNewsModal } from './expanded-news-modal';
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
+import { useNewsStore } from '../../store';
+import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
+import { DeleteModal } from '../../../../shared/components/modal/delete-modal';
 
 interface FeaturedNewsCardProps {
   id?: string;
@@ -25,6 +30,7 @@ interface FeaturedNewsCardProps {
 }
 
 export const FeaturedNewsCard = ({
+  id,
   title,
   details,
   image,
@@ -34,19 +40,92 @@ export const FeaturedNewsCard = ({
   link
 }: FeaturedNewsCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const router = useRouter();
+  const { deleteNews } = useNewsStore();
+  const { showAlert } = useAlertDialog();
+
+  const newsData = {
+    id,
+    title,
+    details,
+    type,
+    image,
+    link,
+    created_at,
+    user
+  };
+
+  console.log('newsData', newsData);
 
   const fullName = `${user.first_name} ${user.last_name}`;
 
+  const handleEdit = () => {
+    router.push(
+      `/resources/edit/${id}?mode=news&data=${encodeURIComponent(JSON.stringify(newsData))}`
+    );
+  };
+
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!id) return;
+    try {
+      setIsDeleting(true);
+      const success = await deleteNews(id);
+
+      if (success) {
+        showAlert({
+          title: 'Success',
+          description: 'News deleted successfully',
+          type: 'success'
+        });
+      } else {
+        throw new Error('Failed to delete news');
+      }
+    } catch (error) {
+      console.error('Error deleting news:', error);
+      showAlert({
+        title: 'Error',
+        description: 'An error occurred while deleting the news',
+        type: 'error'
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
   return (
     <Card className="mx-auto w-full bg-primary-300 p-6 text-white">
+      <AlertDialogUI />
+      <DeleteModal
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={confirmDelete}
+        isDeleting={isDeleting}
+        title="Delete News"
+        description="Are you sure you want to delete this news item? This action cannot be undone."
+      />
       <div className="flex justify-between">
         <h2 className="mb-6 text-2xl font-bold text-white">Featured News</h2>
         <div className="flex h-8 gap-3">
-          <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary">
+          <div
+            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary"
+            onClick={handleEdit}
+          >
             <PenBox className="h-4 w-4 text-white" />
           </div>
-          <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive">
-            <Trash2 className="h-4 w-4 text-white" />
+          <div
+            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive"
+            onClick={handleDelete}
+          >
+            <Trash2
+              className={`h-4 w-4 text-white ${isDeleting ? 'animate-spin' : ''}`}
+            />
           </div>
         </div>
       </div>

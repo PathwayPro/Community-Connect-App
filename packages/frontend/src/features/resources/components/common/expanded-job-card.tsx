@@ -9,6 +9,11 @@ import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { Link, PenBox, Trash2 } from 'lucide-react';
 import { OpportunityResponseDto } from '../../dto/opportunity-dto';
 import { useRouter } from 'next/navigation';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
+import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
+import { DeleteModal } from '../../../../shared/components/modal/delete-modal';
+import { useResourcesStore } from '../../store';
+import { useState } from 'react';
 
 interface ExpandedJobCardProps {
   opportunity: OpportunityResponseDto;
@@ -38,6 +43,11 @@ export function ExpandedJobCard({
     file: opportunity.file
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { deleteResource } = useResourcesStore();
+  const { showAlert } = useAlertDialog();
+
   const handleEdit = () => {
     router.push(
       `/resources/edit/${opportunity.id}?mode=opportunities&data=${encodeURIComponent(
@@ -46,8 +56,45 @@ export function ExpandedJobCard({
     );
   };
 
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!opportunity.id) return;
+    try {
+      setIsDeleting(true);
+      await deleteResource(opportunity.id);
+      showAlert({
+        title: 'Success',
+        description: 'Opportunity deleted successfully',
+        type: 'success',
+        redirect: '/resources'
+      });
+    } catch (error) {
+      console.error('Error deleting opportunity:', error);
+      showAlert({
+        title: 'Error',
+        description: 'An error occurred while deleting the opportunity',
+        type: 'error'
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
   return (
     <Card className="relative w-full min-w-full bg-neutral-light-100 p-4">
+      <AlertDialogUI />
+      <DeleteModal
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={confirmDelete}
+        isDeleting={isDeleting}
+        title="Delete Opportunity"
+        description="Are you sure you want to delete this opportunity? This action cannot be undone."
+      />
       <div className="flex flex-col items-center space-y-4">
         <div className="absolute top-0 h-[70px] w-full shrink-0 rounded-t-xl bg-primary-200" />
 
@@ -59,8 +106,13 @@ export function ExpandedJobCard({
           >
             <PenBox className="h-4 w-4 text-white" />
           </div>
-          <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive">
-            <Trash2 className="h-4 w-4 text-white" />
+          <div
+            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive"
+            onClick={handleDelete}
+          >
+            <Trash2
+              className={`h-4 w-4 text-white ${isDeleting ? 'animate-spin' : ''}`}
+            />
           </div>
         </div>
 

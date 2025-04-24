@@ -64,17 +64,28 @@ const InfoGroup = ({ title, items }: InfoGroupProps) => (
   </div>
 );
 
-export const ViewProfile = () => {
+interface ViewProfileProps {
+  slug?: string;
+}
+
+export const ViewProfile = ({ slug }: ViewProfileProps) => {
   const router = useRouter();
   const { user } = useUserStore();
-  const { isLoading, error } = useFetchProfile();
+  const userId = slug;
 
-  console.log('user data', user);
+  console.log('slug', slug);
+  // Modified to accept userId parameter
+  const { isLoading, error, data: profileData } = useFetchProfile(userId);
+
+  const isOwnProfile = !userId || Number(userId) === user?.id;
+  const displayedUser = isOwnProfile ? user : profileData;
+
+  console.log('profile data', displayedUser, isOwnProfile);
 
   // view profile data builder
-  const profileData = {
-    name: `${user?.firstName} ${user?.lastName}`,
-    avatar: user?.pictureUploadLink || '/profile/profile.png',
+  const profileDataBuilder = {
+    name: `${displayedUser?.firstName} ${displayedUser?.lastName}`,
+    avatar: displayedUser?.pictureUploadLink || '/profile/profile.png',
     stats: {
       menteesTutored: 24,
       groupSessions: 15,
@@ -82,61 +93,93 @@ export const ViewProfile = () => {
     },
     bio: {
       label: 'Bio',
-      value: user?.bio || 'Not specified'
+      value: displayedUser?.bio || 'Not specified'
     },
     personalInfo: [
-      { label: 'Name', value: `${user?.firstName} ${user?.lastName}` },
+      {
+        label: 'Name',
+        value: `${displayedUser?.firstName} ${displayedUser?.lastName}`
+      },
       {
         label: 'Date of Birth',
-        value: user?.dob
-          ? formatDate(new Date(user.dob), 'MMMM d')
+        value: displayedUser?.dob
+          ? formatDate(new Date(displayedUser.dob), 'MMMM d')
           : 'Not specified'
       },
       {
         label: 'Years in Canada',
-        value: user?.arrivalInCanada
-          ? getArrivalInCanadaLabel(user.arrivalInCanada)
+        value: displayedUser?.arrivalInCanada
+          ? getArrivalInCanadaLabel(displayedUser.arrivalInCanada)
           : 'Not specified'
       },
       {
         label: 'Country of Origin',
-        value: user?.countryOfOrigin || 'Not specified'
+        value: displayedUser?.countryOfOrigin || 'Not specified'
       },
-      { label: 'Languages', value: user?.languages || 'Not specified' }
+      { label: 'Languages', value: displayedUser?.languages || 'Not specified' }
     ],
     contactDetails: [
-      { label: 'Email', value: user?.email || 'Not specified' },
-      { label: 'Province/State', value: user?.province || 'Not specified' },
-      { label: 'City', value: user?.city || 'Not specified' }
+      { label: 'Email', value: displayedUser?.email || 'Not specified' },
+      {
+        label: 'Province/State',
+        value: displayedUser?.province || 'Not specified'
+      },
+      { label: 'City', value: displayedUser?.city || 'Not specified' }
     ],
     professionalInfo: [
-      { label: 'Profession', value: user?.profession || 'Not specified' },
-      { label: 'Company', value: user?.companyName || 'Not specified' },
-      { label: 'Experience', value: `${user?.experience || 0} years` },
+      {
+        label: 'Profession',
+        value: displayedUser?.profession || 'Not specified'
+      },
+      {
+        label: 'Company',
+        value: displayedUser?.companyName || 'Not specified'
+      },
+      { label: 'Experience', value: `${displayedUser?.experience || 0} years` },
       {
         label: 'Skills',
-        value: user?.skills
-          ? user.skills.map((skill) => getSkillLabel(skill)).join(', ')
+        value: displayedUser?.skills
+          ? displayedUser.skills
+              .map((skill: string) => getSkillLabel(skill))
+              .join(', ')
           : 'Not specified'
       }
     ],
     links: [
-      ...(user?.linkedinLink
-        ? [{ label: 'LinkedIn', value: user.linkedinLink, isLink: true }]
+      ...(displayedUser?.linkedinLink
+        ? [
+            {
+              label: 'LinkedIn',
+              value: displayedUser.linkedinLink,
+              isLink: true
+            }
+          ]
         : []),
-      ...(user?.githubLink
-        ? [{ label: 'GitHub', value: user.githubLink, isLink: true }]
+      ...(displayedUser?.githubLink
+        ? [{ label: 'GitHub', value: displayedUser.githubLink, isLink: true }]
         : []),
-      ...(user?.twitterLink
-        ? [{ label: 'Twitter', value: user.twitterLink, isLink: true }]
+      ...(displayedUser?.twitterLink
+        ? [{ label: 'Twitter', value: displayedUser.twitterLink, isLink: true }]
         : []),
-      ...(user?.portfolioLink
-        ? [{ label: 'Portfolio', value: user.portfolioLink, isLink: true }]
+      ...(displayedUser?.portfolioLink
+        ? [
+            {
+              label: 'Portfolio',
+              value: displayedUser.portfolioLink,
+              isLink: true
+            }
+          ]
         : []),
-      ...(user?.otherLinks
-        ? [{ label: 'Other Links', value: user.otherLinks, isLink: true }]
+      ...(displayedUser?.otherLinks
+        ? [
+            {
+              label: 'Other Links',
+              value: displayedUser.otherLinks,
+              isLink: true
+            }
+          ]
         : []),
-      ...(user?.additionalLinks?.map((link) => ({
+      ...(displayedUser?.additionalLinks?.map((link: string) => ({
         label: 'Additional Link',
         value: link,
         isLink: true
@@ -167,14 +210,23 @@ export const ViewProfile = () => {
   return (
     <div className="container-default mx-auto min-w-[1024px] max-w-4xl">
       <Card className="space-y-8 p-6">
-        {/* Edit Profile Button */}
-        <div className="flex justify-end">
+        {/* Edit Profile Button - Only show for own profile */}
+        <div className="flex justify-between gap-4">
           <IconButton
-            leftIcon="pencilSquare"
-            label="Edit Profile"
-            className="w-[180px]"
-            onClick={() => router.push('/profile/update')}
+            label="Back"
+            leftIcon="arrowLeft"
+            variant="outline"
+            className="h-10 w-fit"
+            onClick={() => router.back()}
           />
+          {isOwnProfile && (
+            <IconButton
+              leftIcon="pencilSquare"
+              label="Edit Profile"
+              className="h-10 w-fit"
+              onClick={() => router.push('/profile/update')}
+            />
+          )}
         </div>
 
         {/* Avatar Card */}
@@ -183,7 +235,7 @@ export const ViewProfile = () => {
         <div className="flex flex-col items-center space-y-4">
           <div className="relative h-40 w-40 overflow-hidden rounded-full bg-warning-500">
             <Image
-              src={profileData.avatar}
+              src={profileDataBuilder.avatar}
               alt="Profile-avatar"
               width={160}
               height={160}
@@ -191,35 +243,35 @@ export const ViewProfile = () => {
               className="h-full w-full object-cover"
             />
           </div>
-          <h3 className="font-bold">{profileData.name}</h3>
+          <h3 className="font-bold">{profileDataBuilder.name}</h3>
         </div>
 
         {/* Stats Section */}
         <div className="flex items-center justify-center gap-8">
           <StatItem
             label="Mentees Tutored"
-            value={profileData.stats.menteesTutored}
+            value={profileDataBuilder.stats.menteesTutored}
           />
           <Separator orientation="vertical" className="h-12" />
           <StatItem
             label="Group Sessions"
-            value={profileData.stats.groupSessions}
+            value={profileDataBuilder.stats.groupSessions}
           />
           <Separator orientation="vertical" className="h-12" />
           <StatItem
             label="Personal Sessions"
-            value={profileData.stats.personalSessions}
+            value={profileDataBuilder.stats.personalSessions}
           />
         </div>
 
         {/* Bio */}
-        {profileData.bio && (
+        {profileDataBuilder.bio && (
           <>
             <div className="space-y-3">
               <Separator />
 
               <p className="paragraph-lg pt-3 text-center text-muted-foreground">
-                {profileData.bio.value}
+                {profileDataBuilder.bio.value}
               </p>
             </div>
           </>
@@ -229,39 +281,39 @@ export const ViewProfile = () => {
         {/* Information Cards */}
         <div className="space-y-6">
           {/* Personal Information */}
-          {profileData.personalInfo.length > 0 && (
+          {profileDataBuilder.personalInfo.length > 0 && (
             <Card className="bg-neutral-light-200 p-6">
               <InfoGroup
                 title="Personal Information"
-                items={profileData.personalInfo}
+                items={profileDataBuilder.personalInfo}
               />
             </Card>
           )}
 
           {/* Contact Details */}
-          {profileData.contactDetails.length > 0 && (
+          {profileDataBuilder.contactDetails.length > 0 && (
             <Card className="bg-neutral-light-200 p-6">
               <InfoGroup
                 title="Contact Details"
-                items={profileData.contactDetails}
+                items={profileDataBuilder.contactDetails}
               />
             </Card>
           )}
 
           {/* Professional Information */}
-          {profileData.professionalInfo.length > 0 && (
+          {profileDataBuilder.professionalInfo.length > 0 && (
             <Card className="bg-neutral-light-200 p-6">
               <InfoGroup
                 title="Professional Information"
-                items={profileData.professionalInfo}
+                items={profileDataBuilder.professionalInfo}
               />
             </Card>
           )}
 
           {/* Links */}
-          {profileData.links.length > 0 && (
+          {profileDataBuilder.links.length > 0 && (
             <Card className="bg-neutral-light-200 p-6">
-              <InfoGroup title="Links" items={profileData.links} />
+              <InfoGroup title="Links" items={profileDataBuilder.links} />
             </Card>
           )}
         </div>

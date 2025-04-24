@@ -9,6 +9,10 @@ import { ExpandedNewsModal } from './expanded-news-modal';
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
+import { useNewsStore } from '../../store';
+import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
+import { DeleteModal } from '../../../../shared/components/modal/delete-modal';
 
 interface NewsCardProps {
   id?: string;
@@ -36,7 +40,11 @@ export const NewsCard = ({
   user
 }: NewsCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const router = useRouter();
+  const { deleteNews } = useNewsStore();
+  const { showAlert } = useAlertDialog();
 
   const handleEdit = () => {
     const newsData = {
@@ -55,8 +63,49 @@ export const NewsCard = ({
     );
   };
 
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!id) return;
+    try {
+      setIsDeleting(true);
+      const success = await deleteNews(id);
+
+      if (success) {
+        showAlert({
+          title: 'Success',
+          description: 'News deleted successfully',
+          type: 'success'
+        });
+      } else {
+        throw new Error('Failed to delete news');
+      }
+    } catch (error) {
+      console.error('Error deleting news:', error);
+      showAlert({
+        title: 'Error',
+        description: 'An error occurred while deleting the news',
+        type: 'error'
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
   return (
     <Card className="w-full overflow-hidden">
+      <AlertDialogUI />
+      <DeleteModal
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={confirmDelete}
+        isDeleting={isDeleting}
+        title="Delete News"
+        description="Are you sure you want to delete this news item? This action cannot be undone."
+      />
       <div className="relative flex flex-col">
         {/* Action Buttons */}
         <div className="absolute right-4 top-4 z-20 flex gap-3">
@@ -66,8 +115,13 @@ export const NewsCard = ({
           >
             <PenBox className="h-4 w-4 text-white" />
           </div>
-          <div className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive">
-            <Trash2 className="h-4 w-4 text-white" />
+          <div
+            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive"
+            onClick={handleDelete}
+          >
+            <Trash2
+              className={`h-4 w-4 text-white ${isDeleting ? 'animate-spin' : ''}`}
+            />
           </div>
         </div>
 

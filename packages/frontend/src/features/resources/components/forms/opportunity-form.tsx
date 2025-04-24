@@ -61,14 +61,14 @@ export const OpportunityForm = ({
         name="job"
         label="Job Title"
         placeholder="Enter job title"
-        customError="Job title is required"
+        customError={errors.job?.message as string}
         required
       />
       <FormInput
         name="company"
         label="Company Name"
         placeholder="Enter company name"
-        customError="Company name is required"
+        customError={errors.company?.message as string}
         required
       />
       <FileUpload
