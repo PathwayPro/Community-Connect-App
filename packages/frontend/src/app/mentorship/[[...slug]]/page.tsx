@@ -44,7 +44,7 @@ export default function MentorshipPage({ params }: MentorshipPageProps) {
         return (
           <MentorshipWaitlist
             applicationDate={new Date()}
-            activityType="Mentor"
+            activityType={params.slug[1]}
           />
         );
 

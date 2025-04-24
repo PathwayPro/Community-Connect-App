@@ -8,6 +8,9 @@ import { useState, useEffect } from 'react';
 import { mockComments } from '../../lib/mock-data';
 import { CommentCard } from '../comment-card';
 
+import { useBlogStore } from '../../store';
+import { PostCommentResponse } from '../../types';
+
 interface ThreadCardProps {
   id: number;
   authorName: string;
@@ -23,6 +26,26 @@ interface ThreadCardProps {
   setShowCommentSection?: (show: boolean) => void;
   showCommentSection?: boolean;
 }
+
+interface CommentCardProps {
+  id: number;
+  authorUsername: string;
+  authorName: string;
+  content: string;
+  avatarUrl: string;
+  timeAgo: string;
+}
+
+const transformCommentResponseToCommentCardProps = (
+  response: PostCommentResponse
+): CommentCardProps => ({
+  id: response.id,
+  authorUsername: `${response.user.first_name} ${response.user.last_name}`,
+  authorName: `${response.user.first_name} ${response.user.last_name}`,
+  content: response.message,
+  avatarUrl: '',
+  timeAgo: response.created_at
+});
 
 export const CommentsThreadCard = ({
   id,
@@ -44,9 +67,22 @@ export const CommentsThreadCard = ({
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
 
+  const {
+    threadMessages: rawThreadMessages,
+    fetchThreadComments,
+    isLoading: commentsLoading,
+    error: commentsError
+  } = useBlogStore();
+  const threadComments: CommentCardProps[] = rawThreadMessages.map(
+    transformCommentResponseToCommentCardProps
+  );
+
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    if (showCommentSection && selectedThread?.id) {
+      fetchThreadComments(selectedThread.id);
+    }
+  }, [showCommentSection, selectedThread?.id, fetchThreadComments]);
 
   // handle like
   const handleLike = () => {
@@ -145,7 +181,9 @@ export const CommentsThreadCard = ({
           </button>
         </BaseThreadCard.Actions>
 
-        {showCommentSection && (
+        {/* 
+          - - - - - - - ORIGINAL - - - - - - - 
+          {showCommentSection && (
           <BaseThreadCard.Comment>
             {mockComments.map((comment) => (
               <CommentCard
@@ -155,6 +193,25 @@ export const CommentsThreadCard = ({
                 variant="primary"
               />
             ))}
+          </BaseThreadCard.Comment>
+        )} */}
+
+        {showCommentSection && (
+          <BaseThreadCard.Comment>
+            {commentsLoading ? (
+              <div>Loading comments...</div>
+            ) : commentsError ? (
+              <div>Error loading comments: {commentsError}</div>
+            ) : (
+              threadComments.map((comment) => (
+                <CommentCard
+                  key={comment.id}
+                  comment={comment}
+                  iconClassName="hover:bg-white/50"
+                  variant="primary"
+                />
+              ))
+            )}
           </BaseThreadCard.Comment>
         )}
 

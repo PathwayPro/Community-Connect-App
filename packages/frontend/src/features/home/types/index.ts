@@ -6,3 +6,47 @@ export interface NavItemProps {
   isActive?: boolean;
   onClick?: () => void;
 }
+
+interface UserPosts {
+  id: number;
+  first_name: string;
+  middle_name: string;
+  last_name: string;
+}
+
+export interface ThreadResponse {
+  id: number;
+  // message?: string,
+  content: string;
+  image?: string;
+  created_at: string;
+  published?: boolean;
+  user: UserPosts;
+  likes_count: number;
+  comments_count: number;
+}
+
+export interface PostCommentResponse {
+  id: number;
+  message: string;
+  created_at: string;
+  published: false;
+  user: UserPosts;
+  post: {
+    id: number;
+    message: string;
+    created_at: string;
+    published: boolean;
+    user: UserPosts;
+  };
+}
+
+// id: number;
+// authorName: string;
+// authorUsername: string;
+// timeAgo: string;
+// content: string;
+// avatarUrl: string;
+// likes?: number;
+// comments?: number;
+// replies?: Comment[];

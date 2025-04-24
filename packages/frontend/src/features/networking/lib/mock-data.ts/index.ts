@@ -66,7 +66,7 @@ export const getCountries = () => {
 
 export const mockNetworkingProfiles: NetworkingProfile[] = [
   {
-    id: '1',
+    id: 1,
     firstName: 'Sarah',
     lastName: 'Chen',
     company: 'TechForward Solutions',
@@ -82,10 +82,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
       'AWS'
     ],
     profession: 'Software Architect',
-    country: 'United States'
+    countryOfOrigin: 'United States'
   },
   {
-    id: '2',
+    id: 2,
     firstName: 'James',
     lastName: 'Rodriguez',
     company: 'Innovation Hub',
@@ -95,10 +95,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'USER',
     skills: ['Agile', 'Scrum', 'UI/UX', 'Product Management'],
     profession: 'Product Manager',
-    country: 'Spain'
+    countryOfOrigin: 'Spain'
   },
   {
-    id: '3',
+    id: 3,
     firstName: 'Emily',
     lastName: 'Thompson',
     company: 'DesignCraft Co',
@@ -108,10 +108,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'MENTOR',
     skills: ['UI/UX', 'Figma', 'Adobe XD', 'Design Systems'],
     profession: 'UX Designer',
-    country: 'United Kingdom'
+    countryOfOrigin: 'United Kingdom'
   },
   {
-    id: '4',
+    id: 4,
     firstName: 'Michael',
     lastName: 'Patel',
     company: 'DataMinds Analytics',
@@ -121,10 +121,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'MENTOR',
     skills: ['Machine Learning', 'Python', 'Data Analysis', 'SQL'],
     profession: 'Data Scientist',
-    country: 'India'
+    countryOfOrigin: 'India'
   },
   {
-    id: '5',
+    id: 5,
     firstName: 'Lisa',
     lastName: 'Wong',
     company: 'GrowthBase',
@@ -134,10 +134,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'USER',
     skills: ['Marketing', 'Content Strategy', 'Analytics', 'Growth Hacking'],
     profession: 'Marketing Director',
-    country: 'Singapore'
+    countryOfOrigin: 'Singapore'
   },
   {
-    id: '6',
+    id: 6,
     firstName: 'David',
     lastName: 'Kim',
     company: 'WebFlow Interactive',
@@ -147,10 +147,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'MENTOR',
     skills: ['React', 'TypeScript', 'JavaScript', 'UI/UX'],
     profession: 'Frontend Developer',
-    country: 'South Korea'
+    countryOfOrigin: 'South Korea'
   },
   {
-    id: '7',
+    id: 7,
     firstName: 'Rachel',
     lastName: 'Martinez',
     company: 'Strategic Solutions Inc',
@@ -160,10 +160,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'USER',
     skills: ['Business Analysis', 'Agile', 'Scrum', 'Requirements Gathering'],
     profession: 'Business Analyst',
-    country: 'Mexico'
+    countryOfOrigin: 'Mexico'
   },
   {
-    id: '8',
+    id: 8,
     firstName: 'Thomas',
     lastName: 'Anderson',
     company: 'CloudScale Systems',
@@ -173,10 +173,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'ADMIN',
     skills: ['DevOps', 'Kubernetes', 'Docker', 'CI/CD'],
     profession: 'DevOps Engineer',
-    country: 'Germany'
+    countryOfOrigin: 'Germany'
   },
   {
-    id: '9',
+    id: 9,
     firstName: 'Anna',
     lastName: 'Kowalski',
     company: 'ContentFirst Media',
@@ -186,10 +186,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'USER',
     skills: ['Content Strategy', 'SEO', 'Social Media', 'Copywriting'],
     profession: 'Content Strategist',
-    country: 'Poland'
+    countryOfOrigin: 'Poland'
   },
   {
-    id: '10',
+    id: 10,
     firstName: 'Kevin',
     lastName: 'Zhang',
     company: 'ServerLogic Pro',
@@ -199,10 +199,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'MENTOR',
     skills: ['Node.js', 'GraphQL', 'MongoDB', 'REST APIs'],
     profession: 'Backend Developer',
-    country: 'China'
+    countryOfOrigin: 'China'
   },
   {
-    id: '11',
+    id: 11,
     firstName: 'Nina',
     lastName: 'Patel',
     company: 'Agile Dynamics',
@@ -212,10 +212,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'USER',
     skills: ['Project Management', 'Agile', 'Scrum', 'Risk Management'],
     profession: 'Project Manager',
-    country: 'United Arab Emirates'
+    countryOfOrigin: 'United Arab Emirates'
   },
   {
-    id: '12',
+    id: 12,
     firstName: 'Robert',
     lastName: 'Lee',
     company: 'CyberShield Security',
@@ -225,10 +225,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'MENTOR',
     skills: ['Security', 'DevOps', 'Cloud Architecture', 'System Design'],
     profession: 'Security Engineer',
-    country: 'Canada'
+    countryOfOrigin: 'Canada'
   },
   {
-    id: '13',
+    id: 13,
     firstName: 'Maria',
     lastName: 'Garcia',
     company: 'PixelPerfect Design',
@@ -238,10 +238,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'MENTOR',
     skills: ['UI/UX', 'Figma', 'Design Systems', 'Adobe XD'],
     profession: 'UX Designer',
-    country: 'Brazil'
+    countryOfOrigin: 'Brazil'
   },
   {
-    id: '14',
+    id: 14,
     firstName: 'John',
     lastName: 'Murphy',
     company: 'Enterprise Solutions',
@@ -251,10 +251,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'USER',
     skills: ['Business Development', 'Strategy', 'Enterprise Sales'],
     profession: 'Business Analyst',
-    country: 'Ireland'
+    countryOfOrigin: 'Ireland'
   },
   {
-    id: '15',
+    id: 15,
     firstName: 'Sophie',
     lastName: 'Bernard',
     company: 'UserFirst Products',
@@ -264,10 +264,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'MENTOR',
     skills: ['UI/UX', 'User Research', 'Accessibility', 'Prototyping'],
     profession: 'UX Designer',
-    country: 'France'
+    countryOfOrigin: 'France'
   },
   {
-    id: '16',
+    id: 16,
     firstName: 'Alex',
     lastName: 'Taylor',
     company: 'CodeCraft Labs',
@@ -277,10 +277,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'ADMIN',
     skills: ['TypeScript', 'React', 'Node.js', 'GraphQL'],
     profession: 'Frontend Developer',
-    country: 'Australia'
+    countryOfOrigin: 'Australia'
   },
   {
-    id: '17',
+    id: 17,
     firstName: 'Olivia',
     lastName: 'Brown',
     company: 'TalentHub Global',
@@ -290,10 +290,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'USER',
     skills: ['HR', 'Leadership', 'Talent Development', 'DEI'],
     profession: 'Product Manager',
-    country: 'New Zealand'
+    countryOfOrigin: 'New Zealand'
   },
   {
-    id: '18',
+    id: 18,
     firstName: 'Daniel',
     lastName: 'Wilson',
     company: 'InfraCore Technologies',
@@ -303,10 +303,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'MENTOR',
     skills: ['AWS', 'DevOps', 'Kubernetes', 'System Design'],
     profession: 'DevOps Engineer',
-    country: 'Sweden'
+    countryOfOrigin: 'Sweden'
   },
   {
-    id: '19',
+    id: 19,
     firstName: 'Emma',
     lastName: 'Davies',
     company: 'FutureScale Digital',
@@ -316,10 +316,10 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'USER',
     skills: ['Digital Strategy', 'Change Management', 'Innovation'],
     profession: 'Business Analyst',
-    country: 'Denmark'
+    countryOfOrigin: 'Denmark'
   },
   {
-    id: '20',
+    id: 20,
     firstName: 'Marcus',
     lastName: 'Johnson',
     company: 'Neural Dynamics',
@@ -329,6 +329,6 @@ export const mockNetworkingProfiles: NetworkingProfile[] = [
     role: 'MENTOR',
     skills: ['Machine Learning', 'Python', 'Computer Vision', 'Data Analysis'],
     profession: 'Data Scientist',
-    country: 'Norway'
+    countryOfOrigin: 'Norway'
   }
 ];

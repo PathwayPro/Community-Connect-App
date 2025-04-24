@@ -47,8 +47,10 @@ const defaultMentorValues = ({
 export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
   const pathname = usePathname();
   const isMentor = pathname === '/mentorship/mentor';
+  const isMentee = pathname === '/mentorship/mentee';
   const router = useRouter();
-  const { createMentor, interests, fetchInterests } = useMentorshipStore();
+  const { createMentor, createMentee, interests, fetchInterests } =
+    useMentorshipStore();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [hasAgreed, setHasAgreed] = React.useState(false);
   const { user } = useUserStore();
@@ -99,7 +101,6 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
 
       await createMentor(modifiedData);
       */
-
       const formData = new FormData();
 
       // Append file data (resume)
@@ -107,26 +108,31 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
         formData.append('file', selectedFile);
       }
 
-      // Rest of the form
-      formData.append('max_mentees', String(data.max_mentees));
-      formData.append('availability', data.availability);
-      formData.append(
-        'has_experience',
-        String(Boolean(data.experience_details))
-      );
-      formData.append('experience_years', String(data.experience));
-      formData.append('profession', 'hardcoded profession'); // Hardcoded
-
-      if (data.experience_details) {
-        formData.append('experience_details', data.experience_details);
-      }
-
       if (data.interests) {
         data.interests.forEach((interest) => {
           formData.append('interests[]', String(interest));
         });
       }
-      await createMentor(formData);
+      if (data.experience_details) {
+        const experienceParam = isMentor ? 'experience_details' : 'reason';
+        formData.append(experienceParam, data.experience_details);
+      }
+
+      // Rest of the form
+      if (isMentor) {
+        formData.append('max_mentees', String(data.max_mentees));
+        formData.append('availability', data.availability);
+        formData.append(
+          'has_experience',
+          String(Boolean(data.experience_details))
+        );
+        formData.append('experience_years', String(data.experience));
+        formData.append('profession', 'hardcoded profession'); // Hardcoded
+
+        await createMentor(formData);
+      } else if (isMentee) {
+        await createMentee(formData);
+      }
 
       showAlert({
         type: 'success',
@@ -135,6 +141,11 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
           'Your application has been successfully submitted and is currently under review.',
         redirect: '/mentorship/waitlist'
       });
+
+      setTimeout(() => {
+        const activityType = isMentor ? 'Mentor' : isMentee ? 'Mentee' : '';
+        router.push(`/mentorship/waitlist/${activityType}`);
+      }, 3000);
     } catch (error) {
       console.log('error', error);
       showAlert({

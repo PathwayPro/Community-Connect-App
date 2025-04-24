@@ -1,10 +1,16 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { mentorshipApi } from '../api/mentorship-api';
-import { CreateMentorDto, InterestsResponse, MentorResponse } from '../types';
+import {
+  CreateMentorDto,
+  InterestsResponse,
+  MentorResponse,
+  MenteeResponse
+} from '../types';
 
 interface MentorshipState {
   mentors: MentorResponse[];
+  mentees: MenteeResponse[];
   interests: InterestsResponse[];
   isLoading: boolean;
   error: string | null;
@@ -12,6 +18,7 @@ interface MentorshipState {
 
   // Actions
   createMentor: (mentorData: FormData) => Promise<MentorResponse>;
+  createMentee: (menteeData: FormData) => Promise<MenteeResponse>;
   fetchInterests: () => Promise<InterestsResponse[]>;
   getMentor: (mentorId: number) => Promise<MentorResponse>;
 }
@@ -31,6 +38,23 @@ export const useMentorshipStore = create<MentorshipState>()(
           const response = await mentorshipApi.createMentor(mentorData);
           set((state) => ({
             mentors: [...state.mentors, response.data],
+            isLoading: false
+          }));
+          return response;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+        }
+      },
+
+      createMentee: async (menteeData) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await mentorshipApi.createMentee(menteeData);
+          set((state) => ({
+            mentees: [...state.mentees, response.data],
             isLoading: false
           }));
           return response;

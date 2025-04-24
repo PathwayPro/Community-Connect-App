@@ -103,7 +103,6 @@ export const BaseForm = ({
               placeholder="Enter your profession"
               customError="Profession is required"
               required
-              disabled
             />
             <FormInput
               name="experience"

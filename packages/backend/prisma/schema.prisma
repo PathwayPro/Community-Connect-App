@@ -52,6 +52,8 @@ model users {
   goal_id              String?
   // MENTOR RELATIONSHIP
   mentor               mentors?
+  // MENTEE RELATIONSHIP
+  mentee               mentees?
   // EVENTS MANAGERS RELATIONSHIP
   event_manager        EventsManagers[]
   // EVENTS SUBSCRIPTIONS RELATIONSHIP
@@ -105,6 +107,24 @@ model mentors {
 }
 
 enum mentors_status {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+model mentees {
+  id                 Int            @id @default(autoincrement())
+  resume             String
+  reason             String
+  // STATUS ENUM
+  status             mentees_status @default(PENDING)
+  // USER RELATIONSHIP
+  user               users          @relation(fields: [user_id], references: [id])
+  user_id            Int            @unique
+}
+
+enum mentees_status {
   PENDING
   APPROVED
   REJECTED
