@@ -21,6 +21,7 @@ import {
   userEmailExists,
 } from 'src/common/utils/helper';
 import { RolesEnum } from 'src/auth/util';
+import { SettingsService } from '../settings/settings.services';
 
 @Injectable()
 export class UsersService {
@@ -30,6 +31,7 @@ export class UsersService {
     private prisma: PrismaService,
     private readonly authService: AuthService,
     private readonly emailService: EmailService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   // User Registration and Creation
@@ -46,6 +48,8 @@ export class UsersService {
     };
 
     const newUser = await this.createUserInDatabase(userToCreate);
+
+    await this.settingsService.createUserSettings(newUser.id);
 
     await this.setupEmailVerification(newUser);
 

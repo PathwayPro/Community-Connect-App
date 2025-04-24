@@ -6,10 +6,17 @@ import { PrismaService } from '../database/prisma.service';
 import { AuthService } from '../auth/services/auth.service';
 import { EmailService } from '../auth/services/email.service';
 import { AuthModule } from 'src/auth/auth.module';
+import { SettingsService } from 'src/settings/settings.services';
 
 @Module({
   imports: [JwtModule, forwardRef(() => AuthModule)],
-  providers: [UsersService, PrismaService, AuthService, EmailService],
+  providers: [
+    UsersService,
+    PrismaService,
+    AuthService,
+    EmailService,
+    SettingsService,
+  ],
   controllers: [UsersController],
   exports: [UsersService],
 })

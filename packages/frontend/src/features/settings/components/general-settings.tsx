@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Card,
   CardContent,
@@ -15,213 +16,174 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/shared/components/ui/select';
-import { Label } from '@/shared/components/ui/label';
+import { Button } from '@/shared/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/shared/components/ui/form';
+import { SaveIcon } from 'lucide-react';
 import { useSettingsStore } from '../store';
+import { useEffect } from 'react';
+import { ProfileVisibility } from '../types';
+import {
+  formSchema,
+  GeneralSettingsFormValues
+} from '../lib/validation/settings-validation';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
+import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 
-interface PrivacyOption {
-  id: string;
-  label: string;
-  description?: string;
-  value: boolean;
-  onToggle: (value: boolean) => void;
-}
+const privacyOptions = [
+  { id: 'shareBirthDate', label: 'Share Birth Date' },
+  { id: 'shareContactDetails', label: 'Share Contact Details' },
+  { id: 'shareSocialLinks', label: 'Share Social Links' }
+];
 
-interface VisibilitySection {
-  id: string;
-  label: string;
-  description?: string;
-  value: string;
-  options: { value: string; label: string }[];
-  onChange: (value: string) => void;
-}
+const visibilityOptions = [
+  { value: ProfileVisibility.PUBLIC, label: 'Public' },
+  { value: ProfileVisibility.PRIVATE, label: 'Private' },
+  { value: ProfileVisibility.CONNECTIONS_ONLY, label: 'Connections Only' }
+];
 
-interface GeneralSettingsProps {
-  onHasChanges: (hasChanges: boolean) => void;
-  // onSave: () => void;
-}
+export const GeneralSettings = () => {
+  const { settings, updateSettings, getSettings } = useSettingsStore();
+  const { showAlert } = useAlertDialog();
 
-export default function GeneralSettings({
-  onHasChanges
-  // onSave
-}: GeneralSettingsProps) {
-  const { settings, updateSettings } = useSettingsStore();
-  const [localSettings, setLocalSettings] = useState({
-    shareBirthDate: settings?.shareBirthDate || false,
-    shareContactDetails: settings?.shareContactDetails || false,
-    shareSocialLinks: settings?.shareSocialLinks || false,
-    profileVisibility: settings?.profileVisibility || 'public',
-    messageSettings: settings?.messageSettings || 'everyone'
+  const form = useForm<GeneralSettingsFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      shareBirthDate: settings?.shareBirthDate ?? true,
+      shareContactDetails: settings?.shareContactDetails ?? false,
+      shareSocialLinks: settings?.shareSocialLinks ?? true,
+      profileVisibility: settings?.profileVisibility ?? ProfileVisibility.PUBLIC
+    }
   });
-  const [hasChanges, setHasChanges] = useState(false);
 
-  // Update local settings when store settings change
   useEffect(() => {
     if (settings) {
-      setLocalSettings({
-        shareBirthDate: settings.shareBirthDate || false,
-        shareContactDetails: settings.shareContactDetails || false,
-        shareSocialLinks: settings.shareSocialLinks || false,
-        profileVisibility: settings.profileVisibility || 'public',
-        messageSettings: settings.messageSettings || 'everyone'
+      form.reset({
+        shareBirthDate: settings.shareBirthDate,
+        shareContactDetails: settings.shareContactDetails,
+        shareSocialLinks: settings.shareSocialLinks,
+        profileVisibility: settings.profileVisibility
       });
     }
-  }, [settings]);
+  }, [settings, form]);
 
-  // Notify parent component about changes
   useEffect(() => {
-    onHasChanges(hasChanges);
-  }, [hasChanges, onHasChanges]);
+    getSettings();
+  }, [getSettings]);
 
-  // Expose save function to parent
-  useEffect(() => {
-    // Create and pass the save handler to parent
-    const saveHandler = () => {
-      if (settings?.id) {
-        updateSettings(settings.id, localSettings);
-        setHasChanges(false);
-        console.log('Settings updated:', localSettings);
-      }
-    };
+  console.log('settings', settings);
 
-    // Store the handler in a ref or context that the parent can access
-    // onSave = saveHandler;
-  }, [localSettings, settings, updateSettings]);
-
-  const updateLocalSettings = (updates: Partial<typeof localSettings>) => {
-    setLocalSettings((prev) => ({ ...prev, ...updates }));
-    setHasChanges(true);
+  const onSubmit = async (data: GeneralSettingsFormValues) => {
+    try {
+      // Here you would typically save the data to your backend
+      await updateSettings(data);
+      showAlert({
+        type: 'success',
+        title: 'Settings Updated Successfully!',
+        description: 'Your settings have been saved.'
+      });
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      showAlert({
+        type: 'error',
+        title: 'Settings Update Failed',
+        description: 'Please try again later.'
+      });
+    }
   };
 
-  const privacyOptions: PrivacyOption[] = [
-    {
-      id: 'birthDate',
-      label: 'Share Birth Date',
-      value: localSettings.shareBirthDate,
-      onToggle: (value) => {
-        updateLocalSettings({ shareBirthDate: value });
-        console.log('Birth date visibility:', value);
-      }
-    },
-    {
-      id: 'contactDetails',
-      label: 'Share Contact Details',
-      value: localSettings.shareContactDetails,
-      onToggle: (value) => {
-        updateLocalSettings({ shareContactDetails: value });
-        console.log('Contact details visibility:', value);
-      }
-    },
-    {
-      id: 'socialLinks',
-      label: 'Share Social Links',
-      value: localSettings.shareSocialLinks,
-      onToggle: (value) => {
-        updateLocalSettings({ shareSocialLinks: value });
-        console.log('Social links visibility:', value);
-      }
-    }
-  ];
-
-  const visibilitySections: VisibilitySection[] = [
-    {
-      id: 'profileVisibility',
-      label: 'Profile Visibility',
-      description: 'Manage who can view your profile information.',
-      value: localSettings.profileVisibility,
-      options: [
-        { value: 'public', label: 'Public' },
-        { value: 'private', label: 'Private' },
-        { value: 'connections', label: 'Connections Only' }
-      ],
-      onChange: (value) => {
-        updateLocalSettings({
-          profileVisibility: value as 'public' | 'private' | 'connections'
-        });
-        console.log('Profile visibility:', value);
-      }
-    },
-    {
-      id: 'messages',
-      label: 'Messages',
-      description: 'Manage who is allowed to message you.',
-      value: localSettings.messageSettings,
-      options: [
-        { value: 'everyone', label: 'Everyone' },
-        { value: 'connections', label: 'Only Connections' }
-      ],
-      onChange: (value) => {
-        updateLocalSettings({
-          messageSettings: value as 'everyone' | 'connections'
-        });
-        console.log('Messages settings:', value);
-      }
-    }
-  ];
-
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <h6 className="text-paragraph-lg font-semibold">
-              Personal Information
-            </h6>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {privacyOptions.map((option) => (
-            <div
-              key={option.id}
-              className="flex items-center justify-between space-y-2"
-            >
-              <Label htmlFor={option.id} className="text-sm font-medium">
-                {option.label}
-              </Label>
-              <Switch
-                id={option.id}
-                checked={option.value}
-                onCheckedChange={option.onToggle}
-              />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+    <>
+      <AlertDialogUI />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <h6 className="text-paragraph-lg font-semibold">
+                  Personal Information
+                </h6>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {privacyOptions.map((option) => (
+                <FormField
+                  key={option.id}
+                  control={form.control}
+                  name={option.id as keyof GeneralSettingsFormValues}
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between space-y-0">
+                      <FormLabel className="text-sm font-medium">
+                        {option.label}
+                      </FormLabel>
+                      <FormControl>
+                        <Switch
+                          checked={field.value as boolean}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <h6 className="text-paragraph-lg font-semibold">
-              Profile Settings
-            </h6>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {visibilitySections.map((section) => (
-            <div key={section.id} className="space-y-2">
-              <Label htmlFor={section.id} className="text-sm font-medium">
-                {section.label}
-              </Label>
-              {section.description && (
-                <p className="text-sm text-muted-foreground">
-                  {section.description}
-                </p>
-              )}
-              <Select value={section.value} onValueChange={section.onChange}>
-                <SelectTrigger id={section.id} className="w-full">
-                  <SelectValue placeholder="Select visibility" />
-                </SelectTrigger>
-                <SelectContent>
-                  {section.options.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <h6 className="text-paragraph-lg font-semibold">
+                  Profile Settings
+                </h6>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <FormField
+                control={form.control}
+                name="profileVisibility"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="text-sm font-medium">
+                      Profile Visibility
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select visibility" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {visibilityOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end">
+            <Button type="submit" className="h-10 w-fit gap-2 px-4">
+              <SaveIcon className="h-4 w-4" />
+              Save Changes
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   );
-}
+};

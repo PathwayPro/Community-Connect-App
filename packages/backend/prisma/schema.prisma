@@ -451,12 +451,6 @@ enum ProfileVisibility {
   PRIVATE
 }
 
-enum MessageSettings {
-  EVERYONE
-  CONNECTIONS_ONLY
-  NOBODY
-}
-
 model UserSettings {
   id                Int               @id @default(autoincrement())
   user              users             @relation(fields: [userId], references: [id])
@@ -465,6 +459,5 @@ model UserSettings {
   shareContactDetails Boolean         @default(true)
   shareSocialLinks  Boolean           @default(true)
   profileVisibility ProfileVisibility @default(PUBLIC)
-  messageSettings   MessageSettings   @default(EVERYONE)
 }
 
