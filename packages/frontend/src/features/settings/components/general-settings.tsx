@@ -37,12 +37,12 @@ interface VisibilitySection {
 
 interface GeneralSettingsProps {
   onHasChanges: (hasChanges: boolean) => void;
-  onSave: () => void;
+  // onSave: () => void;
 }
 
 export default function GeneralSettings({
-  onHasChanges,
-  onSave
+  onHasChanges
+  // onSave
 }: GeneralSettingsProps) {
   const { settings, updateSettings } = useSettingsStore();
   const [localSettings, setLocalSettings] = useState({
@@ -84,7 +84,7 @@ export default function GeneralSettings({
     };
 
     // Store the handler in a ref or context that the parent can access
-    onSave = saveHandler;
+    // onSave = saveHandler;
   }, [localSettings, settings, updateSettings]);
 
   const updateLocalSettings = (updates: Partial<typeof localSettings>) => {

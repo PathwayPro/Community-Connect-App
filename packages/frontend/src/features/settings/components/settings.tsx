@@ -90,7 +90,7 @@ export const Settings = () => {
         </div>
         <GeneralSettings
           onHasChanges={handlePrivacyChanges}
-          onSave={setSaveFunction}
+          // onSave={setSaveFunction}
         />
       </div>
     </div>
