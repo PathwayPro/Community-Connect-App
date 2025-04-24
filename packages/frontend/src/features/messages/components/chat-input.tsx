@@ -1,6 +1,6 @@
 import { Input } from '@/shared/components/ui/input';
 import { Button } from '@/shared/components/ui/button';
-import { SmileIcon, PaperclipIcon, Send, X } from 'lucide-react';
+import { SmileIcon, PaperclipIcon, Send } from 'lucide-react';
 import { useState, useRef } from 'react';
 import {
   Dialog,
@@ -11,6 +11,7 @@ import {
 } from '@/shared/components/ui/dialog';
 import { useMessageStore } from '../store';
 import { ConnectionRequestsStatus } from '../types';
+import Image from 'next/image';
 interface ImagePreview {
   url: string;
   file: File;
@@ -19,11 +20,13 @@ interface ImagePreview {
 interface ChatInputProps {
   recipientId: number;
   connectionStatus: ConnectionRequestsStatus;
+  lastMessageType: 'MESSAGE' | 'CONNECTION_REQUEST';
 }
 
 export const ChatInput = ({
   recipientId,
-  connectionStatus
+  connectionStatus,
+  lastMessageType
 }: ChatInputProps) => {
   const { sendMessage } = useMessageStore();
   const [messageInputs, setMessageInputs] = useState<Record<number, string>>(
@@ -32,7 +35,8 @@ export const ChatInput = ({
   const [imagePreview, setImagePreview] = useState<ImagePreview | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const isDisabled = connectionStatus !== 'APPROVED';
+  const isDisabled =
+    connectionStatus !== 'APPROVED' && lastMessageType !== 'MESSAGE';
 
   const currentMessage = messageInputs[recipientId] || '';
 
@@ -123,10 +127,12 @@ export const ChatInput = ({
           </DialogHeader>
           {imagePreview && (
             <div className="relative">
-              <img
+              <Image
                 src={imagePreview.url}
                 alt="Preview"
                 className="w-full rounded-lg object-contain"
+                width={400}
+                height={300}
                 style={{ maxHeight: '400px' }}
               />
             </div>

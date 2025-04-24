@@ -126,7 +126,7 @@ export const NetworkingCard = ({ profile }: NetworkingCardProps) => {
   };
 
   return (
-    <div className="flex h-[440px] w-full overflow-hidden rounded-2xl border border-neutral-light-500">
+    <div className="flex min-h-[350px] w-full overflow-hidden rounded-2xl border border-neutral-light-500">
       <div className="relative flex w-full flex-col">
         <ConnectRequest
           isOpen={isConnectModalOpen}
@@ -184,7 +184,7 @@ export const NetworkingCard = ({ profile }: NetworkingCardProps) => {
           </Avatar>
 
           {/* Profile Info */}
-          <div className="mt-4 flex flex-1 flex-col items-center gap-2">
+          <div className="mt-2 flex flex-1 flex-col items-center gap-1">
             <h6 className="max-w-full truncate text-lg font-medium">
               {profile.first_name} {profile.last_name}
             </h6>
@@ -200,7 +200,7 @@ export const NetworkingCard = ({ profile }: NetworkingCardProps) => {
             </p>
 
             {/* Social Icons */}
-            <div className="mt-2 flex items-center gap-4">
+            <div className="mt-0 flex items-center gap-4">
               {profile.portfolio_link && (
                 <SharedIcons.briefcase className="h-5 w-5" />
               )}
@@ -217,16 +217,20 @@ export const NetworkingCard = ({ profile }: NetworkingCardProps) => {
           </div>
 
           {/* Action Buttons - Fixed at bottom */}
-          <div className="w-full space-y-2 py-4">
+          <div className="w-full space-y-2 pb-4 pt-2">
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="h-10 flex-1 gap-2 px-0"
-                onClick={() => router.push(`/messages`)}
-              >
-                <MessageSquare className="h-5 w-5" />
-                Message
-              </Button>
+              {(profile.connectionStatus?.status === 'APPROVED' ||
+                (profile.connectionStatus?.status === 'PENDING' &&
+                  profile.connectionStatus?.isSender)) && (
+                <Button
+                  variant="outline"
+                  className="h-10 flex-1 gap-2 px-0"
+                  onClick={() => router.push(`/messages/${profile.id}`)}
+                >
+                  <MessageSquare className="h-5 w-5" />
+                  Message
+                </Button>
+              )}
               <Button
                 className="h-10 flex-1 gap-2 px-0"
                 onClick={handleViewProfile}

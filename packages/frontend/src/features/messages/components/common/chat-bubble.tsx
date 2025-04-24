@@ -73,17 +73,18 @@ export function MessageTimestamp({
 }
 
 export function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) {
+  // Safely extract sender/recipient information with fallbacks
   const sender = React.useMemo(
     () => ({
       first_name: isCurrentUser
-        ? message.recipient_first_name
-        : message.sender_first_name,
+        ? message.recipient_first_name || 'User'
+        : message.sender_first_name || 'User',
       last_name: isCurrentUser
-        ? message.recipient_last_name
-        : message.sender_last_name,
+        ? message.recipient_last_name || ''
+        : message.sender_last_name || '',
       picture_upload_link: isCurrentUser
-        ? message.recipient_picture_upload_link
-        : message.sender_picture_upload_link
+        ? message.recipient_picture_upload_link || '/profile/profile.png'
+        : message.sender_picture_upload_link || '/profile/profile.png'
     }),
     [
       isCurrentUser,
@@ -101,6 +102,11 @@ export function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) {
     [sender.first_name, sender.last_name]
   );
 
+  // Convert timestamp to Date object safely
+  const messageDate = message.created_at
+    ? new Date(message.created_at)
+    : new Date();
+
   // Assuming message attachments would be handled separately in the future
   const hasImages = false; // For now, no image handling
   const images: string[] = []; // For future implementation
@@ -114,10 +120,7 @@ export function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) {
       )}
     >
       <Avatar className="h-8 w-8">
-        <AvatarImage
-          src={sender.picture_upload_link || '/profile/profile.png'}
-          alt={fullName}
-        />
+        <AvatarImage src={sender.picture_upload_link} alt={fullName} />
         <AvatarFallback>{sender.first_name.charAt(0)}</AvatarFallback>
       </Avatar>
 
@@ -145,7 +148,7 @@ export function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) {
               {message.message}
             </p>
             <MessageTimestamp
-              timestamp={new Date(message.created_at)}
+              timestamp={messageDate}
               isCurrentUser={isCurrentUser}
             />
           </div>

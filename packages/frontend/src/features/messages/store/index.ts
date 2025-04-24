@@ -60,8 +60,6 @@ export const useMessageStore = create<MessageState>()(
               isLoading: false
             });
           }
-
-          set({ chatList: response.data, isLoading: false });
         } catch (error) {
           set({
             error:
@@ -76,16 +74,27 @@ export const useMessageStore = create<MessageState>()(
       getChat: async (userId: string) => {
         try {
           set({ isLoading: true, error: null });
-          const response = await messageApi.getChat(userId);
+          const response = await messageApi.getChatWithUser(userId);
 
           console.log('this is the response for getChat', response.data);
 
           if (response.success) {
-            set({
-              currentChat: response.data as unknown as MessageBubble[],
-              selectedUserId: userId,
-              isLoading: false
-            });
+            if (Array.isArray(response.data)) {
+              set({
+                currentChat: response.data,
+                selectedUserId: userId,
+                isLoading: false
+              });
+            } else {
+              console.error(
+                'Expected array for chat data but got:',
+                response.data
+              );
+              set({
+                error: 'Invalid chat data format',
+                isLoading: false
+              });
+            }
           } else {
             set({
               error: response.message || 'Failed to fetch chat',

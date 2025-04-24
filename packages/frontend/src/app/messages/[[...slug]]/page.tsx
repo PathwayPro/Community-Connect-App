@@ -9,23 +9,34 @@ interface MessagesPageProps {
 }
 
 export default async function MessagesPage({ params }: MessagesPageProps) {
-  const [action] = params.slug || [];
+  const slugs = params.slug || [];
+  console.log('Slugs:', slugs);
 
-  switch (action) {
-    case undefined:
-      // Handle /messages - Show all messages
-
-      return (
-        <Suspense fallback={<MessagesLoadingSkeleton />}>
-          <div className="flex w-full justify-center">
-            <Messages />
-          </div>
-        </Suspense>
-      );
-
-    default:
-      return notFound();
+  // For /messages/6
+  if (slugs.length === 1) {
+    const userId = slugs[0];
+    return (
+      <Suspense fallback={<MessagesLoadingSkeleton />}>
+        <div className="flex w-full justify-center">
+          <Messages userId={userId} />
+        </div>
+      </Suspense>
+    );
   }
+
+  // For /messages (show all messages)
+  if (slugs.length === 0) {
+    return (
+      <Suspense fallback={<MessagesLoadingSkeleton />}>
+        <div className="flex w-full justify-center">
+          <Messages userId={undefined} />
+        </div>
+      </Suspense>
+    );
+  }
+
+  // Any other pattern should 404
+  return notFound();
 }
 
 // Component implementations
