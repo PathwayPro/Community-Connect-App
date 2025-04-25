@@ -16,6 +16,7 @@ import {
 } from '@/shared/components/ui/form';
 import { cn } from '@/shared/lib/utils';
 import { SharedIcons } from '@/shared/components/icons';
+import { useSupportStore } from '@/features/support/store';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address')
@@ -26,6 +27,8 @@ type FormValues = z.infer<typeof formSchema>;
 export function NewsletterSection() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
+  const { subscribeToNewsletter, error, isSuccess, clearError } =
+    useSupportStore();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -35,28 +38,26 @@ export function NewsletterSection() {
   });
 
   const onSubmit = async (values: FormValues) => {
-    try {
-      setIsSubmitted(true);
-      // TODO: Implement your newsletter subscription API call here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated API call
+    clearError();
+    await subscribeToNewsletter({ email: values.email });
 
-      console.log('Submitted', values);
+    if (isSuccess) {
+      setIsSubmitted(true);
 
       toast({
         title: 'Success!',
-        description: "You've been subscribed to our newsletter."
+        description: "You've been subscribed to Communet's newsletter."
       });
 
       setTimeout(() => {
         setIsSubmitted(false);
         form.reset();
       }, 3000);
-    } catch (error) {
-      console.error(error);
+    } else if (error) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Something went wrong. Please try again later.'
+        description: error || 'Failed to subscribe to the newsletter'
       });
     }
   };

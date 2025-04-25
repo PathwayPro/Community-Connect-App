@@ -4,6 +4,11 @@ export enum ContactUsStatus {
   FAILED = 'FAILED'
 }
 
+export enum NewsletterStatus {
+  SUBSCRIBED = 'SUBSCRIBED',
+  UNSUBSCRIBED = 'UNSUBSCRIBED'
+}
+
 export interface ContactUsResponse {
   id: number;
   first_name: string;
@@ -13,5 +18,12 @@ export interface ContactUsResponse {
   phone?: string;
   contact_message: string;
   status: ContactUsStatus;
+  created_at: Date;
+}
+
+export interface Subscription {
+  id: number;
+  email: string;
+  status: NewsletterStatus;
   created_at: Date;
 }

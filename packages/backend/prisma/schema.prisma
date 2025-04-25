@@ -479,4 +479,18 @@ model ContactUs {
   created_at        DateTime          @default(now())
 }
 
+enum NewsletterStatus {
+  PENDING
+  SUBSCRIBED
+  UNSUBSCRIBED
+}
+
+model NewsletterSubscriptions {
+  id                Int               @id @default(autoincrement())
+  email             String
+  created_at        DateTime          @default(now())
+  status            NewsletterStatus  @default(PENDING)
+}
+
+
 

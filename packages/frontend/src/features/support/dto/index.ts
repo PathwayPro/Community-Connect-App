@@ -6,3 +6,11 @@ export interface ContactUsDto {
   phone?: string;
   contact_message: string;
 }
+
+export interface CreateSubscriptionDto {
+  email: string;
+}
+
+export interface UpdateSubscriptionDto {
+  email: string;
+}

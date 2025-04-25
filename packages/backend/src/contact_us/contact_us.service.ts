@@ -2,9 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CreateContactUsDto } from './dto/create-contact_us.dto';
 import { ContactUs } from './entities/contact_us.entity';
 import { PrismaService } from 'src/database/prisma.service';
-import { ContactUsStatus } from '@prisma/client';
+import { ContactUsStatus, NewsletterStatus } from '@prisma/client';
 import { EmailService } from 'src/auth/services/email.service';
 import { UpdateContactUsDto } from './dto/update-contact_us.dto';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
+import { Subscription } from './entities/subscription.entity';
+import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 
 @Injectable()
 export class ContactUsService {
@@ -74,6 +77,52 @@ export class ContactUsService {
       where: { id },
       data: updateContactUsDto,
     });
+  }
+
+  async subscribe(subscribeDto: CreateSubscriptionDto): Promise<Subscription> {
+    try {
+      const existingSubscription =
+        await this.prisma.newsletterSubscriptions.findFirst({
+          where: { email: subscribeDto.email },
+        });
+
+      if (existingSubscription) {
+        throw new Error('Email already subscribed');
+      }
+
+      return this.prisma.newsletterSubscriptions.create({
+        data: {
+          ...subscribeDto,
+          status: NewsletterStatus.SUBSCRIBED,
+        },
+      });
+    } catch (error) {
+      this.logger.error(`Subscription failed: ${error.message}`);
+      throw new Error(`Failed to subscribe: ${error.message}`);
+    }
+  }
+
+  async unsubscribe(
+    unsubscribeDto: UpdateSubscriptionDto,
+  ): Promise<Subscription> {
+    try {
+      const existingSubscription =
+        await this.prisma.newsletterSubscriptions.findFirst({
+          where: { email: unsubscribeDto.email },
+        });
+
+      if (!existingSubscription) {
+        throw new Error('Email not subscribed');
+      }
+
+      return this.prisma.newsletterSubscriptions.update({
+        where: { id: existingSubscription.id },
+        data: { status: NewsletterStatus.UNSUBSCRIBED },
+      });
+    } catch (error) {
+      this.logger.error(`Unsubscription failed: ${error.message}`);
+      throw new Error(`Failed to unsubscribe: ${error.message}`);
+    }
   }
 
   findAll(): Promise<ContactUs[]> {

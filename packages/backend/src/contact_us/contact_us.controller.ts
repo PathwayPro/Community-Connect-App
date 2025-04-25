@@ -20,6 +20,8 @@ import {
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
 import { UpdateContactUsDto } from './dto/update-contact_us.dto';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
+import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 
 @ApiTags('Contact Us')
 @UseGuards(JwtAuthGuard)
@@ -49,6 +51,26 @@ export class ContactUsController {
     @Body() updateContactUsDto: UpdateContactUsDto,
   ) {
     return await this.contactUsService.updateStatus(+id, updateContactUsDto);
+  }
+
+  @Public()
+  @Post('subscribe')
+  @ApiOkResponse({ description: 'Successfully subscribed to newsletter' })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to subscribe to newsletter',
+  })
+  async subscribe(@Body() subscribeDto: CreateSubscriptionDto) {
+    return await this.contactUsService.subscribe(subscribeDto);
+  }
+
+  @Public()
+  @Post('unsubscribe')
+  @ApiOkResponse({ description: 'Successfully unsubscribed from newsletter' })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to unsubscribe from newsletter',
+  })
+  async unsubscribe(@Body() unsubscribeDto: UpdateSubscriptionDto) {
+    return await this.contactUsService.unsubscribe(unsubscribeDto);
   }
 
   @Roles('ADMIN')
