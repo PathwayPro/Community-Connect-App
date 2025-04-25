@@ -21,6 +21,7 @@ interface FormPhonebookProps<T extends FieldValues> {
   customError?: string;
   control?: Control<T>;
   required?: boolean;
+  placeholder?: string;
 }
 
 export const FormPhonebook = <T extends FieldValues>({
@@ -28,14 +29,15 @@ export const FormPhonebook = <T extends FieldValues>({
   label,
   customError,
   control: controlProp,
-  required = false
+  required = false,
+  placeholder = 'Enter phone number'
 }: FormPhonebookProps<T>) => {
   const formContext = useFormContext<T>();
   const control = controlProp || formContext?.control;
 
   if (!control) {
     console.error(
-      'Form control is missing - FormMultiSelect must be used within a FormProvider or with a control prop'
+      'Form control is missing - FormPhonebook must be used within a FormProvider or with a control prop'
     );
     return null;
   }
@@ -46,9 +48,7 @@ export const FormPhonebook = <T extends FieldValues>({
       name={name}
       render={({ field }) => {
         const error = formContext?.formState?.errors[name];
-        const showError = error;
-
-        console.log('error :', error);
+        const showError = !!error;
 
         return (
           <FormItem className="w-full">
@@ -64,8 +64,11 @@ export const FormPhonebook = <T extends FieldValues>({
               <PhoneInput
                 value={field.value}
                 onChange={field.onChange}
+                onBlur={field.onBlur}
+                name={field.name}
                 international
                 defaultCountry="CA"
+                placeholder={placeholder}
               />
             </FormControl>
             {showError && (
@@ -74,7 +77,7 @@ export const FormPhonebook = <T extends FieldValues>({
                 <p className="text-paragraph-sm text-error-500">
                   {customError ||
                     (error as FieldError)?.message ||
-                    'Invalid type of selection'}
+                    'Invalid phone number'}
                 </p>
               </div>
             )}

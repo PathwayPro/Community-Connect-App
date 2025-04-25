@@ -15,26 +15,29 @@ import {
 import { Input } from '@/shared/components/ui/input';
 import { Textarea } from '@/shared/components/ui/textarea';
 import { cn } from '@/shared/lib/utils';
+import { useSupportStore } from '@/features/support/store';
+import { toast } from 'sonner';
 
 const formSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+  first_name: z.string().min(2, 'First name must be at least 2 characters'),
+  last_name: z.string().optional(),
   email: z.string().email('Please enter a valid email address'),
-  message: z.string().min(10, 'Message must be at least 10 characters')
+  contact_message: z.string().min(10, 'Message must be at least 10 characters')
 });
 
 type ContactFormValues = z.infer<typeof formSchema>;
 
 export function ContactSection() {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const { submitContactForm } = useSupportStore();
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      first_name: '',
+      last_name: '',
       email: '',
-      message: ''
+      contact_message: ''
     }
   });
 
@@ -44,14 +47,21 @@ export function ContactSection() {
   };
 
   async function onSubmit(values: ContactFormValues) {
-    setIsSubmitted(true);
-    // TODO: Implement your form submission logic here
-    form.reset();
-    console.log(values);
+    try {
+      await submitContactForm(values);
+      setIsSubmitted(true);
+      form.reset();
+      console.log(values);
 
-    setTimeout(() => {
-      setIsSubmitted(false);
-    }, 3000);
+      setTimeout(() => {
+        setIsSubmitted(false);
+      }, 3000);
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        'Failed to send message, please try again or contact us via email'
+      );
+    }
   }
 
   return (
@@ -70,7 +80,7 @@ export function ContactSection() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <FormField
               control={form.control}
-              name="firstName"
+              name="first_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -78,7 +88,7 @@ export function ContactSection() {
                       {...field}
                       placeholder="First Name"
                       className={`h-[60px] w-full rounded-xl border-[0.5px] border-[#C3D0FF] shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)] ring-8 focus-visible:ring-offset-0 ${
-                        isFieldValid('firstName')
+                        isFieldValid('first_name')
                           ? 'bg-[#E9EEFF] ring-[#E9EEFF]'
                           : 'bg-neutral-light-200 ring-neutral-light-200'
                       }`}
@@ -90,7 +100,7 @@ export function ContactSection() {
             />
             <FormField
               control={form.control}
-              name="lastName"
+              name="last_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -98,7 +108,7 @@ export function ContactSection() {
                       {...field}
                       placeholder="Last Name"
                       className={`h-[60px] w-full rounded-xl border-[#C3D0FF] shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)] ring-8 focus-visible:ring-offset-0 ${
-                        isFieldValid('lastName')
+                        isFieldValid('last_name')
                           ? 'bg-[#E9EEFF] ring-[#E9EEFF]'
                           : 'bg-neutral-light-200 ring-neutral-light-200'
                       }`}
@@ -131,7 +141,7 @@ export function ContactSection() {
           />
           <FormField
             control={form.control}
-            name="message"
+            name="contact_message"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -139,7 +149,7 @@ export function ContactSection() {
                     {...field}
                     placeholder="Write your questions and messages here..."
                     className={`h-[204px] w-full rounded-xl border-[#C3D0FF] text-xl shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)] ring-8 focus-visible:ring-offset-0 ${
-                      isFieldValid('message')
+                      isFieldValid('contact_message')
                         ? 'bg-[#E9EEFF] ring-[#E9EEFF]'
                         : 'bg-neutral-light-200 ring-neutral-light-200'
                     }`}
@@ -157,10 +167,10 @@ export function ContactSection() {
             )}
             disabled={
               isSubmitted ||
-              !isFieldValid('firstName') ||
-              !isFieldValid('lastName') ||
+              !isFieldValid('first_name') ||
+              !isFieldValid('last_name') ||
               !isFieldValid('email') ||
-              !isFieldValid('message')
+              !isFieldValid('contact_message')
             }
           >
             {isSubmitted ? 'Message Sent!' : 'Send Message'}
