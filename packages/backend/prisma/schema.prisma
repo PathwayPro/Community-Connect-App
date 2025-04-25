@@ -461,3 +461,22 @@ model UserSettings {
   profileVisibility ProfileVisibility @default(PUBLIC)
 }
 
+enum ContactUsStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model ContactUs {
+  id                Int               @id @default(autoincrement())
+  first_name        String
+  last_name         String?
+  company_name      String?
+  email             String
+  phone             String?
+  contact_message   String
+  status            ContactUsStatus    @default(PENDING)
+  created_at        DateTime          @default(now())
+}
+
+

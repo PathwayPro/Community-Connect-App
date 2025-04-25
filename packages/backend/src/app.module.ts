@@ -27,6 +27,7 @@ import { MenteeModule } from './mentee/mentee.module';
 import { OpportunitiesModule } from './opportunities/opportunities.module';
 import { SalaryRangesModule } from './salary_ranges/salary_ranges.module';
 import { SettingsModule } from './settings/settings.module';
+import { ContactUsModule } from './contact_us/contact_us.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { SettingsModule } from './settings/settings.module';
     OpportunitiesModule,
     SalaryRangesModule,
     SettingsModule,
+    ContactUsModule,
   ],
   controllers: [AppController],
   providers: [
