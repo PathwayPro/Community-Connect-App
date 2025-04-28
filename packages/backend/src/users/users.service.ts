@@ -15,11 +15,7 @@ import {
 } from './dto/user.dto';
 import { AuthService } from '../auth/services/auth.service';
 import { EmailService } from '../auth/services/email.service';
-import {
-  findUserByEmail,
-  findUserById,
-  userEmailExists,
-} from 'src/common/utils/helper';
+import { findUserById, userEmailExists } from 'src/common/utils/helper';
 import { RolesEnum } from 'src/auth/util';
 import { SettingsService } from '../settings/settings.services';
 
@@ -77,7 +73,12 @@ export class UsersService {
 
   // User Retrieval Methods
   async getUserById(userIdNumber: string): Promise<ReadUserDto> {
-    const user = await findUserById(this.prisma, Number(userIdNumber));
+    const user = await this.prisma.users.findFirst({
+      where: {
+        id: Number(userIdNumber),
+        deleted_at: false,
+      },
+    });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${userIdNumber} not found`);
@@ -88,17 +89,27 @@ export class UsersService {
   }
 
   async getUserByUsername(email: string): Promise<ReadUserDto> {
-    const user = await findUserByEmail(this.prisma, email);
+    const user = await this.prisma.users.findFirst({
+      where: {
+        email,
+        deleted_at: false,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+
     return this.mapToReadUserDto(user);
   }
 
   async getUsers(): Promise<ReadUserDto[]> {
-    const users = await this.prisma.users.findMany();
+    const users = await this.prisma.users.findMany({});
     return users.map(this.mapToReadUserDto);
   }
 
   async getUsersPublicInfo(): Promise<PublicReadUserDto[]> {
-    const users = await this.prisma.users.findMany();
+    const users = await this.prisma.users.findMany({});
 
     console.log('users in public', users);
 
@@ -112,7 +123,12 @@ export class UsersService {
   async getUserPublicInfoById(
     userIdNumber: string,
   ): Promise<PublicReadUserDto> {
-    const user = await findUserById(this.prisma, Number(userIdNumber));
+    const user = await this.prisma.users.findFirst({
+      where: {
+        id: Number(userIdNumber),
+        deleted_at: false,
+      },
+    });
 
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -124,7 +140,12 @@ export class UsersService {
 
   async getUserByEmail(email: string): Promise<PublicReadUserDto> {
     try {
-      const user = await findUserByEmail(this.prisma, email);
+      const user = await this.prisma.users.findFirst({
+        where: {
+          email,
+          deleted_at: false,
+        },
+      });
 
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -215,6 +236,8 @@ export class UsersService {
           company_name: updateData.companyName,
           country_of_origin: updateData.countryOfOrigin,
           actively_searching: updateData.activelySearching,
+          last_login: updateData.lastLogin,
+          deleted_at: updateData.deletedAt,
         },
       });
 
@@ -269,7 +292,10 @@ export class UsersService {
         );
       }
 
-      await this.prisma.users.delete({ where: { id: userId } });
+      await this.prisma.users.update({
+        where: { id: userId },
+        data: { deleted_at: true },
+      });
       return { message: `User with ID ${userId} deleted successfully` };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -328,6 +354,19 @@ export class UsersService {
 
   private mapToReadUserDto(user: any): ReadUserDto {
     const readUser = new ReadUserDto();
+
+    // Determine user status with clearer logic
+    let status: string;
+    if (user.deleted_at === true) {
+      status = 'DELETED';
+    } else if (user.email_verified === true) {
+      status = 'ACTIVE';
+    } else if (user.email_verified === false) {
+      status = 'PENDING';
+    } else {
+      status = 'INACTIVE';
+    }
+
     Object.assign(readUser, {
       id: user.id,
       firstName: user.first_name,
@@ -358,6 +397,10 @@ export class UsersService {
       companyName: user.company_name,
       countryOfOrigin: user.country_of_origin,
       activelySearching: user.actively_searching,
+      lastLogin: user.last_login,
+      deletedAt: user.deleted_at,
+      emailVerified: user.email_verified,
+      status: status,
     });
     return readUser;
   }

@@ -56,6 +56,12 @@ export class AuthService {
       };
       const tokens = await this.getTokens(payload);
 
+      // Update user last login date
+      await this.prisma.users.update({
+        where: { id: user.id },
+        data: { last_login: new Date() },
+      });
+
       return { tokens, message: 'Login successful' };
     } catch (error) {
       this.logger.error(`Error logging in user: ${error}`);
@@ -418,7 +424,7 @@ export class AuthService {
         const tokens = await this.getTokens({
           sub: newUser.id,
           email: newUser.email,
-          roles: existingUser.role,
+          roles: newUser.role,
         });
         await this.updateRefreshToken(newUser.id, tokens.refreshToken);
 

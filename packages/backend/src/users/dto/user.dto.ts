@@ -199,11 +199,23 @@ export class UpdateUserDto {
   @IsOptional()
   @IsArray()
   skills?: string[];
+
+  @IsOptional()
+  @IsDate()
+  lastLogin?: Date;
+
+  @IsOptional()
+  @IsBoolean()
+  deletedAt?: boolean;
 }
 
 export class DeleteUserDto {
   @IsNumber()
   id: number;
+
+  @IsOptional()
+  @IsBoolean()
+  deletedAt?: boolean;
 }
 
 export class PublicReadUserDto {

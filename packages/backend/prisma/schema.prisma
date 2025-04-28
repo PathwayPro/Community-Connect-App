@@ -50,6 +50,8 @@ model users {
   skills               String[]
   age_range            String?
   goal_id              String?
+  last_login           DateTime?
+  deleted_at           Boolean                     @default(false)
   // MENTOR RELATIONSHIP
   mentor               mentors?
   // MENTEE RELATIONSHIP
