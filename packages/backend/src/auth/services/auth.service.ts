@@ -56,11 +56,11 @@ export class AuthService {
       };
       const tokens = await this.getTokens(payload);
 
-      // Update user last login date
-      await this.prisma.users.update({
-        where: { id: user.id },
-        data: { last_login: new Date() },
-      });
+      // // Update user last login date
+      // await this.prisma.users.update({
+      //   where: { id: user.id },
+      //   data: { last_login: new Date() },
+      // });
 
       return { tokens, message: 'Login successful' };
     } catch (error) {
