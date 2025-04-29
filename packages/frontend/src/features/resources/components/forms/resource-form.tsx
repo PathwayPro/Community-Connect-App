@@ -48,7 +48,6 @@ export const ResourceForm = () => {
           leftLabel="https://"
           placeholder="Enter resource link"
           customError={errors.link?.message as string}
-          required
         />
       </div>
     </div>

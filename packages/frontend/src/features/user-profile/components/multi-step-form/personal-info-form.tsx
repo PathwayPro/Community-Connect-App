@@ -125,7 +125,6 @@ export const PersonalInfoForm = () => {
           label="Country of Origin"
           placeholder="Enter your country of origin"
           customError="Country of origin is required"
-          required
         />
         <FormInput
           name="languages"

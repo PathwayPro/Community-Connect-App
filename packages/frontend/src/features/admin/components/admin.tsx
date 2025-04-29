@@ -38,21 +38,21 @@ export const Admin = () => {
 
         <TabsContent
           value="users"
-          className="mt-4 rounded-lg border bg-white p-4"
+          className="mt-4 rounded-2xl border bg-white p-4"
         >
           <UserManagement />
         </TabsContent>
 
         <TabsContent
           value="settings"
-          className="mt-4 rounded-lg border bg-white p-4"
+          className="mt-4 rounded-2xl border bg-white p-4"
         >
           <ApplicationSettings />
         </TabsContent>
 
         <TabsContent
           value="system"
-          className="mt-4 rounded-lg border bg-white p-4"
+          className="mt-4 rounded-2xl border bg-white p-4"
         >
           <SystemStatus />
         </TabsContent>

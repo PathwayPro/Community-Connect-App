@@ -88,8 +88,8 @@ export function FooterSection() {
               Work with Us
             </h6>
             <div className="flex flex-col gap-2">
-              <FooterLink href="/register">Become a member</FooterLink>
-              <FooterLink href="/register">Become a volunteer</FooterLink>
+              <FooterLink href="/contact-us">Become a member</FooterLink>
+              <FooterLink href="/contact-us">Become a volunteer</FooterLink>
               <FooterLink href="/contact-us">Become a partner</FooterLink>
             </div>
           </div>
