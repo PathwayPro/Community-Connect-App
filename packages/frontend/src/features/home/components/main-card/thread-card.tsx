@@ -52,18 +52,25 @@ export const ThreadCard = ({
   // handle view thread
   const handleViewThread = () => {
     if (setSelectedThread) {
+      console.log('| - - - - - - - > IMAGEN: ', imageUrl);
       setSelectedThread({
         id,
         authorName,
         authorUsername: '',
         timeAgo,
         content,
-        avatarUrl,
-        imageUrl: imageUrl || '',
+        avatarUrl:
+          avatarUrl ||
+          'https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png',
+        imageUrl:
+          imageUrl ||
+          'https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png',
         likes,
         comments,
         isSaved: isSaved
       });
+      console.log('| - - - - - - - > IMAGEN: ', imageUrl);
+      console.log('| - - - - - - - > COSAS: ', selectedThread, selectedThread);
     }
     viewThreads();
   };

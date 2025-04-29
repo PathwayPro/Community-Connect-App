@@ -109,6 +109,7 @@ export class BlogService {
       first_name: true,
       middle_name: true,
       last_name: true,
+      picture_upload_link: true,
     };
   }
 

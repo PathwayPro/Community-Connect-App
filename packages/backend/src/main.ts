@@ -27,13 +27,17 @@ async function bootstrap() {
     .addTag('Authentication', 'Authentication related endpoints')
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-
-  SwaggerModule.setup('api/docs', app, document);
-
   app.useGlobalPipes(new ValidationPipe());
 
   app.setGlobalPrefix('api/v1');
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      url: '/api/v1/api-json', // Update the Swagger UI to fetch the prefixed JSON
+    },
+  });
 
   await app.listen(process.env.PORT ?? 3001);
 }

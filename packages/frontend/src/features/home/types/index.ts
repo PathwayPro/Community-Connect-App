@@ -12,6 +12,7 @@ interface UserPosts {
   first_name: string;
   middle_name: string;
   last_name: string;
+  picture_upload_link?: string;
 }
 
 export interface ThreadResponse {

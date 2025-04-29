@@ -21,10 +21,10 @@ const transformThreadResponseToThread = (response: ThreadResponse): Thread => ({
   authorUsername: response.user.first_name,
   timeAgo: response.created_at,
   content: response.content,
-  avatarUrl: '',
+  avatarUrl: response.user.picture_upload_link || '',
   imageUrl: '',
-  likes: 14,
-  comments: 21,
+  likes: response.likes_count || 0,
+  comments: response.comments_count || 0,
   tags: [],
   isSaved: false
 });
@@ -48,7 +48,7 @@ export const Home = () => {
   const threads: Thread[] = rawThreads.map(transformThreadResponseToThread); // Transform the API response
 
   useEffect(() => {
-    console.log('POR LO MENOS LLEGA AL USE EFFECT!');
+    console.log('LLEGA AL USE EFFECT!');
     fetchThreads();
   }, [activeTab, sort, selectedTags, fetchThreads]); // Include fetchThreads in the dependency array
 
@@ -58,7 +58,7 @@ export const Home = () => {
       console.log('Thread submitted:', content, attachments);
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated API call
       setDraftContent('');
-      setIsCreatingThread(false);
+      setIsCreatingThread(true);
     } catch (error) {
       console.error('Error submitting thread:', error);
     }

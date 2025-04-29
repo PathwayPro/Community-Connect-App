@@ -73,9 +73,9 @@ export const CommentsThreadCard = ({
     isLoading: commentsLoading,
     error: commentsError
   } = useBlogStore();
-  const threadComments: CommentCardProps[] = rawThreadMessages.map(
-    transformCommentResponseToCommentCardProps
-  );
+  const threadComments: CommentCardProps[] = !rawThreadMessages
+    ? []
+    : rawThreadMessages.map(transformCommentResponseToCommentCardProps);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -92,6 +92,7 @@ export const CommentsThreadCard = ({
 
   // handle comment click
   const handleCommentClick = (e: React.MouseEvent) => {
+    console.log('COMMENT CLICK');
     e.stopPropagation();
     if (setShowCommentSection) {
       setShowCommentSection(!showCommentSection);
