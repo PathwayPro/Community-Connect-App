@@ -53,6 +53,15 @@ export class User extends BaseEntity {
 
   @Column({ type: 'date', nullable: true })
   last_logout?: Date;
+
+  @Column({ type: 'date', nullable: true })
+  last_login?: Date;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  status?: string;
+
+  @Column({ type: 'boolean', default: false, nullable: false })
+  deleted_at?: boolean;
 }
 
 export class UserResponseMin {

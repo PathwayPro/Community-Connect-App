@@ -22,6 +22,7 @@ export class EmailService {
       pass: this.configService.get<string>('EMAIL_PASS'),
       frontendUrl: this.configService.get<string>('FRONTEND_URL'),
       jwtSecret: this.configService.get<string>('JWT_SECRET_KEY'),
+      adminEmail: this.configService.get<string>('ADMIN_EMAIL'),
     };
 
     // Validate config
@@ -115,6 +116,55 @@ export class EmailService {
           </body>
         </html>
       `,
+    });
+
+    return response;
+  }
+
+  public async sendEmailToAdmin(
+    contact_message: string,
+    email: string,
+    first_name: string,
+    last_name: string | null,
+    phone: string | null,
+    company_name: string | null,
+  ): Promise<{ success: boolean; message: string }> {
+    const adminEmail = this.config.adminEmail;
+
+    if (!adminEmail) {
+      throw new Error('Admin email is not configured');
+    }
+
+    const fullName = last_name ? `${first_name} ${last_name}` : first_name;
+    const subject = `New Contact Message from ${fullName}`;
+    const senderEmail = `"${fullName}" <${email}>`;
+
+    // Build text content conditionally
+    const text = `
+      Subject: ${subject}
+      Email: ${email}
+      First Name: ${first_name}
+      ${last_name ? `Last Name: ${last_name}\n` : ''}${phone ? `Phone: ${phone}\n` : ''}${company_name ? `Company Name: ${company_name}\n` : ''}Contact Message: ${contact_message}
+    `;
+
+    // Build HTML content conditionally
+    const html = `
+      <h1>Contact Message</h1>
+      <p>Subject: ${subject}</p>
+      <p>Email: ${email}</p>
+      <p>First Name: ${first_name}</p>
+      ${last_name ? `<p>Last Name: ${last_name}</p>` : ''}
+      ${phone ? `<p>Phone: ${phone}</p>` : ''}
+      ${company_name ? `<p>Company Name: ${company_name}</p>` : ''}
+      <p>Contact Message: ${contact_message}</p>
+    `;
+
+    const response = await this.sendEmail({
+      to: adminEmail,
+      from: senderEmail,
+      subject,
+      text,
+      html,
     });
 
     return response;

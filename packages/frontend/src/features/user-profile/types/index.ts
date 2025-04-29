@@ -33,6 +33,10 @@ export interface UserProfile {
   companyName?: string;
   skills?: string[];
   activelySearching?: boolean;
+  status?: string;
+  updatedAt?: string;
+  createdAt?: string;
+  emailVerified?: boolean;
 }
 
 export interface UserResponse<T> {

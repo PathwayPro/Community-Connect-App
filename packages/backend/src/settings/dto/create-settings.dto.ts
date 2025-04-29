@@ -1,7 +1,20 @@
-export interface CreateSettingsDto {
+import { ProfileVisibility } from '@prisma/client';
+import { IsEnum, IsBoolean, IsOptional } from 'class-validator';
+
+export class CreateSettingsDto {
+  @IsOptional()
+  @IsBoolean()
   shareBirthDate?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
   shareContactDetails?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
   shareSocialLinks?: boolean;
-  profileVisibility?: 'public' | 'private' | 'connections';
-  messageSettings?: 'everyone' | 'connections';
+
+  @IsOptional()
+  @IsEnum(ProfileVisibility)
+  profileVisibility?: ProfileVisibility;
 }

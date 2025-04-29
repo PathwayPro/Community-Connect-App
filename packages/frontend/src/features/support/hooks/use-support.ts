@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { ApiError } from '@/shared/types';
 import { supportApi } from '@/features/support/api/support-api';
-import { ContactFormData } from '@/features/support/types';
+import { ContactFormData } from '@/features/support/lib/validation';
 
 export function useSupport() {
   const [isLoading, setIsLoading] = useState(false);

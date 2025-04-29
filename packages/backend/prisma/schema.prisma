@@ -50,6 +50,8 @@ model users {
   skills               String[]
   age_range            String?
   goal_id              String?
+  last_login           DateTime?
+  deleted_at           Boolean                     @default(false)
   // MENTOR RELATIONSHIP
   mentor               mentors?
   // MENTEE RELATIONSHIP
@@ -451,12 +453,6 @@ enum ProfileVisibility {
   PRIVATE
 }
 
-enum MessageSettings {
-  EVERYONE
-  CONNECTIONS_ONLY
-  NOBODY
-}
-
 model UserSettings {
   id                Int               @id @default(autoincrement())
   user              users             @relation(fields: [userId], references: [id])
@@ -465,6 +461,38 @@ model UserSettings {
   shareContactDetails Boolean         @default(true)
   shareSocialLinks  Boolean           @default(true)
   profileVisibility ProfileVisibility @default(PUBLIC)
-  messageSettings   MessageSettings   @default(EVERYONE)
 }
+
+enum ContactUsStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model ContactUs {
+  id                Int               @id @default(autoincrement())
+  first_name        String
+  last_name         String?
+  company_name      String?
+  email             String
+  phone             String?
+  contact_message   String
+  status            ContactUsStatus    @default(PENDING)
+  created_at        DateTime          @default(now())
+}
+
+enum NewsletterStatus {
+  PENDING
+  SUBSCRIBED
+  UNSUBSCRIBED
+}
+
+model NewsletterSubscriptions {
+  id                Int               @id @default(autoincrement())
+  email             String
+  created_at        DateTime          @default(now())
+  status            NewsletterStatus  @default(PENDING)
+}
+
+
 

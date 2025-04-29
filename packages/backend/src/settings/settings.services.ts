@@ -5,7 +5,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/database';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
-
+import { CreateSettingsDto } from './dto/create-settings.dto';
+import { ProfileVisibility, UserSettings } from '@prisma/client';
 @Injectable()
 export class SettingsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -38,6 +39,57 @@ export class SettingsService {
         where: { userId },
         data: updateSettingsDto,
       });
+
+      return updatedSettings;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed to update settings: ${error.message}`,
+      );
+    }
+  }
+
+  async createUserSettings(userId: number) {
+    try {
+      const newSettings = await this.prisma.userSettings.create({
+        data: {
+          userId,
+          profileVisibility: ProfileVisibility.PUBLIC,
+          shareBirthDate: true,
+          shareContactDetails: false,
+          shareSocialLinks: true,
+        },
+      });
+
+      return newSettings;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed to create settings: ${error.message}`,
+      );
+    }
+  }
+
+  async createSettingsForExistingUsers(createSettingsDto: CreateSettingsDto) {
+    const updatedSettings: UserSettings[] = [];
+
+    try {
+      const users = await this.prisma.users.findMany({});
+
+      for (const user of users) {
+        const existingSettings = await this.prisma.userSettings.findUnique({
+          where: { userId: user.id },
+        });
+
+        if (!existingSettings) {
+          const updatedSetting = await this.prisma.userSettings.create({
+            data: {
+              userId: user.id,
+              ...createSettingsDto,
+            },
+          });
+
+          updatedSettings.push(updatedSetting);
+        }
+      }
 
       return updatedSettings;
     } catch (error) {

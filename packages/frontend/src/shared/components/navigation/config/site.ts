@@ -43,6 +43,11 @@ export const MainSiteNav = [
     name: 'Analytics',
     href: '/analytics',
     icon: 'analytics'
+  },
+  {
+    name: 'Admin',
+    href: '/admin',
+    icon: 'appWindow'
   }
 ];
 

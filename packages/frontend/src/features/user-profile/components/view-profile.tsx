@@ -13,6 +13,8 @@ import {
   getArrivalInCanadaLabel,
   getSkillLabel
 } from '@/features/user-profile/lib/utils';
+import { useSettingsStore } from '@/features/settings/store';
+import { useEffect } from 'react';
 
 interface StatItemProps {
   label: string;
@@ -71,16 +73,20 @@ interface ViewProfileProps {
 export const ViewProfile = ({ slug }: ViewProfileProps) => {
   const router = useRouter();
   const { user } = useUserStore();
+  const { settings, getSettingsById } = useSettingsStore();
+
   const userId = slug;
 
-  console.log('slug', slug);
-  // Modified to accept userId parameter
   const { isLoading, error, data: profileData } = useFetchProfile(userId);
 
   const isOwnProfile = !userId || Number(userId) === user?.id;
   const displayedUser = isOwnProfile ? user : profileData;
 
-  console.log('profile data', displayedUser, isOwnProfile);
+  useEffect(() => {
+    if (!isOwnProfile) {
+      getSettingsById(Number(userId));
+    }
+  }, [isOwnProfile, userId, getSettingsById]);
 
   // view profile data builder
   const profileDataBuilder = {
@@ -100,12 +106,16 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
         label: 'Name',
         value: `${displayedUser?.firstName} ${displayedUser?.lastName}`
       },
-      {
-        label: 'Date of Birth',
-        value: displayedUser?.dob
-          ? formatDate(new Date(displayedUser.dob), 'MMMM d')
-          : 'Not specified'
-      },
+      ...(settings?.shareBirthDate
+        ? [
+            {
+              label: 'Date of Birth',
+              value: displayedUser?.dob
+                ? formatDate(new Date(displayedUser.dob), 'MMMM d')
+                : 'Not specified'
+            }
+          ]
+        : []),
       {
         label: 'Years in Canada',
         value: displayedUser?.arrivalInCanada
@@ -291,14 +301,15 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
           )}
 
           {/* Contact Details */}
-          {profileDataBuilder.contactDetails.length > 0 && (
-            <Card className="bg-neutral-light-200 p-6">
-              <InfoGroup
-                title="Contact Details"
-                items={profileDataBuilder.contactDetails}
-              />
-            </Card>
-          )}
+          {profileDataBuilder.contactDetails.length > 0 &&
+            settings?.shareContactDetails && (
+              <Card className="bg-neutral-light-200 p-6">
+                <InfoGroup
+                  title="Contact Details"
+                  items={profileDataBuilder.contactDetails}
+                />
+              </Card>
+            )}
 
           {/* Professional Information */}
           {profileDataBuilder.professionalInfo.length > 0 && (
@@ -311,11 +322,12 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
           )}
 
           {/* Links */}
-          {profileDataBuilder.links.length > 0 && (
-            <Card className="bg-neutral-light-200 p-6">
-              <InfoGroup title="Links" items={profileDataBuilder.links} />
-            </Card>
-          )}
+          {profileDataBuilder.links.length > 0 &&
+            settings?.shareSocialLinks && (
+              <Card className="bg-neutral-light-200 p-6">
+                <InfoGroup title="Links" items={profileDataBuilder.links} />
+              </Card>
+            )}
         </div>
 
         {/* View Resume Button */}

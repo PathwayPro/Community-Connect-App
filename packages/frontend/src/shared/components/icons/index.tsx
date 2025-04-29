@@ -38,7 +38,8 @@ import {
   SaveIcon,
   ChartArea,
   EyeIcon,
-  Github
+  Github,
+  AppWindow
 } from 'lucide-react';
 
 export const SharedIcons = {
@@ -81,6 +82,7 @@ export const SharedIcons = {
   analytics: ChartArea,
   eye: EyeIcon,
   github: Github,
+  appWindow: AppWindow,
   mentors: ({ ...props }) => (
     <svg
       viewBox="0 0 24 24"

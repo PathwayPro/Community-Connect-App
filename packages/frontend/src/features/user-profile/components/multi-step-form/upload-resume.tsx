@@ -14,8 +14,14 @@ export const UploadResume = () => {
   const {
     setValue,
     formState: { errors },
-    getValues
+    getValues,
+    watch,
+    register
   } = useFormContext<UserProfileFormData>();
+
+  // Register the field and watch its value for reactivity
+  register('activelySearching');
+  const activelySearching = watch('activelySearching');
 
   console.log(errors);
   console.log(getValues());
@@ -81,11 +87,15 @@ export const UploadResume = () => {
         <div className="my-2 flex w-full items-center justify-end gap-4">
           <p>Actively Searching</p>
           <Switch
-            name="activelySearching"
+            id="activelySearching"
             onCheckedChange={(checked) => {
-              setValue('activelySearching', checked);
+              setValue('activelySearching', checked, {
+                shouldValidate: true,
+                shouldDirty: true,
+                shouldTouch: true
+              });
             }}
-            checked={getValues('activelySearching')}
+            checked={activelySearching || false}
           />
         </div>
         <FormMultiSelect

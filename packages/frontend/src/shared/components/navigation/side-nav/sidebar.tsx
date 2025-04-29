@@ -12,6 +12,7 @@ import { Button } from '../../ui/button';
 import { cn } from '@/shared/lib/utils';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ interface SidebarProps {
 export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
   const pathname = usePathname();
   const { logout } = useAuth();
+  const router = useRouter();
 
   const isPathActive = (path: string) => {
     if (path === '/') {
@@ -64,7 +66,10 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
           )}
         />
       </Button>
-      <div className="mb-6 flex flex-row items-center gap-2">
+      <div
+        className="mb-6 flex cursor-pointer flex-row items-center gap-2"
+        onClick={() => router.push('/')}
+      >
         <SharedIcons.logo className={cn('h-10 w-10', isOpen && 'ml-4')} />
         {isOpen && (
           <div className="flex flex-col text-sm font-extrabold">
