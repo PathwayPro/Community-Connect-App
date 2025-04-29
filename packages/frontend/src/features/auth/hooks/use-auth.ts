@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuthContext } from '../providers/auth-context';
 import { authApi } from '@/features/auth/api';
 import {
@@ -17,8 +16,9 @@ import Cookies from 'js-cookie';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { ApiError } from '@/shared/types';
 
+const USER_STORAGE_KEY = 'user_data';
+
 export function useAuth() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { loginContext, logoutContext } = useAuthContext();
   const { showAlert } = useAlertDialog();
@@ -56,6 +56,11 @@ export function useAuth() {
         console.log('responseUserData', responseUserData);
 
         if (responseUserData.success) {
+          // Store user data in localStorage
+          localStorage.setItem(
+            USER_STORAGE_KEY,
+            JSON.stringify(responseUserData.data)
+          );
           loginContext(responseUserData.data);
           showAlert({
             title: 'Login successful!',
@@ -249,25 +254,31 @@ export function useAuth() {
   const logout = async () => {
     try {
       setIsLoading(true);
+
+      // Call the API (but we've already handled the logout locally)
       const response = await authApi.logout();
 
-      if (response.success) {
-        logoutContext();
-        showAlert({
-          title: 'Logged out successfully!',
-          description: 'See you soon!',
-          type: 'success',
-          redirect: '/'
-        });
-      }
+      logoutContext();
+
+      console.log('logout response', response);
+
+      return response;
     } catch (error) {
+      console.error('Logout error:', error);
+
+      console.log('logging out');
+
+      logoutContext();
+
       const apiError = error as ApiError;
       showAlert({
-        title: 'Logout Failed!',
-        description: apiError.response?.data?.message || 'Please try again.',
-        type: 'error'
+        title: 'Logout completed with warning',
+        description:
+          apiError.response?.data?.message ||
+          'You have been logged out, but there was an issue on our server.',
+        type: 'warning',
+        redirect: '/'
       });
-      throw error;
     } finally {
       setIsLoading(false);
     }
