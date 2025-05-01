@@ -1,12 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { mentorshipApi } from '../api/mentorship-api';
-import {
-  CreateMentorDto,
-  InterestsResponse,
-  MentorResponse,
-  MenteeResponse
-} from '../types';
+import { InterestsResponse, MentorResponse, MenteeResponse } from '../types';
 
 interface MentorshipState {
   mentors: MentorResponse[];

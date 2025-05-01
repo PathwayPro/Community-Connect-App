@@ -44,3 +44,8 @@ export interface UserResponse<T> {
   message?: string;
   data: T;
 }
+
+export interface SkillsResponse {
+  id: number;
+  name: string;
+}

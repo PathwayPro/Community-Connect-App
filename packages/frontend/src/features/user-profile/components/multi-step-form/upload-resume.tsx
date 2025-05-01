@@ -1,16 +1,14 @@
 import { FileUpload } from '@/shared/components/upload/file-upload';
-import {
-  skillsOptions,
-  workStatusData
-} from '@/features/user-profile/lib/constants/profile';
+import { workStatusData } from '@/features/user-profile/lib/constants/profile';
 import { FormMultiSelect } from '@/shared/components/form/form-multiselect';
 import { FormInput } from '@/shared/components/form/form-input';
 import { FormSelect } from '@/shared/components/form/form-select';
 import { Switch } from '@/shared/components/ui/switch';
 import { useFormContext } from 'react-hook-form';
 import { UserProfileFormData } from '../../lib/validations';
+import { SkillsResponse } from '../../types';
 
-export const UploadResume = () => {
+export const UploadResume = ({ skills }: { skills: SkillsResponse[] }) => {
   const {
     setValue,
     formState: { errors },
@@ -18,6 +16,8 @@ export const UploadResume = () => {
     watch,
     register
   } = useFormContext<UserProfileFormData>();
+
+  console.log('skills', skills);
 
   // Register the field and watch its value for reactivity
   register('activelySearching');
@@ -101,7 +101,10 @@ export const UploadResume = () => {
         <FormMultiSelect
           name="skills"
           label="Skills & Proficiencies"
-          options={skillsOptions}
+          options={skills.map((skill) => ({
+            label: skill.name,
+            value: skill.id
+          }))}
           placeholder="Select your skills"
           maxCount={5}
         />

@@ -28,6 +28,7 @@ import { OpportunitiesModule } from './opportunities/opportunities.module';
 import { SalaryRangesModule } from './salary_ranges/salary_ranges.module';
 import { SettingsModule } from './settings/settings.module';
 import { ContactUsModule } from './contact_us/contact_us.module';
+import { SkillsModule } from './skills/skills.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { ContactUsModule } from './contact_us/contact_us.module';
     SalaryRangesModule,
     SettingsModule,
     ContactUsModule,
+    SkillsModule,
   ],
   controllers: [AppController],
   providers: [

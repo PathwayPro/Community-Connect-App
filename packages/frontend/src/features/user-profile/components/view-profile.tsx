@@ -74,6 +74,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
   const router = useRouter();
   const { user } = useUserStore();
   const { settings, getSettingsById } = useSettingsStore();
+  const { skills, fetchSkills } = useUserStore();
 
   const userId = slug;
 
@@ -86,7 +87,10 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
     if (!isOwnProfile) {
       getSettingsById(Number(userId));
     }
-  }, [isOwnProfile, userId, getSettingsById]);
+    fetchSkills();
+  }, [isOwnProfile, userId, getSettingsById, fetchSkills]);
+
+  console.log('skills in view profile', skills);
 
   // view profile data builder
   const profileDataBuilder = {
@@ -150,7 +154,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
         label: 'Skills',
         value: displayedUser?.skills
           ? displayedUser.skills
-              .map((skill: string) => getSkillLabel(skill))
+              .map((skillId: string) => getSkillLabel(skillId, skills))
               .join(', ')
           : 'Not specified'
       }
