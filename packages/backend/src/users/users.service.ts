@@ -341,6 +341,7 @@ export class UsersService {
         last_name: userData.lastName,
         email: userData.email,
         password_hash: userData.passwordHash,
+        provider: 'email',
       },
     });
 
@@ -418,6 +419,7 @@ export class UsersService {
       emailVerified: user.email_verified,
       status: status,
       skills: user.skills?.map((skill: any) => skill?.skill_id),
+      provider: user.provider,
     });
     return readUser;
   }
@@ -444,6 +446,7 @@ export class UsersService {
       otherLinks: user.other_links,
       additionalLinks: user.additional_links,
       languages: user.languages,
+      provider: user.provider,
     });
     return publicUser;
   }

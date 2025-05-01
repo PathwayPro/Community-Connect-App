@@ -6,9 +6,17 @@ import { Button } from '@/shared/components/ui/button';
 import { Separator } from '@/shared/components/ui/separator';
 import { GeneralSettings } from './general-settings';
 import ReasonModal from './modals/reason-modal';
+import { useUserStore } from '@/features/user-profile/store';
+import { useEffect } from 'react';
 
 export const Settings = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, fetchUserProfile } = useUserStore();
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
+  const isLocalAuth = user?.provider === 'email';
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -24,13 +32,15 @@ export const Settings = () => {
 
   return (
     <div className="container-wide grid min-h-full w-full grid-cols-1 gap-6 md:grid-cols-2">
-      <div className="h-full rounded-[24px] border bg-card p-6">
-        <h4 className="mb-8 font-semibold">Security and Account</h4>
+      {isLocalAuth && (
+        <div className="h-full rounded-[24px] border bg-card p-6">
+          <h4 className="mb-8 font-semibold">Security and Account</h4>
 
-        <div className="space-y-4">
-          <ChangePasswordForm />
+          <div className="space-y-4">
+            <ChangePasswordForm />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="min-h-full rounded-[24px] border bg-card p-6">
         <div className="mb-8 flex items-center justify-between">

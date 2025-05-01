@@ -56,6 +56,10 @@ export class ReadUserDto {
   @IsNumber()
   skills?: number[];
 
+  @IsOptional()
+  @IsString()
+  provider?: string;
+
   @ApiPropertyOptional({
     description: 'User role',
     enum: ['USER', 'ADMIN', 'MENTOR'],
@@ -317,6 +321,10 @@ export class PublicReadUserDto {
   @IsOptional()
   @IsString()
   languages?: string;
+
+  @IsOptional()
+  @IsString()
+  provider?: string;
 }
 
 export class LoginUserDto {
