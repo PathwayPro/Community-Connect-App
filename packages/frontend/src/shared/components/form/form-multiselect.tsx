@@ -35,8 +35,8 @@ export const FormMultiSelect = <T extends FieldValues>({
   customError,
   control: controlProp,
   required = false,
-  maxCount = 10
-  // value
+  maxCount = 10,
+  value
 }: FormMultiSelectProps<T>) => {
   const formContext = useFormContext<T>();
   const control = controlProp || formContext?.control;
@@ -58,7 +58,10 @@ export const FormMultiSelect = <T extends FieldValues>({
         const error = formContext?.formState?.errors[name];
         const showError = error;
 
-        console.log('error :', error);
+        // Convert field value to string array if it exists
+        const fieldValue = field.value ? field.value.map(String) : [];
+        // Convert default value to string array if it exists
+        const defaultValue = value ? value.map(String) : fieldValue;
 
         return (
           <FormItem className="w-full">
@@ -79,11 +82,9 @@ export const FormMultiSelect = <T extends FieldValues>({
                   )}
                   options={options}
                   placeholder={placeholder}
-                  onValueChange={(value: (number | string)[]) =>
-                    field.onChange(value)
-                  }
-                  value={field.value || []}
-                  defaultValue={field.value || []}
+                  onValueChange={(value: string[]) => field.onChange(value)}
+                  value={fieldValue}
+                  defaultValue={defaultValue}
                   maxCount={maxCount}
                   animation={animation}
                   variant={variant}

@@ -75,7 +75,8 @@ export const EditProfile = () => {
         workStatus: user?.workStatus || '',
         companyName: user?.companyName || '',
         countryOfOrigin: user?.countryOfOrigin || '',
-        activelySearching: user?.activelySearching || false
+        activelySearching: user?.activelySearching || false,
+        skills: user?.skills?.map(String) || []
       }),
       [user]
     )
