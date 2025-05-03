@@ -41,7 +41,7 @@ export function ForgotPasswordForm() {
     ),
     defaultValues: {
       email: '',
-      ...(isForgotPasswordPage && { passwordHash: '', confirmPassword: '' })
+      ...(isForgotPasswordPage && { newPassword: '', confirmPassword: '' })
     }
   });
 
@@ -109,7 +109,7 @@ export function ForgotPasswordForm() {
           {!isForgotPasswordPage && (
             <FormField
               control={form.control}
-              name="passwordHash"
+              name="newPassword"
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel className="text-paragraph-sm font-medium text-neutral-dark-600">
@@ -125,13 +125,13 @@ export function ForgotPasswordForm() {
                       state={showPassword}
                       className={cn(
                         'w-full',
-                        form.formState.errors.passwordHash &&
+                        form.formState.errors.newPassword &&
                           'border-red-500 focus-visible:ring-red-100'
                       )}
                       {...field}
                     />
                   </FormControl>
-                  {form.formState.errors.passwordHash && (
+                  {form.formState.errors.newPassword && (
                     <>
                       <div className="flex flex-row items-center gap-2">
                         <Icons.informationCircle className="h-4 w-4" />
@@ -187,7 +187,7 @@ export function ForgotPasswordForm() {
                       state={showConfirmPassword}
                       className={cn(
                         'w-full',
-                        form.formState.errors.passwordHash &&
+                        form.formState.errors.newPassword &&
                           'border-red-500 focus-visible:ring-red-100'
                       )}
                       {...field}
