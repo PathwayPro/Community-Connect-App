@@ -38,9 +38,7 @@ export const opportunityFormSchema = z.object({
   experience: z.string({
     required_error: 'Experience is required'
   }),
-  salary_range_id: z.string({
-    required_error: 'Salary range is required'
-  }),
+  salary_range_id: z.string().optional(),
   settings: z.enum(Object.values(WorkSettings) as [string, ...string[]]),
   province: z.string({
     required_error: 'Province is required'
@@ -79,11 +77,8 @@ export const resourceFormSchema = z.object({
     })
     .min(10, 'Details must be at least 10 characters'),
   type: z.enum(resourceTypeValues),
-  link: z
-    .string({
-      required_error: 'Link is required'
-    })
-    .regex(urlPattern, 'Must be a valid URL')
+  link: z.string().regex(urlPattern, 'Must be a valid URL').optional(),
+  file: z.instanceof(File).optional()
 });
 
 export type ResourceFormValues = z.infer<typeof resourceFormSchema>;

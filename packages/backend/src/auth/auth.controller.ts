@@ -76,7 +76,7 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   resetPassword(
-    @GetUser('userId') userId: number,
+    @GetUser('sub') userId: number,
     @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<{ message: string }> {
     return this.authService.resetPassword(userId, resetPasswordDto);

@@ -52,11 +52,13 @@ export type ForgotPasswordCredentials = {
 };
 
 export type ResetPasswordCredentials = {
-  passwordHash: string;
+  currentPassword: string;
+  newPassword: string;
   confirmPassword: string;
 };
 
 export type UpdatePasswordCredentials = {
-  passwordHash: string;
+  password: string;
+  newPassword: string;
   confirmPassword: string;
 };

@@ -30,8 +30,8 @@ export function RootLayoutClient({
               <div className="flex w-full">{children}</div>
             </MainLayout>
           )}
+          <Toaster />
         </TooltipProvider>
-        <Toaster />
       </AuthProvider>
     </ThemeProvider>
   );

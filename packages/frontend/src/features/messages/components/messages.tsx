@@ -229,14 +229,8 @@ export const Messages = ({ userId }: { userId: string | undefined }) => {
           <div className="flex flex-1 items-center justify-center p-4">
             <EmptyStateCard
               icon={MessagesSquare}
-              title="Select a conversation"
-              description="Choose a chat from the sidebar or start a new conversation"
-              action={{
-                label: 'Start New Chat',
-                onClick: () => {
-                  /* Handle new chat */
-                }
-              }}
+              title="Connect to start a conversation"
+              description="Connect with someone first to start a conversation"
             />
           </div>
         )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/shared/components/ui/button';
@@ -16,8 +16,9 @@ import { useAuth } from '@/features/auth/hooks/use-auth';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { cn } from '@/shared/lib/utils';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { z } from 'zod';
-
+import { useUserStore } from '@/features/user-profile/store';
 // New schema for change password
 const changePasswordSchema = z
   .object({
@@ -50,10 +51,11 @@ const passwordRequirements = [
 ];
 
 export function ChangePasswordForm() {
-  const { changePassword, isLoading } = useAuth();
+  const { resetPassword, isLoading } = useAuth();
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { showAlert } = useAlertDialog();
 
   const form = useForm<ChangePasswordFormValues>({
     resolver: zodResolver(changePasswordSchema),
@@ -65,7 +67,27 @@ export function ChangePasswordForm() {
   });
 
   const onSubmit = async (data: ChangePasswordFormValues) => {
-    await changePassword(data);
+    console.log('data from form to reset password', data);
+
+    try {
+      await resetPassword(data);
+
+      form.reset();
+
+      showAlert({
+        title: 'Password changed successfully',
+        description: 'Your password has been changed successfully',
+        type: 'success',
+        redirect: '/auth/login'
+      });
+    } catch (error) {
+      console.error('Error changing password:', error);
+      showAlert({
+        title: 'Error changing password',
+        description: 'Your password has not been changed',
+        type: 'error'
+      });
+    }
   };
 
   return (

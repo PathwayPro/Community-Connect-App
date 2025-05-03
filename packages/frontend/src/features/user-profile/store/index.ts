@@ -1,11 +1,13 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { UserProfile, UserResponse } from '../types';
+import { UserProfile, UserResponse, SkillsResponse } from '../types';
 import { userApi } from '../api/user-api';
+import React from 'react';
 
 interface UserState {
   user: UserProfile | null;
   users: UserProfile[];
+  skills: SkillsResponse[];
   publicUsers: UserProfile[];
   selectedUser: UserProfile | null;
   isLoading: boolean;
@@ -18,6 +20,7 @@ interface UserState {
   fetchUserPublicData: (id: number) => Promise<UserResponse<UserProfile>>;
   fetchUserById: (id: number) => Promise<UserResponse<UserProfile>>;
   fetchUserByEmail: (email: string) => Promise<UserResponse<UserProfile>>;
+  fetchSkills: () => Promise<UserResponse<SkillsResponse[]>>;
   updateUser: (
     data: UserProfile,
     id: number
@@ -31,6 +34,7 @@ export const useUserStore = create<UserState>()(
     (set) => ({
       user: null,
       users: [],
+      skills: [],
       publicUsers: [],
       selectedUser: null,
       isLoading: false,
@@ -115,6 +119,21 @@ export const useUserStore = create<UserState>()(
         }
       },
 
+      fetchSkills: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await userApi.getSkills();
+          set({ skills: response.data, isLoading: false });
+          return response;
+        } catch (error) {
+          const errorMsg =
+            error instanceof Error ? error.message : 'An error occurred';
+          set({ error: errorMsg, isLoading: false });
+          // Return a UserResponse object instead of undefined
+          return { success: false, data: [], message: errorMsg };
+        }
+      },
+
       updateUser: async (data: UserProfile, id: number) => {
         try {
           set({ isLoading: true, error: null });
@@ -166,3 +185,12 @@ export const useUserStore = create<UserState>()(
     }
   )
 );
+
+// Add a hook to fetch user profile on store initialization
+export const useInitializeUserStore = () => {
+  const { fetchUserProfile } = useUserStore();
+
+  React.useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
+};
