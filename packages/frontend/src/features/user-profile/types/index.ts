@@ -38,6 +38,7 @@ export interface UserProfile {
   createdAt?: string;
   emailVerified?: boolean;
   provider?: string;
+  lastLogin?: string;
 }
 
 export interface UserResponse<T> {

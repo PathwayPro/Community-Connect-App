@@ -81,9 +81,15 @@ export const columns: ColumnDef<UserProfile>[] = [
     }
   },
   {
-    accessorKey: 'updatedAt',
+    accessorKey: 'lastLogin',
     header: 'Last Login',
-    cell: ({ row }) => formatDate(row.original.updatedAt || '')
+    cell: ({ row }) => {
+      const lastLogin = row.original.lastLogin || null;
+
+      if (lastLogin === null || lastLogin === undefined) return '-';
+
+      return formatDate(lastLogin);
+    }
   },
   {
     id: 'actions',

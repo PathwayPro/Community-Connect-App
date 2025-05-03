@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { UserProfile, UserResponse, SkillsResponse } from '../types';
 import { userApi } from '../api/user-api';
+import React from 'react';
 
 interface UserState {
   user: UserProfile | null;
@@ -184,3 +185,12 @@ export const useUserStore = create<UserState>()(
     }
   )
 );
+
+// Add a hook to fetch user profile on store initialization
+export const useInitializeUserStore = () => {
+  const { fetchUserProfile } = useUserStore();
+
+  React.useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
+};
