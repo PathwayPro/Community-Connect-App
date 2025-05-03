@@ -37,10 +37,17 @@ export interface UserProfile {
   updatedAt?: string;
   createdAt?: string;
   emailVerified?: boolean;
+  provider?: string;
+  lastLogin?: string;
 }
 
 export interface UserResponse<T> {
   success: boolean;
   message?: string;
   data: T;
+}
+
+export interface SkillsResponse {
+  id: number;
+  name: string;
 }

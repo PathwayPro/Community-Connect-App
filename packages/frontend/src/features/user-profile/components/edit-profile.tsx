@@ -22,8 +22,9 @@ import { useUserStore } from '../store';
 import { useFetchProfile } from '../hooks/use-fetch-profile';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
+import { SkillsResponse } from '../types';
 
-function getStepContent(step: number) {
+function getStepContent(step: number, skills: SkillsResponse[]) {
   console.log('STEP HERE', step);
   switch (step) {
     case 1:
@@ -31,7 +32,7 @@ function getStepContent(step: number) {
     case 2:
       return <SocialLinksForm />;
     case 3:
-      return <UploadResume />;
+      return <UploadResume skills={skills} />;
     case 4:
       return <GoalsForm />;
     default:
@@ -45,6 +46,7 @@ export const EditProfile = () => {
   const { user } = useUserStore();
   const { isLoading, error } = useFetchProfile();
   const { showAlert } = useAlertDialog();
+  const { skills, fetchSkills } = useUserStore();
 
   const methods = useForm<UserProfileFormData>({
     mode: 'onChange',
@@ -73,7 +75,8 @@ export const EditProfile = () => {
         workStatus: user?.workStatus || '',
         companyName: user?.companyName || '',
         countryOfOrigin: user?.countryOfOrigin || '',
-        activelySearching: user?.activelySearching || false
+        activelySearching: user?.activelySearching || false,
+        skills: user?.skills?.map(String) || []
       }),
       [user]
     )
@@ -82,7 +85,8 @@ export const EditProfile = () => {
   useEffect(() => {
     console.log('Form Values:', methods.getValues());
     console.log('Form Errors:', methods.formState.errors);
-  }, [methods]);
+    fetchSkills();
+  }, [methods, fetchSkills]);
 
   const {
     handleSubmit,
@@ -193,7 +197,7 @@ export const EditProfile = () => {
       <CardContent className="flex flex-col justify-center gap-4">
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {getStepContent(activeStep)}
+            {getStepContent(activeStep, skills)}
             <div className="flex w-full justify-between pt-5">
               <IconButton
                 className="w-[180px]"

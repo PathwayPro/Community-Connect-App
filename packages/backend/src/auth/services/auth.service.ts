@@ -54,13 +54,14 @@ export class AuthService {
         email: user.email,
         roles: user.role,
       };
+
       const tokens = await this.getTokens(payload);
 
-      // // Update user last login date
-      // await this.prisma.users.update({
-      //   where: { id: user.id },
-      //   data: { last_login: new Date() },
-      // });
+      // Update user last login date
+      await this.prisma.users.update({
+        where: { id: user.id },
+        data: { last_login: new Date(), provider: 'email' },
+      });
 
       return { tokens, message: 'Login successful' };
     } catch (error) {
@@ -186,8 +187,11 @@ export class AuthService {
     userId: number,
     resetPasswordDto: ResetPasswordDto,
   ): Promise<{ message: string }> {
+    console.log('resetPasswordDto', resetPasswordDto, userId);
+
     try {
-      const { oldPassword, newPassword, confirmPassword } = resetPasswordDto;
+      const { currentPassword, newPassword, confirmPassword } =
+        resetPasswordDto;
 
       const user = await this.prisma.users.findUnique({
         where: { id: userId },
@@ -210,7 +214,7 @@ export class AuthService {
       }
 
       const isOldPasswordValid = await this.verifyPassword({
-        plainPassword: oldPassword,
+        plainPassword: currentPassword,
         hashedPassword: user.password_hash,
       });
 
@@ -343,12 +347,13 @@ export class AuthService {
         throw new UnauthorizedException('Email already verified');
       }
 
-      // Update user verification status
+      // Update user verification status and provider
       await this.prisma.users.update({
         where: { id: decodedMessage.userId },
         data: {
           email_verified: true,
           verification_token: null,
+          provider: 'email',
         },
       });
 
@@ -399,6 +404,14 @@ export class AuthService {
 
         await this.updateRefreshToken(existingUser.id, tokens.refreshToken);
 
+        await this.prisma.users.update({
+          where: { id: existingUser.id },
+          data: {
+            last_login: new Date(),
+            provider: 'google',
+          },
+        });
+
         data = {
           message: 'Google authentication successful',
           tokens: {
@@ -418,6 +431,7 @@ export class AuthService {
             first_name: googleUser.firstName,
             last_name: googleUser.lastName,
             password_hash: hashedPassword,
+            provider: 'google',
           },
         });
 

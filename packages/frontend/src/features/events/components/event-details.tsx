@@ -25,6 +25,10 @@ import { toSentenceCase } from '@/shared/lib/utils';
 import { formatDate } from 'date-fns';
 import { ConnectRequest } from '@/features/messages/components/common/connect-request';
 import { useState } from 'react';
+import {
+  useUserStore,
+  useInitializeUserStore
+} from '@/features/user-profile/store';
 
 interface EventDetailsProps {
   onBack?: () => void;
@@ -35,6 +39,10 @@ interface EventDetailsProps {
 export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
   const router = useRouter();
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+  const { user } = useUserStore();
+
+  // Initialize user store
+  useInitializeUserStore();
 
   const searchParams = useSearchParams();
 
@@ -65,9 +73,14 @@ export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
     host_id,
     host_name,
     host_bio,
-    host_image,
-    isHost
+    host_image
   } = eventData;
+
+  // Ensure proper type conversion for comparison
+  const isHost =
+    user?.id !== undefined &&
+    host_id !== undefined &&
+    Number(user.id) === Number(host_id);
 
   const handleViewProfile = () => {
     router.push(`/profile/${host_id}`);

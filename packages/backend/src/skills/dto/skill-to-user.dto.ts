@@ -1,8 +1,8 @@
 import { IsInt } from 'class-validator';
 
-export class InterestToUserDto {
+export class SkillToUserDto {
   @IsInt()
   user_id: number;
   @IsInt()
-  interest_id: number;
+  skill_id: number;
 }

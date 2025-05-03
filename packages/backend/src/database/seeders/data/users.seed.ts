@@ -33,6 +33,7 @@ const GeneralUsersData = {
   age_range: '',
   deleted_at: false,
   last_login: new Date(),
+  provider: 'email',
 };
 
 export const UsersData: users[] = [

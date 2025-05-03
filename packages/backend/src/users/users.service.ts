@@ -5,6 +5,7 @@ import {
   Logger,
   NotFoundException,
   UnauthorizedException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import {
@@ -77,6 +78,9 @@ export class UsersService {
       where: {
         id: Number(userIdNumber),
         deleted_at: false,
+      },
+      include: {
+        skills: true,
       },
     });
 
@@ -209,6 +213,20 @@ export class UsersService {
         );
       }
 
+      // Update skills if provided
+      if (updateData.skills) {
+        const updatedSkills = await this.addUserSkillsFormatted(
+          targetUserId,
+          updateData.skills as unknown as number[],
+        );
+
+        if (!updatedSkills) {
+          throw new InternalServerErrorException(
+            'There was an error updating your skills. Please try again later.',
+          );
+        }
+      }
+
       const updatedUser = await this.prisma.users.update({
         where: { id: targetUserId },
         data: {
@@ -231,7 +249,6 @@ export class UsersService {
           portfolio_link: updateData.portfolioLink,
           other_links: updateData.otherLinks,
           additional_links: updateData.additionalLinks,
-          skills: updateData.skills,
           work_status: updateData.workStatus,
           company_name: updateData.companyName,
           country_of_origin: updateData.countryOfOrigin,
@@ -324,6 +341,7 @@ export class UsersService {
         last_name: userData.lastName,
         email: userData.email,
         password_hash: userData.passwordHash,
+        provider: 'email',
       },
     });
 
@@ -392,7 +410,6 @@ export class UsersService {
       portfolioLink: user.portfolio_link,
       otherLinks: user.other_links,
       additionalLinks: user.additional_links,
-      skills: user.skills,
       workStatus: user.work_status,
       companyName: user.company_name,
       countryOfOrigin: user.country_of_origin,
@@ -401,6 +418,8 @@ export class UsersService {
       deletedAt: user.deleted_at,
       emailVerified: user.email_verified,
       status: status,
+      skills: user.skills?.map((skill: any) => skill?.skill_id),
+      provider: user.provider,
     });
     return readUser;
   }
@@ -418,7 +437,6 @@ export class UsersService {
       countryOfOrigin: user.country_of_origin,
       companyName: user.company_name,
       bio: user.bio,
-      skills: user.skills,
       profession: user.profession,
       experience: user.experience,
       linkedinLink: user.linkedin_link,
@@ -428,7 +446,57 @@ export class UsersService {
       otherLinks: user.other_links,
       additionalLinks: user.additional_links,
       languages: user.languages,
+      provider: user.provider,
     });
     return publicUser;
+  }
+
+  private async addUserSkillsFormatted(
+    user_id: number,
+    skills: string | number[],
+  ) {
+    try {
+      // Transform skills input into array of integers
+      const skillsToArray =
+        typeof skills === 'string'
+          ? JSON.parse(skills).map((item: any) => parseInt(item, 10))
+          : skills.map((item: any) => parseInt(item, 10));
+
+      // Validate only existing skills and return formatted values
+      const validSkillIds = await this.prisma.skills
+        .findMany({
+          where: { id: { in: skillsToArray } },
+          select: { id: true },
+        })
+        .then((skills) =>
+          skills.map((skill) => ({
+            user_id: user_id,
+            skill_id: skill.id,
+          })),
+        );
+
+      // Remove previous skills for the user
+      await this.prisma.usersSkills.deleteMany({
+        where: { user_id: user_id },
+      });
+
+      // Add validated skills to the user
+      const userSkills = await this.prisma.usersSkills.createMany({
+        data: validSkillIds,
+        skipDuplicates: true,
+      });
+
+      if (!userSkills || userSkills.count < 1) {
+        throw new InternalServerErrorException(
+          'There was an error saving your skills. Please try again later or edit your profile.',
+        );
+      }
+
+      return validSkillIds;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error saving skills: ' + error.message,
+      );
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { apiMethods } from '@/shared/api';
-import { UserProfile } from '../types';
+import { SkillsResponse, UserProfile } from '../types';
 
 export const userApi = {
   getUserProfile: () => apiMethods.get<UserProfile>('/users/profile'),
@@ -20,5 +20,7 @@ export const userApi = {
     apiMethods.put<UserProfile>(`/users/${id}`, data),
 
   deleteUserProfile: (id: number) =>
-    apiMethods.delete<UserProfile>(`/users/${id}`)
+    apiMethods.delete<UserProfile>(`/users/${id}`),
+
+  getSkills: () => apiMethods.get<SkillsResponse[]>('/skills')
 };

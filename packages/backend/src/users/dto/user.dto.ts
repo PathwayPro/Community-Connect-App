@@ -8,8 +8,10 @@ import {
   IsDate,
   IsNotEmpty,
   IsArray,
+  IsInt,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class ReadUserDto {
   @ApiProperty({ description: 'User ID', example: 1 })
@@ -49,6 +51,14 @@ export class ReadUserDto {
   @IsOptional()
   @IsString()
   goalId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  skills?: number[];
+
+  @IsOptional()
+  @IsString()
+  provider?: string;
 
   @ApiPropertyOptional({
     description: 'User role',
@@ -196,9 +206,23 @@ export class UpdateUserDto {
   @IsBoolean()
   activelySearching?: boolean;
 
+  @ApiPropertyOptional({
+    description: 'Array of skill IDs (Number[])',
+    example: [1, 2, 3],
+  })
   @IsOptional()
   @IsArray()
-  skills?: string[];
+  @IsInt({ each: true })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return JSON.parse(value).map((item: any) => parseInt(item, 10));
+    } else if (Array.isArray(value)) {
+      return value.map((item: any) => parseInt(item, 10));
+    } else {
+      return [];
+    }
+  })
+  skills?: number[];
 
   @IsOptional()
   @IsDate()
@@ -259,8 +283,8 @@ export class PublicReadUserDto {
   bio?: string;
 
   @IsOptional()
-  @IsString()
-  skills?: string[];
+  @IsArray()
+  skills?: number[];
 
   @IsOptional()
   @IsString()
@@ -297,6 +321,10 @@ export class PublicReadUserDto {
   @IsOptional()
   @IsString()
   languages?: string;
+
+  @IsOptional()
+  @IsString()
+  provider?: string;
 }
 
 export class LoginUserDto {

@@ -60,6 +60,9 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   status?: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  provider?: string;
+
   @Column({ type: 'boolean', default: false, nullable: false })
   deleted_at?: boolean;
 }

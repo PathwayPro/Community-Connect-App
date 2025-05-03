@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutContext = useCallback(async () => {
     setUser(null);
-    localStorage.removeItem(USER_STORAGE_KEY);
+    localStorage.clear();
     Cookies.remove('accessToken');
     Cookies.remove('refreshToken');
 
