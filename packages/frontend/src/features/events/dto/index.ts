@@ -36,3 +36,13 @@ export interface UpdateEventDto {
   start_time?: string;
   end_time?: string;
 }
+
+// API Response Types
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+}
+
+// FormData Types
+export type EventFormData = FormData;

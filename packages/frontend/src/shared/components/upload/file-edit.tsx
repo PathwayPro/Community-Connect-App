@@ -10,7 +10,7 @@ import { Separator } from '@/shared/components/ui/separator';
 import { Button } from '../ui/button';
 import { SharedIcons } from '../icons';
 import { Slider } from '../ui/slider';
-
+import Image from 'next/image';
 interface FileEditProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -117,11 +117,13 @@ export const FileEdit = ({
             aspect={1}
             className="max-h-[500px] max-w-[500px]"
           >
-            <img
+            <Image
               ref={imageRef}
               src={selectedImage ?? ''}
               alt="Selected"
               className="w-auto object-contain"
+              width={500}
+              height={500}
             />
           </ReactCrop>
         </div>

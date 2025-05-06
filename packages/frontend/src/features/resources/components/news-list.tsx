@@ -108,7 +108,6 @@ export const NewsList = () => {
   // Filter news based on sub-tabs
   const recentNews = filterRecentNews(newsItems);
   const editorsPickNews = filterEditorsPickNews(newsItems);
-  const mostReadNews = filterMostReadNews(newsItems);
   const featuredNews = filterFeaturedNews(newsItems);
 
   console.log('featuredNews', featuredNews);

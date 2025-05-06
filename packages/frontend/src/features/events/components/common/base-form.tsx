@@ -8,7 +8,11 @@ import { EventFormValues, FreePaidOptions } from '../../lib/validation';
 import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
 import { useEventStore } from '../../store';
 
-export const BaseForm = () => {
+interface BaseFormProps {
+  onFileSelect?: (file: File | null) => void;
+}
+
+export const BaseForm = ({ onFileSelect }: BaseFormProps) => {
   const {
     setValue,
     watch,
@@ -23,22 +27,22 @@ export const BaseForm = () => {
 
   const handleImageUpload = async (files: File[]) => {
     try {
-      const formData = new FormData();
-      files.forEach((file) => formData.append('files', file));
-
-      toast.success('Event image uploaded successfully');
-
-      // Placeholder for actual upload implementation
-      // const response = await fetch('/api/upload', {
-      //   method: 'POST',
-      //   body: formData
-      // });
-      // if (!response.ok) throw new Error('Upload failed');
-      // const { urls } = await response.json();
-      // setValue('image', urls[0], { shouldValidate: true });
-
-      // For now, just set a placeholder value to pass validation
-      setValue('image', 'placeholder-image-url', { shouldValidate: true });
+      if (files && files.length > 0) {
+        const file = files[0];
+        // Pass the file to parent component
+        if (onFileSelect) {
+          onFileSelect(file);
+        }
+        // Set a temporary value for form validation
+        setValue('image', 'pending-upload', { shouldValidate: true });
+        toast.success('Event image uploaded successfully');
+      } else {
+        if (onFileSelect) {
+          onFileSelect(null);
+        }
+        setValue('image', '', { shouldValidate: true });
+        toast.error('No file selected.');
+      }
     } catch (error) {
       console.error('Upload failed:', error);
       toast.error('Failed to upload event image');

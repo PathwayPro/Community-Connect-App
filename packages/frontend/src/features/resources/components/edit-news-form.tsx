@@ -27,7 +27,6 @@ import {
 import { useNewsStore } from '../store';
 import { useOpportunityStore } from '../store';
 import { useResourcesStore } from '../store';
-import { useEffect } from 'react';
 import { CreateNewsDto } from '../dto/news-dto';
 import { CreateResourceDto } from '../dto/resource-dto';
 import { CreateOpportunityDto } from '../dto/opportunity-dto';

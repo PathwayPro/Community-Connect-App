@@ -94,6 +94,7 @@ export const EventForm = () => {
   const router = useRouter();
   const { createEvent, editEvent } = useEventStore();
   const { showAlert } = useAlertDialog();
+  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
 
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -122,59 +123,19 @@ export const EventForm = () => {
     accept_subscriptions: eventData?.accept_subscriptions ?? true,
     start_date: eventData?.start_date || '',
     start_time: eventData?.start_time || '',
-    end_time: eventData?.end_time || ''
+    end_time: eventData?.end_time || '',
+    image: eventData?.image || ''
   };
 
   const methods = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
     defaultValues,
-    mode: 'onChange' // Enable validation on change for better user feedback
+    mode: 'onChange'
   });
 
-  // // Set up data in edit mode
-  // useEffect(() => {
-  //   if (isEdit && eventData) {
-  //     Object.entries(eventData).forEach(([key, value]) => {
-  //       if (key === 'category_id') {
-  //         methods.setValue(key, String(value), { shouldValidate: true });
-  //       } else if (value !== undefined) {
-  //         methods.setValue(key as keyof EventFormValues, value, {
-  //           shouldValidate: true
-  //         });
-  //       }
-  //     });
-  //   }
-  // }, [eventData]);
-
-  // const [isCurrentStepValid, setIsCurrentStepValid] = React.useState(false);
-
-  // // Update the useEffect to use the external checkStepValidity function
-  // useEffect(() => {
-  //   const formValues = methods.getValues();
-  //   setIsCurrentStepValid(
-  //     checkStepValidity(
-  //       formValues as EventFormValues,
-  //       activeStep,
-  //       methods.formState
-  //     )
-  //   );
-  // }, [activeStep]);
-
-  // // Update the data setting logic in the edit mode useEffect
-  // useEffect(() => {
-  //   if (isEdit && eventData && !methods.formState.isDirty) {
-  //     const updates = Object.entries(eventData).reduce((acc, [key, value]) => {
-  //       if (key === 'category_id') {
-  //         acc[key] = String(value);
-  //       } else if (value !== undefined) {
-  //         acc[key as keyof EventFormValues] = value;
-  //       }
-  //       return acc;
-  //     }, {} as Partial<EventFormValues>);
-
-  //     methods.reset(updates);
-  //   }
-  // }, [eventData]);
+  const handleFileSelect = (file: File | null) => {
+    setSelectedFile(file);
+  };
 
   const handleNext = () => {
     setActiveStep(activeStep + 1);
@@ -184,23 +145,29 @@ export const EventForm = () => {
     setActiveStep(activeStep - 1);
   };
 
-  console.log('activeStep', activeStep);
-
   const onSubmit = async (data: EventFormValues) => {
-    console.log('data', data);
     try {
-      const formattedData = {
-        ...data,
-        category_id: Number(data.category_id),
-        type: data.type as EventType,
-        start_date: new Date(`${data.start_date}, ${year}`).toISOString()
-      };
+      const formData = new FormData();
+
+      // Append file if selected
+      if (selectedFile) {
+        formData.append('image', selectedFile);
+      }
+
+      // Append all form fields
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'category_id') {
+          formData.append(key, String(value));
+        } else if (key === 'image' && !selectedFile) {
+          // Only append existing image if no new file is selected
+          if (value) formData.append(key, value);
+        } else if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
 
       if (isEdit && eventData) {
-        const result = await editEvent(eventData.id, {
-          ...formattedData,
-          id: eventData.id
-        });
+        const result = await editEvent(eventData.id, formData);
 
         if (result) {
           showAlert({
@@ -211,7 +178,8 @@ export const EventForm = () => {
           });
         }
       } else {
-        const result = await createEvent(formattedData);
+        console.log('formData in the event form ', formData);
+        const result = await createEvent(formData);
 
         if (result) {
           showAlert({
@@ -256,7 +224,11 @@ export const EventForm = () => {
       <CardContent className="flex flex-col justify-center gap-4">
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-            {getStepContent(activeStep)}
+            {activeStep === 1 ? (
+              <BaseForm onFileSelect={handleFileSelect} />
+            ) : (
+              <TimeLocationForm />
+            )}
             <div className="flex w-full gap-4 pt-5">
               {activeStep === 2 && (
                 <IconButton

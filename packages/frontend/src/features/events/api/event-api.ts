@@ -1,10 +1,12 @@
 import { apiMethods } from '@/shared/api';
-import { EventCategory, EventResponse } from '../types';
-import { CreateEventDto, UpdateEventDto } from '../dto';
+import { Event, EventCategory, EventResponse } from '../types';
+import { CreateEventDto, UpdateEventDto, EventFormData } from '../dto';
 
 export const eventApi = {
-  createEvent: (data: CreateEventDto) =>
-    apiMethods.post<EventResponse<Event>>('/events', data),
+  createEvent: (formData: EventFormData) =>
+    apiMethods.post<EventResponse<Event>>('/events', formData, {
+      'Content-Type': 'multipart/form-data'
+    }),
 
   getEvents: () => apiMethods.get<EventResponse<Event>>('/events'),
 
@@ -14,8 +16,10 @@ export const eventApi = {
   getEventById: (id: number) =>
     apiMethods.get<EventResponse<Event>>(`/events/${id}`),
 
-  updateEvent: (id: number, data: UpdateEventDto) =>
-    apiMethods.patch<EventResponse<Event>>(`/events/${id}`, data),
+  updateEvent: (id: number, formData: EventFormData) =>
+    apiMethods.patch<EventResponse<Event>>(`/events/${id}`, formData, {
+      'Content-Type': 'multipart/form-data'
+    }),
 
   editEvent: (id: number, data: UpdateEventDto) =>
     apiMethods.put<EventResponse<Event>>(`/events/${id}`, data),

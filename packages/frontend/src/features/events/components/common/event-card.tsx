@@ -14,8 +14,7 @@ import { IconButton } from '@/shared/components/ui/icon-button';
 import { useRouter } from 'next/navigation';
 import { EventType, Event, EventWithHost } from '../../types';
 import { useEventStore } from '@/features/events/store/index';
-import { formatDate } from 'date-fns';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { DeleteModal } from '@/shared/components/modal/delete-modal';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
@@ -23,6 +22,7 @@ import {
   useUserStore,
   useInitializeUserStore
 } from '@/features/user-profile/store';
+import { formatDate } from 'date-fns';
 
 interface EventInfoProps {
   icon: React.ReactNode;
@@ -105,6 +105,7 @@ export const EventCard = ({
       });
       router.refresh();
     } catch (error) {
+      console.error('Error deleting event:', error);
       showAlert({
         title: 'Error',
         description: 'An error occurred while deleting the event',

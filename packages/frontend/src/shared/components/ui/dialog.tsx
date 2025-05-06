@@ -6,10 +6,10 @@ import { X } from 'lucide-react';
 
 import { cn } from '@/shared/lib/utils';
 
-interface DialogProps
-  extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root> {
-  closeButton?: boolean;
-}
+// interface DialogProps
+//   extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root> {
+//   closeButton?: boolean;
+// }
 
 const Dialog = DialogPrimitive.Root;
 

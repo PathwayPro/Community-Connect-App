@@ -12,18 +12,25 @@ const VerifyEmailPageContent = () => {
   const token = tokenParam ? (tokenParam as unknown as AccessToken) : null;
 
   return (
-    <div className="flex flex-col items-center justify-center">
-      <Icons.logo className="mx-auto h-[84px] w-[84px]" />
-
-      {token && <VerifyEmail token={token} />}
+    <div className="flex min-h-screen w-full items-center justify-center">
+      <div className="flex flex-col items-center justify-center space-y-6 p-8">
+        <Icons.logo className="h-[84px] w-[84px]" />
+        {token && <VerifyEmail token={token} />}
+      </div>
     </div>
   );
-}
+};
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen w-full items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
       <VerifyEmailPageContent />
     </Suspense>
   );
-};
+}

@@ -16,17 +16,25 @@ export const apiMethods = {
     data?: FormData | unknown,
     headers?: Record<string, string>
   ) => {
-    const response = await api.post<ApiResponse<T>>(url, data, { headers }); // Passing headers to api.post
+    const response = await api.post<ApiResponse<T>>(url, data, { headers });
     return response.data;
   },
 
-  put: async <T>(url: string, data: unknown) => {
-    const response = await api.put<ApiResponse<T>>(url, data);
+  put: async <T>(
+    url: string,
+    data: FormData | unknown,
+    headers?: Record<string, string>
+  ) => {
+    const response = await api.put<ApiResponse<T>>(url, data, { headers });
     return response.data;
   },
 
-  patch: async <T>(url: string, data: unknown) => {
-    const response = await api.patch<ApiResponse<T>>(url, data);
+  patch: async <T>(
+    url: string,
+    data: FormData | unknown,
+    headers?: Record<string, string>
+  ) => {
+    const response = await api.patch<ApiResponse<T>>(url, data, { headers });
     return response.data;
   },
 

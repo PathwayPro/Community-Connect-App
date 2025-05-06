@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { CreateEventDto, UpdateEventDto } from '../dto';
 import { eventApi } from '../api/event-api';
 import { Event, EventCategory } from '../types';
+import { EventFormData } from '../dto';
 
 interface EventState {
   events: Event[];
@@ -10,43 +10,45 @@ interface EventState {
   event: Event | null;
   isLoading: boolean;
   error: string | null;
-  createEvent: (event: CreateEventDto) => Promise<Event>;
+  createEvent: (formData: EventFormData) => Promise<Event>;
   fetchEvents: () => Promise<void>;
-  editEvent: (id: number, updatedEvent: UpdateEventDto) => Promise<Event>;
+  editEvent: (id: number, formData: EventFormData) => Promise<Event>;
   fetchEvent: (id: number) => Promise<void>;
   fetchEventCategories: () => Promise<void>;
-  deleteEvent: (id: number) => Promise<boolean | undefined>;
+  deleteEvent: (id: number) => Promise<void>;
   revalidate: () => void;
 }
 
 export const useEventStore = create<EventState>()(
   devtools((set) => ({
     events: [],
+    eventCategories: [],
+    event: null,
     isLoading: false,
     error: null,
-    event: null,
-    createEvent: async (event) => {
+    createEvent: async (formData: EventFormData) => {
       try {
         set({ isLoading: true, error: null });
-        const response = await eventApi.createEvent(event);
+        const response = await eventApi.createEvent(formData);
 
         if (!response.success) {
           throw new Error('Failed to create event');
         }
 
         const newEvent = response.data as unknown as Event;
+        set((state) => ({
+          events: [...state.events, newEvent],
+          isLoading: false
+        }));
         set((state) => {
-          const newState = {
-            ...state,
-            events: [...state.events, newEvent],
-            isLoading: false
-          } as EventState;
+          const newState = { ...state, isLoading: false };
           newState.revalidate();
           return newState;
         });
         return newEvent;
       } catch (error) {
         set({ error: (error as Error).message, isLoading: false });
+        throw error;
       }
     },
 
@@ -101,16 +103,16 @@ export const useEventStore = create<EventState>()(
       }
     },
 
-    editEvent: async (id, updatedEvent) => {
+    editEvent: async (id: number, formData: EventFormData) => {
       try {
         set({ isLoading: true, error: null });
-        const response = await eventApi.updateEvent(id, updatedEvent);
+        const response = await eventApi.updateEvent(id, formData);
 
         if (!response.success) {
           throw new Error('Failed to update event');
         }
 
-        const updated = response.data;
+        const updated = response.data as unknown as Event;
         set((state) => ({
           events: state.events.map((event) =>
             event.id === id ? { ...event, ...updated } : event
@@ -125,6 +127,7 @@ export const useEventStore = create<EventState>()(
         return updated;
       } catch (error) {
         set({ error: (error as Error).message, isLoading: false });
+        throw error;
       }
     },
 
