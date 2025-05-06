@@ -31,7 +31,7 @@ export class ResetPasswordDto {
   })
   @IsString()
   @IsNotEmpty()
-  oldPassword: string;
+  currentPassword: string;
 
   @ApiProperty({
     description:

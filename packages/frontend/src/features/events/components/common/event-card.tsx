@@ -15,11 +15,14 @@ import { useRouter } from 'next/navigation';
 import { EventType, Event, EventWithHost } from '../../types';
 import { useEventStore } from '@/features/events/store/index';
 import { formatDate } from 'date-fns';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DeleteModal } from '@/shared/components/modal/delete-modal';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
-import { useUserStore } from '@/features/user-profile/store';
+import {
+  useUserStore,
+  useInitializeUserStore
+} from '@/features/user-profile/store';
 
 interface EventInfoProps {
   icon: React.ReactNode;
@@ -54,7 +57,14 @@ export const EventCard = ({
   const { showAlert } = useAlertDialog();
   const { user } = useUserStore();
 
-  const isHost = host_id === user?.id;
+  // Initialize user store
+  useInitializeUserStore();
+
+  // Ensure proper type conversion for comparison
+  const isHost =
+    user?.id !== undefined &&
+    host_id !== undefined &&
+    Number(user.id) === Number(host_id);
 
   const eventData = {
     id,

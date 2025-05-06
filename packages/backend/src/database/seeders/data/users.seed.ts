@@ -31,6 +31,9 @@ const GeneralUsersData = {
   country_of_origin: '',
   actively_searching: false,
   age_range: '',
+  deleted_at: false,
+  last_login: new Date(),
+  provider: 'email',
 };
 
 export const UsersData: users[] = [

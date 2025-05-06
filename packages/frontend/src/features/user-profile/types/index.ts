@@ -33,10 +33,21 @@ export interface UserProfile {
   companyName?: string;
   skills?: string[];
   activelySearching?: boolean;
+  status?: string;
+  updatedAt?: string;
+  createdAt?: string;
+  emailVerified?: boolean;
+  provider?: string;
+  lastLogin?: string;
 }
 
 export interface UserResponse<T> {
   success: boolean;
   message?: string;
   data: T;
+}
+
+export interface SkillsResponse {
+  id: number;
+  name: string;
 }

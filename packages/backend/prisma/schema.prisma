@@ -47,9 +47,11 @@ model users {
   work_status          String?
   company_name         String?
   actively_searching   Boolean?
-  skills               String[]
   age_range            String?
   goal_id              String?
+  last_login           DateTime?
+  provider             String?
+  deleted_at           Boolean                     @default(false)
   // MENTOR RELATIONSHIP
   mentor               mentors?
   // MENTEE RELATIONSHIP
@@ -68,6 +70,8 @@ model users {
   resources            Resources[]
   // INTERESTS RELATIONSHIP
   interests            UsersInterests[]
+  // SKILLS RELATIONSHIP
+  skills               UsersSkills[]
   // NETWORKING - CONNECTION REQUESTS
   connection_request_sender_id        ConnectionRequests[]          @relation(name: "ConnectionRequestsSender")
   connection_request_recipient_id        ConnectionRequests[]          @relation(name: "ConnectionRequestsRecipient")
@@ -328,6 +332,23 @@ model UsersInterests {
   @@id([user_id, interest_id])
 }
 
+// SKILLS
+model Skills {
+  id    Int              @id @default(autoincrement())
+  name  String
+  users UsersSkills[]
+}
+
+model UsersSkills {
+  user_id     Int
+  user        users     @relation(fields: [user_id], references: [id])
+  skill_id    Int
+  skill       Skills    @relation(fields: [skill_id], references: [id]) 
+
+  @@id([user_id, skill_id])
+}
+
+
 // USERS NETWORKING
 enum ConnectionRequestsStatus {
   PENDING
@@ -451,12 +472,6 @@ enum ProfileVisibility {
   PRIVATE
 }
 
-enum MessageSettings {
-  EVERYONE
-  CONNECTIONS_ONLY
-  NOBODY
-}
-
 model UserSettings {
   id                Int               @id @default(autoincrement())
   user              users             @relation(fields: [userId], references: [id])
@@ -465,6 +480,38 @@ model UserSettings {
   shareContactDetails Boolean         @default(true)
   shareSocialLinks  Boolean           @default(true)
   profileVisibility ProfileVisibility @default(PUBLIC)
-  messageSettings   MessageSettings   @default(EVERYONE)
 }
+
+enum ContactUsStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model ContactUs {
+  id                Int               @id @default(autoincrement())
+  first_name        String
+  last_name         String?
+  company_name      String?
+  email             String
+  phone             String?
+  contact_message   String
+  status            ContactUsStatus    @default(PENDING)
+  created_at        DateTime          @default(now())
+}
+
+enum NewsletterStatus {
+  PENDING
+  SUBSCRIBED
+  UNSUBSCRIBED
+}
+
+model NewsletterSubscriptions {
+  id                Int               @id @default(autoincrement())
+  email             String
+  created_at        DateTime          @default(now())
+  status            NewsletterStatus  @default(PENDING)
+}
+
+
 

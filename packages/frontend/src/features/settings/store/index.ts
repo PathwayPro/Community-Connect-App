@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { settingsApi } from '../api/settings-api';
 import { SettingsResponse } from '../types';
-import { CreateSettingsDto, UpdateSettingsDto } from '../dto';
+import { UpdateSettingsDto } from '../dto';
 
 interface SettingsState {
   // Data
@@ -16,9 +16,8 @@ interface SettingsState {
 
   // Actions
   getSettings: () => Promise<void>;
-  createSettings: (data: CreateSettingsDto) => Promise<void>;
-  updateSettings: (id: number, data: UpdateSettingsDto) => Promise<void>;
-  deleteSettings: (id: number) => Promise<void>;
+  getSettingsById: (id: number) => Promise<void>;
+  updateSettings: (data: UpdateSettingsDto) => Promise<void>;
   clearError: () => void;
 }
 
@@ -50,11 +49,10 @@ export const useSettingsStore = create<SettingsState>()(
         }
       },
 
-      createSettings: async (data) => {
+      getSettingsById: async (id: number) => {
         try {
-          set({ error: null, isLoading: true });
-          const response = await settingsApi.createSettings(data);
-
+          set({ isLoading: true, error: null });
+          const response = await settingsApi.getSettingsById(id);
           if (response.success) {
             set({ settings: response.data, isLoading: false });
           }
@@ -63,16 +61,18 @@ export const useSettingsStore = create<SettingsState>()(
             error:
               error instanceof Error
                 ? error.message
-                : 'Failed to create settings',
+                : 'Failed to fetch settings',
             isLoading: false
           });
         }
       },
 
-      updateSettings: async (id, data) => {
+      updateSettings: async (data: UpdateSettingsDto) => {
         try {
           set({ error: null, isLoading: true });
-          const response = await settingsApi.updateSettings(id, data);
+          const response = await settingsApi.updateSettings(data);
+
+          console.log('settings response', response);
 
           if (response.success) {
             set({ settings: response.data, isLoading: false });
@@ -83,25 +83,6 @@ export const useSettingsStore = create<SettingsState>()(
               error instanceof Error
                 ? error.message
                 : 'Failed to update settings',
-            isLoading: false
-          });
-        }
-      },
-
-      deleteSettings: async (id) => {
-        try {
-          set({ error: null, isLoading: true });
-          const response = await settingsApi.deleteSettings(id);
-
-          if (response.success) {
-            set({ settings: null, isLoading: false });
-          }
-        } catch (error) {
-          set({
-            error:
-              error instanceof Error
-                ? error.message
-                : 'Failed to delete settings',
             isLoading: false
           });
         }

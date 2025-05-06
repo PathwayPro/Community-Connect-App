@@ -102,7 +102,6 @@ export const OpportunityForm = ({
         label="Annual Salary Range"
         placeholder="Select salary range"
         options={formattedSalaryRanges}
-        required
       />
       <div className="flex w-full gap-4">
         <CustomSwitch

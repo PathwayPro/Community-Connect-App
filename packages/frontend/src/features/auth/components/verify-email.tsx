@@ -1,7 +1,7 @@
 'use client';
 
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../hooks/use-auth';
 import { AccessToken } from '../types';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
@@ -17,9 +17,13 @@ export const VerifyEmail = ({ token }: VerifyEmailProps) => {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(true);
+  const verificationAttempted = useRef(false);
 
   useEffect(() => {
     const verifyEmailToken = async () => {
+      if (verificationAttempted.current) return;
+
+      verificationAttempted.current = true;
       try {
         await verifyEmail(token);
         setIsVerifying(false);

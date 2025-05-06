@@ -23,10 +23,12 @@ export type EmailConfig = {
   pass: string;
   frontendUrl: string;
   jwtSecret: string;
+  adminEmail: string;
 };
 
 export type EmailOptions = {
   to: string;
+  from?: string;
   subject: string;
   text: string;
   html: string;
