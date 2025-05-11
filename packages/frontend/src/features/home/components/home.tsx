@@ -42,13 +42,13 @@ export const Home = () => {
   const {
     threads: rawThreads,
     fetchThreads,
+    createThread,
     isLoading,
     error
   } = useBlogStore(); // Get threads, loading, and error from store
   const threads: Thread[] = rawThreads.map(transformThreadResponseToThread); // Transform the API response
 
   useEffect(() => {
-    console.log('LLEGA AL USE EFFECT!');
     fetchThreads();
   }, [activeTab, sort, selectedTags, fetchThreads]); // Include fetchThreads in the dependency array
 
@@ -56,7 +56,8 @@ export const Home = () => {
     try {
       // Handle the thread submission here
       console.log('Thread submitted:', content, attachments);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated API call
+      // await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated API call
+      const threadSubmit = await createThread(content);
       setDraftContent('');
       setIsCreatingThread(true);
     } catch (error) {

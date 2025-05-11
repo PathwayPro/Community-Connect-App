@@ -12,6 +12,7 @@ interface BlogState {
   // Actions
   fetchThreads: () => Promise<void>;
   fetchThreadComments: (post_id: number) => Promise<void>;
+  createThread: (content: string) => Promise<void>;
 }
 
 export const useBlogStore = create<BlogState>()(
@@ -26,7 +27,9 @@ export const useBlogStore = create<BlogState>()(
         try {
           const response = await blogApi.getThreads();
           const data = response.data;
+
           console.log('| - - - - - - - > DATA FROM BLOG STORE:', data);
+
           set({ threads: data, isLoading: false });
         } catch (error) {
           set({
@@ -41,10 +44,12 @@ export const useBlogStore = create<BlogState>()(
         try {
           const response = await blogApi.getThreadComments(post_id);
           const data = response.data;
+
           console.log(
             '| - - - - - - - > DATA FROM BLOG STORE - MESSAGES:',
             data
           );
+
           set({ threadMessages: data, isLoading: false });
         } catch (error) {
           set({
@@ -52,10 +57,48 @@ export const useBlogStore = create<BlogState>()(
             isLoading: false
           });
         }
+      },
+
+      // createMentor: async (mentorData) => {
+      //         set({ isLoading: true, error: null });
+      //         try {
+      //           const response = await mentorshipApi.createMentor(mentorData);
+      //           set((state) => ({
+      //             mentors: [...state.mentors, response.data],
+      //             isLoading: false
+      //           }));
+      //           return response;
+      //         } catch (error) {
+      //           set({
+      //             error: error instanceof Error ? error.message : 'An error occurred',
+      //             isLoading: false
+      //           });
+      //         }
+      //       },
+
+      createThread: async (content: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          console.log('CREANDO THREAD: ', content);
+          const data = { message: content };
+          const response = await blogApi.createThread(data);
+
+          console.log('| - - - - - - - > RESPONSE CREANDO THREAD:', response);
+
+          const message = response.data.content;
+
+          //set({ threadMessages: data, isLoading: false });
+        } catch (error) {
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'An error occurred creating the thread',
+            isLoading: false
+          });
+        }
       }
     }),
-    {
-      name: 'blog-store'
-    }
+    { name: 'blog-store' }
   )
 );

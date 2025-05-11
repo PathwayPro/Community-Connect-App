@@ -3,11 +3,12 @@ import { PostCommentResponse, ThreadResponse } from '../types';
 
 export const blogApi = {
   getThreads: () => apiMethods.get<ThreadResponse[]>('/blog/post'),
-  getThreadComments: (post_id: number) =>
-    apiMethods.get<PostCommentResponse[]>(`/blog/post/${post_id}/comments`)
 
-  // createMentor: (data: FormData) =>
-  //   apiMethods.post<MentorResponse>('/mentors', data),
+  getThreadComments: (post_id: number) =>
+    apiMethods.get<PostCommentResponse[]>(`/blog/post/${post_id}/comments`),
+
+  createThread: (data: { message: string }) =>
+    apiMethods.post<ThreadResponse>('/blog/post', data)
 
   // createMentee: (data: FormData) =>
   //   apiMethods.post<MenteeResponse>('/mentees', data),

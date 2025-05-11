@@ -83,7 +83,7 @@ export const ThreadCard = ({
     }
   };
 
-  console.log('this is hte isSaved', isSaved);
+  // console.log('this is hte isSaved', isSaved);
 
   return (
     <ThreadCardProvider
@@ -140,15 +140,13 @@ export const ThreadCard = ({
               className="flex items-center gap-2 rounded-full p-1 px-2 text-gray-500 hover:bg-neutral-light-200 group-hover:bg-neutral-light-200"
             >
               <Heart
-                className={`h-5 w-5 transition-colors duration-200 ${
-                  isLiked ? 'fill-red-500 text-red-500' : ''
-                }`}
+                className={`h-5 w-5 transition-colors duration-200 ${isLiked ? 'fill-red-500 text-red-500' : ''}`}
               />
               <span>{likes}</span>
             </button>
             <button
-              className="flex items-center gap-2 rounded-full p-1 px-2 text-gray-500 hover:bg-neutral-light-200"
               onClick={handleCommentClick}
+              className="flex items-center gap-2 rounded-full p-1 px-2 text-gray-500 hover:bg-neutral-light-200"
             >
               <MessageSquare className="h-5 w-5" />
               <span>{comments}</span>
