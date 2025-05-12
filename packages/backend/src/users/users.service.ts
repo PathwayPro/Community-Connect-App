@@ -375,10 +375,19 @@ export class UsersService {
 
     // Determine user status with clearer logic
     let status: string;
+    const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+    const isInactive =
+      user.last_login &&
+      Date.now() - new Date(user.last_login).getTime() > ONE_WEEK_MS;
+
     if (user.deleted_at === true) {
       status = 'DELETED';
     } else if (user.email_verified === true) {
-      status = 'ACTIVE';
+      // Email verified users are active regardless of provider, but check last login
+      status = isInactive ? 'INACTIVE' : 'ACTIVE';
+    } else if (user.provider === 'google') {
+      // Google users are active by default but still check last login
+      status = isInactive ? 'INACTIVE' : 'ACTIVE';
     } else if (user.email_verified === false) {
       status = 'PENDING';
     } else {

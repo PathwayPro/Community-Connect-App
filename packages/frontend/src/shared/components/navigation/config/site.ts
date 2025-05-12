@@ -39,11 +39,11 @@ export const MainSiteNav = [
     href: '/messages',
     icon: 'messageSquare'
   },
-  {
-    name: 'Analytics',
-    href: '/analytics',
-    icon: 'analytics'
-  },
+  // {
+  //   name: 'Analytics',
+  //   href: '/analytics',
+  //   icon: 'analytics'
+  // },
   {
     name: 'Admin',
     href: '/admin',

@@ -3,7 +3,6 @@
 import { Clock, PenBox, Trash2 } from 'lucide-react';
 import { Card } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
-import Image from 'next/image';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { ExpandedNewsModal } from './expanded-news-modal';
 import { useState } from 'react';
@@ -13,6 +12,7 @@ import { useNewsStore } from '../../store';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { DeleteModal } from '../../../../shared/components/modal/delete-modal';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 
 interface FeaturedNewsCardProps {
   id?: string;
@@ -133,12 +133,13 @@ export const FeaturedNewsCard = ({
       <div className="grid grid-cols-2 gap-6">
         {/* Left Column - Image */}
         <div className="relative h-[280px] w-full">
-          <Image
-            src={image || '/event/placeholder-2.jpg'}
+          <ImagePreview
+            imagePath={image}
             alt={title}
             className="rounded-[20px] object-cover"
-            fill
-            priority
+            fallbackImage="/public/news/3.png"
+            fill={true}
+            priority={true}
             sizes="(max-width: 768px) 100vw, 50vw"
           />
         </div>
@@ -159,7 +160,7 @@ export const FeaturedNewsCard = ({
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              <span>{format(created_at, 'MMM d, yyyy')}</span>
+              <span>{format(new Date(created_at), 'MMM d, yyyy')}</span>
             </div>
             <span>by {fullName}</span>
           </div>

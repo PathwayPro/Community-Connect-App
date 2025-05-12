@@ -13,6 +13,7 @@ import { useResourcesStore } from '../../store';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { DeleteModal } from '../../../../shared/components/modal/delete-modal';
+import { resourceTypes } from '../../lib/constants/enums';
 
 interface ResourceCardProps {
   id?: string;
@@ -94,6 +95,49 @@ export const ResourceCard = ({
     }
   };
 
+  const getResourceImage = () => {
+    const resourceType = resourceTypes.find((item) => item.value === type);
+    if (!resourceType) return '/resources/others.jpg';
+
+    switch (type) {
+      case 'RESUME':
+        return '/resources/resume.png';
+      case 'COVER_LETTER':
+        return '/resources/cover-letter.jpg';
+      case 'LINKEDIN':
+        return '/resources/linkedin.png';
+      case 'BUSINESS_CARD':
+        return '/resources/business-card.jpg';
+      case 'INVOICE':
+        return '/resources/invoice.png';
+      case 'PORTFOLIO':
+        return '/resources/others.jpg';
+      case 'EMAIL_SIGNATURE':
+        return '/resources/others.jpg';
+      case 'PERSONAL_BRANDING':
+        return '/resources/others.jpg';
+      case 'JOB_APPLICATION_TRACKER':
+        return '/resources/others.jpg';
+      case 'INTERVIEW_PREP':
+        return '/resources/others.jpg';
+      case 'NETWORKING_TIPS':
+        return '/resources/others.jpg';
+      case 'CAREER_PLANNING':
+        return '/resources/others.jpg';
+      case 'SALARY_NEGOTIATION':
+        return '/resources/others.jpg';
+      case 'BANNER':
+        return '/resources/others.jpg';
+      default:
+        return '/resources/others.jpg';
+    }
+  };
+
+  const getResourceTypeLabel = () => {
+    const resourceType = resourceTypes.find((item) => item.value === type);
+    return resourceType ? resourceType.label : type;
+  };
+
   return (
     <Card className="w-full overflow-hidden">
       <AlertDialogUI />
@@ -127,7 +171,7 @@ export const ResourceCard = ({
         {/* Image */}
         <div className="relative h-[320px] w-full">
           <Image
-            src={'/event/placeholder-2.jpg'}
+            src={getResourceImage()}
             alt={title}
             className="object-cover"
             fill
@@ -147,7 +191,7 @@ export const ResourceCard = ({
           {/* Keywords */}
           <div className="flex flex-wrap gap-2">
             <Badge key={type} variant="secondary">
-              {type}
+              {getResourceTypeLabel()}
             </Badge>
           </div>
 
@@ -162,26 +206,26 @@ export const ResourceCard = ({
             </span>
           </div>
 
-          {/* Action Button */}
+          {/* Action Buttons */}
           <div className="flex flex-col gap-2">
             <IconButton
               label="Preview Resource"
-              //   rightIcon="arrowRight"
               leftIcon="eye"
               iconClassName="text-white"
               className="w-full"
               onClick={() => setIsOpen(true)}
             />
-            <IconButton
-              label="Get Resource"
-              //   rightIcon="arrowRight"
-              leftIcon="squareArrowTopRight"
-              iconClassName="text-white"
-              className="w-full"
-              onClick={() => {
-                window.open(ensureAbsoluteUrl(link || ''), '_blank');
-              }}
-            />
+            {link && (
+              <IconButton
+                label="View Resource"
+                leftIcon="squareArrowTopRight"
+                iconClassName="text-white"
+                className="w-full"
+                onClick={() => {
+                  window.open(ensureAbsoluteUrl(link), '_blank');
+                }}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -189,11 +233,11 @@ export const ResourceCard = ({
       <ResourcePreviewCard
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        image={'/event/placeholder-2.jpg'}
+        image={getResourceImage()}
         title={title}
         details={details || ''}
         link={link || ''}
-        type={type}
+        type={getResourceTypeLabel()}
       />
     </Card>
   );

@@ -112,7 +112,6 @@ export const EventForm = () => {
 
   const defaultValues = {
     title: eventData?.title || '',
-    subtitle: eventData?.subtitle || '',
     description: eventData?.description || '',
     category_id: eventData?.category_id?.toString() || '',
     location: eventData?.location || '',
@@ -124,7 +123,8 @@ export const EventForm = () => {
     start_date: eventData?.start_date || '',
     start_time: eventData?.start_time || '',
     end_time: eventData?.end_time || '',
-    image: eventData?.image || ''
+    // end_date: eventData?.end_date || '',
+    file: eventData?.file || undefined
   };
 
   const methods = useForm<EventFormValues>({
@@ -149,26 +149,70 @@ export const EventForm = () => {
     try {
       const formData = new FormData();
 
-      // Append file if selected
+      // Handle file upload
       if (selectedFile) {
-        formData.append('image', selectedFile);
+        formData.append('file', selectedFile);
       }
 
-      // Append all form fields
+      // Handle dates and times
+      if (data.start_date) {
+        const startDate = new Date(data.start_date);
+        formData.append('start_date', startDate.toISOString());
+      }
+
+      // Handle link formatting
+      if (data.link) {
+        const formattedLink = data.link.startsWith('http')
+          ? data.link
+          : `https://${data.link}`;
+        formData.append('link', formattedLink);
+      }
+
+      // Handle category_id - ensure it's a number
+      if (data.category_id) {
+        formData.append('category_id', String(data.category_id));
+      }
+
+      // Handle location - ensure it's set
+      formData.append('location', data.location || 'Online');
+
+      // Handle boolean fields
+      formData.append('is_free', String(data.is_free));
+      formData.append(
+        'requires_confirmation',
+        String(data.requires_confirmation)
+      );
+      formData.append(
+        'accept_subscriptions',
+        String(data.accept_subscriptions)
+      );
+
+      // Append all other form fields
       Object.entries(data).forEach(([key, value]) => {
-        if (key === 'category_id') {
-          formData.append(key, String(value));
-        } else if (key === 'image' && !selectedFile) {
-          // Only append existing image if no new file is selected
-          if (value) formData.append(key, value);
-        } else if (value !== undefined && value !== null) {
+        if (
+          key !== 'file' && // Skip file as it's handled separately
+          key !== 'start_date' && // Skip dates as they're handled separately
+          key !== 'link' && // Skip link as it's handled separately
+          key !== 'category_id' && // Skip category_id as it's handled separately
+          key !== 'location' && // Skip location as it's handled separately
+          key !== 'is_free' && // Skip boolean fields as they're handled separately
+          key !== 'requires_confirmation' && // Skip boolean fields as they're handled separately
+          key !== 'accept_subscriptions' && // Skip boolean fields as they're handled separately
+          value !== undefined &&
+          value !== null
+        ) {
           formData.append(key, String(value));
         }
       });
 
+      console.log('FormData contents in the event form:');
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
+      // Submit the form
       if (isEdit && eventData) {
         const result = await editEvent(eventData.id, formData);
-
         if (result) {
           showAlert({
             type: 'success',
@@ -178,9 +222,12 @@ export const EventForm = () => {
           });
         }
       } else {
-        console.log('formData in the event form ', formData);
-        const result = await createEvent(formData);
+        console.log('FormData contents:');
+        for (const [key, value] of formData.entries()) {
+          console.log(`${key}:`, value);
+        }
 
+        const result = await createEvent(formData);
         if (result) {
           showAlert({
             type: 'success',
@@ -191,11 +238,14 @@ export const EventForm = () => {
         }
       }
     } catch (error) {
-      console.error('error', error);
+      console.error('Form submission error:', error);
       showAlert({
         type: 'error',
         title: isEdit ? 'Event Update Failed' : 'Event Creation Failed',
-        description: 'Please check your input and try again.'
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Please check your input and try again.'
       });
     }
   };

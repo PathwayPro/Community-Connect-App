@@ -29,18 +29,35 @@ export const BaseForm = ({ onFileSelect }: BaseFormProps) => {
     try {
       if (files && files.length > 0) {
         const file = files[0];
+
+        // Validate file type and size
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        const maxSize = 5 * 1024 * 1024; // 5MB
+
+        if (!allowedTypes.includes(file.type)) {
+          toast.error(
+            'Invalid file type. Please upload a JPEG, PNG, or WebP image.'
+          );
+          return;
+        }
+
+        if (file.size > maxSize) {
+          toast.error('File size too large. Maximum size is 5MB.');
+          return;
+        }
+
         // Pass the file to parent component
         if (onFileSelect) {
           onFileSelect(file);
         }
         // Set a temporary value for form validation
-        setValue('image', 'pending-upload', { shouldValidate: true });
+        setValue('file', file, { shouldValidate: true });
         toast.success('Event image uploaded successfully');
       } else {
         if (onFileSelect) {
           onFileSelect(null);
         }
-        setValue('image', '', { shouldValidate: true });
+        setValue('file', null, { shouldValidate: true });
         toast.error('No file selected.');
       }
     } catch (error) {
@@ -116,16 +133,6 @@ export const BaseForm = ({ onFileSelect }: BaseFormProps) => {
           leftLabel="https://"
           placeholder="Registration link URL"
           customError={errors.link?.message}
-          // onChange={(e) => {
-          //   const value = e.target.value;
-          //   if (handleLinkChange) {
-          //     handleLinkChange(value, (processedValue: string) =>
-          //       setValue('link', processedValue, { shouldValidate: true })
-          //     );
-          //   } else {
-          //     setValue('link', value, { shouldValidate: true });
-          //   }
-          // }}
           required
         />
       </div>

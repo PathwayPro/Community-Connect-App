@@ -45,8 +45,40 @@ export const TimeLocationForm = () => {
     const [startHour, startMinute, startPeriod] = startTime.split(/[:\s]/);
     const [endHour, endMinute, endPeriod] = endTimeValue.split(/[:\s]/);
 
+    // Validate time format
+    if (
+      !startHour ||
+      !startMinute ||
+      !startPeriod ||
+      !endHour ||
+      !endMinute ||
+      !endPeriod
+    ) {
+      return false;
+    }
+
     let startHourNum = parseInt(startHour);
     let endHourNum = parseInt(endHour);
+    const startMinuteNum = parseInt(startMinute);
+    const endMinuteNum = parseInt(endMinute);
+
+    // Validate numeric values
+    if (
+      isNaN(startHourNum) ||
+      isNaN(endHourNum) ||
+      isNaN(startMinuteNum) ||
+      isNaN(endMinuteNum) ||
+      startHourNum < 1 ||
+      startHourNum > 12 ||
+      endHourNum < 1 ||
+      endHourNum > 12 ||
+      startMinuteNum < 0 ||
+      startMinuteNum > 59 ||
+      endMinuteNum < 0 ||
+      endMinuteNum > 59
+    ) {
+      return false;
+    }
 
     // Convert to 24-hour format for comparison
     if (startPeriod === 'PM' && startHourNum < 12) startHourNum += 12;
@@ -54,11 +86,12 @@ export const TimeLocationForm = () => {
     if (endPeriod === 'PM' && endHourNum < 12) endHourNum += 12;
     if (endPeriod === 'AM' && endHourNum === 12) endHourNum = 0;
 
-    const start = new Date(2000, 0, 1, startHourNum, parseInt(startMinute));
+    const start = new Date(2000, 0, 1, startHourNum, startMinuteNum);
+    const end = new Date(2000, 0, 1, endHourNum, endMinuteNum);
 
-    const end = new Date(2000, 0, 1, endHourNum, parseInt(endMinute));
-
-    return end > start;
+    // Ensure end time is at least 15 minutes after start time
+    const minDuration = 15 * 60 * 1000; // 15 minutes in milliseconds
+    return end.getTime() - start.getTime() >= minDuration;
   };
 
   return (
@@ -68,6 +101,7 @@ export const TimeLocationForm = () => {
           name="start_date"
           label="Event Date"
           customError={errors.start_date?.message as string}
+          useDateTimePicker
           required
         />
       </div>
@@ -161,6 +195,7 @@ export const TimeLocationForm = () => {
           onChange={(e) =>
             setValue('location', e.target.value, { shouldValidate: true })
           }
+          required
         />
       </div>
     </div>
