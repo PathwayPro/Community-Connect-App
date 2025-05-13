@@ -25,7 +25,7 @@ export const Admin = () => {
       </div>
 
       <Tabs
-        defaultValue="users"
+        defaultValue="analytics"
         value={activeTab}
         onValueChange={setActiveTab}
         className="w-full"

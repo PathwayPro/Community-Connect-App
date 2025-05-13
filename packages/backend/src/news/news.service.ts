@@ -97,6 +97,7 @@ export class NewsService {
         include: {
           user: {
             select: {
+              id: true,
               first_name: true,
               last_name: true,
               picture_upload_link: true,
@@ -123,6 +124,7 @@ export class NewsService {
         include: {
           user: {
             select: {
+              id: true,
               first_name: true,
               last_name: true,
               picture_upload_link: true,
@@ -151,6 +153,7 @@ export class NewsService {
         include: {
           user: {
             select: {
+              id: true,
               first_name: true,
               last_name: true,
               picture_upload_link: true,
@@ -179,6 +182,7 @@ export class NewsService {
         include: {
           user: {
             select: {
+              id: true,
               first_name: true,
               last_name: true,
               picture_upload_link: true,
@@ -228,6 +232,7 @@ export class NewsService {
         include: {
           user: {
             select: {
+              id: true,
               first_name: true,
               last_name: true,
               picture_upload_link: true,

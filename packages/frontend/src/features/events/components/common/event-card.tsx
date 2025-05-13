@@ -23,6 +23,7 @@ import {
   useInitializeUserStore
 } from '@/features/user-profile/store';
 import { formatDate } from 'date-fns';
+import { useRole } from '@/features/user-profile/hooks/useRole';
 
 interface EventInfoProps {
   icon: React.ReactNode;
@@ -56,6 +57,7 @@ export const EventCard = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const { showAlert } = useAlertDialog();
   const { user } = useUserStore();
+  const { hasRole, hasPermission } = useRole();
 
   // Initialize user store
   useInitializeUserStore();
@@ -65,6 +67,11 @@ export const EventCard = ({
     user?.id !== undefined &&
     host_id !== undefined &&
     Number(user.id) === Number(host_id);
+
+  // Check permissions: Admin can edit/delete all events, mentors only their own
+  const canEdit = hasRole('ADMIN') || (isHost && hasPermission('edit:event'));
+  const canDelete =
+    hasRole('ADMIN') || (isHost && hasPermission('delete:event'));
 
   const eventData = {
     id,
@@ -175,22 +182,22 @@ export const EventCard = ({
               className="w-full"
               onClick={handleLearnMore}
             />
-            {isHost && (
-              <>
-                <IconButton
-                  label="Edit Details"
-                  rightIcon="pencil"
-                  className="w-full"
-                  onClick={handleEdit}
-                />
-                <IconButton
-                  label="Delete Event"
-                  rightIcon="delete"
-                  variant="outline"
-                  className="w-full hover:border-destructive hover:bg-destructive hover:text-white"
-                  onClick={() => setIsDeleteModalOpen(true)}
-                />
-              </>
+            {canEdit && (
+              <IconButton
+                label="Edit Details"
+                rightIcon="pencil"
+                className="w-full"
+                onClick={handleEdit}
+              />
+            )}
+            {canDelete && (
+              <IconButton
+                label="Delete Event"
+                rightIcon="delete"
+                variant="outline"
+                className="w-full hover:border-destructive hover:bg-destructive hover:text-white"
+                onClick={() => setIsDeleteModalOpen(true)}
+              />
             )}
           </div>
         </div>

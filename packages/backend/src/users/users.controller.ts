@@ -34,6 +34,12 @@ export class UsersController {
   }
 
   @Public()
+  @Get('professions')
+  async getProfessions() {
+    return await this.usersService.getUserProfessions();
+  }
+
+  @Public()
   @Get('public-data/:userId')
   async getUserPublicDataById(@Param('userId') userId: string) {
     return await this.usersService.getUserPublicInfoById(userId);

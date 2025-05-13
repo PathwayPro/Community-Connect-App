@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { SharedIcons } from '@/shared/components/icons';
 import { cn } from '@/shared/lib/utils';
 import { ChevronDown } from 'lucide-react';
+import { useUserStore } from '@/features/user-profile/store';
 
 interface NavItem {
   name: string;
@@ -34,6 +35,13 @@ const NavItem = ({
   onExpandSidebar
 }: NavItemProps) => {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const { user, fetchUserProfile } = useUserStore();
+
+  useEffect(() => {
+    if (!user || user === undefined) {
+      fetchUserProfile();
+    }
+  }, [fetchUserProfile, user]);
 
   const toggleExpand = (href: string) => {
     setExpandedItems((prev) =>
@@ -83,21 +91,25 @@ const NavItem = ({
                 )}
               </div>
             ) : (
-              <Link href={item.href}>
-                <div
-                  className={cn(
-                    linkClassName,
-                    'flex cursor-pointer items-center justify-between',
-                    isPathActive(item.href) &&
-                      'border border-white bg-neutral-200/10'
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <Icon className={cn('ml-4 h-6 w-6', !showText && 'ml-2')} />
-                    {showText && item.name}
+              (item.name !== 'Admin' || user?.role === 'ADMIN') && (
+                <Link href={item.href}>
+                  <div
+                    className={cn(
+                      linkClassName,
+                      'flex cursor-pointer items-center justify-between',
+                      isPathActive(item.href) &&
+                        'border border-white bg-neutral-200/10'
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon
+                        className={cn('ml-4 h-6 w-6', !showText && 'ml-2')}
+                      />
+                      {showText && item.name}
+                    </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
+              )
             )}
 
             {hasSubItems && showText && (

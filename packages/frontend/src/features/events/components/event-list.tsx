@@ -16,12 +16,19 @@ import { Ticket } from 'lucide-react';
 import { PaginationComponent } from '@/shared/components/pagination/pagination';
 import { Event } from '../types';
 import { Skeleton } from '@/shared/components/ui/skeleton';
+import { useRole } from '@/features/user-profile/hooks/useRole';
+import { useUserStore } from '@/features/user-profile/store';
 
 export const EventList = () => {
   const router = useRouter();
   const { events, fetchEvents, isLoading } = useEventStore();
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 5;
+  const { hasPermission } = useRole();
+  const { isLoading: isUserLoading } = useUserStore();
+
+  // Check if user can create events (only admin and mentors)
+  const canCreateEvent = !isUserLoading && hasPermission('create:event');
 
   useEffect(() => {
     fetchEvents();
@@ -141,12 +148,14 @@ export const EventList = () => {
                 <TabsTrigger value="all">All Events</TabsTrigger>
               </TabsList>
             </div>
-            <IconButton
-              leftIcon="plusCircle"
-              label="Create New Event"
-              className="w-[236px] bg-secondary-500"
-              onClick={() => router.push('/events/create')}
-            />
+            {canCreateEvent && (
+              <IconButton
+                leftIcon="plusCircle"
+                label="Create New Event"
+                className="w-[236px] bg-secondary-500"
+                onClick={() => router.push('/events/create')}
+              />
+            )}
           </div>
 
           <TabsContent

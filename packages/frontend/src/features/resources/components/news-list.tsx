@@ -38,6 +38,8 @@ import {
 } from '@/shared/components/ui/carousel';
 import { EmptyStateCard } from '@/shared/components/empty-state/empty-state-card';
 import { Newspaper, FileText, Briefcase } from 'lucide-react';
+import { useRole } from '@/features/user-profile/hooks/useRole';
+import { useUserStore } from '@/features/user-profile/store';
 
 // Add these filter functions before the NewsList component
 const filterRecentNews = (news: News[]) => {
@@ -49,12 +51,6 @@ const filterRecentNews = (news: News[]) => {
 
 const filterEditorsPickNews = (news: News[]) => {
   return news.filter((item) => item.type === 'EDITORS_PICK');
-};
-
-const filterMostReadNews = (news: News[]) => {
-  // In a real app, you'd have a viewCount in the NewsItem interface
-  // This is just for demonstration
-  return news.filter((_, index) => index < 3);
 };
 
 const filterFeaturedNews = (news: News[]) => {
@@ -80,15 +76,30 @@ export const NewsList = () => {
     isLoading: isOpportunitiesLoading
   } = useOpportunityStore();
 
+  const { hasPermission, role } = useRole();
+  const { isLoading: isUserLoading } = useUserStore();
+
+  // Don't render permission-dependent UI until user data is loaded
+  const canCreateNews = !isUserLoading && hasPermission('create:news');
+  const canCreateResource = !isUserLoading && hasPermission('create:resource');
+  const canCreateOpportunity =
+    !isUserLoading && hasPermission('create:opportunity');
+
+  // Add debug logging to help troubleshoot
+  useEffect(() => {
+    console.log('Current user role:', role);
+    console.log('Permission checks:', {
+      canCreateNews,
+      canCreateResource,
+      canCreateOpportunity
+    });
+  }, [role, canCreateNews, canCreateResource, canCreateOpportunity]);
+
   useEffect(() => {
     fetchNews();
     fetchResources();
     fetchOpportunities();
   }, [fetchNews, fetchResources, fetchOpportunities]);
-
-  console.log('news store', news);
-
-  // const canManageResources = user?.role === 'ADMIN' || user?.role === 'MENTOR';
 
   const [activeTab, setActiveTab] = useState('news');
   const [newsSubTab, setNewsSubTab] = useState('recent');
@@ -97,8 +108,6 @@ export const NewsList = () => {
   );
   const [selectedResourceType, setSelectedResourceType] =
     useState<string>('ALL');
-
-  console.log(activeTab);
 
   // Filter news items by category
   const newsItems = news;
@@ -109,8 +118,6 @@ export const NewsList = () => {
   const recentNews = filterRecentNews(newsItems);
   const editorsPickNews = filterEditorsPickNews(newsItems);
   const featuredNews = filterFeaturedNews(newsItems);
-
-  console.log('featuredNews', featuredNews);
 
   // Replace single newsPage with separate states for each tab
   const [recentNewsPage, setRecentNewsPage] = useState(1);
@@ -225,12 +232,19 @@ export const NewsList = () => {
                 Opportunities
               </TabsTrigger>
             </TabsList>
-            <IconButton
-              leftIcon="plusCircle"
-              label={`Create ${activeTab === 'news' ? 'News' : activeTab === 'contentLibrary' ? 'Resource' : 'Opportunity'} Item`}
-              className="h-12 w-fit bg-secondary-500"
-              onClick={() => router.push(`/resources/create?mode=${activeTab}`)}
-            />
+
+            {((activeTab === 'news' && canCreateNews) ||
+              (activeTab === 'contentLibrary' && canCreateResource) ||
+              (activeTab === 'opportunities' && canCreateOpportunity)) && (
+              <IconButton
+                leftIcon="plusCircle"
+                label={`Create ${activeTab === 'news' ? 'News' : activeTab === 'contentLibrary' ? 'Resource' : 'Opportunity'} Item`}
+                className="h-12 w-fit bg-secondary-500"
+                onClick={() =>
+                  router.push(`/resources/create?mode=${activeTab}`)
+                }
+              />
+            )}
           </div>
 
           {/* News Tab Content */}
@@ -292,15 +306,6 @@ export const NewsList = () => {
                         >
                           Editor&apos;s Pick
                         </TabsTrigger>
-
-                        {/* Most Read */}
-                        {/* <TabsTrigger
-                          value="most-read"
-                          className={`h-10`}
-                          onClick={() => setNewsSubTab('most-read')}
-                        >
-                          Most Read
-                        </TabsTrigger> */}
                       </TabsList>
                     </div>
 
@@ -356,33 +361,6 @@ export const NewsList = () => {
                         </>
                       )}
                     </TabsContent>
-
-                    {/* <TabsContent
-                      value="most-read"
-                      className="flex w-full flex-col gap-6"
-                    >
-                      {isNewsLoading ? (
-                        renderLoadingState()
-                      ) : paginatedMostReadNews.length === 0 &&
-                        !isNewsLoading ? (
-                        renderNewsEmptyState()
-                      ) : (
-                        <>
-                          <div className="grid grid-cols-2 gap-6">
-                            {paginatedMostReadNews.map((item) => (
-                              <NewsCard key={item.id} {...item} />
-                            ))}
-                          </div>
-                          <PaginationComponent
-                            currentPage={mostReadPage}
-                            totalPages={Math.ceil(
-                              mostReadNews.length / ITEMS_PER_PAGE
-                            )}
-                            onPageChange={setMostReadPage}
-                          />
-                        </>
-                      )}
-                    </TabsContent> */}
                   </Tabs>
                 </div>
               </div>

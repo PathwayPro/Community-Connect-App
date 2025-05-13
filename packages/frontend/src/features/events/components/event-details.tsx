@@ -36,7 +36,7 @@ interface EventDetailsProps {
   onRegister?: () => void;
 }
 
-export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
+export const EventDetails = ({ onShare }: EventDetailsProps) => {
   const router = useRouter();
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const { user } = useUserStore();
@@ -84,6 +84,18 @@ export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
 
   const handleViewProfile = () => {
     router.push(`/profile/${host_id}`);
+  };
+
+  const handleRegister = () => {
+    if (isHost) {
+      router.push(
+        `/events/${eventData.id}/subscribers?title=${encodeURIComponent(title)}&eventId=${eventData.id}`
+      );
+    } else {
+      // Existing registration logic
+      console.log('Registering for event');
+      // Implementation for non-hosts
+    }
   };
 
   return (
@@ -172,9 +184,15 @@ export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
           </div>
         </div>
 
-        <Button className="h-12 w-full" onClick={onRegister}>
-          Register Now
-        </Button>
+        {isHost ? (
+          <Button className="h-12 w-full" onClick={handleRegister}>
+            Show Subscribers
+          </Button>
+        ) : (
+          <Button className="h-12 w-full" onClick={handleRegister}>
+            Register Now
+          </Button>
+        )}
       </Card>
 
       {/* Host Section */}
@@ -226,9 +244,15 @@ export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
       </Card>
 
       {/* Bottom Register Button */}
-      <Button className="h-12 w-full" onClick={onRegister}>
-        Register Now
-      </Button>
+      {isHost ? (
+        <Button className="h-12 w-full" onClick={handleRegister}>
+          Show Subscribers
+        </Button>
+      ) : (
+        <Button className="h-12 w-full" onClick={handleRegister}>
+          Register Now
+        </Button>
+      )}
     </div>
   );
 };

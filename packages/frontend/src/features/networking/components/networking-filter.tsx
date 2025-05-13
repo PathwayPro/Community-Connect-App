@@ -4,11 +4,8 @@ import { FormInput } from '@/shared/components/form';
 import { FormMultiSelect } from '@/shared/components/form/form-multiselect';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useEffect, useMemo } from 'react';
-import {
-  getProfessions,
-  getSkills,
-  getCountries
-} from '@/features/networking/lib/mock-data.ts';
+import { getCountries } from '@/features/networking/lib/mock-data.ts';
+import { useUserStore } from '@/features/user-profile/store';
 
 interface NetworkingFilterValues {
   search: string;
@@ -24,8 +21,31 @@ interface NetworkingFilterProps {
 export const NetworkingFilter = ({ onFilterChange }: NetworkingFilterProps) => {
   // Memoize the options to ensure consistency
   const countries = useMemo(() => getCountries(), []);
-  const skills = useMemo(() => getSkills(), []);
-  const professions = useMemo(() => getProfessions(), []);
+  const { professions, fetchProfessions, skills, fetchSkills } = useUserStore();
+
+  // Memoize transformed skills and professions
+  const skillOptions = useMemo(
+    () =>
+      skills.map((skill) => ({
+        value: skill.id,
+        label: skill.name
+      })),
+    [skills]
+  );
+
+  const professionOptions = useMemo(
+    () =>
+      professions.map((profession) => ({
+        value: profession,
+        label: profession
+      })),
+    [professions]
+  );
+
+  useEffect(() => {
+    fetchProfessions();
+    fetchSkills();
+  }, [fetchProfessions, fetchSkills]);
 
   const form = useForm<NetworkingFilterValues>({
     defaultValues: {
@@ -64,14 +84,14 @@ export const NetworkingFilter = ({ onFilterChange }: NetworkingFilterProps) => {
         <FormMultiSelect
           name="skills"
           label="Skills"
-          options={skills}
+          options={skillOptions}
           placeholder="Select Skills"
         />
 
         <FormMultiSelect
           name="professions"
           label="Professions"
-          options={professions}
+          options={professionOptions}
           placeholder="Select Profession"
         />
       </div>

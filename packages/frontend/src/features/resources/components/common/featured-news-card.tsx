@@ -13,6 +13,8 @@ import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { DeleteModal } from '../../../../shared/components/modal/delete-modal';
 import { ImagePreview } from '@/shared/components/image/image-preview';
+import { useRole } from '@/features/user-profile/hooks/useRole';
+import { useUserStore } from '@/features/user-profile/store';
 
 interface FeaturedNewsCardProps {
   id?: string;
@@ -23,6 +25,7 @@ interface FeaturedNewsCardProps {
   link?: string;
   created_at: string;
   user: {
+    id: number;
     first_name: string;
     last_name: string;
     picture_upload_link: string;
@@ -45,6 +48,16 @@ export const FeaturedNewsCard = ({
   const router = useRouter();
   const { deleteNews } = useNewsStore();
   const { showAlert } = useAlertDialog();
+  const { hasRole, hasPermission } = useRole();
+  const { user: currentUser } = useUserStore();
+
+  // Check if current user is the creator of this news item
+  const isCreator = currentUser?.id?.toString() === user?.id?.toString();
+
+  // ADMIN can edit/delete all news, other users can only edit/delete their own
+  const canEdit = hasRole('ADMIN') || (isCreator && hasPermission('edit:news'));
+  const canDelete =
+    hasRole('ADMIN') || (isCreator && hasPermission('delete:news'));
 
   const newsData = {
     id,
@@ -56,8 +69,6 @@ export const FeaturedNewsCard = ({
     created_at,
     user
   };
-
-  console.log('newsData', newsData);
 
   const fullName = `${user.first_name} ${user.last_name}`;
 
@@ -112,22 +123,28 @@ export const FeaturedNewsCard = ({
       />
       <div className="flex justify-between">
         <h2 className="mb-6 text-2xl font-bold text-white">Featured News</h2>
-        <div className="flex h-8 gap-3">
-          <div
-            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary"
-            onClick={handleEdit}
-          >
-            <PenBox className="h-4 w-4 text-white" />
+        {(canEdit || canDelete) && (
+          <div className="flex h-8 gap-3">
+            {canEdit && (
+              <div
+                className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary"
+                onClick={handleEdit}
+              >
+                <PenBox className="h-4 w-4 text-white" />
+              </div>
+            )}
+            {canDelete && (
+              <div
+                className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive"
+                onClick={handleDelete}
+              >
+                <Trash2
+                  className={`h-4 w-4 text-white ${isDeleting ? 'animate-spin' : ''}`}
+                />
+              </div>
+            )}
           </div>
-          <div
-            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive"
-            onClick={handleDelete}
-          >
-            <Trash2
-              className={`h-4 w-4 text-white ${isDeleting ? 'animate-spin' : ''}`}
-            />
-          </div>
-        </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-6">

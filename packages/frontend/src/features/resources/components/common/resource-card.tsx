@@ -14,6 +14,7 @@ import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { DeleteModal } from '../../../../shared/components/modal/delete-modal';
 import { resourceTypes } from '../../lib/constants/enums';
+import { useRole } from '@/features/user-profile/hooks/useRole';
 
 interface ResourceCardProps {
   id?: string;
@@ -44,6 +45,11 @@ export const ResourceCard = ({
   const router = useRouter();
   const { deleteResource } = useResourcesStore();
   const { showAlert } = useAlertDialog();
+  const { hasRole, hasPermission } = useRole();
+
+  // ADMIN can edit/delete all resources, other users can only edit/delete their own
+  const canEdit = hasRole('ADMIN') || hasPermission('edit:resource');
+  const canDelete = hasRole('ADMIN') || hasPermission('delete:resource');
 
   const ensureAbsoluteUrl = (url: string) => {
     if (!url) return '#';
@@ -151,22 +157,28 @@ export const ResourceCard = ({
       />
       <div className="relative flex flex-col">
         {/* Action Buttons */}
-        <div className="absolute right-4 top-4 z-20 flex gap-3">
-          <div
-            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary"
-            onClick={handleEdit}
-          >
-            <PenBox className="h-4 w-4 text-white" />
+        {(canEdit || canDelete) && (
+          <div className="absolute right-4 top-4 z-20 flex gap-3">
+            {canEdit && (
+              <div
+                className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary"
+                onClick={handleEdit}
+              >
+                <PenBox className="h-4 w-4 text-white" />
+              </div>
+            )}
+            {canDelete && (
+              <div
+                className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive"
+                onClick={handleDelete}
+              >
+                <Trash2
+                  className={`h-4 w-4 text-white ${isDeleting ? 'animate-spin' : ''}`}
+                />
+              </div>
+            )}
           </div>
-          <div
-            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive"
-            onClick={handleDelete}
-          >
-            <Trash2
-              className={`h-4 w-4 text-white ${isDeleting ? 'animate-spin' : ''}`}
-            />
-          </div>
-        </div>
+        )}
 
         {/* Image */}
         <div className="relative h-[320px] w-full">

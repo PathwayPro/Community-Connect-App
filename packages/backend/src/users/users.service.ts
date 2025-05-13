@@ -370,6 +370,32 @@ export class UsersService {
     }
   }
 
+  async getUserProfessions(): Promise<string[]> {
+    // Get all users and extract their professions
+    const users = await this.prisma.users.findMany({
+      where: {
+        deleted_at: false,
+        profession: {
+          not: null,
+        },
+      },
+      select: {
+        profession: true,
+      },
+    });
+
+    // Extract professions and filter out any empty strings
+    const allProfessions = users
+      .map((user) => user.profession)
+      .filter((profession) => profession && profession.trim() !== '');
+
+    // Create a unique list using Set
+    const uniqueProfessions = [...new Set(allProfessions)];
+
+    // Sort alphabetically
+    return uniqueProfessions.sort();
+  }
+
   private mapToReadUserDto(user: any): ReadUserDto {
     const readUser = new ReadUserDto();
 
