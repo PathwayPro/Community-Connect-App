@@ -13,6 +13,8 @@ interface BlogState {
   fetchThreads: () => Promise<void>;
   fetchThreadComments: (post_id: number) => Promise<void>;
   createThread: (content: string) => Promise<void>;
+  createComment: (post_id: number, content: string) => Promise<void>;
+  toggleLike: (post_id: number) => Promise<void>;
 }
 
 export const useBlogStore = create<BlogState>()(
@@ -94,6 +96,44 @@ export const useBlogStore = create<BlogState>()(
               error instanceof Error
                 ? error.message
                 : 'An error occurred creating the thread',
+            isLoading: false
+          });
+        }
+      },
+
+      createComment: async (post_id: number, content: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          console.log('CREANDO COMMENT: ', post_id, content);
+          const data = { post_id: post_id, message: content };
+          const response = await blogApi.createComment(data);
+
+          console.log('| - - - - - - - > RESPONSE CREANDO COMMENT:', response);
+
+          const message = response.data.content;
+
+          //set({ threadMessages: data, isLoading: false });
+        } catch (error) {
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'An error occurred creating the comment',
+            isLoading: false
+          });
+        }
+      },
+
+      toggleLike: async (post_id: number) => {
+        set({ isLoading: true, error: null });
+        try {
+          console.log('TOGGLEANDO LIKE EN POST: ', post_id);
+          const response = await blogApi.toggleLike(post_id);
+
+          console.log('| - - - - - - - > RESPONSE TOGGLEANDO LIKE:', response);
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
             isLoading: false
           });
         }

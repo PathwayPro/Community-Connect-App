@@ -70,6 +70,8 @@ export const CommentsThreadCard = ({
   const {
     threadMessages: rawThreadMessages,
     fetchThreadComments,
+    createComment,
+    toggleLike,
     isLoading: commentsLoading,
     error: commentsError
   } = useBlogStore();
@@ -85,7 +87,12 @@ export const CommentsThreadCard = ({
   }, [showCommentSection, selectedThread?.id, fetchThreadComments]);
 
   // handle like
-  const handleLike = () => {
+  const handleLike = async () => {
+    if (!selectedThread?.id) {
+      return;
+    }
+    const like = await toggleLike(selectedThread.id);
+
     setIsLiked(!isLiked);
     setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
   };
@@ -101,14 +108,24 @@ export const CommentsThreadCard = ({
     setShowCommentSearchbar(true);
   };
 
-  const handleCommentSubmit = (comment: string) => {
+  const handleCommentSubmit = async (comment: string) => {
     // Handle comment submission here
     console.log('New comment:', comment);
+    console.log('SELECTED THREAD:', selectedThread?.id);
+
+    if (!selectedThread?.id || !content) {
+      return;
+    }
+
+    const commentSubmit = await createComment(selectedThread.id, comment);
+
     if (setShowCommentSection) {
       setShowCommentSection(false);
     }
     setShowCommentSearchbar(false);
     setShowCommentInput(false);
+
+    return commentSubmit;
   };
 
   // handle view thread

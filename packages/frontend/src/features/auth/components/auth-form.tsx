@@ -43,8 +43,8 @@ export function AuthForm() {
   const form = useForm<AuthFormValues>({
     resolver: zodResolver(isRegisterPage ? registerSchema : loginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: 'user2@sv.com',
+      password: 'Password123!',
       ...(isRegisterPage && {
         firstName: '',
         lastName: '',

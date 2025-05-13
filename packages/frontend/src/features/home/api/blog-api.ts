@@ -8,7 +8,13 @@ export const blogApi = {
     apiMethods.get<PostCommentResponse[]>(`/blog/post/${post_id}/comments`),
 
   createThread: (data: { message: string }) =>
-    apiMethods.post<ThreadResponse>('/blog/post', data)
+    apiMethods.post<ThreadResponse>('/blog/post', data),
+
+  createComment: (data: { post_id: number; message: string }) =>
+    apiMethods.post<ThreadResponse>('/blog/comment', data),
+
+  toggleLike: (post_id: number) =>
+    apiMethods.post<ThreadResponse>(`/blog/post/${post_id}/like`)
 
   // createMentee: (data: FormData) =>
   //   apiMethods.post<MenteeResponse>('/mentees', data),

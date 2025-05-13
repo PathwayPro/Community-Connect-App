@@ -38,7 +38,7 @@ export const ThreadCommentInput = ({
     }
   };
 
-  console.log('this is the variant ', variant);
+  //console.log('this is the variant ', variant);
 
   const characterLimit = 500;
   const remainingCharacters = characterLimit - comment.length;

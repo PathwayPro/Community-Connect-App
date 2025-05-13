@@ -22,7 +22,6 @@ export const CommentCard = ({
   hasComments = true,
   variant = 'primary'
 }: CommentCardProps) => {
-  console.log('ENTRA COMMENTS???');
   const [showCommentSection, setShowCommentSection] = useState(false);
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [showCommentSearchbar, setShowCommentSearchbar] = useState(true);

@@ -44,7 +44,12 @@ export const ThreadCard = ({
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
 
-  const handleLike = () => {
+  const handleLike = async () => {
+    if (!selectedThread?.id) {
+      return;
+    }
+    const like = await toggleLike(selectedThread.id);
+
     setIsLiked(!isLiked);
     setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
   };
