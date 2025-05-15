@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Shadcn Datetime Picker with support for timezone, date and time selection, minimum and maximum date limits, and 12-hour format...
  * Check out the live demo at https://shadcn-datetime-picker-pro.vercel.app/
@@ -183,7 +184,8 @@ export function DateTimePicker({
   );
 
   const onDayChanged = useCallback(
-    (d: Date) => {
+    (d: Date | undefined) => {
+      if (!d) return;
       d.setHours(date.getHours(), date.getMinutes(), date.getSeconds());
       if (min && d < min) {
         d.setHours(min.getHours(), min.getMinutes(), min.getSeconds());
@@ -193,7 +195,7 @@ export function DateTimePicker({
       }
       setDate(d);
     },
-    [setDate, setMonth]
+    [date, min, max]
   );
   const onSubmit = useCallback(() => {
     onChange(new Date(date));
@@ -335,7 +337,7 @@ export function DateTimePicker({
         <div className="relative min-h-[250px] overflow-hidden">
           <DayPicker
             mode="single"
-            selected={date}
+            selected={date || undefined}
             onSelect={onDayChanged}
             month={month}
             onMonthChange={setMonth}
@@ -363,7 +365,6 @@ export function DateTimePicker({
               day_hidden: 'invisible'
             }}
             showOutsideDays={true}
-            {...props}
           />
           <div
             className={cn(
