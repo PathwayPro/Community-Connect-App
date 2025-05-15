@@ -15,7 +15,7 @@ import {
 } from '@/features/user-profile/lib/utils';
 import { useSettingsStore } from '@/features/settings/store';
 import { useEffect } from 'react';
-import { Crown, UserCog } from 'lucide-react';
+import { Crown, UserCircle, UserCog } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -279,6 +279,14 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
                       <UserCog className="z-20 h-6 w-6 text-white" />
                     </TooltipTrigger>
                     <TooltipContent>Mentor</TooltipContent>
+                  </Tooltip>
+                )}
+                {displayedUser.role === 'USER' && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <UserCircle className="z-20 h-6 w-6 text-white" />
+                    </TooltipTrigger>
+                    <TooltipContent>User</TooltipContent>
                   </Tooltip>
                 )}
               </div>
