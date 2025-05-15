@@ -10,7 +10,6 @@ export default function EventPage() {
     <EventDetails
       onBack={() => router.back()}
       onShare={() => console.log('Share clicked')}
-      onRegister={() => console.log('Register clicked')}
     />
   );
 }

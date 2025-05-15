@@ -181,60 +181,51 @@ export const EventList = () => {
   };
 
   return (
-    <div className="container space-y-6">
-      <div className="flex items-center justify-between">
-        <Tabs defaultValue="all" className="w-full">
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center justify-start gap-4">
-              <span className="text-sm text-neutral-dark-300">
-                Sort Events By:
-              </span>
-              <TabsList>
-                <TabsTrigger value="all">All Events</TabsTrigger>
-                <TabsTrigger value="upcoming">Upcoming Events</TabsTrigger>
-                <TabsTrigger value="my-events">My Events</TabsTrigger>
-              </TabsList>
-            </div>
-            {canCreateEvent && (
-              <IconButton
-                leftIcon="plusCircle"
-                label="Create New Event"
-                className="w-[236px] bg-secondary-500"
-                onClick={() => router.push('/events/create')}
-              />
-            )}
-          </div>
-
-          <TabsContent
-            value="all"
-            className="flex h-full w-full flex-col gap-6"
-          >
-            {events.length === 0 ? (
-              <div className="flex h-full w-full items-center justify-center">
-                <EmptyStateCard
-                  title="No events created yet"
-                  description="Create a new event to get started"
-                  icon={Ticket}
-                  action={{
-                    label: 'Create New Event',
-                    onClick: () => router.push('/events/create')
-                  }}
-                />
-              </div>
-            ) : (
-              renderEventsList(allEvents, sortedEvents)
-            )}
-          </TabsContent>
-
-          <TabsContent value="upcoming" className="flex w-full flex-col gap-6">
-            {renderEventsList(upcomingEvents, upcomingEventsList)}
-          </TabsContent>
-
-          <TabsContent value="my-events" className="flex w-full flex-col gap-6">
-            {renderEventsList(myEvents, myEventsList)}
-          </TabsContent>
-        </Tabs>
+    <Tabs defaultValue="all" className="container h-full w-full">
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center justify-start gap-4">
+          <span className="text-sm text-neutral-dark-300">Sort Events By:</span>
+          <TabsList>
+            <TabsTrigger value="all">All Events</TabsTrigger>
+            <TabsTrigger value="upcoming">Upcoming Events</TabsTrigger>
+            <TabsTrigger value="my-events">My Events</TabsTrigger>
+          </TabsList>
+        </div>
+        {canCreateEvent && (
+          <IconButton
+            leftIcon="plusCircle"
+            label="Create New Event"
+            className="w-[236px] bg-secondary-500"
+            onClick={() => router.push('/events/create')}
+          />
+        )}
       </div>
-    </div>
+
+      <TabsContent value="all" className="flex w-full flex-col gap-6">
+        {events.length === 0 ? (
+          <div className="flex h-full w-full items-center justify-center">
+            <EmptyStateCard
+              title="No events created yet"
+              description="Create a new event to get started"
+              icon={Ticket}
+              action={{
+                label: 'Create New Event',
+                onClick: () => router.push('/events/create')
+              }}
+            />
+          </div>
+        ) : (
+          renderEventsList(allEvents, sortedEvents)
+        )}
+      </TabsContent>
+
+      <TabsContent value="upcoming" className="flex w-full flex-col gap-6">
+        {renderEventsList(upcomingEvents, upcomingEventsList)}
+      </TabsContent>
+
+      <TabsContent value="my-events" className="flex w-full flex-col gap-6">
+        {renderEventsList(myEvents, myEventsList)}
+      </TabsContent>
+    </Tabs>
   );
 };

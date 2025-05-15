@@ -64,7 +64,6 @@ interface EventError {
 interface EventDetailsProps {
   onBack?: () => void;
   onShare?: () => void;
-  onRegister?: () => void;
 }
 
 export const EventDetails = ({ onShare }: EventDetailsProps) => {
