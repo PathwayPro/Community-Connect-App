@@ -72,10 +72,10 @@ export function FloatingNav() {
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-2">
+      <Link href="#home" className="flex items-center gap-2">
         <SharedIcons.logo className="h-8 w-8" />
         <span className="text-lg font-bold text-primary">CommuNet</span>
-      </div>
+      </Link>
 
       {/* Navigation Links */}
       <div className="flex items-center gap-6">

@@ -47,12 +47,12 @@ export function FooterSection() {
       <div className="flex justify-between px-16 py-8">
         {/* Logo and Social Links */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
+          <Link href="#home" className="flex items-center gap-2">
             <Icons.logo className="h-16 w-16" />
             <h5 className="text-2xl font-semibold text-primary-500">
               CommuNet
             </h5>
-          </div>
+          </Link>
           <div className="flex flex-col">
             <p className="text-sm text-neutral-dark-100">
               Connecting communities through technology

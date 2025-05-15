@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { EventDetails, EventForm } from '@/features/events/components';
 import { EventList } from '@/features/events/components';
+import { EventSubscribers } from '@/features/events/components';
 
 interface EventPageProps {
   params: {
@@ -46,6 +47,18 @@ export default async function EventPage({ params }: EventPageProps) {
       );
 
     default:
+      // Check if we have a slug format like /events/:id/subscribers
+      if (id === 'subscribers') {
+        // Handle /events/:id/subscribers
+        return (
+          <Suspense fallback={<EventDetailsSkeleton />}>
+            <div className="flex w-full justify-center">
+              <EventSubscribers eventId={action} />
+            </div>
+          </Suspense>
+        );
+      }
+
       // Handle /events/:id - Show specific event
       if (action && !id) {
         return (

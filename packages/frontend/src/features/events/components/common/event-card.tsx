@@ -14,8 +14,7 @@ import { IconButton } from '@/shared/components/ui/icon-button';
 import { useRouter } from 'next/navigation';
 import { EventType, Event, EventWithHost } from '../../types';
 import { useEventStore } from '@/features/events/store/index';
-import { formatDate } from 'date-fns';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { DeleteModal } from '@/shared/components/modal/delete-modal';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
@@ -23,6 +22,8 @@ import {
   useUserStore,
   useInitializeUserStore
 } from '@/features/user-profile/store';
+import { formatDate } from 'date-fns';
+import { useRole } from '@/features/user-profile/hooks/useRole';
 
 interface EventInfoProps {
   icon: React.ReactNode;
@@ -56,6 +57,7 @@ export const EventCard = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const { showAlert } = useAlertDialog();
   const { user } = useUserStore();
+  const { hasRole, hasPermission } = useRole();
 
   // Initialize user store
   useInitializeUserStore();
@@ -65,6 +67,11 @@ export const EventCard = ({
     user?.id !== undefined &&
     host_id !== undefined &&
     Number(user.id) === Number(host_id);
+
+  // Check permissions: Admin can edit/delete all events, mentors only their own
+  const canEdit = hasRole('ADMIN') || (isHost && hasPermission('edit:event'));
+  const canDelete =
+    hasRole('ADMIN') || (isHost && hasPermission('delete:event'));
 
   const eventData = {
     id,
@@ -105,6 +112,7 @@ export const EventCard = ({
       });
       router.refresh();
     } catch (error) {
+      console.error('Error deleting event:', error);
       showAlert({
         title: 'Error',
         description: 'An error occurred while deleting the event',
@@ -133,7 +141,7 @@ export const EventCard = ({
 
         <div className="flex flex-col gap-3 p-4">
           <div className="flex items-start justify-between gap-2">
-            <h2 className="font-semibold">{title}</h2>
+            <h2 className="line-clamp-1 font-semibold">{title}</h2>
             <div className="flex items-center justify-center rounded-full bg-primary-300 p-3">
               <div className="flex items-center gap-2">
                 {!is_free && <DollarSign className="h-5 w-5 text-secondary" />}
@@ -174,22 +182,22 @@ export const EventCard = ({
               className="w-full"
               onClick={handleLearnMore}
             />
-            {isHost && (
-              <>
-                <IconButton
-                  label="Edit Details"
-                  rightIcon="pencil"
-                  className="w-full"
-                  onClick={handleEdit}
-                />
-                <IconButton
-                  label="Delete Event"
-                  rightIcon="delete"
-                  variant="outline"
-                  className="w-full hover:border-destructive hover:bg-destructive hover:text-white"
-                  onClick={() => setIsDeleteModalOpen(true)}
-                />
-              </>
+            {canEdit && (
+              <IconButton
+                label="Edit Details"
+                rightIcon="pencil"
+                className="w-full"
+                onClick={handleEdit}
+              />
+            )}
+            {canDelete && (
+              <IconButton
+                label="Delete Event"
+                rightIcon="delete"
+                variant="outline"
+                className="w-full hover:border-destructive hover:bg-destructive hover:text-white"
+                onClick={() => setIsDeleteModalOpen(true)}
+              />
             )}
           </div>
         </div>

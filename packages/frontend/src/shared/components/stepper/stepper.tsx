@@ -1,7 +1,4 @@
-import { Separator } from '@/shared/components/ui/separator';
 import clsx from 'clsx';
-import { Check } from 'lucide-react';
-import React, { Fragment } from 'react';
 
 interface StepperIndicatorProps {
   activeStep: number;

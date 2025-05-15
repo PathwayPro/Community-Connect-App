@@ -85,6 +85,7 @@ export class EventsSubscriptionsService {
       select: {
         id: true,
         title: true,
+        description: true,
         location: true,
         link: true,
         image: true,
@@ -95,6 +96,8 @@ export class EventsSubscriptionsService {
         is_free: true,
         category: true,
         accept_subscriptions: true,
+        created_at: true,
+        updated_at: true,
       },
     });
     if (!event) {
@@ -106,13 +109,18 @@ export class EventsSubscriptionsService {
       where: { user_id: user_id, event_id: event_id },
     });
     if (subscription && isNewSubscription) {
-      throw new BadRequestException(`
-          There is already a subscription 
-          from ${user.first_name} ${user.last_name} 
-          for the event ${event.title}
-          created on ${subscription.created_at}
-          with status ${subscription.status}
-        `);
+      throw new BadRequestException({
+        message: `User ${user.first_name} ${user.last_name} is already subscribed to event "${event.title}" (created on ${new Date(subscription.created_at).toLocaleDateString()}, status: ${subscription.status})`,
+        code: 'SUBSCRIPTION_ALREADY_EXISTS',
+        details: {
+          userId: user.id,
+          userName: `${user.first_name} ${user.last_name}`,
+          eventId: event.id,
+          eventTitle: event.title,
+          subscriptionDate: subscription.created_at,
+          subscriptionStatus: subscription.status,
+        },
+      });
     }
 
     return { user, event, subscription };
@@ -136,6 +144,7 @@ export class EventsSubscriptionsService {
       const invitation = await this.prisma.eventsInvitations.findFirst({
         where: { event_id, invitee_id: user_id },
       });
+
       if (!invitation) {
         throw new BadRequestException(
           'You can only subscribe to this event with an invitation.',
@@ -158,6 +167,11 @@ export class EventsSubscriptionsService {
         true,
       );
 
+      console.log(
+        'subscriptionData after subscription validation',
+        subscriptionData,
+      );
+
       // VALIDATE IF THE USER CAN SUBSCRIBE TO THAT EVENT
       const canSubscribe = await this.canSubscribe(
         user.sub,
@@ -165,6 +179,9 @@ export class EventsSubscriptionsService {
         subscriptionData.event.type,
         subscriptionData.event.accept_subscriptions,
       );
+
+      console.log('canSubscribe after canSubscribe validation', canSubscribe);
+
       if (!canSubscribe) {
         throw new BadRequestException("You can't subscribe to this event");
       }
@@ -183,12 +200,26 @@ export class EventsSubscriptionsService {
           id: true,
           status: true,
           created_at: true,
+          updated_at: true,
         },
       });
 
+      console.log('newSubscription after create', newSubscription);
+
+      // Return in the expected format
       return {
-        newSubscription,
-        details: { user: subscriptionData.user, event: subscriptionData.event },
+        id: newSubscription.id,
+        user_id: user.sub,
+        event_id: createEventsSubscriptionDto.event_id,
+        status: newSubscription.status,
+        created_at: newSubscription.created_at,
+        updated_at: newSubscription.updated_at || newSubscription.created_at,
+        user: subscriptionData.user,
+        event: {
+          ...subscriptionData.event,
+          category_id: subscriptionData.event.category?.id || 0,
+        },
+        updates: [],
       };
     } catch (error) {
       throw new BadRequestException(
@@ -211,6 +242,8 @@ export class EventsSubscriptionsService {
               first_name: true,
               middle_name: true,
               last_name: true,
+              picture_upload_link: true,
+              profession: true,
             },
           },
           event: {

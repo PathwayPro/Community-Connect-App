@@ -61,6 +61,8 @@ export class EventsSubscriptionsController {
     const newSubscription: CreateEventsSubscriptionDto = {
       event_id: createEventsSubscriptionDto.event_id,
     };
+
+    console.log('newSubscription', newSubscription);
     return this.eventsSubscriptionsService.create(newSubscription, user);
   }
 

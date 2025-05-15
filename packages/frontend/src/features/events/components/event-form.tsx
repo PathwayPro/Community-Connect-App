@@ -17,24 +17,22 @@ import {
   EventsTypes
 } from '../lib/validation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { useEventStore } from '../store';
 import { TimeLocationForm } from './common/time-location-form';
-import { EventType } from '../types';
 import { UpdateEventDto } from '../dto';
-import { year } from '../lib/constants';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 
-function getStepContent(step: number) {
-  switch (step) {
-    case 1:
-      return <BaseForm />;
-    case 2:
-      return <TimeLocationForm />;
-    default:
-      return 'Unknown step';
-  }
-}
+// function getStepContent(step: number) {
+//   switch (step) {
+//     case 1:
+//       return <BaseForm />;
+//     case 2:
+//       return <TimeLocationForm />;
+//     default:
+//       return 'Unknown step';
+//   }
+// }
 
 // Move checkStepValidity outside the component to prevent recreation on each render
 const checkStepValidity = (
@@ -64,14 +62,7 @@ const checkStepValidity = (
 
     return hasValues && !hasErrors;
   } else if (activeStep === 2) {
-    const step2Fields = [
-      'start_date',
-      'start_time',
-      'end_time',
-      'type',
-      'requires_confirmation',
-      'accept_subscriptions'
-    ];
+    const step2Fields = ['start_date', 'start_time', 'end_time', 'type'];
 
     // Check if required fields for step 2 are valid
     const hasErrors = step2Fields.some(
@@ -94,6 +85,7 @@ export const EventForm = () => {
   const router = useRouter();
   const { createEvent, editEvent } = useEventStore();
   const { showAlert } = useAlertDialog();
+  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
 
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -111,70 +103,30 @@ export const EventForm = () => {
 
   const defaultValues = {
     title: eventData?.title || '',
-    subtitle: eventData?.subtitle || '',
     description: eventData?.description || '',
     category_id: eventData?.category_id?.toString() || '',
     location: eventData?.location || '',
     link: eventData?.link || '',
     is_free: eventData?.is_free ?? true,
     type: eventData?.type || EventsTypes.PUBLIC,
-    requires_confirmation: eventData?.requires_confirmation ?? false,
-    accept_subscriptions: eventData?.accept_subscriptions ?? true,
+    requires_confirmation: false,
+    accept_subscriptions: true,
     start_date: eventData?.start_date || '',
     start_time: eventData?.start_time || '',
-    end_time: eventData?.end_time || ''
+    end_time: eventData?.end_time || '',
+    // end_date: eventData?.end_date || '',
+    file: eventData?.file || undefined
   };
 
   const methods = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
     defaultValues,
-    mode: 'onChange' // Enable validation on change for better user feedback
+    mode: 'onChange'
   });
 
-  // // Set up data in edit mode
-  // useEffect(() => {
-  //   if (isEdit && eventData) {
-  //     Object.entries(eventData).forEach(([key, value]) => {
-  //       if (key === 'category_id') {
-  //         methods.setValue(key, String(value), { shouldValidate: true });
-  //       } else if (value !== undefined) {
-  //         methods.setValue(key as keyof EventFormValues, value, {
-  //           shouldValidate: true
-  //         });
-  //       }
-  //     });
-  //   }
-  // }, [eventData]);
-
-  // const [isCurrentStepValid, setIsCurrentStepValid] = React.useState(false);
-
-  // // Update the useEffect to use the external checkStepValidity function
-  // useEffect(() => {
-  //   const formValues = methods.getValues();
-  //   setIsCurrentStepValid(
-  //     checkStepValidity(
-  //       formValues as EventFormValues,
-  //       activeStep,
-  //       methods.formState
-  //     )
-  //   );
-  // }, [activeStep]);
-
-  // // Update the data setting logic in the edit mode useEffect
-  // useEffect(() => {
-  //   if (isEdit && eventData && !methods.formState.isDirty) {
-  //     const updates = Object.entries(eventData).reduce((acc, [key, value]) => {
-  //       if (key === 'category_id') {
-  //         acc[key] = String(value);
-  //       } else if (value !== undefined) {
-  //         acc[key as keyof EventFormValues] = value;
-  //       }
-  //       return acc;
-  //     }, {} as Partial<EventFormValues>);
-
-  //     methods.reset(updates);
-  //   }
-  // }, [eventData]);
+  const handleFileSelect = (file: File | null) => {
+    setSelectedFile(file);
+  };
 
   const handleNext = () => {
     setActiveStep(activeStep + 1);
@@ -184,24 +136,68 @@ export const EventForm = () => {
     setActiveStep(activeStep - 1);
   };
 
-  console.log('activeStep', activeStep);
-
   const onSubmit = async (data: EventFormValues) => {
-    console.log('data', data);
     try {
-      const formattedData = {
-        ...data,
-        category_id: Number(data.category_id),
-        type: data.type as EventType,
-        start_date: new Date(`${data.start_date}, ${year}`).toISOString()
-      };
+      const formData = new FormData();
 
+      // Handle file upload
+      if (selectedFile) {
+        formData.append('file', selectedFile);
+      }
+
+      // Handle dates and times
+      if (data.start_date) {
+        const startDate = new Date(data.start_date);
+        formData.append('start_date', startDate.toISOString());
+      }
+
+      // Handle link formatting
+      if (data.link) {
+        const formattedLink = data.link.startsWith('http')
+          ? data.link
+          : `https://${data.link}`;
+        formData.append('link', formattedLink);
+      }
+
+      // Handle category_id - ensure it's a number
+      if (data.category_id) {
+        formData.append('category_id', String(data.category_id));
+      }
+
+      // Handle location - ensure it's set
+      formData.append('location', data.location || 'Online');
+
+      // Handle boolean fields
+      formData.append('is_free', String(data.is_free));
+      formData.append('requires_confirmation', String(false));
+      formData.append('accept_subscriptions', String(true));
+
+      // Append all other form fields
+      Object.entries(data).forEach(([key, value]) => {
+        if (
+          key !== 'file' && // Skip file as it's handled separately
+          key !== 'start_date' && // Skip dates as they're handled separately
+          key !== 'link' && // Skip link as it's handled separately
+          key !== 'category_id' && // Skip category_id as it's handled separately
+          key !== 'location' && // Skip location as it's handled separately
+          key !== 'is_free' && // Skip boolean fields as they're handled separately
+          key !== 'requires_confirmation' && // Skip boolean fields as they're handled separately
+          key !== 'accept_subscriptions' && // Skip boolean fields as they're handled separately
+          value !== undefined &&
+          value !== null
+        ) {
+          formData.append(key, String(value));
+        }
+      });
+
+      console.log('FormData contents in the event form:');
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
+      // Submit the form
       if (isEdit && eventData) {
-        const result = await editEvent(eventData.id, {
-          ...formattedData,
-          id: eventData.id
-        });
-
+        const result = await editEvent(eventData.id, formData);
         if (result) {
           showAlert({
             type: 'success',
@@ -211,8 +207,12 @@ export const EventForm = () => {
           });
         }
       } else {
-        const result = await createEvent(formattedData);
+        console.log('FormData contents:');
+        for (const [key, value] of formData.entries()) {
+          console.log(`${key}:`, value);
+        }
 
+        const result = await createEvent(formData);
         if (result) {
           showAlert({
             type: 'success',
@@ -223,11 +223,14 @@ export const EventForm = () => {
         }
       }
     } catch (error) {
-      console.error('error', error);
+      console.error('Form submission error:', error);
       showAlert({
         type: 'error',
         title: isEdit ? 'Event Update Failed' : 'Event Creation Failed',
-        description: 'Please check your input and try again.'
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Please check your input and try again.'
       });
     }
   };
@@ -256,7 +259,11 @@ export const EventForm = () => {
       <CardContent className="flex flex-col justify-center gap-4">
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-            {getStepContent(activeStep)}
+            {activeStep === 1 ? (
+              <BaseForm onFileSelect={handleFileSelect} />
+            ) : (
+              <TimeLocationForm />
+            )}
             <div className="flex w-full gap-4 pt-5">
               {activeStep === 2 && (
                 <IconButton

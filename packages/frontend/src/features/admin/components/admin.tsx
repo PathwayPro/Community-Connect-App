@@ -8,8 +8,9 @@ import {
   TabsTrigger
 } from '@/shared/components/ui/tabs';
 import { UserManagement } from './common/user-management';
-import { ApplicationSettings } from './common/application-settings';
-import { SystemStatus } from './common/system-status';
+import { Analytics } from '@/features/analytics/components/analytics';
+import { UsersIcon } from 'lucide-react';
+import { ChartAreaIcon } from 'lucide-react';
 
 export const Admin = () => {
   const [activeTab, setActiveTab] = useState('users');
@@ -19,42 +20,38 @@ export const Admin = () => {
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
         <p className="text-muted-foreground">
-          Manage users, configure application settings, and monitor system
-          status.
+          View analytics, manage users, and configure application settings.
         </p>
       </div>
 
       <Tabs
-        defaultValue="users"
+        defaultValue="analytics"
         value={activeTab}
         onValueChange={setActiveTab}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-3 md:w-auto">
-          <TabsTrigger value="users">User Management</TabsTrigger>
-          <TabsTrigger value="settings">Application Settings</TabsTrigger>
-          <TabsTrigger value="system">System Status</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 md:w-auto">
+          <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <ChartAreaIcon className="h-4 w-4" />
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center gap-2">
+            <UsersIcon className="h-4 w-4" />
+            User Management
+          </TabsTrigger>
         </TabsList>
 
+        <TabsContent
+          value="analytics"
+          className="mt-4 rounded-2xl border bg-white"
+        >
+          <Analytics />
+        </TabsContent>
         <TabsContent
           value="users"
           className="mt-4 rounded-2xl border bg-white p-4"
         >
           <UserManagement />
-        </TabsContent>
-
-        <TabsContent
-          value="settings"
-          className="mt-4 rounded-2xl border bg-white p-4"
-        >
-          <ApplicationSettings />
-        </TabsContent>
-
-        <TabsContent
-          value="system"
-          className="mt-4 rounded-2xl border bg-white p-4"
-        >
-          <SystemStatus />
         </TabsContent>
       </Tabs>
     </div>

@@ -8,6 +8,7 @@ import {
   FormControl
 } from '@/shared/components/ui/form';
 import CustomDatePicker from '../date-picker/custom-date-picker';
+import { DateTimePicker } from '@/shared/components/date-picker/date-picker';
 
 interface FormDatePickerProps<T extends FieldValues> {
   name: Path<T>;
@@ -15,6 +16,7 @@ interface FormDatePickerProps<T extends FieldValues> {
   customError?: string;
   control?: Control<T>;
   required?: boolean;
+  useDateTimePicker?: boolean;
 }
 
 export const FormDatePicker = <T extends FieldValues>({
@@ -22,6 +24,7 @@ export const FormDatePicker = <T extends FieldValues>({
   label,
   customError,
   control: controlProp,
+  useDateTimePicker = false,
   required = false
 }: FormDatePickerProps<T>) => {
   const formContext = useFormContext<T>();
@@ -42,6 +45,13 @@ export const FormDatePicker = <T extends FieldValues>({
         const error = formContext?.formState?.errors[name];
         const showError = error;
 
+        const handleDateChange = (date: Date | undefined) => {
+          if (date) {
+            const dateString = date.toISOString().split('T')[0];
+            field.onChange(dateString);
+          }
+        };
+
         return (
           <FormItem className="w-full">
             <FormLabel
@@ -54,13 +64,27 @@ export const FormDatePicker = <T extends FieldValues>({
             </FormLabel>
             <FormControl>
               <div className="space-y-2">
-                <CustomDatePicker
-                  className={cn(
-                    'h-12 max-h-12 w-full bg-neutral-light-100',
-                    showError && 'border-error-500 focus-visible:ring-error-100'
-                  )}
-                  onSelect={field.onChange}
-                />
+                {useDateTimePicker ? (
+                  <DateTimePicker
+                    value={field.value ? new Date(field.value) : undefined}
+                    onChange={handleDateChange}
+                    className={cn(
+                      'h-12 max-h-12 w-full bg-neutral-light-100',
+                      showError &&
+                        'border-error-500 focus-visible:ring-error-100'
+                    )}
+                    hideTime
+                  />
+                ) : (
+                  <CustomDatePicker
+                    className={cn(
+                      'h-12 max-h-12 w-full bg-neutral-light-100',
+                      showError &&
+                        'border-error-500 focus-visible:ring-error-100'
+                    )}
+                    onSelect={field.onChange}
+                  />
+                )}
               </div>
             </FormControl>
             {showError && (

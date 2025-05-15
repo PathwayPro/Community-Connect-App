@@ -16,7 +16,7 @@ export const HomeSidebar = ({ activeTab, setActiveTab }: HomeSidebarProps) => {
       <div className="relative">
         <IconInput
           leftIcon="search"
-          className="w-[250px] rounded-full bg-neutral-light-100"
+          className="h-10 w-[250px] rounded-full bg-neutral-light-100"
           placeholder="Search"
         />
       </div>

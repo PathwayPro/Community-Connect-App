@@ -12,13 +12,30 @@ import {
   Cell,
   Legend,
   ResponsiveContainer,
-  Label
+  Label,
+  LegendType
 } from 'recharts';
 
 interface PieChartData {
   name: string;
   value: number;
   color: string;
+}
+
+// Add this type for the Legend formatter entry
+interface PieChartLegendEntry {
+  value: string | number;
+  id?: string;
+  type?: LegendType;
+  color?: string;
+  payload?: {
+    strokeDasharray?: string | number;
+    value?: string | number;
+    name?: string;
+    percentage?: string;
+    color?: string;
+  };
+  dataKey?: string;
 }
 
 interface PieChartCardProps {
@@ -109,10 +126,11 @@ export const PieChartCard = ({
               verticalAlign="middle"
               iconSize={12}
               iconType="circle"
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               formatter={(value: string, entry: any) => (
                 <span className="text-sm">
                   {value}
-                  {showPercentage && ` (${entry.payload.percentage}%)`}
+                  {showPercentage && ` (${entry.payload?.percentage}%)`}
                 </span>
               )}
             />

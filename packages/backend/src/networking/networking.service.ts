@@ -9,10 +9,8 @@ import {
   CreateConnectedUsersDto,
   CreateMessagesDto,
 } from './dto/create-networking.dto';
-import { ConnectionRequest } from './entities/networking.entity';
 import { UpdateConnectionRequestsDto } from './dto/update-networking.dto';
 import { PrismaService } from 'src/database';
-import ChatList from './dto/ChatList.interface';
 import { FilterConnectionRequestsDto } from './dto/filter-networking.dto';
 import { Prisma } from '@prisma/client';
 

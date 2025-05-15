@@ -15,6 +15,12 @@ import {
 } from '@/features/user-profile/lib/utils';
 import { useSettingsStore } from '@/features/settings/store';
 import { useEffect } from 'react';
+import { Crown, UserCircle, UserCog } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/shared/components/ui/tooltip';
 
 interface StatItemProps {
   label: string;
@@ -90,7 +96,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
     fetchSkills();
   }, [isOwnProfile, userId, getSettingsById, fetchSkills]);
 
-  console.log('skills in view profile', skills);
+  console.log('displayedUser', displayedUser);
 
   // view profile data builder
   const profileDataBuilder = {
@@ -244,18 +250,47 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
         </div>
 
         {/* Avatar Card */}
-        {/* <Card className="space-y-6 p-6"> */}
         {/* Avatar and Name Section */}
         <div className="flex flex-col items-center space-y-4">
-          <div className="relative h-40 w-40 overflow-hidden rounded-full bg-warning-500">
-            <Image
-              src={profileDataBuilder.avatar}
-              alt="Profile-avatar"
-              width={160}
-              height={160}
-              priority
-              className="h-full w-full object-cover"
-            />
+          <div className="relative flex items-center gap-4">
+            <div className="h-40 w-40 overflow-hidden rounded-full bg-warning-500">
+              <Image
+                src={profileDataBuilder.avatar}
+                alt="Profile-avatar"
+                width={160}
+                height={160}
+                priority
+                className="h-full w-full object-cover"
+              />
+            </div>
+            {displayedUser?.role && (
+              <div className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary-200 shadow-md">
+                {displayedUser.role === 'ADMIN' && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Crown className="z-20 h-6 w-6 text-white" />
+                    </TooltipTrigger>
+                    <TooltipContent>Admin</TooltipContent>
+                  </Tooltip>
+                )}
+                {displayedUser.role === 'MENTOR' && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <UserCog className="z-20 h-6 w-6 text-white" />
+                    </TooltipTrigger>
+                    <TooltipContent>Mentor</TooltipContent>
+                  </Tooltip>
+                )}
+                {displayedUser.role === 'USER' && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <UserCircle className="z-20 h-6 w-6 text-white" />
+                    </TooltipTrigger>
+                    <TooltipContent>User</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+            )}
           </div>
           <h3 className="font-bold">{profileDataBuilder.name}</h3>
         </div>

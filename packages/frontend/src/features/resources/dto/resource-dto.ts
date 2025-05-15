@@ -1,6 +1,8 @@
 export interface CreateResourceDto {
   title: string;
-  link: string;
+  details: string;
+  type: string;
+  link?: string;
 }
 
 export interface FilterResourceDto {
@@ -13,6 +15,8 @@ export interface FilterResourceDto {
 
 export interface UpdateResourceDto {
   title?: string;
+  details?: string;
+  type?: string;
   link?: string;
 }
 

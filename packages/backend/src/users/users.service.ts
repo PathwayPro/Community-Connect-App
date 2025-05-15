@@ -370,15 +370,50 @@ export class UsersService {
     }
   }
 
+  async getUserProfessions(): Promise<string[]> {
+    // Get all users and extract their professions
+    const users = await this.prisma.users.findMany({
+      where: {
+        deleted_at: false,
+        profession: {
+          not: null,
+        },
+      },
+      select: {
+        profession: true,
+      },
+    });
+
+    // Extract professions and filter out any empty strings
+    const allProfessions = users
+      .map((user) => user.profession)
+      .filter((profession) => profession && profession.trim() !== '');
+
+    // Create a unique list using Set
+    const uniqueProfessions = [...new Set(allProfessions)];
+
+    // Sort alphabetically
+    return uniqueProfessions.sort();
+  }
+
   private mapToReadUserDto(user: any): ReadUserDto {
     const readUser = new ReadUserDto();
 
     // Determine user status with clearer logic
     let status: string;
+    const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+    const isInactive =
+      user.last_login &&
+      Date.now() - new Date(user.last_login).getTime() > ONE_WEEK_MS;
+
     if (user.deleted_at === true) {
       status = 'DELETED';
     } else if (user.email_verified === true) {
-      status = 'ACTIVE';
+      // Email verified users are active regardless of provider, but check last login
+      status = isInactive ? 'INACTIVE' : 'ACTIVE';
+    } else if (user.provider === 'google') {
+      // Google users are active by default but still check last login
+      status = isInactive ? 'INACTIVE' : 'ACTIVE';
     } else if (user.email_verified === false) {
       status = 'PENDING';
     } else {

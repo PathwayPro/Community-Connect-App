@@ -4,7 +4,7 @@ import { useFormContext } from 'react-hook-form';
 import { FormInput, FormSelect, FormTextarea } from '@/shared/components/form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
-import React from 'react';
+import React, { useState } from 'react';
 import { OpportunityFormValues } from '@/features/resources/lib/validation';
 import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
 import { Label } from '@/shared/components/ui/label';
@@ -26,15 +26,19 @@ const experienceOptions = [
 ];
 
 export const OpportunityForm = ({
-  salaryRanges
+  salaryRanges,
+  onFileUpload
 }: {
   salaryRanges: SalaryRangeResponseDto[];
+  onFileUpload: (files: File[]) => Promise<void>;
 }) => {
   const {
     setValue,
     watch,
     formState: { errors }
   } = useFormContext<OpportunityFormValues>();
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Ensure salary range options are properly formatted
   const formattedSalaryRanges =
@@ -45,10 +49,14 @@ export const OpportunityForm = ({
 
   const handleCompanyLogoUpload = async (files: File[]) => {
     try {
-      const formData = new FormData();
-      files.forEach((file) => formData.append('files', file));
-      toast.success('Company logo uploaded successfully');
-      // ... existing upload logic ...
+      if (files && files.length > 0) {
+        setSelectedFile(files[0]);
+        await onFileUpload(files);
+        toast.success('Company logo uploaded successfully');
+      } else {
+        setSelectedFile(null);
+        toast.error('No file selected');
+      }
     } catch (error) {
       console.error('Upload failed:', error);
       toast.error('Failed to upload company logo');

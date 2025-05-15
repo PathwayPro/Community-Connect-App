@@ -13,6 +13,8 @@ import { useResourcesStore } from '../../store';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { DeleteModal } from '../../../../shared/components/modal/delete-modal';
+import { resourceTypes } from '../../lib/constants/enums';
+import { useRole } from '@/features/user-profile/hooks/useRole';
 
 interface ResourceCardProps {
   id?: string;
@@ -43,6 +45,11 @@ export const ResourceCard = ({
   const router = useRouter();
   const { deleteResource } = useResourcesStore();
   const { showAlert } = useAlertDialog();
+  const { hasRole, hasPermission } = useRole();
+
+  // ADMIN can edit/delete all resources, other users can only edit/delete their own
+  const canEdit = hasRole('ADMIN') || hasPermission('edit:resource');
+  const canDelete = hasRole('ADMIN') || hasPermission('delete:resource');
 
   const ensureAbsoluteUrl = (url: string) => {
     if (!url) return '#';
@@ -94,6 +101,49 @@ export const ResourceCard = ({
     }
   };
 
+  const getResourceImage = () => {
+    const resourceType = resourceTypes.find((item) => item.value === type);
+    if (!resourceType) return '/resources/others.jpg';
+
+    switch (type) {
+      case 'RESUME':
+        return '/resources/resume.png';
+      case 'COVER_LETTER':
+        return '/resources/cover-letter.jpg';
+      case 'LINKEDIN':
+        return '/resources/linkedin.png';
+      case 'BUSINESS_CARD':
+        return '/resources/business-card.jpg';
+      case 'INVOICE':
+        return '/resources/invoice.png';
+      case 'PORTFOLIO':
+        return '/resources/others.jpg';
+      case 'EMAIL_SIGNATURE':
+        return '/resources/others.jpg';
+      case 'PERSONAL_BRANDING':
+        return '/resources/others.jpg';
+      case 'JOB_APPLICATION_TRACKER':
+        return '/resources/others.jpg';
+      case 'INTERVIEW_PREP':
+        return '/resources/others.jpg';
+      case 'NETWORKING_TIPS':
+        return '/resources/others.jpg';
+      case 'CAREER_PLANNING':
+        return '/resources/others.jpg';
+      case 'SALARY_NEGOTIATION':
+        return '/resources/others.jpg';
+      case 'BANNER':
+        return '/resources/others.jpg';
+      default:
+        return '/resources/others.jpg';
+    }
+  };
+
+  const getResourceTypeLabel = () => {
+    const resourceType = resourceTypes.find((item) => item.value === type);
+    return resourceType ? resourceType.label : type;
+  };
+
   return (
     <Card className="w-full overflow-hidden">
       <AlertDialogUI />
@@ -107,27 +157,33 @@ export const ResourceCard = ({
       />
       <div className="relative flex flex-col">
         {/* Action Buttons */}
-        <div className="absolute right-4 top-4 z-20 flex gap-3">
-          <div
-            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary"
-            onClick={handleEdit}
-          >
-            <PenBox className="h-4 w-4 text-white" />
+        {(canEdit || canDelete) && (
+          <div className="absolute right-4 top-4 z-20 flex gap-3">
+            {canEdit && (
+              <div
+                className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary"
+                onClick={handleEdit}
+              >
+                <PenBox className="h-4 w-4 text-white" />
+              </div>
+            )}
+            {canDelete && (
+              <div
+                className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive"
+                onClick={handleDelete}
+              >
+                <Trash2
+                  className={`h-4 w-4 text-white ${isDeleting ? 'animate-spin' : ''}`}
+                />
+              </div>
+            )}
           </div>
-          <div
-            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive"
-            onClick={handleDelete}
-          >
-            <Trash2
-              className={`h-4 w-4 text-white ${isDeleting ? 'animate-spin' : ''}`}
-            />
-          </div>
-        </div>
+        )}
 
         {/* Image */}
         <div className="relative h-[320px] w-full">
           <Image
-            src={'/event/placeholder-2.jpg'}
+            src={getResourceImage()}
             alt={title}
             className="object-cover"
             fill
@@ -147,7 +203,7 @@ export const ResourceCard = ({
           {/* Keywords */}
           <div className="flex flex-wrap gap-2">
             <Badge key={type} variant="secondary">
-              {type}
+              {getResourceTypeLabel()}
             </Badge>
           </div>
 
@@ -162,26 +218,26 @@ export const ResourceCard = ({
             </span>
           </div>
 
-          {/* Action Button */}
+          {/* Action Buttons */}
           <div className="flex flex-col gap-2">
             <IconButton
               label="Preview Resource"
-              //   rightIcon="arrowRight"
               leftIcon="eye"
               iconClassName="text-white"
               className="w-full"
               onClick={() => setIsOpen(true)}
             />
-            <IconButton
-              label="Get Resource"
-              //   rightIcon="arrowRight"
-              leftIcon="squareArrowTopRight"
-              iconClassName="text-white"
-              className="w-full"
-              onClick={() => {
-                window.open(ensureAbsoluteUrl(link || ''), '_blank');
-              }}
-            />
+            {link && (
+              <IconButton
+                label="View Resource"
+                leftIcon="squareArrowTopRight"
+                iconClassName="text-white"
+                className="w-full"
+                onClick={() => {
+                  window.open(ensureAbsoluteUrl(link), '_blank');
+                }}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -189,11 +245,11 @@ export const ResourceCard = ({
       <ResourcePreviewCard
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        image={'/event/placeholder-2.jpg'}
+        image={getResourceImage()}
         title={title}
         details={details || ''}
         link={link || ''}
-        type={type}
+        type={getResourceTypeLabel()}
       />
     </Card>
   );

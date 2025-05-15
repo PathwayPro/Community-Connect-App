@@ -15,8 +15,8 @@ export const ResourceForm = () => {
     <div className="flex w-full flex-col gap-4">
       <FormSelect
         name="type"
-        label="Template Type"
-        placeholder="Select template type"
+        label="Resource Type"
+        placeholder="Select resource type"
         options={resourceTypes}
         required
       />
@@ -24,8 +24,8 @@ export const ResourceForm = () => {
       <div className="flex w-full gap-4">
         <FormInput
           name="title"
-          label="Template Title"
-          placeholder="Enter template title"
+          label="Resource Title"
+          placeholder="Enter resource title"
           customError="Title is required"
           required
         />
@@ -33,8 +33,8 @@ export const ResourceForm = () => {
 
       <FormTextarea
         name="details"
-        label="Template Details"
-        placeholder="Write template details..."
+        label="Resource Details"
+        placeholder="Write resource details..."
         customError="Details are required"
         maxLength={400}
         required

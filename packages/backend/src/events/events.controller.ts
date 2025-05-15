@@ -212,7 +212,7 @@ export class EventsController {
           ? updateEventDto.is_free === 'true'
           : updateEventDto.is_free,
       start_date: updateEventDto.start_date,
-      end_date: updateEventDto.end_date,
+      // end_date: updateEventDto.end_date,
       type: updateEventDto.type,
       requires_confirmation:
         typeof updateEventDto.requires_confirmation === 'string'
