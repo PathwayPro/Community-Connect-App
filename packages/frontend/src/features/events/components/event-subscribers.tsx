@@ -5,82 +5,36 @@ import { Card } from '@/shared/components/ui/card';
 import { ArrowLeft, UserIcon, UsersIcon } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { SubscriberCard } from './common/subcriber-card';
 import { Input } from '@/shared/components/ui/input';
 import { Skeleton } from '@/shared/components/ui/skeleton';
 import { EmptyStateCard } from '@/shared/components/empty-state/empty-state-card';
-
-interface Subscriber {
-  id: number;
-  firstName: string;
-  lastName: string;
-  profession: string;
-  avatar?: string;
-}
+import { useEventStore } from '../store';
+import { SubscriberCard } from './common/subscriber-card';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@/shared/components/ui/tabs';
+import { EventSubscription, EventSubscriptionStatus } from '../types';
 
 export const EventSubscribers = ({ eventId }: { eventId: string }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const eventTitle = searchParams.get('title');
 
-  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
-  const [filteredSubscribers, setFilteredSubscribers] = useState<Subscriber[]>(
-    []
-  );
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>('all');
+  const { eventSubscriptions, fetchEventSubscriptions } = useEventStore();
 
   useEffect(() => {
-    // In a real application, fetch subscribers from API
-    // This is mock data for demonstration
     const fetchSubscribers = async () => {
       try {
         setIsLoading(true);
-        // Mock API call
-        // const response = await fetch(`/api/events/${eventId}/subscribers`);
-        // const data = await response.json();
-
-        // Mock data
-        const mockSubscribers: Subscriber[] = [
-          {
-            id: 1,
-            firstName: 'John',
-            lastName: 'Doe',
-            profession: 'Software Engineer',
-            avatar: '/profile/profile.png'
-          },
-          {
-            id: 2,
-            firstName: 'Jane',
-            lastName: 'Smith',
-            profession: 'Product Manager',
-            avatar: '/profile/profile.png'
-          },
-          {
-            id: 3,
-            firstName: 'Michael',
-            lastName: 'Brown',
-            profession: 'UI/UX Designer',
-            avatar: '/profile/profile.png'
-          },
-          {
-            id: 4,
-            firstName: 'Sarah',
-            lastName: 'Johnson',
-            profession: 'Data Scientist',
-            avatar: '/profile/profile.png'
-          },
-          {
-            id: 5,
-            firstName: 'David',
-            lastName: 'Wilson',
-            profession: 'Marketing Specialist',
-            avatar: '/profile/profile.png'
-          }
-        ];
-
-        setSubscribers(mockSubscribers);
-        setFilteredSubscribers(mockSubscribers);
+        await fetchEventSubscriptions({
+          event_id: Number(eventId)
+        });
       } catch (error) {
         console.error('Error fetching subscribers:', error);
       } finally {
@@ -91,25 +45,43 @@ export const EventSubscribers = ({ eventId }: { eventId: string }) => {
     if (eventId) {
       fetchSubscribers();
     }
-  }, [eventId]);
+  }, [eventId, fetchEventSubscriptions]);
 
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredSubscribers(subscribers);
-      return;
-    }
+  const handleRefreshSubscribers = async () => {
+    setIsLoading(true);
+    await fetchEventSubscriptions({
+      event_id: Number(eventId)
+    });
+    setIsLoading(false);
+  };
 
-    const filtered = subscribers.filter(
-      (subscriber) =>
-        subscriber.firstName
+  const filteredSubscribers = eventSubscriptions.filter((subscriber) => {
+    // First filter by search query
+    if (searchQuery.trim() !== '') {
+      const matchesSearch =
+        subscriber.user.first_name
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        subscriber.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        subscriber.profession.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+        subscriber.user.last_name
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        subscriber.user.profession
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase());
 
-    setFilteredSubscribers(filtered);
-  }, [searchQuery, subscribers]);
+      if (!matchesSearch) return false;
+    }
+
+    // Then filter by status based on active tab
+    if (activeTab === 'approved') {
+      return subscriber.status === EventSubscriptionStatus.APPROVED;
+    } else if (activeTab === 'rejected') {
+      return subscriber.status === EventSubscriptionStatus.REJECTED;
+    }
+
+    // "all" tab shows everyone
+    return true;
+  });
 
   return (
     <div className="container mx-auto max-w-4xl space-y-6 rounded-[24px] bg-white px-6 py-6 shadow-md">
@@ -134,11 +106,11 @@ export const EventSubscribers = ({ eventId }: { eventId: string }) => {
           </h1>
         </div>
         <p className="mt-2 text-muted-foreground">
-          {filteredSubscribers.length} people registered for this event
+          {eventSubscriptions.length} people registered for this event
         </p>
       </Card>
 
-      {/* Search */}
+      {/* Search and Tabs */}
       <Card className="p-6">
         <Input
           placeholder="Search subscribers by name or profession..."
@@ -147,42 +119,77 @@ export const EventSubscribers = ({ eventId }: { eventId: string }) => {
           className="mb-4"
         />
 
-        {/* Subscribers List */}
-        <div className="space-y-4">
-          {isLoading ? (
-            // Loading skeletons
-            Array.from({ length: 3 }).map((_, index) => (
-              <Card key={index} className="p-4">
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-16 w-16 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-40" />
-                    <Skeleton className="h-3 w-24" />
-                  </div>
-                  <Skeleton className="ml-auto h-9 w-28" />
-                </div>
-              </Card>
-            ))
-          ) : filteredSubscribers.length > 0 ? (
-            filteredSubscribers.map((subscriber) => (
-              <SubscriberCard
-                key={subscriber.id}
-                id={subscriber.id}
-                firstName={subscriber.firstName}
-                lastName={subscriber.lastName}
-                profession={subscriber.profession}
-                avatar={subscriber.avatar}
-              />
-            ))
-          ) : (
-            <EmptyStateCard
-              title="No subscribers found"
-              description="Try a different search query or check back later."
-              icon={UserIcon}
-            />
-          )}
-        </div>
+        <Tabs defaultValue="all" onValueChange={setActiveTab} className="mb-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="all">All Subscribers</TabsTrigger>
+            <TabsTrigger value="approved">Approved</TabsTrigger>
+            <TabsTrigger value="rejected">Rejected</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all" className="mt-4 space-y-4">
+            {renderSubscribersList(filteredSubscribers, 'all')}
+          </TabsContent>
+
+          <TabsContent value="approved" className="mt-4 space-y-4">
+            {renderSubscribersList(filteredSubscribers, 'approved')}
+          </TabsContent>
+
+          <TabsContent value="rejected" className="mt-4 space-y-4">
+            {renderSubscribersList(filteredSubscribers, 'rejected')}
+          </TabsContent>
+        </Tabs>
       </Card>
     </div>
   );
+
+  function renderSubscribersList(
+    subscribers: EventSubscription[],
+    tabType: string
+  ) {
+    if (isLoading) {
+      return Array.from({ length: 3 }).map((_, index) => (
+        <Card key={index} className="p-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+            <Skeleton className="ml-auto h-9 w-28" />
+          </div>
+        </Card>
+      ));
+    }
+
+    if (subscribers.length === 0) {
+      return (
+        <EmptyStateCard
+          title="No subscribers found"
+          description={
+            tabType === 'all'
+              ? 'Try a different search query or check back later.'
+              : tabType === 'approved'
+                ? 'No approved subscribers yet.'
+                : 'No rejected subscribers yet.'
+          }
+          icon={UserIcon}
+        />
+      );
+    }
+
+    return subscribers.map((subscriber) => (
+      <SubscriberCard
+        key={subscriber.user.id}
+        id={subscriber.user.id}
+        subscriptionId={subscriber.id}
+        firstName={subscriber.user.first_name}
+        lastName={subscriber.user.last_name}
+        profession={subscriber.user.profession || ''}
+        avatar={subscriber.user.picture_upload_link}
+        status={subscriber.status}
+        tabType={tabType}
+        onRefresh={handleRefreshSubscribers}
+      />
+    ));
+  }
 };

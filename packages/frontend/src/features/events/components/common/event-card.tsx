@@ -141,7 +141,7 @@ export const EventCard = ({
 
         <div className="flex flex-col gap-3 p-4">
           <div className="flex items-start justify-between gap-2">
-            <h2 className="font-semibold">{title}</h2>
+            <h2 className="line-clamp-1 font-semibold">{title}</h2>
             <div className="flex items-center justify-center rounded-full bg-primary-300 p-3">
               <div className="flex items-center gap-2">
                 {!is_free && <DollarSign className="h-5 w-5 text-secondary" />}

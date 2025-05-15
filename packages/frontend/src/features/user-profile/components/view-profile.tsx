@@ -268,7 +268,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
                 {displayedUser.role === 'ADMIN' && (
                   <Tooltip>
                     <TooltipTrigger>
-                      <Crown className="h-6 w-6 text-white" />
+                      <Crown className="z-20 h-6 w-6 text-white" />
                     </TooltipTrigger>
                     <TooltipContent>Admin</TooltipContent>
                   </Tooltip>
@@ -276,7 +276,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
                 {displayedUser.role === 'MENTOR' && (
                   <Tooltip>
                     <TooltipTrigger>
-                      <UserCog className="h-6 w-6 text-white" />
+                      <UserCog className="z-20 h-6 w-6 text-white" />
                     </TooltipTrigger>
                     <TooltipContent>Mentor</TooltipContent>
                   </Tooltip>

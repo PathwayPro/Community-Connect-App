@@ -64,6 +64,9 @@ export const MainNav = () => {
                   <p className="text-xs leading-none text-muted-foreground">
                     {user?.email}
                   </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user?.role}
+                  </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />

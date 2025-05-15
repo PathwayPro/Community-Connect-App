@@ -1,6 +1,16 @@
 import { apiMethods } from '@/shared/api';
-import { Event, EventCategory, EventResponse } from '../types';
-import { CreateEventDto, UpdateEventDto, EventFormData } from '../dto';
+import {
+  Event,
+  EventCategory,
+  EventResponse,
+  EventSubscription
+} from '../types';
+import {
+  UpdateEventDto,
+  EventFormData,
+  UpdateEventSubscriptionDto,
+  FilterEventsSubscriptionDto
+} from '../dto';
 
 export const eventApi = {
   createEvent: (formData: EventFormData) =>
@@ -25,5 +35,32 @@ export const eventApi = {
     apiMethods.put<EventResponse<Event>>(`/events/${id}`, data),
 
   deleteEvent: (id: number) =>
-    apiMethods.delete<EventResponse<Event>>(`/events/${id}`)
+    apiMethods.delete<EventResponse<Event>>(`/events/${id}`),
+
+  // Event Subscriptions
+  createEventSubscription: (eventId: number) =>
+    apiMethods.post<EventResponse<EventSubscription>>(`/events-subscriptions`, {
+      event_id: eventId
+    }),
+
+  updateEventSubscription: (id: number, data: UpdateEventSubscriptionDto) =>
+    apiMethods.put<EventResponse<EventSubscription>>(
+      `/events-subscriptions/${id}`,
+      data
+    ),
+
+  getEventSubscriptions: (filters: Partial<FilterEventsSubscriptionDto>) => {
+    // Convert numeric string IDs to numbers if they exist
+    const processedFilters: Record<string, string> = {
+      ...(filters.event_id && { event_id: String(filters.event_id) }),
+      ...(filters.user_id && { user_id: String(filters.user_id) }),
+      ...(filters.status && { status: String(filters.status) }),
+      ...(filters.date_from && { date_from: String(filters.date_from) }),
+      ...(filters.date_to && { date_to: String(filters.date_to) })
+    };
+
+    return apiMethods.get<EventResponse<EventSubscription>>(
+      `/events-subscriptions?${new URLSearchParams(processedFilters).toString()}`
+    );
+  }
 };

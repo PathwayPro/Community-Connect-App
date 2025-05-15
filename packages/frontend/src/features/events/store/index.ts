@@ -1,17 +1,30 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { eventApi } from '../api/event-api';
-import { Event, EventCategory } from '../types';
-import { EventFormData } from '../dto';
+import { Event, EventCategory, EventSubscription } from '../types';
+import {
+  EventFormData,
+  FilterEventsSubscriptionDto,
+  UpdateEventSubscriptionDto
+} from '../dto';
 
 interface EventState {
   events: Event[];
   eventCategories: EventCategory[];
   event: Event | null;
   isLoading: boolean;
+  eventSubscriptions: EventSubscription[];
   error: string | null;
   createEvent: (formData: EventFormData) => Promise<Event>;
+  createEventSubscription: (eventId: number) => Promise<EventSubscription>;
   fetchEvents: () => Promise<void>;
+  fetchEventSubscriptions: (
+    filters: FilterEventsSubscriptionDto
+  ) => Promise<void>;
+  updateEventSubscription: (
+    id: number,
+    data: UpdateEventSubscriptionDto
+  ) => Promise<EventSubscription>;
   editEvent: (id: number, formData: EventFormData) => Promise<Event>;
   fetchEvent: (id: number) => Promise<void>;
   fetchEventCategories: () => Promise<void>;
@@ -25,6 +38,7 @@ export const useEventStore = create<EventState>()(
     eventCategories: [],
     event: null,
     isLoading: false,
+    eventSubscriptions: [],
     error: null,
     createEvent: async (formData: EventFormData) => {
       try {
@@ -134,6 +148,84 @@ export const useEventStore = create<EventState>()(
       } catch (error) {
         set({ error: (error as Error).message, isLoading: false });
         throw error;
+      }
+    },
+
+    createEventSubscription: async (eventId: number) => {
+      try {
+        set({ isLoading: true, error: null });
+        const response = await eventApi.createEventSubscription(eventId);
+
+        if (!response.success) {
+          throw new Error('Failed to create event subscription');
+        }
+
+        const newEventSubscription =
+          response.data as unknown as EventSubscription;
+
+        console.log(
+          'newEventSubscription response data: ',
+          newEventSubscription
+        );
+
+        set((state) => ({
+          eventSubscriptions: [
+            ...(state.eventSubscriptions || []),
+            newEventSubscription
+          ],
+          isLoading: false
+        }));
+        return newEventSubscription;
+      } catch (error) {
+        set({ error: (error as Error).message, isLoading: false });
+        throw error;
+      }
+    },
+
+    updateEventSubscription: async (
+      id: number,
+      data: UpdateEventSubscriptionDto
+    ) => {
+      try {
+        set({ isLoading: true, error: null });
+        const response = await eventApi.updateEventSubscription(id, data);
+
+        if (!response.success) {
+          throw new Error('Failed to update event subscription');
+        }
+
+        const updated = response.data as unknown as EventSubscription;
+        set((state) => ({
+          eventSubscriptions: state.eventSubscriptions.map((sub) =>
+            sub.id === id ? { ...sub, ...updated } : sub
+          ),
+          isLoading: false
+        }));
+        return updated;
+      } catch (error) {
+        set({ error: (error as Error).message, isLoading: false });
+        throw error;
+      }
+    },
+
+    fetchEventSubscriptions: async (filters: FilterEventsSubscriptionDto) => {
+      try {
+        set({ isLoading: true, error: null });
+        const response = await eventApi.getEventSubscriptions(filters);
+
+        if (!response.success) {
+          throw new Error('Failed to fetch event subscriptions');
+        }
+
+        const eventSubscriptions = response.data;
+
+        set({
+          eventSubscriptions:
+            eventSubscriptions as unknown as EventSubscription[],
+          isLoading: false
+        });
+      } catch (error) {
+        set({ error: (error as Error).message, isLoading: false });
       }
     },
 

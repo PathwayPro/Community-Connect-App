@@ -1,4 +1,4 @@
-import { EventType } from '../types';
+import { EventSubscriptionStatus, EventType } from '../types';
 
 // CreateEventDto
 export interface CreateEventDto {
@@ -39,12 +39,24 @@ export interface UpdateEventDto {
   end_time?: string;
 }
 
-// API Response Types
+export interface UpdateEventSubscriptionDto {
+  new_status: EventSubscriptionStatus;
+  message?: string;
+}
+
+export interface FilterEventsSubscriptionDto {
+  event_id?: number;
+  user_id?: number;
+  status?: EventSubscriptionStatus;
+  date_from?: Date;
+  date_to?: Date;
+}
+
+// FormData Types
+export type EventFormData = FormData;
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
   message?: string;
 }
-
-// FormData Types
-export type EventFormData = FormData;

@@ -2,11 +2,7 @@ import { FormInput, FormSelect } from '@/shared/components/form';
 import React, { useEffect } from 'react';
 import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
 import { useFormContext } from 'react-hook-form';
-import {
-  EventFormValues,
-  EventsTypes,
-  trueFalseOptions
-} from '../../lib/validation';
+import { EventFormValues, EventsTypes } from '../../lib/validation';
 import { FormDatePicker } from '@/shared/components/form/form-date-picker';
 import { timeOptions } from '../../lib/constants';
 
@@ -159,7 +155,7 @@ export const TimeLocationForm = () => {
         />
       </div>
 
-      <div className="flex w-full justify-start gap-4 pt-4">
+      {/* <div className="flex w-full justify-start gap-4 pt-4">
         <CustomSwitch
           name="requires_confirmation"
           label="Requires Confirmation"
@@ -170,9 +166,9 @@ export const TimeLocationForm = () => {
           }
           required
         />
-      </div>
+      </div> */}
 
-      <div className="flex w-full justify-start gap-4 pt-4">
+      {/* <div className="flex w-full justify-start gap-4 pt-4">
         <CustomSwitch
           name="accept_subscriptions"
           label="Accept Subscriptions"
@@ -183,7 +179,7 @@ export const TimeLocationForm = () => {
           }
           required
         />
-      </div>
+      </div> */}
 
       <div className="flex w-full gap-4">
         <FormInput

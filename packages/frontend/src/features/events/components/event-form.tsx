@@ -17,24 +17,22 @@ import {
   EventsTypes
 } from '../lib/validation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { useEventStore } from '../store';
 import { TimeLocationForm } from './common/time-location-form';
-import { EventType } from '../types';
 import { UpdateEventDto } from '../dto';
-import { year } from '../lib/constants';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 
-function getStepContent(step: number) {
-  switch (step) {
-    case 1:
-      return <BaseForm />;
-    case 2:
-      return <TimeLocationForm />;
-    default:
-      return 'Unknown step';
-  }
-}
+// function getStepContent(step: number) {
+//   switch (step) {
+//     case 1:
+//       return <BaseForm />;
+//     case 2:
+//       return <TimeLocationForm />;
+//     default:
+//       return 'Unknown step';
+//   }
+// }
 
 // Move checkStepValidity outside the component to prevent recreation on each render
 const checkStepValidity = (
@@ -64,14 +62,7 @@ const checkStepValidity = (
 
     return hasValues && !hasErrors;
   } else if (activeStep === 2) {
-    const step2Fields = [
-      'start_date',
-      'start_time',
-      'end_time',
-      'type',
-      'requires_confirmation',
-      'accept_subscriptions'
-    ];
+    const step2Fields = ['start_date', 'start_time', 'end_time', 'type'];
 
     // Check if required fields for step 2 are valid
     const hasErrors = step2Fields.some(
@@ -118,8 +109,8 @@ export const EventForm = () => {
     link: eventData?.link || '',
     is_free: eventData?.is_free ?? true,
     type: eventData?.type || EventsTypes.PUBLIC,
-    requires_confirmation: eventData?.requires_confirmation ?? false,
-    accept_subscriptions: eventData?.accept_subscriptions ?? true,
+    requires_confirmation: false,
+    accept_subscriptions: true,
     start_date: eventData?.start_date || '',
     start_time: eventData?.start_time || '',
     end_time: eventData?.end_time || '',
@@ -178,14 +169,8 @@ export const EventForm = () => {
 
       // Handle boolean fields
       formData.append('is_free', String(data.is_free));
-      formData.append(
-        'requires_confirmation',
-        String(data.requires_confirmation)
-      );
-      formData.append(
-        'accept_subscriptions',
-        String(data.accept_subscriptions)
-      );
+      formData.append('requires_confirmation', String(false));
+      formData.append('accept_subscriptions', String(true));
 
       // Append all other form fields
       Object.entries(data).forEach(([key, value]) => {

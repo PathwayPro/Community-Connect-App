@@ -82,6 +82,14 @@ export interface EventManager {
   isSpeaker: boolean;
 }
 
+export interface UserInEventSubscription {
+  id: number;
+  first_name: string;
+  last_name: string;
+  profession: string;
+  picture_upload_link: string;
+}
+
 export interface EventSubscription {
   id: number;
   userId: number;
@@ -89,6 +97,9 @@ export interface EventSubscription {
   status: EventSubscriptionStatus;
   createdAt: Date;
   updatedAt: Date;
+  user: UserInEventSubscription;
+  event: Event;
+  updates: string[];
 }
 
 export interface EventSubscriptionUpdate {
@@ -114,4 +125,8 @@ export interface EventResponse<T> {
   success: boolean;
   message?: string;
   data: T;
+}
+
+export interface EventSubscriptions {
+  event_id: number;
 }

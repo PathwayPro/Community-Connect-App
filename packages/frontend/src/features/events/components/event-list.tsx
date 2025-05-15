@@ -21,18 +21,43 @@ import { useUserStore } from '@/features/user-profile/store';
 
 export const EventList = () => {
   const router = useRouter();
-  const { events, fetchEvents, isLoading } = useEventStore();
+  const {
+    events,
+    fetchEvents,
+    isLoading: eventsLoading,
+    eventSubscriptions,
+    fetchEventSubscriptions
+  } = useEventStore();
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const eventsPerPage = 5;
   const { hasPermission } = useRole();
-  const { isLoading: isUserLoading } = useUserStore();
+  const { user, isLoading: isUserLoading } = useUserStore();
 
   // Check if user can create events (only admin and mentors)
   const canCreateEvent = !isUserLoading && hasPermission('create:event');
 
   useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+    if (!user?.id) return;
+
+    setIsLoading(true);
+    const fetchSubscribers = async () => {
+      try {
+        await fetchEvents();
+        await fetchEventSubscriptions({
+          user_id: Number(user?.id)
+        });
+      } catch (error) {
+        console.error('Error fetching subscribers:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSubscribers();
+  }, [fetchEvents, fetchEventSubscriptions, user?.id]);
+
+  console.log('eventSubscriptions', eventSubscriptions);
 
   // Pagination helpers
   const getPageEvents = (eventsList: Event[]) => {
@@ -50,10 +75,33 @@ export const EventList = () => {
     (a, b) =>
       new Date(b.start_date).getTime() - new Date(a.start_date).getTime()
   );
-  const upcomingEvents = getPageEvents(sortedEvents.slice(0, 1));
-  const thisMonthEvents = getPageEvents(sortedEvents.slice(1, 4));
-  const thisYearEvents = getPageEvents(sortedEvents.slice(4, 7));
+
+  // Get current date for upcoming events filtering
+  const currentDate = new Date();
+
+  // Filter for upcoming events (events that haven't happened yet)
+  const upcomingEventsList = sortedEvents.filter(
+    (event) => new Date(event.start_date) >= currentDate
+  );
+
+  // Filter for user's events (events they created or are participating in)
+  const myEventsList = user?.id
+    ? [
+        ...sortedEvents.filter((event) => event.host_id === user.id),
+        ...sortedEvents.filter((event) =>
+          eventSubscriptions.some(
+            (subscription) =>
+              subscription.user.id === user.id &&
+              subscription.event.id === event.id
+          )
+        )
+      ]
+    : [];
+
+  // Get paginated event lists for each tab
   const allEvents = getPageEvents(sortedEvents);
+  const upcomingEvents = getPageEvents(upcomingEventsList);
+  const myEvents = getPageEvents(myEventsList);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -61,7 +109,7 @@ export const EventList = () => {
 
   console.log('events', events);
 
-  if (isLoading) {
+  if (isLoading || eventsLoading) {
     return (
       <div className="container space-y-6">
         <div className="flex items-center justify-between">
@@ -135,17 +183,16 @@ export const EventList = () => {
   return (
     <div className="container space-y-6">
       <div className="flex items-center justify-between">
-        <Tabs defaultValue="upcoming" className="w-full">
+        <Tabs defaultValue="all" className="w-full">
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center justify-start gap-4">
               <span className="text-sm text-neutral-dark-300">
                 Sort Events By:
               </span>
               <TabsList>
-                <TabsTrigger value="upcoming">Upcoming Events</TabsTrigger>
-                <TabsTrigger value="this-month">Later this month</TabsTrigger>
-                <TabsTrigger value="this-year">Later this year</TabsTrigger>
                 <TabsTrigger value="all">All Events</TabsTrigger>
+                <TabsTrigger value="upcoming">Upcoming Events</TabsTrigger>
+                <TabsTrigger value="my-events">My Events</TabsTrigger>
               </TabsList>
             </div>
             {canCreateEvent && (
@@ -159,7 +206,7 @@ export const EventList = () => {
           </div>
 
           <TabsContent
-            value="upcoming"
+            value="all"
             className="flex h-full w-full flex-col gap-6"
           >
             {events.length === 0 ? (
@@ -175,23 +222,16 @@ export const EventList = () => {
                 />
               </div>
             ) : (
-              renderEventsList(upcomingEvents, events)
+              renderEventsList(allEvents, sortedEvents)
             )}
           </TabsContent>
 
-          <TabsContent
-            value="this-month"
-            className="flex w-full flex-col gap-6"
-          >
-            {renderEventsList(thisMonthEvents, events)}
+          <TabsContent value="upcoming" className="flex w-full flex-col gap-6">
+            {renderEventsList(upcomingEvents, upcomingEventsList)}
           </TabsContent>
 
-          <TabsContent value="this-year" className="flex w-full flex-col gap-6">
-            {renderEventsList(thisYearEvents, events)}
-          </TabsContent>
-
-          <TabsContent value="all" className="flex w-full flex-col gap-6">
-            {renderEventsList(allEvents, events)}
+          <TabsContent value="my-events" className="flex w-full flex-col gap-6">
+            {renderEventsList(myEvents, myEventsList)}
           </TabsContent>
         </Tabs>
       </div>
