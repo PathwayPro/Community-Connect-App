@@ -354,6 +354,8 @@ export class BlogController {
       user_id: filters.user_id ? +filters.user_id : null,
       date_from: filters.date_from ? new Date(filters.date_from) : null,
       date_to: filterDateTo ? new Date(filterDateTo.toISOString()) : null,
+      filter: filters.filter,
+      order_by: filters.order_by,
     };
     return this.blogService.findAllPosts(searchFilters, user?.sub);
   }

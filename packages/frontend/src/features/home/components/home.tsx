@@ -13,7 +13,7 @@ import {
   TagComponent
 } from './main-card';
 import { useBlogStore } from '../store';
-import { ThreadResponse, PostCommentResponse } from '../types';
+import { ThreadResponse, PostCommentResponse, NavItemProps } from '../types';
 
 const transformThreadResponseToThread = (response: ThreadResponse): Thread => ({
   id: response.id,
@@ -36,6 +36,7 @@ export const Home = () => {
   const [isCreatingThread, setIsCreatingThread] = useState(false);
   const [draftContent, setDraftContent] = useState('');
   const [activeTab, setActiveTab] = useState<string>('Threads');
+  const [activeFilterTab, setActiveFilterTab] = useState<string>('THREADS');
   const [viewThreads, setViewThreads] = useState<boolean>(false);
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
   const [showCommentSection, setShowCommentSection] = useState(false);
@@ -51,7 +52,8 @@ export const Home = () => {
   const threads: Thread[] = rawThreads.map(transformThreadResponseToThread); // Transform the API response
 
   useEffect(() => {
-    fetchThreads();
+    console.log('FETCHEA THREADS DESDE USE EFFECT...', activeFilterTab);
+    fetchThreads({ filter: activeFilterTab });
   }, [activeTab, sort, selectedTags, fetchThreads]); // Include fetchThreads in the dependency array
 
   const handleThreadSubmit = async (content: string, attachments: File[]) => {
@@ -78,30 +80,21 @@ export const Home = () => {
   };
 
   const filteredThreads = threads.filter((thread) => {
-    if (activeTab === 'Tags') {
-      if (selectedTags.length === 0) return true;
-      return thread?.tags?.some((tag: string) => selectedTags.includes(tag)); // Adjust if your API returns tags differently
-    } else if (activeTab === 'Saved') {
-      return thread.isSaved; // Adjust if your API returns saved status
-    }
+    console.log('SALE ESE FILTRO... SIN API???');
+    // if (activeTab === 'Tags') {
+    //   if (selectedTags.length === 0) return true;
+    //   return thread?.tags?.some((tag: string) => selectedTags.includes(tag)); // Adjust if your API returns tags differently
+    // } else if (activeTab === 'Saved') {
+    //   return thread.isSaved; // Adjust if your API returns saved status
+    // }
     return true;
   });
 
-  // console.log('| - - - - - - - > FILTERED THREADS 2: ', filteredThreads2)
-
-  // ORIGINAL CJ
-  // const filteredThreads = mockThreads.filter((thread) => {
-  //   if (activeTab === 'Tags') {
-  //     // Filter by selected tags
-  //     if (selectedTags.length === 0) return true;
-  //     return thread?.tags?.some((tag: string) => selectedTags.includes(tag));
-  //   } else if (activeTab === 'Saved') {
-  //     // Filter saved threads
-  //     return thread.isSaved;
-  //   }
-  //   // Show all threads for other tabs
-  //   return true;
-  // });
+  const handleActiveTab = (tab: NavItemProps) => {
+    console.log('HANDLE ACTIVE TABS: ', tab);
+    setActiveFilterTab(tab.filter || 'THREADS');
+    setActiveTab(tab.label);
+  };
 
   console.log('| - - - - - - - > FILTERED THREADS 1: ', filteredThreads);
 
@@ -110,7 +103,10 @@ export const Home = () => {
       <div className="grid grid-cols-12 gap-8">
         {/* Left column - 1 part */}
         <div className="sticky top-0 col-span-3 h-fit rounded-2xl border bg-card p-4">
-          <HomeSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+          <HomeSidebar
+            activeTab={activeTab}
+            handleActiveTab={handleActiveTab}
+          />
         </div>
 
         {/* Middle column */}

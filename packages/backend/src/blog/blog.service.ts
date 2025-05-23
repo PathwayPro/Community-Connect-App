@@ -22,7 +22,10 @@ export class BlogService {
     private filesService: FilesService,
   ) {}
 
-  getPostFormattedFilters(filters: FilterPostsDto): Prisma.PostsWhereInput {
+  getPostFormattedFilters(
+    filters: FilterPostsDto,
+    user_id?: number,
+  ): Prisma.PostsWhereInput {
     const formattedFilters: Prisma.PostsWhereInput = {};
 
     if (filters?.message) {
@@ -31,12 +34,15 @@ export class BlogService {
         mode: 'insensitive',
       };
     }
+
     if (filters?.user_id) {
       formattedFilters.user_id = filters.user_id;
     }
+
     if (typeof filters?.published === 'boolean') {
       formattedFilters.published = filters.published;
     }
+
     if (filters?.date_from && filters?.date_to) {
       formattedFilters.updated_at = {
         gte: filters.date_from,
@@ -46,6 +52,22 @@ export class BlogService {
       formattedFilters.updated_at = { gte: filters.date_from };
     } else if (filters?.date_to) {
       formattedFilters.updated_at = { lte: filters.date_to };
+    }
+
+    if (filters?.filter) {
+      // SAVED | MY_THREADS | MY_MESSAGES | MY_LIKES
+      if (filters?.filter === 'MY_THREADS') {
+        formattedFilters.user_id = user_id;
+      }
+      if (filters?.filter === 'MY_LIKES') {
+        formattedFilters.likes = { some: { user_id: user_id } };
+      }
+      if (filters?.filter === 'SAVED') {
+        formattedFilters.saves = { some: { user_id: user_id } };
+      }
+      if (filters?.filter === 'MY_MESSAGES') {
+        formattedFilters.comments = { some: { user_id: user_id } };
+      }
     }
 
     return formattedFilters;
@@ -678,7 +700,7 @@ export class BlogService {
   async findAllPosts(filters: FilterPostsDto, user_id: number | null) {
     try {
       const appliedFilters: Prisma.PostsWhereInput =
-        this.getPostFormattedFilters(filters);
+        this.getPostFormattedFilters(filters, user_id);
 
       // const posts = await this.prisma.posts.findMany({
       //   where: appliedFilters,

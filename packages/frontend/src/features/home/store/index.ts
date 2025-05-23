@@ -5,7 +5,8 @@ import {
   ThreadResponse,
   PostCommentResponse,
   LikeThreadResponse,
-  SaveThreadResponse
+  SaveThreadResponse,
+  ThreadsParams
 } from '../types';
 
 interface BlogState {
@@ -15,7 +16,7 @@ interface BlogState {
   error: string | null;
 
   // Actions
-  fetchThreads: () => Promise<void>;
+  fetchThreads: (params?: ThreadsParams) => Promise<void>;
   fetchThreadComments: (post_id: number) => Promise<void>;
   createThread: (content: string) => Promise<void>;
   createComment: (post_id: number, content: string) => Promise<void>;
@@ -30,13 +31,13 @@ export const useBlogStore = create<BlogState>()(
       isLoading: false,
       error: null,
 
-      fetchThreads: async () => {
+      fetchThreads: async (params?: ThreadsParams) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await blogApi.getThreads();
+          const response = await blogApi.getThreads(params);
           const data = response.data;
 
-          console.log('| - - - - - - - > DATA FROM BLOG STORE:', data);
+          console.log('| - - - - - - - > DATA FROM BLOG STORE:', data, params);
 
           set({ threads: data, isLoading: false });
         } catch (error) {

@@ -3,23 +3,27 @@
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { NavItem } from './nav-item';
 import { navItems } from './config/site';
+import { NavItemProps } from '../../types';
 
 interface HomeSidebarProps {
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  handleActiveTab: (tab: NavItemProps) => void;
 }
 
-export const HomeSidebar = ({ activeTab, setActiveTab }: HomeSidebarProps) => {
+export const HomeSidebar = ({
+  activeTab,
+  handleActiveTab
+}: HomeSidebarProps) => {
   return (
     <div className="flex h-full flex-col gap-6">
-      {/* Search */}
+      {/* Search * /}
       <div className="relative">
         <IconInput
           leftIcon="search"
           className="h-10 w-[250px] rounded-full bg-neutral-light-100"
           placeholder="Search"
         />
-      </div>
+      </div> */}
 
       {/* Main Menu */}
       <div className="space-y-1">
@@ -29,7 +33,7 @@ export const HomeSidebar = ({ activeTab, setActiveTab }: HomeSidebarProps) => {
             key={item.label}
             {...item}
             isActive={activeTab === item.label}
-            onClick={() => setActiveTab(item.label)}
+            onClick={() => handleActiveTab(item)}
           />
         ))}
       </div>
@@ -44,7 +48,7 @@ export const HomeSidebar = ({ activeTab, setActiveTab }: HomeSidebarProps) => {
             key={item.label}
             {...item}
             isActive={activeTab === item.label}
-            onClick={() => setActiveTab(item.label)}
+            onClick={() => handleActiveTab(item)}
           />
         ))}
       </div>

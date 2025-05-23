@@ -3,8 +3,14 @@ import { SharedIcons } from '@/shared/components/icons';
 export interface NavItemProps {
   icon: keyof typeof SharedIcons;
   label: string;
+  filter?: string;
   isActive?: boolean;
   onClick?: () => void;
+}
+
+export interface ThreadsParams {
+  order_by?: string;
+  filter?: string;
 }
 
 interface UserPosts {

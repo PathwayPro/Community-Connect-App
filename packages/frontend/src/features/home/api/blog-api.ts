@@ -3,11 +3,19 @@ import {
   PostCommentResponse,
   ThreadResponse,
   LikeThreadResponse,
-  SaveThreadResponse
+  SaveThreadResponse,
+  ThreadsParams
 } from '../types';
 
 export const blogApi = {
-  getThreads: () => apiMethods.get<ThreadResponse[]>('/blog/post'),
+  getThreads: (params?: ThreadsParams) => {
+    let url_params = '?';
+    url_params += params?.filter ? 'filter=' + params.filter : '';
+    url_params += params?.order_by ? 'order=' + params.order_by : '';
+    url_params = url_params === '?' ? '' : url_params;
+
+    return apiMethods.get<ThreadResponse[]>(`/blog/post${url_params}`);
+  },
 
   getThreadComments: (post_id: number) =>
     apiMethods.get<PostCommentResponse[]>(`/blog/post/${post_id}/comments`),
