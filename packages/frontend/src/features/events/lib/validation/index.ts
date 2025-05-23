@@ -18,23 +18,22 @@ export const FreePaidOptions = [
 
 export const eventFormSchema = z.object({
   title: z.string().min(3, 'Event title must be at least 3 characters'),
-  subtitle: z.string().optional(),
   description: z
     .string()
     .min(20, 'Event description must be at least 20 characters'),
   category_id: z.string().min(1, 'Event category is required'),
-  location: z.string().optional(),
+  location: z.string().min(1, 'Event location is required').default('Online'),
   link: z
     .string()
     .regex(urlPattern, 'Must be a valid URL without "https://" prefix'),
-  image: z.string().optional(),
+  file: z.instanceof(File).optional().nullable(),
   is_free: z.boolean().default(true),
   type: z
     .enum(Object.values(EventsTypes) as [string, ...string[]])
     .default(EventsTypes.PUBLIC),
   requires_confirmation: z.boolean().default(false),
   accept_subscriptions: z.boolean().default(true),
-  start_date: z.string().min(1, 'Event date is required'),
+  start_date: z.string().min(1, 'Event start date is required'),
   start_time: z.string().min(1, 'Start time is required'),
   end_time: z.string().min(1, 'End time is required')
 });

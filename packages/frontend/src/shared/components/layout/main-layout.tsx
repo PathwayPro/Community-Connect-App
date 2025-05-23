@@ -18,9 +18,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         className={`flex flex-1 flex-col ${isSidebarOpen ? 'ml-[260px]' : 'ml-[92px]'}`}
       >
         <MainNav />
-        <div className="flex-1 overflow-auto bg-neutral-light-200 p-8">
-          {children}
-        </div>
+        <div className="flex-1 bg-neutral-light-200 p-8">{children}</div>
       </main>
     </div>
   );

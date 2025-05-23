@@ -8,7 +8,11 @@ import { EventFormValues, FreePaidOptions } from '../../lib/validation';
 import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
 import { useEventStore } from '../../store';
 
-export const BaseForm = () => {
+interface BaseFormProps {
+  onFileSelect?: (file: File | null) => void;
+}
+
+export const BaseForm = ({ onFileSelect }: BaseFormProps) => {
   const {
     setValue,
     watch,
@@ -23,22 +27,39 @@ export const BaseForm = () => {
 
   const handleImageUpload = async (files: File[]) => {
     try {
-      const formData = new FormData();
-      files.forEach((file) => formData.append('files', file));
+      if (files && files.length > 0) {
+        const file = files[0];
 
-      toast.success('Event image uploaded successfully');
+        // Validate file type and size
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        const maxSize = 5 * 1024 * 1024; // 5MB
 
-      // Placeholder for actual upload implementation
-      // const response = await fetch('/api/upload', {
-      //   method: 'POST',
-      //   body: formData
-      // });
-      // if (!response.ok) throw new Error('Upload failed');
-      // const { urls } = await response.json();
-      // setValue('image', urls[0], { shouldValidate: true });
+        if (!allowedTypes.includes(file.type)) {
+          toast.error(
+            'Invalid file type. Please upload a JPEG, PNG, or WebP image.'
+          );
+          return;
+        }
 
-      // For now, just set a placeholder value to pass validation
-      setValue('image', 'placeholder-image-url', { shouldValidate: true });
+        if (file.size > maxSize) {
+          toast.error('File size too large. Maximum size is 5MB.');
+          return;
+        }
+
+        // Pass the file to parent component
+        if (onFileSelect) {
+          onFileSelect(file);
+        }
+        // Set a temporary value for form validation
+        setValue('file', file, { shouldValidate: true });
+        toast.success('Event image uploaded successfully');
+      } else {
+        if (onFileSelect) {
+          onFileSelect(null);
+        }
+        setValue('file', null, { shouldValidate: true });
+        toast.error('No file selected.');
+      }
     } catch (error) {
       console.error('Upload failed:', error);
       toast.error('Failed to upload event image');
@@ -112,16 +133,6 @@ export const BaseForm = () => {
           leftLabel="https://"
           placeholder="Registration link URL"
           customError={errors.link?.message}
-          // onChange={(e) => {
-          //   const value = e.target.value;
-          //   if (handleLinkChange) {
-          //     handleLinkChange(value, (processedValue: string) =>
-          //       setValue('link', processedValue, { shouldValidate: true })
-          //     );
-          //   } else {
-          //     setValue('link', value, { shouldValidate: true });
-          //   }
-          // }}
           required
         />
       </div>

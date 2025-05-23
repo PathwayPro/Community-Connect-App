@@ -22,5 +22,7 @@ export const userApi = {
   deleteUserProfile: (id: number) =>
     apiMethods.delete<UserProfile>(`/users/${id}`),
 
-  getSkills: () => apiMethods.get<SkillsResponse[]>('/skills')
+  getSkills: () => apiMethods.get<SkillsResponse[]>('/skills'),
+
+  getProfessions: () => apiMethods.get<string[]>('/users/professions')
 };

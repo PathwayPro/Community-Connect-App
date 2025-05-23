@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/shared/components/ui/button';
@@ -18,8 +18,7 @@ import { cn } from '@/shared/lib/utils';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { z } from 'zod';
-import { useUserStore } from '@/features/user-profile/store';
-// New schema for change password
+
 const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, 'Current password is required'),

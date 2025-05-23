@@ -19,27 +19,65 @@ import {
 import Image from 'next/image';
 import { notFound, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { EventWithHost } from '../types';
+import { EventSubscriptionStatus, EventWithHost } from '../types';
 import { EventsTypes } from '../lib/validation';
 import { toSentenceCase } from '@/shared/lib/utils';
 import { formatDate } from 'date-fns';
 import { ConnectRequest } from '@/features/messages/components/common/connect-request';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   useUserStore,
   useInitializeUserStore
 } from '@/features/user-profile/store';
+import { useEventStore } from '../store';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
+import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/shared/components/ui/alert-dialog';
+
+interface EventError {
+  message?: string;
+  response?: {
+    data: {
+      message: string;
+      code: string;
+      details?: {
+        userId?: number;
+        userName?: string;
+        eventId?: number;
+        eventTitle?: string;
+        subscriptionDate?: string;
+        subscriptionStatus?: string;
+      };
+    };
+  };
+}
 
 interface EventDetailsProps {
   onBack?: () => void;
   onShare?: () => void;
-  onRegister?: () => void;
 }
 
-export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
+export const EventDetails = ({ onShare }: EventDetailsProps) => {
   const router = useRouter();
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const { user } = useUserStore();
+  const { createEventSubscription } = useEventStore();
+  const { showAlert } = useAlertDialog();
+  const {
+    eventSubscriptions,
+    fetchEventSubscriptions,
+    updateEventSubscription
+  } = useEventStore();
+  const [isUnregisterDialogOpen, setIsUnregisterDialogOpen] = useState(false);
 
   // Initialize user store
   useInitializeUserStore();
@@ -82,8 +120,91 @@ export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
     host_id !== undefined &&
     Number(user.id) === Number(host_id);
 
+  useEffect(() => {
+    fetchEventSubscriptions({
+      event_id: Number(eventData.id),
+      user_id: Number(user?.id)
+    });
+  }, [fetchEventSubscriptions, eventData.id, user?.id]);
+
+  const status = eventSubscriptions[0]?.status;
+
+  console.log('eventSubscriptions in the details page ', eventSubscriptions);
+
   const handleViewProfile = () => {
     router.push(`/profile/${host_id}`);
+  };
+
+  const handleRegister = async () => {
+    try {
+      if (isHost) {
+        router.push(
+          `/events/${eventData.id}/subscribers?title=${encodeURIComponent(title)}&eventId=${eventData.id}`
+        );
+      } else {
+        // Existing registration logic
+        console.log('Registering for event');
+        const response = await createEventSubscription(eventData.id);
+
+        console.log(
+          'response after createEventSubscription in the details page',
+          response
+        );
+
+        if (response.status === 'APPROVED' || response.status === 'PENDING') {
+          showAlert({
+            type: 'success',
+            title: 'Event Subscribed Successfully!',
+            description: 'You have been successfully subscribed to the event.'
+          });
+        }
+      }
+    } catch (error: unknown) {
+      console.error('Error registering for event:', error);
+      const eventError = error as EventError;
+      showAlert({
+        type: 'error',
+        title: 'Error Subscribing to Event',
+        description:
+          eventError.response?.data.message ||
+          'An error occurred while subscribing to the event.'
+      });
+    }
+  };
+
+  const performUnregistration = async () => {
+    try {
+      // TODO: Implement the actual unregistration API call here
+      console.log('Unregistering for event');
+
+      const response = await updateEventSubscription(eventData.id, {
+        new_status: EventSubscriptionStatus.REJECTED
+      });
+
+      if (response.status === EventSubscriptionStatus.REJECTED) {
+        showAlert({
+          type: 'success',
+          title: 'Successfully Unregistered',
+          description: 'You have been unregistered from the event.'
+        });
+
+        // Refresh subscriptions after unregistering
+        await fetchEventSubscriptions({
+          event_id: Number(eventData.id),
+          user_id: Number(user?.id)
+        });
+      }
+    } catch (error) {
+      console.error('Error unregistering from event:', error);
+      const eventError = error as EventError;
+      showAlert({
+        type: 'error',
+        title: 'Error Unregistering',
+        description:
+          eventError.response?.data.message ||
+          'An error occurred while unregistering from the event.'
+      });
+    }
   };
 
   return (
@@ -94,6 +215,33 @@ export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
         onClose={() => setIsConnectModalOpen(false)}
         onSubmit={handleConnectSubmit}
       />
+
+      {/* Unregister Confirmation Dialog */}
+      <AlertDialog
+        open={isUnregisterDialogOpen}
+        onOpenChange={setIsUnregisterDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unregister from Event</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to unregister from &quot;{title}&quot;? This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-10">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={performUnregistration}
+              className="h-10 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Unregister
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialogUI />
 
       {/* Top Navigation */}
       <div className="flex items-center justify-between">
@@ -110,20 +258,12 @@ export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
             <Share2 className="h-5 w-5" />
             Share
           </Button>
-          {/* <Button onClick={onFavorite} className="h-10">
-            <Heart className="h-5 w-5" />
-            Favourite
-          </Button> */}
-          {/* <Button onClick={onCreateEvent} className="bg-secondary-500">
-            <PlusCircle className="mr-2 h-5 w-5" />
-            Create New Event
-          </Button> */}
         </div>
       </div>
 
       {/* Hero Image Section */}
       <Card className="rounded-[24px] p-6">
-        <h2 className="text-center font-bold">{title}</h2>
+        <h2 className="line-clamp-1 text-center font-bold">{title}</h2>
         <Image
           src={image || '/event/placeholder.jpg'}
           alt={title}
@@ -132,9 +272,9 @@ export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
           className="mt-6 aspect-[2/1] h-auto w-full rounded-2xl object-cover"
           priority
         />
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+        {/* <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
           <h1 className="text-3xl font-bold text-white">{title}</h1>
-        </div>
+        </div> */}
       </Card>
 
       {/* Event Info Card */}
@@ -172,9 +312,32 @@ export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
           </div>
         </div>
 
-        <Button className="h-12 w-full" onClick={onRegister}>
-          Register Now
-        </Button>
+        {isHost ? (
+          <Button className="h-12 w-full" onClick={handleRegister}>
+            Show Subscribers
+          </Button>
+        ) : status === EventSubscriptionStatus.APPROVED ||
+          status === EventSubscriptionStatus.PENDING ? (
+          <Button
+            className={`h-12 w-full cursor-default ${status === EventSubscriptionStatus.APPROVED ? 'bg-success-500 hover:bg-success-500' : 'bg-warning-300 hover:bg-warning-300'}`}
+            disabled
+          >
+            {status === EventSubscriptionStatus.APPROVED
+              ? 'Registered'
+              : 'Pending Registration'}
+          </Button>
+        ) : status === EventSubscriptionStatus.REJECTED ? (
+          <Button
+            className={`h-12 w-full cursor-default ${status === EventSubscriptionStatus.REJECTED ? 'bg-destructive hover:bg-destructive' : ''}`}
+            disabled
+          >
+            Rejected
+          </Button>
+        ) : (
+          <Button className="h-12 w-full" onClick={handleRegister}>
+            Register Now
+          </Button>
+        )}
       </Card>
 
       {/* Host Section */}
@@ -226,9 +389,32 @@ export const EventDetails = ({ onShare, onRegister }: EventDetailsProps) => {
       </Card>
 
       {/* Bottom Register Button */}
-      <Button className="h-12 w-full" onClick={onRegister}>
-        Register Now
-      </Button>
+      {isHost ? (
+        <Button className="h-12 w-full" onClick={handleRegister}>
+          Show Subscribers
+        </Button>
+      ) : status === EventSubscriptionStatus.APPROVED ||
+        status === EventSubscriptionStatus.PENDING ? (
+        <Button
+          className={`h-12 w-full cursor-default ${status === EventSubscriptionStatus.APPROVED ? 'bg-success-500 hover:bg-success-500' : 'bg-warning-300 hover:bg-warning-300'}`}
+          disabled
+        >
+          {status === EventSubscriptionStatus.APPROVED
+            ? 'Registered'
+            : 'Pending Registration'}
+        </Button>
+      ) : status === EventSubscriptionStatus.REJECTED ? (
+        <Button
+          className={`h-12 w-full cursor-default ${status === EventSubscriptionStatus.REJECTED ? 'bg-destructive hover:bg-destructive' : ''}`}
+          disabled
+        >
+          Rejected
+        </Button>
+      ) : (
+        <Button className="h-12 w-full" onClick={handleRegister}>
+          Register Now
+        </Button>
+      )}
     </div>
   );
 };

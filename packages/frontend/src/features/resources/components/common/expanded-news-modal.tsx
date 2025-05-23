@@ -1,3 +1,4 @@
+import { ImagePreview } from '@/shared/components/image/image-preview';
 import { Button } from '@/shared/components/ui/button';
 import {
   Dialog,
@@ -8,7 +9,6 @@ import {
 } from '@/shared/components/ui/dialog';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { LinkIcon } from 'lucide-react';
-import Image from 'next/image';
 
 interface ExpandedNewsModalProps {
   isOpen: boolean;
@@ -46,11 +46,20 @@ export function ExpandedNewsModal({
 
         <div className="flex flex-col gap-4 rounded-2xl bg-neutral-light-200 p-4">
           <div className="relative aspect-video h-[300px] w-full">
-            <Image
+            {/* <Image
               src={image || '/event/placeholder-2.jpg'}
               alt={newsTitle}
               fill
               className="rounded-2xl object-cover"
+            /> */}
+
+            <ImagePreview
+              imagePath={image}
+              alt={newsTitle}
+              className="object-cover"
+              fill={true}
+              priority={true}
+              sizes="(max-width: 768px) 100vw, 700px"
             />
           </div>
 
@@ -67,17 +76,19 @@ export function ExpandedNewsModal({
           <Button variant="outline" onClick={onClose} className="h-12 w-full">
             Back to News
           </Button>
-          <Button variant="default" asChild className="h-12 w-full">
-            <a
-              href={ensureAbsoluteUrl(articleUrl)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center"
-            >
-              <LinkIcon className="mr-2 h-6 w-6" />
-              Read Full Article
-            </a>
-          </Button>
+          {articleUrl && (
+            <Button variant="default" asChild className="h-12 w-full">
+              <a
+                href={ensureAbsoluteUrl(articleUrl)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center"
+              >
+                <LinkIcon className="mr-2 h-6 w-6" />
+                Read Full Article
+              </a>
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>

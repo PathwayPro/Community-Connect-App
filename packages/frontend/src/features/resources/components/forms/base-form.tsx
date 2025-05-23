@@ -9,25 +9,18 @@ import { NewsType } from '../../lib/constants/enums';
 import { FormRadio } from '@/shared/components/form/form-radio';
 import { useFormContext } from 'react-hook-form';
 
-export const BaseForm = () => {
+interface BaseFormProps {
+  onFileUpload: (files: File[]) => Promise<void>;
+}
+
+export const BaseForm = ({ onFileUpload }: BaseFormProps) => {
   const {
     formState: { errors }
   } = useFormContext();
 
   const handlePosterUpload = async (files: File[]) => {
     try {
-      const formData = new FormData();
-      files.forEach((file) => formData.append('files', file));
-      toast.success('News image uploaded successfully');
-
-      // Uncomment and update when API is ready
-      // const response = await fetch('/api/upload', {
-      //   method: 'POST',
-      //   body: formData
-      // });
-      // if (!response.ok) throw new Error('Upload failed');
-      // const { urls } = await response.json();
-      // setValue('image', urls[0], { shouldValidate: true });
+      await onFileUpload(files);
     } catch (error) {
       console.error('Upload failed:', error);
       toast.error('Failed to upload news image');
@@ -50,7 +43,7 @@ export const BaseForm = () => {
           name="title"
           label="News Title"
           placeholder="Enter news title"
-          customError="Title is required"
+          customError={errors.title?.message?.toString()}
           required
         />
       </div>
@@ -59,7 +52,7 @@ export const BaseForm = () => {
         name="details"
         label="News Details"
         placeholder="Write your news details..."
-        customError="Content is required"
+        customError={errors.details?.message?.toString()}
         maxLength={400}
         required
       />
@@ -80,7 +73,7 @@ export const BaseForm = () => {
               id: 'editorial'
             }
           ]}
-          customError="News type is required"
+          customError={errors.type?.message?.toString()}
           required
         />
       </div>
@@ -92,7 +85,8 @@ export const BaseForm = () => {
           hasLabelInput={true}
           leftLabel="https://"
           placeholder="Link text"
-          customError={errors.link?.message as string}
+          customError={errors.link?.message?.toString()}
+          required
         />
       </div>
     </div>

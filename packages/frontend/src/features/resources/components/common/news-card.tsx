@@ -13,6 +13,8 @@ import { useNewsStore } from '../../store';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { DeleteModal } from '../../../../shared/components/modal/delete-modal';
+import { Permission, useRole } from '@/features/user-profile/hooks/useRole';
+import { useUserStore } from '@/features/user-profile/store';
 
 interface NewsCardProps {
   id?: string;
@@ -23,6 +25,7 @@ interface NewsCardProps {
   link?: string;
   created_at: string;
   user: {
+    id: number;
     first_name: string;
     last_name: string;
     picture_upload_link: string;
@@ -45,6 +48,35 @@ export const NewsCard = ({
   const router = useRouter();
   const { deleteNews } = useNewsStore();
   const { showAlert } = useAlertDialog();
+  const { hasRole, hasPermission } = useRole();
+  const { user: currentUser } = useUserStore();
+
+  const getPermissionType = () => {
+    switch (type) {
+      case 'news':
+        return { edit: 'edit:news', delete: 'delete:news' };
+      case 'resource':
+        return { edit: 'edit:resource', delete: 'delete:resource' };
+      case 'opportunity':
+        return { edit: 'create:opportunity', delete: 'delete:opportunity' };
+      default:
+        return { edit: '', delete: '' };
+    }
+  };
+
+  // Check if current user is the creator of this news item
+  const isCreator = currentUser?.id?.toString() === user?.id?.toString();
+
+  // Get the edit/delete permission types based on content type
+  const permissions = getPermissionType();
+
+  // ADMIN can edit/delete all news, other users can only edit/delete their own
+  const canEdit =
+    hasRole('ADMIN') ||
+    (isCreator && hasPermission(permissions.edit as Permission));
+  const canDelete =
+    hasRole('ADMIN') ||
+    (isCreator && hasPermission(permissions.delete as Permission));
 
   const handleEdit = () => {
     const newsData = {
@@ -108,22 +140,28 @@ export const NewsCard = ({
       />
       <div className="relative flex flex-col">
         {/* Action Buttons */}
-        <div className="absolute right-4 top-4 z-20 flex gap-3">
-          <div
-            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary"
-            onClick={handleEdit}
-          >
-            <PenBox className="h-4 w-4 text-white" />
+        {(canEdit || canDelete) && (
+          <div className="absolute right-4 top-4 z-20 flex gap-3">
+            {canEdit && (
+              <div
+                className="cursor-pointer rounded-full bg-primary p-2 hover:bg-secondary"
+                onClick={handleEdit}
+              >
+                <PenBox className="h-4 w-4 text-white" />
+              </div>
+            )}
+            {canDelete && (
+              <div
+                className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive"
+                onClick={handleDelete}
+              >
+                <Trash2
+                  className={`h-4 w-4 text-white ${isDeleting ? 'animate-spin' : ''}`}
+                />
+              </div>
+            )}
           </div>
-          <div
-            className="cursor-pointer rounded-full bg-primary p-2 hover:bg-destructive"
-            onClick={handleDelete}
-          >
-            <Trash2
-              className={`h-4 w-4 text-white ${isDeleting ? 'animate-spin' : ''}`}
-            />
-          </div>
-        </div>
+        )}
 
         {/* Image */}
         <div className="relative h-[320px] w-full">

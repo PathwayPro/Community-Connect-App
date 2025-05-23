@@ -8,6 +8,7 @@ interface UserState {
   user: UserProfile | null;
   users: UserProfile[];
   skills: SkillsResponse[];
+  professions: string[];
   publicUsers: UserProfile[];
   selectedUser: UserProfile | null;
   isLoading: boolean;
@@ -21,6 +22,7 @@ interface UserState {
   fetchUserById: (id: number) => Promise<UserResponse<UserProfile>>;
   fetchUserByEmail: (email: string) => Promise<UserResponse<UserProfile>>;
   fetchSkills: () => Promise<UserResponse<SkillsResponse[]>>;
+  fetchProfessions: () => Promise<UserResponse<string[]>>;
   updateUser: (
     data: UserProfile,
     id: number
@@ -35,6 +37,7 @@ export const useUserStore = create<UserState>()(
       user: null,
       users: [],
       skills: [],
+      professions: [],
       publicUsers: [],
       selectedUser: null,
       isLoading: false,
@@ -131,6 +134,18 @@ export const useUserStore = create<UserState>()(
           set({ error: errorMsg, isLoading: false });
           // Return a UserResponse object instead of undefined
           return { success: false, data: [], message: errorMsg };
+        }
+      },
+
+      fetchProfessions: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await userApi.getProfessions();
+          set({ professions: response.data, isLoading: false });
+          return response;
+        } catch (error) {
+          set({ error: 'Failed to fetch professions', isLoading: false });
+          throw error;
         }
       },
 

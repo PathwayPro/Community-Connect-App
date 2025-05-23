@@ -27,13 +27,14 @@ import {
 import { useNewsStore } from '../store';
 import { useOpportunityStore } from '../store';
 import { useResourcesStore } from '../store';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { CreateNewsDto } from '../dto/news-dto';
 import { CreateResourceDto } from '../dto/resource-dto';
 import { CreateOpportunityDto } from '../dto/opportunity-dto';
 import { WorkSettings } from '../lib/constants/enums';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
+import { toast } from 'sonner';
 
 type FormMode = 'news' | 'contentLibrary' | 'opportunities';
 type FormValues = {
@@ -47,6 +48,8 @@ export const NewsForm = () => {
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode') as FormMode;
   const { showAlert } = useAlertDialog();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { createNews, fetchNews } = useNewsStore();
   const { createResource, fetchResources } = useResourcesStore();
@@ -60,6 +63,7 @@ export const NewsForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         if (mode === 'opportunities') {
           await Promise.all([fetchOpportunities(), fetchSalaryRanges()]);
         } else if (mode === 'news') {
@@ -74,6 +78,8 @@ export const NewsForm = () => {
           description: 'Failed to fetch data. Please try again.',
           type: 'error'
         });
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -121,14 +127,62 @@ export const NewsForm = () => {
 
   const { isSubmitting, errors } = methods.formState;
 
-  console.log('errors from the form :', errors);
+  const handleFileUpload = async (files: File[]) => {
+    try {
+      if (files && files.length > 0) {
+        setSelectedFile(files[0]);
+        toast.success('Image uploaded successfully');
+      } else {
+        setSelectedFile(null);
+        toast.error('No file selected.');
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      toast.error('Failed to upload image');
+    }
+  };
 
   const onSubmit = async (data: FormValues[typeof mode]) => {
     try {
+      const formData = new FormData();
+
+      // Append file if exists
+      if (selectedFile) {
+        formData.append('file', selectedFile);
+      }
+
+      // Append form data
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, value.toString());
+        }
+      });
+
       const actions = {
         news: async () => {
-          const result = await createNews(data as CreateNewsDto);
+          const newsData = data as NewsFormValues;
+          const formData = new FormData();
 
+          // Append form data
+          formData.append('title', newsData.title);
+          formData.append('details', newsData.details);
+          formData.append('type', newsData.type);
+
+          // Handle link formatting
+          if (newsData.link) {
+            const formattedLink = newsData.link.startsWith('http')
+              ? newsData.link
+              : `https://${newsData.link}`;
+            formData.append('link', formattedLink);
+          }
+
+          // Append file if exists
+          if (selectedFile) {
+            formData.append('file', selectedFile);
+          }
+
+          console.log('formData in news:', formData);
+          const result = await createNews(formData as unknown as CreateNewsDto);
           if (result) {
             showAlert({
               title: 'Success',
@@ -139,20 +193,80 @@ export const NewsForm = () => {
           }
         },
         contentLibrary: async () => {
-          const result = await createResource(data as CreateResourceDto);
-          if (result) {
-            showAlert({
-              title: 'Success',
-              description: 'Resource created successfully',
-              type: 'success',
-              redirect: '/resources'
+          const resourceData = data as ResourceFormValues;
+
+          // Handle link formatting
+          if (resourceData.link) {
+            console.log('resourceData.link:', resourceData.link);
+
+            const formattedLink = resourceData.link.startsWith('http')
+              ? resourceData.link
+              : `https://${resourceData.link}`;
+            resourceData.link = formattedLink;
+          }
+
+          // Append file if exists
+          if (selectedFile) {
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            Object.entries(resourceData).forEach(([key, value]) => {
+              if (value !== undefined && value !== null) {
+                formData.append(key, value.toString());
+              }
             });
+            const result = await createResource(
+              formData as unknown as CreateResourceDto
+            );
+            if (result) {
+              showAlert({
+                title: 'Success',
+                description: 'Resource created successfully',
+                type: 'success',
+                redirect: '/resources'
+              });
+            }
+          } else {
+            const result = await createResource(
+              resourceData as unknown as CreateResourceDto
+            );
+            if (result) {
+              showAlert({
+                title: 'Success',
+                description: 'Resource created successfully',
+                type: 'success',
+                redirect: '/resources'
+              });
+            }
           }
         },
         opportunities: async () => {
-          console.log('data from the form :', data);
+          const opportunityData = data as OpportunityFormValues;
+          const formData = new FormData();
 
-          const result = await createOpportunity(data as CreateOpportunityDto);
+          // Append form data
+          Object.entries(opportunityData).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              // Handle link formatting for link_post and link_apply
+              if ((key === 'link_post' || key === 'link_apply') && value) {
+                const formattedLink = value.toString().startsWith('http')
+                  ? value.toString()
+                  : `https://${value.toString()}`;
+                formData.append(key, formattedLink);
+              } else {
+                formData.append(key, value.toString());
+              }
+            }
+          });
+
+          // Append file if exists
+          if (selectedFile) {
+            formData.append('file', selectedFile);
+          }
+
+          console.log('formData in opportunities:', formData);
+          const result = await createOpportunity(
+            formData as unknown as CreateOpportunityDto
+          );
           if (result) {
             showAlert({
               title: 'Success',
@@ -179,9 +293,14 @@ export const NewsForm = () => {
   };
 
   const formComponents = {
-    news: <BaseForm />,
+    news: <BaseForm onFileUpload={handleFileUpload} />,
     contentLibrary: <ResourceForm />,
-    opportunities: <OpportunityForm salaryRanges={salaryRanges} />
+    opportunities: (
+      <OpportunityForm
+        salaryRanges={salaryRanges}
+        onFileUpload={handleFileUpload}
+      />
+    )
   };
 
   const titles = {
@@ -195,6 +314,16 @@ export const NewsForm = () => {
     contentLibrary: 'Upload Resource',
     opportunities: 'Post Opportunity'
   };
+
+  if (isLoading) {
+    return (
+      <Card className="flex h-full w-[840px] flex-col rounded-[24px]">
+        <CardContent className="flex items-center justify-center p-8">
+          Loading {titles[mode].create} form...
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="flex h-full w-[840px] flex-col rounded-[24px]">
@@ -227,7 +356,7 @@ export const NewsForm = () => {
                 className="w-full"
                 type="submit"
                 disabled={isSubmitting}
-                label={submitLabels[mode]}
+                label={isSubmitting ? 'Saving...' : submitLabels[mode]}
               />
             </div>
           </form>

@@ -54,12 +54,12 @@ export const UserManagement = () => {
         <div className="flex gap-2">
           <IconInput
             leftIcon="search"
-            className="w-[250px] rounded-full bg-neutral-light-100"
+            className="h-10 w-[250px] rounded-full bg-neutral-light-100"
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <Button className="h-11">
+          <Button className="h-10">
             <UserPlus className="mr-2 h-4 w-4" />
             Add User
           </Button>

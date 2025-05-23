@@ -21,6 +21,7 @@ export interface News {
   updated_at: string;
   user_id: number;
   user: {
+    id: number;
     first_name: string;
     last_name: string;
     picture_upload_link: string;

@@ -27,13 +27,14 @@ import {
 import { useNewsStore } from '../store';
 import { useOpportunityStore } from '../store';
 import { useResourcesStore } from '../store';
-import { useEffect } from 'react';
 import { CreateNewsDto } from '../dto/news-dto';
 import { CreateResourceDto } from '../dto/resource-dto';
 import { CreateOpportunityDto } from '../dto/opportunity-dto';
 import { WorkSettings } from '../lib/constants/enums';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 type FormMode = 'news' | 'contentLibrary' | 'opportunities';
 type FormValues = {
@@ -42,18 +43,45 @@ type FormValues = {
   opportunities: OpportunityFormValues;
 };
 
-export const EditNewsForm = () => {
+export const EditNewsForm = ({ id }: { id: string }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode') as FormMode;
   const formData = searchParams.get('data')
     ? JSON.parse(decodeURIComponent(searchParams.get('data')!))
     : null;
+
   const { showAlert } = useAlertDialog();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { updateNews } = useNewsStore();
   const { updateResource } = useResourcesStore();
-  const { editOpportunity, salaryRanges } = useOpportunityStore();
+  const { editOpportunity, salaryRanges, fetchSalaryRanges } =
+    useOpportunityStore();
+
+  console.log('id in the edit news form:', id);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        if (mode === 'opportunities') {
+          await fetchSalaryRanges();
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+        showAlert({
+          title: 'Error',
+          description: 'Failed to fetch data. Please try again.',
+          type: 'error'
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [mode, fetchSalaryRanges, showAlert]);
 
   const formSchema = {
     news: newsFormSchema,
@@ -87,11 +115,49 @@ export const EditNewsForm = () => {
 
   const { isSubmitting, errors } = methods.formState;
 
+  const handleFileUpload = async (files: File[]) => {
+    try {
+      if (files && files.length > 0) {
+        setSelectedFile(files[0]);
+        toast.success('Image uploaded successfully');
+      } else {
+        setSelectedFile(null);
+        toast.error('No file selected.');
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      toast.error('Failed to upload image');
+    }
+  };
+
   const onSubmit = async (data: FormValues[typeof mode]) => {
     try {
       const actions = {
         news: async () => {
-          await updateNews(formData.id, data as CreateNewsDto);
+          const newsData = data as NewsFormValues;
+          const formData = new FormData();
+
+          // Append form data
+          Object.entries(newsData).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              formData.append(key, value.toString());
+            }
+          });
+
+          // Handle link formatting
+          if (newsData.link) {
+            const formattedLink = newsData.link.startsWith('http')
+              ? newsData.link
+              : `https://${newsData.link}`;
+            formData.append('link', formattedLink);
+          }
+
+          // Append file if exists
+          if (selectedFile) {
+            formData.append('file', selectedFile);
+          }
+
+          await updateNews(id, formData as unknown as CreateNewsDto);
           showAlert({
             title: 'Success',
             description: 'News updated successfully',
@@ -100,7 +166,21 @@ export const EditNewsForm = () => {
           });
         },
         contentLibrary: async () => {
-          await updateResource(formData.id, data as CreateResourceDto);
+          const resourceData = data as ResourceFormValues;
+
+          // Handle link formatting
+          if (resourceData.link) {
+            const formattedLink = resourceData.link.startsWith('http')
+              ? resourceData.link
+              : `https://${resourceData.link}`;
+            resourceData.link = formattedLink;
+          }
+
+          await updateResource(
+            id,
+            resourceData as unknown as CreateResourceDto
+          );
+
           showAlert({
             title: 'Success',
             description: 'Resource updated successfully',
@@ -109,10 +189,34 @@ export const EditNewsForm = () => {
           });
         },
         opportunities: async () => {
+          const opportunityData = data as OpportunityFormValues;
+          const formData = new FormData();
+
+          // Append form data
+          Object.entries(opportunityData).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              // Handle link formatting for link_post and link_apply
+              if ((key === 'link_post' || key === 'link_apply') && value) {
+                const formattedLink = value.toString().startsWith('http')
+                  ? value.toString()
+                  : `https://${value.toString()}`;
+                opportunityData[key] = formattedLink;
+              } else {
+                formData.append(key, value.toString());
+              }
+            }
+          });
+
+          // Append file if exists
+          if (selectedFile) {
+            formData.append('file', selectedFile);
+          }
+
           await editOpportunity(
-            Number(formData.id),
-            data as CreateOpportunityDto
+            Number(id),
+            formData as unknown as CreateOpportunityDto
           );
+
           showAlert({
             title: 'Success',
             description: 'Opportunity updated successfully',
@@ -137,9 +241,14 @@ export const EditNewsForm = () => {
   };
 
   const formComponents = {
-    news: <BaseForm />,
+    news: <BaseForm onFileUpload={handleFileUpload} />,
     contentLibrary: <ResourceForm />,
-    opportunities: <OpportunityForm salaryRanges={salaryRanges} />
+    opportunities: (
+      <OpportunityForm
+        salaryRanges={salaryRanges}
+        onFileUpload={handleFileUpload}
+      />
+    )
   };
 
   const titles = {
@@ -147,6 +256,16 @@ export const EditNewsForm = () => {
     contentLibrary: 'Edit Resource',
     opportunities: 'Edit Opportunity'
   };
+
+  if (isLoading) {
+    return (
+      <Card className="flex h-full w-[840px] flex-col rounded-[24px]">
+        <CardContent className="flex items-center justify-center p-8">
+          Loading {titles[mode]} form...
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="flex h-full w-[840px] flex-col rounded-[24px]">
@@ -178,7 +297,11 @@ export const EditNewsForm = () => {
                 className="w-full"
                 type="submit"
                 disabled={isSubmitting}
-                label={`Update ${mode === 'contentLibrary' ? 'Resource' : mode}`}
+                label={
+                  isSubmitting
+                    ? 'Updating...'
+                    : `Update ${mode === 'contentLibrary' ? 'Resource' : mode}`
+                }
               />
             </div>
           </form>

@@ -2,7 +2,6 @@
 
 import { Button } from '@/shared/components/ui/button';
 import { MentorshipSection } from '@/features/mentorship/components/common/mentorship-section';
-import { useUserStore } from '@/features/user-profile/store';
 import MentorCard from '@/features/mentorship/components/common/mentor-card';
 import { AnalyticsSelect } from './common/analytics-select';
 import { DownloadIcon } from 'lucide-react';
@@ -27,13 +26,11 @@ const data = [
   { month: 'Jul', value: 40 }
 ];
 export const Analytics = () => {
-  const { user } = useUserStore();
-
   return (
-    <div className="container-wide flex w-full flex-col gap-6">
+    <div className="container-wide flex w-full flex-col p-0">
       <MentorshipSection className="h-auto w-full">
         <MentorshipSection.Header>
-          <h6 className="font-semibold">Hey, {user?.firstName}!👋</h6>
+          <h2 className="text-2xl font-semibold">Analytics</h2>
           <div className="flex items-center justify-end gap-4">
             <Button className="h-10 w-fit px-4">
               <DownloadIcon className="h-6 w-6" />

@@ -42,7 +42,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
       return (
         <Suspense fallback={<NewsFormSkeleton />}>
           <div className="flex w-full justify-center">
-            <EditNewsForm />
+            <EditNewsForm id={id} />
           </div>
         </Suspense>
       );

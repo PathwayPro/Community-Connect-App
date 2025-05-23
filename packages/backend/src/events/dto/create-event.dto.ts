@@ -79,16 +79,16 @@ export class CreateEventDto {
   })
   @IsDateString()
   @IsOptional()
-  start_date?: Date; // Format ISO 8601
+  start_date?: string; // Format ISO 8601
 
-  @ApiPropertyOptional({
-    description:
-      'Event end date and time. ISO 8601 format `YYYY-MM-DDTHH:mm:ss.sssZ`',
-    example: '2025-01-21T10:30:00.000Z',
-  })
-  @IsDateString()
-  @IsOptional()
-  end_date?: Date; // Format ISO 8601
+  // @ApiPropertyOptional({
+  //   description:
+  //     'Event end date and time. ISO 8601 format `YYYY-MM-DDTHH:mm:ss.sssZ`',
+  //   example: '2025-01-21T10:30:00.000Z',
+  // })
+  // @IsDateString()
+  // @IsOptional()
+  // end_date?: Date; // Format ISO 8601
 
   @ApiProperty({
     description: 'Event start time',
@@ -105,7 +105,9 @@ export class CreateEventDto {
   end_time: string;
 
   @ApiProperty({
-    description: 'Uploaded file. Will use validation for events (OPTIONAL)',
+    description: 'Event image file',
+    type: 'string',
+    format: 'binary',
   })
   @IsOptional()
   file?: Express.Multer.File;
