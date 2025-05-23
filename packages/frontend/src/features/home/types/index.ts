@@ -25,6 +25,11 @@ export interface ThreadResponse {
   user: UserPosts;
   likes_count: number;
   comments_count: number;
+  liked_by_user?: boolean;
+}
+
+export interface LikeThreadResponse {
+  likeStatus: string;
 }
 
 export interface PostCommentResponse {

@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { cn } from '@/shared/lib/utils';
 import { Badge } from '@/shared/components/ui/badge';
 import { useBlogStore } from '../../store';
+import { boolean } from 'zod';
 
 interface ThreadCardProps {
   id: number;
@@ -20,6 +21,9 @@ interface ThreadCardProps {
   avatarUrl: string;
   tags?: string[];
   isSaved?: boolean;
+  isLiked?: boolean;
+  liked_by_user?: boolean;
+  isCommented?: boolean;
   viewThreads: () => void;
   selectedThread?: Thread;
   setSelectedThread?: (thread: Thread) => void | undefined;
@@ -40,9 +44,11 @@ export const ThreadCard = ({
   selectedThread,
   setSelectedThread,
   setShowCommentSection,
-  isSaved
+  isSaved,
+  liked_by_user,
+  isCommented
 }: ThreadCardProps) => {
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(liked_by_user);
   const [likes, setLikes] = useState(initialLikes);
 
   const { toggleLike } = useBlogStore();
@@ -52,7 +58,6 @@ export const ThreadCard = ({
       return;
     }
     const like = await toggleLike(id);
-    console.log('like desde el cambio:', like);
     const liked: boolean = like ? true : false;
     setIsLiked(liked);
     setLikes((prev) => (liked ? prev + 1 : prev - 1));
@@ -61,7 +66,6 @@ export const ThreadCard = ({
   // handle view thread
   const handleViewThread = () => {
     if (setSelectedThread) {
-      console.log('| - - - - - - - > IMAGEN: ', imageUrl);
       setSelectedThread({
         id,
         authorName,
@@ -76,10 +80,9 @@ export const ThreadCard = ({
           'https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png',
         likes,
         comments,
-        isSaved: isSaved
+        isSaved: isSaved,
+        liked_by_user: isLiked
       });
-      console.log('| - - - - - - - > IMAGEN: ', imageUrl);
-      console.log('| - - - - - - - > COSAS: ', selectedThread, selectedThread);
     }
     viewThreads();
   };

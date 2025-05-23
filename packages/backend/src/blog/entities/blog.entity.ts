@@ -156,6 +156,15 @@ export class Like {
   created_at: string;
 }
 
+export class LikeThreadResponse {
+  @ApiProperty({
+    description: 'REMOVED | CREATED',
+    example: 'REMOVED | CREATED',
+  })
+  @IsString()
+  likeStatus: string;
+}
+
 export class Save {
   @ApiProperty({ description: 'ID of the save', example: '1' })
   @IsInt()

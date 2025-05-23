@@ -1,7 +1,11 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { blogApi } from '../api/blog-api';
-import { ThreadResponse, PostCommentResponse } from '../types';
+import {
+  ThreadResponse,
+  PostCommentResponse,
+  LikeThreadResponse
+} from '../types';
 
 interface BlogState {
   threads: ThreadResponse[];
@@ -14,7 +18,7 @@ interface BlogState {
   fetchThreadComments: (post_id: number) => Promise<void>;
   createThread: (content: string) => Promise<void>;
   createComment: (post_id: number, content: string) => Promise<void>;
-  toggleLike: (post_id: number) => Promise<boolean>;
+  toggleLike: (post_id: number) => Promise<LikeThreadResponse>;
 }
 
 export const useBlogStore = create<BlogState>()(
@@ -127,12 +131,9 @@ export const useBlogStore = create<BlogState>()(
       toggleLike: async (post_id: number) => {
         set({ isLoading: true, error: null });
         try {
-          console.log('TOGGLEANDO LIKE EN POST: ', post_id);
           const response = await blogApi.toggleLike(post_id);
 
-          return response.success ? true : false;
-
-          console.log('| - - - - - - - > RESPONSE TOGGLEANDO LIKE:', response);
+          return response.data.likeStatus === 'CREATED';
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'An error occurred',

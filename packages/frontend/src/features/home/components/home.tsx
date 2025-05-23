@@ -25,6 +25,7 @@ const transformThreadResponseToThread = (response: ThreadResponse): Thread => ({
   imageUrl: '',
   likes: response.likes_count || 0,
   comments: response.comments_count || 0,
+  liked_by_user: response.liked_by_user || false,
   tags: [],
   isSaved: false
 });

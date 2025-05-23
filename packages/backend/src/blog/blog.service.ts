@@ -95,6 +95,8 @@ export class BlogService {
       likes_count: returnValue._count?.likes
         ? returnValue._count?.likes
         : undefined,
+      liked_by_user: returnValue.likes?.length > 0 ? true : false,
+      likes: undefined,
     };
 
     delete formattedReturnValue.message;
@@ -216,26 +218,43 @@ export class BlogService {
         throw new NotFoundException(`There is no post with ID #${post_id}`);
       }
 
-      // CREATE (ADD) LIKE
-      const likeData: Prisma.PostsLikesCreateInput = {
-        user: { connect: { id: user.sub } },
-        post: { connect: { id: post_id } },
-      };
-      const like = await this.prisma.postsLikes.create({
-        data: likeData,
-        select: {
-          id: true,
-          post_id: true,
-          user_id: true,
-          created_at: true,
+      // VERIFY IF LIKE EXISTS
+      const likeExist = await this.prisma.postsLikes.findFirst({
+        where: {
+          user_id: user.sub,
+          post_id,
         },
       });
 
-      return like;
-    } catch (error) {
-      if (error.code === 'P2002') {
-        throw new BadRequestException('You have already liked this post.');
+      if (likeExist) {
+        // REMOVE LIKE IF ALREADY EXIST
+        const deletedLike = await this.prisma.postsLikes.delete({
+          where: { id: likeExist.id },
+        });
+        if (!deletedLike) {
+          throw new InternalServerErrorException(
+            `There was an error deleting the like`,
+          );
+        }
+        return { likeStatus: 'REMOVED' };
+      } else {
+        // CREATE (ADD) LIKE IF DON'T EXIST
+        const likeData: Prisma.PostsLikesCreateInput = {
+          user: { connect: { id: user.sub } },
+          post: { connect: { id: post_id } },
+        };
+        const like = await this.prisma.postsLikes.create({ data: likeData });
+        if (!like) {
+          throw new InternalServerErrorException(
+            `There was an error adding the like`,
+          );
+        }
+        return { likeStatus: 'CREATED' };
       }
+    } catch (error) {
+      // if (error.code === 'P2002') {
+      //   throw new BadRequestException('You have already liked this post.');
+      // }
       throw new BadRequestException('Error creating like: ' + error.message);
     }
   }
@@ -640,26 +659,70 @@ export class BlogService {
     return this.returnFormattedData(currentComment);
   }
 
-  async findAllPosts(filters: FilterPostsDto) {
+  async findAllPosts(filters: FilterPostsDto, user_id: number | null) {
     try {
       const appliedFilters: Prisma.PostsWhereInput =
         this.getPostFormattedFilters(filters);
 
+      // const posts = await this.prisma.posts.findMany({
+      //   where: appliedFilters,
+      //   select: {
+      //     ...this.getPostSelection(),
+      //     image: true,
+      //     published: true,
+      //     _count: {
+      //       select: {
+      //         comments: { where: { published: true } },
+      //         likes: true,
+      //       },
+      //     },
+      //   },
+      //   likes: {
+      //     where: {
+      //       userId: user_id, // Check if the current user has liked this post
+      //     },
+      //     select: {
+      //       id: true, // You only need to select one field to check for existence
+      //     },
+      //     take: 1, // Optimize: only need to find one like if it exists
+      //   },
+      //   orderBy: {
+      //     created_at: 'desc',
+      //   },
+      // });
+
       const posts = await this.prisma.posts.findMany({
         where: appliedFilters,
         select: {
-          ...this.getPostSelection(),
+          ...this.getPostSelection(), // Ensure this doesn't select 'likes'
           image: true,
           published: true,
           _count: {
             select: {
               comments: { where: { published: true } },
-              likes: true,
+              likes: true, // This correctly counts ALL likes for the post
             },
           },
+          // Here, use `include` for the specific user's like.
+          // This tells Prisma to fetch the 'likes' relation, but only those by the current user.
+          likes: {
+            // This is an `include` in terms of how Prisma processes it
+            where: {
+              user_id: user_id,
+            },
+            select: {
+              // Selecting just the 'id' is efficient
+              id: true,
+            },
+            take: 1, // We only need to know if at least one exists
+          },
+        },
+        orderBy: {
+          created_at: 'desc',
         },
       });
 
+      console.log('POSTS EN SERVICE CON LIKE: ', posts);
       const formattedPosts = posts.map((post) =>
         this.returnFormattedData(post),
       );

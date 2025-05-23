@@ -1,5 +1,9 @@
 import { apiMethods } from '@/shared/api';
-import { PostCommentResponse, ThreadResponse } from '../types';
+import {
+  PostCommentResponse,
+  ThreadResponse,
+  LikeThreadResponse
+} from '../types';
 
 export const blogApi = {
   getThreads: () => apiMethods.get<ThreadResponse[]>('/blog/post'),
@@ -13,8 +17,8 @@ export const blogApi = {
   createComment: (data: { post_id: number; message: string }) =>
     apiMethods.post<ThreadResponse>('/blog/comment', data),
 
-  toggleLike: (post_id: number) =>
-    apiMethods.post<ThreadResponse>(`/blog/post/${post_id}/like`)
+  toggleLike: async (post_id: number) =>
+    apiMethods.post<LikeThreadResponse>(`/blog/post/${post_id}/like`)
 
   // createMentee: (data: FormData) =>
   //   apiMethods.post<MenteeResponse>('/mentees', data),

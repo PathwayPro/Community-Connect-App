@@ -25,6 +25,7 @@ interface ThreadCardProps {
   setSelectedThread?: (thread: Thread) => void | undefined;
   setShowCommentSection?: (show: boolean) => void;
   showCommentSection?: boolean;
+  liked_by_user?: boolean;
 }
 
 interface CommentCardProps {
@@ -34,6 +35,7 @@ interface CommentCardProps {
   content: string;
   avatarUrl: string;
   timeAgo: string;
+  liked_by_user?: boolean;
 }
 
 const transformCommentResponseToCommentCardProps = (
@@ -45,6 +47,7 @@ const transformCommentResponseToCommentCardProps = (
   content: response.message,
   avatarUrl: '',
   timeAgo: response.created_at
+  // liked_by_user: response.liked_by_user
 });
 
 export const CommentsThreadCard = ({
@@ -56,6 +59,7 @@ export const CommentsThreadCard = ({
   likes: initialLikes,
   comments,
   avatarUrl,
+  liked_by_user,
   viewThreads,
   selectedThread,
   setSelectedThread,
@@ -64,7 +68,7 @@ export const CommentsThreadCard = ({
 }: ThreadCardProps) => {
   const [showCommentSearchbar, setShowCommentSearchbar] = useState(true);
   const [showCommentInput, setShowCommentInput] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(liked_by_user);
   const [likes, setLikes] = useState(initialLikes);
 
   const {

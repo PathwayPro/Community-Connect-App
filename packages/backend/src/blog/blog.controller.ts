@@ -12,7 +12,13 @@ import {
   UseInterceptors,
   Query,
 } from '@nestjs/common';
-import { PostEntity, Comment, Like, Save } from './entities/blog.entity';
+import {
+  PostEntity,
+  Comment,
+  Like,
+  Save,
+  LikeThreadResponse,
+} from './entities/blog.entity';
 import { BlogService } from './blog.service';
 import { CreatePostDto, CreateCommentDto } from './dto/create.dto';
 import { UpdatePostDto, UpdateCommentDto } from './dto/update.dto';
@@ -92,7 +98,7 @@ export class BlogController {
   @Roles('ADMIN', 'MENTOR', 'USER')
   @Post('/post/:post_id/like')
   @ApiParam({ name: 'post_id' })
-  @ApiCreatedResponse({ type: Like })
+  @ApiCreatedResponse({ type: LikeThreadResponse })
   @ApiInternalServerErrorResponse({
     description: 'Error adding your like to this post: [ERROR MESSAGE]',
   })
@@ -103,7 +109,7 @@ export class BlogController {
     description:
       'Creates a new like for a specific post or throws exception [Bad Request | Not Found | Internal Server Error]. \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   createLike(@GetUser() user: JwtPayload, @Param('post_id') post_id: string) {
     return this.blogService.createLike(user, +post_id);
   }
@@ -348,7 +354,7 @@ export class BlogController {
       date_from: filters.date_from ? new Date(filters.date_from) : null,
       date_to: filterDateTo ? new Date(filterDateTo.toISOString()) : null,
     };
-    return this.blogService.findAllPosts(searchFilters);
+    return this.blogService.findAllPosts(searchFilters, user?.sub);
   }
 
   @Public()
