@@ -18,6 +18,7 @@ import {
   Like,
   Save,
   LikeThreadResponse,
+  SaveThreadResponse,
 } from './entities/blog.entity';
 import { BlogService } from './blog.service';
 import { CreatePostDto, CreateCommentDto } from './dto/create.dto';
@@ -117,7 +118,7 @@ export class BlogController {
   @Roles('ADMIN', 'MENTOR', 'USER')
   @Post('/post/:post_id/save')
   @ApiParam({ name: 'post_id' })
-  @ApiCreatedResponse({ type: Save })
+  @ApiCreatedResponse({ type: SaveThreadResponse })
   @ApiInternalServerErrorResponse({
     description: 'Error saving post: [ERROR MESSAGE]',
   })
@@ -128,7 +129,7 @@ export class BlogController {
     description:
       'Saves a specific post for the logged user or throws exception [Bad Request | Not Found | Internal Server Error]. \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   createSave(@GetUser() user: JwtPayload, @Param('post_id') post_id: string) {
     return this.blogService.createSave(user, +post_id);
   }

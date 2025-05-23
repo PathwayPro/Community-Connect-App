@@ -96,7 +96,9 @@ export class BlogService {
         ? returnValue._count?.likes
         : undefined,
       liked_by_user: returnValue.likes?.length > 0 ? true : false,
+      saved_by_user: returnValue.saves?.length > 0 ? true : false,
       likes: undefined,
+      saves: undefined,
     };
 
     delete formattedReturnValue.message;
@@ -269,26 +271,40 @@ export class BlogService {
         throw new NotFoundException(`There is no post with ID #${post_id}`);
       }
 
-      // CREATE (ADD) SAVE
-      const saveData: Prisma.PostsSavesCreateInput = {
-        user: { connect: { id: user.sub } },
-        post: { connect: { id: post_id } },
-      };
-      const save = await this.prisma.postsSaves.create({
-        data: saveData,
-        select: {
-          id: true,
-          post_id: true,
-          user_id: true,
-          created_at: true,
+      // VERIFY IF SAVE EXISTS
+      const saveExist = await this.prisma.postsSaves.findFirst({
+        where: {
+          user_id: user.sub,
+          post_id,
         },
       });
 
-      return save;
-    } catch (error) {
-      if (error.code === 'P2002') {
-        throw new BadRequestException('You have already saved this post.');
+      if (saveExist) {
+        // REMOVE SAVE IF ALREADY EXIST
+        const deletedSave = await this.prisma.postsSaves.delete({
+          where: { id: saveExist.id },
+        });
+        if (!deletedSave) {
+          throw new InternalServerErrorException(
+            `There was an error unsaving the post`,
+          );
+        }
+        return { saveStatus: 'REMOVED' };
+      } else {
+        // CREATE (ADD) SAVE IF DON'T EXIST
+        const saveData: Prisma.PostsSavesCreateInput = {
+          user: { connect: { id: user.sub } },
+          post: { connect: { id: post_id } },
+        };
+        const save = await this.prisma.postsSaves.create({ data: saveData });
+        if (!save) {
+          throw new InternalServerErrorException(
+            `There was an error saving the post`,
+          );
+        }
+        return { saveStatus: 'CREATED' };
       }
+    } catch (error) {
       throw new BadRequestException('Error creating save: ' + error.message);
     }
   }
@@ -703,18 +719,15 @@ export class BlogService {
               likes: true, // This correctly counts ALL likes for the post
             },
           },
-          // Here, use `include` for the specific user's like.
-          // This tells Prisma to fetch the 'likes' relation, but only those by the current user.
           likes: {
-            // This is an `include` in terms of how Prisma processes it
-            where: {
-              user_id: user_id,
-            },
-            select: {
-              // Selecting just the 'id' is efficient
-              id: true,
-            },
-            take: 1, // We only need to know if at least one exists
+            where: { user_id: user_id },
+            select: { id: true },
+            take: 1,
+          },
+          saves: {
+            where: { user_id: user_id },
+            select: { id: true },
+            take: 1,
           },
         },
         orderBy: {
