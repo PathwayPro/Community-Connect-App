@@ -7,6 +7,7 @@ import { BaseThreadCard } from './base-thread-card';
 import { useState } from 'react';
 import { cn } from '@/shared/lib/utils';
 import { Badge } from '@/shared/components/ui/badge';
+import { useBlogStore } from '../../store';
 
 interface ThreadCardProps {
   id: number;
@@ -44,14 +45,17 @@ export const ThreadCard = ({
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
 
+  const { toggleLike } = useBlogStore();
+
   const handleLike = async () => {
-    if (!selectedThread?.id) {
+    if (!id) {
       return;
     }
-    const like = await toggleLike(selectedThread.id);
-
-    setIsLiked(!isLiked);
-    setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
+    const like = await toggleLike(id);
+    console.log('like desde el cambio:', like);
+    const liked: boolean = like ? true : false;
+    setIsLiked(liked);
+    setLikes((prev) => (liked ? prev + 1 : prev - 1));
   };
 
   // handle view thread

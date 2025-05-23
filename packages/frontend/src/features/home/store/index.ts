@@ -14,7 +14,7 @@ interface BlogState {
   fetchThreadComments: (post_id: number) => Promise<void>;
   createThread: (content: string) => Promise<void>;
   createComment: (post_id: number, content: string) => Promise<void>;
-  toggleLike: (post_id: number) => Promise<void>;
+  toggleLike: (post_id: number) => Promise<boolean>;
 }
 
 export const useBlogStore = create<BlogState>()(
@@ -129,6 +129,8 @@ export const useBlogStore = create<BlogState>()(
         try {
           console.log('TOGGLEANDO LIKE EN POST: ', post_id);
           const response = await blogApi.toggleLike(post_id);
+
+          return response.success ? true : false;
 
           console.log('| - - - - - - - > RESPONSE TOGGLEANDO LIKE:', response);
         } catch (error) {
