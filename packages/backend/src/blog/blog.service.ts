@@ -702,33 +702,6 @@ export class BlogService {
       const appliedFilters: Prisma.PostsWhereInput =
         this.getPostFormattedFilters(filters, user_id);
 
-      // const posts = await this.prisma.posts.findMany({
-      //   where: appliedFilters,
-      //   select: {
-      //     ...this.getPostSelection(),
-      //     image: true,
-      //     published: true,
-      //     _count: {
-      //       select: {
-      //         comments: { where: { published: true } },
-      //         likes: true,
-      //       },
-      //     },
-      //   },
-      //   likes: {
-      //     where: {
-      //       userId: user_id, // Check if the current user has liked this post
-      //     },
-      //     select: {
-      //       id: true, // You only need to select one field to check for existence
-      //     },
-      //     take: 1, // Optimize: only need to find one like if it exists
-      //   },
-      //   orderBy: {
-      //     created_at: 'desc',
-      //   },
-      // });
-
       const posts = await this.prisma.posts.findMany({
         where: appliedFilters,
         select: {
@@ -752,12 +725,23 @@ export class BlogService {
             take: 1,
           },
         },
-        orderBy: {
-          created_at: 'desc',
-        },
+        orderBy: [
+          {
+            likes:
+              filters?.order_by === 'most-liked'
+                ? { _count: 'desc' }
+                : undefined,
+          },
+          {
+            comments:
+              filters?.order_by === 'most-commented'
+                ? { _count: 'desc' }
+                : undefined,
+          },
+          { created_at: filters?.order_by === 'oldest' ? 'asc' : 'desc' },
+        ],
       });
 
-      console.log('POSTS EN SERVICE CON LIKE: ', posts);
       const formattedPosts = posts.map((post) =>
         this.returnFormattedData(post),
       );

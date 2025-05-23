@@ -9,10 +9,10 @@ import {
 
 export const blogApi = {
   getThreads: (params?: ThreadsParams) => {
-    let url_params = '?';
-    url_params += params?.filter ? 'filter=' + params.filter : '';
-    url_params += params?.order_by ? 'order=' + params.order_by : '';
-    url_params = url_params === '?' ? '' : url_params;
+    let url_params = '?filter=';
+    url_params += params?.filter ? params.filter : 'THREADS';
+    url_params += '&order_by=';
+    url_params += params?.order_by ? params.order_by : 'newest';
 
     return apiMethods.get<ThreadResponse[]>(`/blog/post${url_params}`);
   },

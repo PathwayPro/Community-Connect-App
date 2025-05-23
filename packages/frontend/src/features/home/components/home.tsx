@@ -52,8 +52,7 @@ export const Home = () => {
   const threads: Thread[] = rawThreads.map(transformThreadResponseToThread); // Transform the API response
 
   useEffect(() => {
-    console.log('FETCHEA THREADS DESDE USE EFFECT...', activeFilterTab);
-    fetchThreads({ filter: activeFilterTab });
+    fetchThreads({ filter: activeFilterTab, order_by: sort });
   }, [activeTab, sort, selectedTags, fetchThreads]); // Include fetchThreads in the dependency array
 
   const handleThreadSubmit = async (content: string, attachments: File[]) => {
@@ -80,7 +79,6 @@ export const Home = () => {
   };
 
   const filteredThreads = threads.filter((thread) => {
-    console.log('SALE ESE FILTRO... SIN API???');
     // if (activeTab === 'Tags') {
     //   if (selectedTags.length === 0) return true;
     //   return thread?.tags?.some((tag: string) => selectedTags.includes(tag)); // Adjust if your API returns tags differently
@@ -91,7 +89,6 @@ export const Home = () => {
   });
 
   const handleActiveTab = (tab: NavItemProps) => {
-    console.log('HANDLE ACTIVE TABS: ', tab);
     setActiveFilterTab(tab.filter || 'THREADS');
     setActiveTab(tab.label);
   };

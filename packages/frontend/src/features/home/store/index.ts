@@ -37,7 +37,7 @@ export const useBlogStore = create<BlogState>()(
           const response = await blogApi.getThreads(params);
           const data = response.data;
 
-          console.log('| - - - - - - - > DATA FROM BLOG STORE:', data, params);
+          // console.log('| - - - - - - - > DATA FROM BLOG STORE:', data, params);
 
           set({ threads: data, isLoading: false });
         } catch (error) {

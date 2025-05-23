@@ -63,7 +63,7 @@ export class FilterPostsDto {
   @ApiPropertyOptional({
     description: 'Fronted filter (sidebar)',
     example:
-      'Newest (ignored - default) | Oldest | Most Liked | Most commented',
+      'newest (ignored - default) | oldest | most-liked | most-commented',
   })
   @IsString()
   @IsOptional()
