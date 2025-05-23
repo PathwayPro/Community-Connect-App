@@ -26,10 +26,14 @@ export interface ThreadResponse {
   likes_count: number;
   comments_count: number;
   liked_by_user?: boolean;
+  saved_by_user?: boolean;
 }
 
 export interface LikeThreadResponse {
   likeStatus: string;
+}
+export interface SaveThreadResponse {
+  saveStatus: string;
 }
 
 export interface PostCommentResponse {

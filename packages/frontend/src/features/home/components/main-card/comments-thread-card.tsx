@@ -10,6 +10,7 @@ import { CommentCard } from '../comment-card';
 
 import { useBlogStore } from '../../store';
 import { PostCommentResponse } from '../../types';
+import { cn } from '@/shared/lib/utils';
 
 interface ThreadCardProps {
   id: number;
@@ -26,6 +27,7 @@ interface ThreadCardProps {
   setShowCommentSection?: (show: boolean) => void;
   showCommentSection?: boolean;
   liked_by_user?: boolean;
+  saved_by_user?: boolean;
 }
 
 interface CommentCardProps {
@@ -36,6 +38,7 @@ interface CommentCardProps {
   avatarUrl: string;
   timeAgo: string;
   liked_by_user?: boolean;
+  saved_by_user?: boolean;
 }
 
 const transformCommentResponseToCommentCardProps = (
@@ -47,7 +50,6 @@ const transformCommentResponseToCommentCardProps = (
   content: response.message,
   avatarUrl: '',
   timeAgo: response.created_at
-  // liked_by_user: response.liked_by_user
 });
 
 export const CommentsThreadCard = ({
@@ -60,6 +62,7 @@ export const CommentsThreadCard = ({
   comments,
   avatarUrl,
   liked_by_user,
+  saved_by_user,
   viewThreads,
   selectedThread,
   setSelectedThread,
@@ -69,6 +72,7 @@ export const CommentsThreadCard = ({
   const [showCommentSearchbar, setShowCommentSearchbar] = useState(true);
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [isLiked, setIsLiked] = useState(liked_by_user);
+  const [isSaved, setIsSaved] = useState(saved_by_user);
   const [likes, setLikes] = useState(initialLikes);
 
   const {
@@ -76,6 +80,7 @@ export const CommentsThreadCard = ({
     fetchThreadComments,
     createComment,
     toggleLike,
+    toggleSave,
     isLoading: commentsLoading,
     error: commentsError
   } = useBlogStore();
@@ -99,6 +104,16 @@ export const CommentsThreadCard = ({
 
     setIsLiked(!isLiked);
     setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
+  };
+
+  // handle save
+  const handleSave = async () => {
+    if (!selectedThread?.id) {
+      return;
+    }
+    const save = await toggleSave(selectedThread.id);
+
+    setIsSaved(!isSaved);
   };
 
   // handle comment click
@@ -198,8 +213,16 @@ export const CommentsThreadCard = ({
               <span>{comments}</span>
             </button>
           </div>
-          <button className="flex items-center gap-2 rounded-full p-1 text-gray-500 hover:bg-neutral-light-200">
-            <Bookmark className="h-5 w-5" />
+          <button
+            onClick={handleSave}
+            className="flex items-center gap-2 rounded-full p-1 text-gray-500 hover:bg-neutral-light-200"
+          >
+            <Bookmark
+              className={cn(
+                'h-5 w-5',
+                isSaved ? 'fill-primary-500 text-primary-500' : ''
+              )}
+            />
           </button>
         </BaseThreadCard.Actions>
 

@@ -4,7 +4,8 @@ import { blogApi } from '../api/blog-api';
 import {
   ThreadResponse,
   PostCommentResponse,
-  LikeThreadResponse
+  LikeThreadResponse,
+  SaveThreadResponse
 } from '../types';
 
 interface BlogState {
@@ -19,6 +20,7 @@ interface BlogState {
   createThread: (content: string) => Promise<void>;
   createComment: (post_id: number, content: string) => Promise<void>;
   toggleLike: (post_id: number) => Promise<LikeThreadResponse>;
+  toggleSave: (post_id: number) => Promise<SaveThreadResponse>;
 }
 
 export const useBlogStore = create<BlogState>()(
@@ -64,23 +66,6 @@ export const useBlogStore = create<BlogState>()(
           });
         }
       },
-
-      // createMentor: async (mentorData) => {
-      //         set({ isLoading: true, error: null });
-      //         try {
-      //           const response = await mentorshipApi.createMentor(mentorData);
-      //           set((state) => ({
-      //             mentors: [...state.mentors, response.data],
-      //             isLoading: false
-      //           }));
-      //           return response;
-      //         } catch (error) {
-      //           set({
-      //             error: error instanceof Error ? error.message : 'An error occurred',
-      //             isLoading: false
-      //           });
-      //         }
-      //       },
 
       createThread: async (content: string) => {
         set({ isLoading: true, error: null });
@@ -134,6 +119,20 @@ export const useBlogStore = create<BlogState>()(
           const response = await blogApi.toggleLike(post_id);
 
           return response.data.likeStatus === 'CREATED';
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+        }
+      },
+
+      toggleSave: async (post_id: number) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await blogApi.toggleSave(post_id);
+
+          return response.data.saveStatus === 'CREATED';
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'An error occurred',

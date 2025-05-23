@@ -23,6 +23,7 @@ interface ThreadCardProps {
   isSaved?: boolean;
   isLiked?: boolean;
   liked_by_user?: boolean;
+  saved_by_user?: boolean;
   isCommented?: boolean;
   viewThreads: () => void;
   selectedThread?: Thread;
@@ -44,14 +45,15 @@ export const ThreadCard = ({
   selectedThread,
   setSelectedThread,
   setShowCommentSection,
-  isSaved,
   liked_by_user,
-  isCommented
+  isCommented,
+  saved_by_user
 }: ThreadCardProps) => {
   const [isLiked, setIsLiked] = useState(liked_by_user);
+  const [isSaved, setIsSaved] = useState(saved_by_user);
   const [likes, setLikes] = useState(initialLikes);
 
-  const { toggleLike } = useBlogStore();
+  const { toggleLike, toggleSave } = useBlogStore();
 
   const handleLike = async () => {
     if (!id) {
@@ -61,6 +63,15 @@ export const ThreadCard = ({
     const liked: boolean = like ? true : false;
     setIsLiked(liked);
     setLikes((prev) => (liked ? prev + 1 : prev - 1));
+  };
+
+  const handleSave = async () => {
+    if (!id) {
+      return;
+    }
+    const save = await toggleSave(id);
+    const saved: boolean = save ? true : false;
+    setIsSaved(saved);
   };
 
   // handle view thread
@@ -80,7 +91,7 @@ export const ThreadCard = ({
           'https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png',
         likes,
         comments,
-        isSaved: isSaved,
+        saved_by_user: isSaved,
         liked_by_user: isLiked
       });
     }
@@ -164,7 +175,10 @@ export const ThreadCard = ({
               <span>{comments}</span>
             </button>
           </div>
-          <button className="flex items-center gap-2 rounded-full p-1 text-gray-500 hover:bg-neutral-light-200">
+          <button
+            onClick={handleSave}
+            className="flex items-center gap-2 rounded-full p-1 text-gray-500 hover:bg-neutral-light-200"
+          >
             <Bookmark
               className={cn(
                 'h-5 w-5',
