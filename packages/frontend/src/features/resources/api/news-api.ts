@@ -12,7 +12,7 @@ export const newsApi = {
   updateNews: (id: string, data: UpdateNewsDto) =>
     apiMethods.patch<News>(`/news/${id}`, data),
 
-  editNews: (id: string, data: UpdateNewsDto) =>
+  editNews: (id: string, data: FormData | UpdateNewsDto) =>
     apiMethods.put<News>(`/news/${id}`, data),
 
   deleteNews: (id: string) => apiMethods.delete<News>(`/news/${id}`)

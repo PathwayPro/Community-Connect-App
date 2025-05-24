@@ -8,6 +8,9 @@ import {
   Put,
   UseGuards,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFiles,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
@@ -15,6 +18,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { RolesGuard } from '../auth/guards';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
@@ -66,16 +70,51 @@ export class UsersController {
   }
 
   @Put(':id')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'pictureUploadLink', maxCount: 1 },
+      { name: 'resumeUploadLink', maxCount: 1 },
+    ]),
+  )
   async updateUser(
     @GetUser('sub') currentUserId: number,
     @Param('id', ParseIntPipe) targetUserId: number,
     @Body() updateUserDto: UpdateUserDto,
+    @UploadedFiles()
+    files: {
+      pictureUploadLink?: Express.Multer.File[];
+      resumeUploadLink?: Express.Multer.File[];
+    },
   ) {
-    return await this.usersService.updateUser(
-      currentUserId,
-      targetUserId,
-      updateUserDto,
-    );
+    try {
+      console.log('Request received:', {
+        currentUserId,
+        targetUserId,
+        updateUserDto,
+        files: files ? Object.keys(files) : 'no files',
+      });
+
+      const pictureUploadLink = files?.pictureUploadLink?.[0];
+      const resumeUploadLink = files?.resumeUploadLink?.[0];
+
+      if (!updateUserDto) {
+        throw new BadRequestException('Update data is required');
+      }
+
+      return await this.usersService.updateUser(
+        currentUserId,
+        targetUserId,
+        updateUserDto,
+        pictureUploadLink,
+        resumeUploadLink,
+      );
+    } catch (error) {
+      console.error('Error in updateUser:', error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message || 'Failed to update user');
+    }
   }
 
   @Delete(':id')

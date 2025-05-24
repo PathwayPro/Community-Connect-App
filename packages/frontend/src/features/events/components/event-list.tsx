@@ -153,10 +153,14 @@ export const EventList = () => {
             title="No events found"
             description="There are no events for this time period"
             icon={Ticket}
-            action={{
-              label: 'Create New Event',
-              onClick: () => router.push('/events/create')
-            }}
+            action={
+              canCreateEvent
+                ? {
+                    label: 'Create New Event',
+                    onClick: () => router.push('/events/create')
+                  }
+                : undefined
+            }
           />
         </div>
       );
@@ -208,10 +212,14 @@ export const EventList = () => {
               title="No events created yet"
               description="Create a new event to get started"
               icon={Ticket}
-              action={{
-                label: 'Create New Event',
-                onClick: () => router.push('/events/create')
-              }}
+              action={
+                canCreateEvent
+                  ? {
+                      label: 'Create New Event',
+                      onClick: () => router.push('/events/create')
+                    }
+                  : undefined
+              }
             />
           </div>
         ) : (

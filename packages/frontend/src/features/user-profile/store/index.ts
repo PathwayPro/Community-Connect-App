@@ -24,7 +24,7 @@ interface UserState {
   fetchSkills: () => Promise<UserResponse<SkillsResponse[]>>;
   fetchProfessions: () => Promise<UserResponse<string[]>>;
   updateUser: (
-    data: UserProfile,
+    data: FormData,
     id: number
   ) => Promise<UserResponse<UserProfile>>;
   deleteUser: (id: number) => Promise<UserResponse<UserProfile>>;
@@ -149,12 +149,20 @@ export const useUserStore = create<UserState>()(
         }
       },
 
-      updateUser: async (data: UserProfile, id: number) => {
+      updateUser: async (data: FormData, id: number) => {
         try {
+          for (const pair of data.entries()) {
+            console.log('pair', pair);
+          }
+
           set({ isLoading: true, error: null });
           const response = await userApi.updateUserProfile(data, id);
-          const usersResponse = await userApi.getUsers();
-          set({ users: usersResponse.data, isLoading: false });
+
+          if (!response.success) {
+            throw new Error('Failed to update user');
+          }
+
+          set({ user: response.data, isLoading: false });
           return response;
         } catch (error) {
           set({ error: 'Failed to update user', isLoading: false });

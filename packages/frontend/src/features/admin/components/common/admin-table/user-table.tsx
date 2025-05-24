@@ -11,14 +11,15 @@ import {
   getCoreRowModel,
   useReactTable
 } from '@tanstack/react-table';
-import { columns } from './column';
-import { UserProfile } from '@/features/user-profile/types';
+import { useColumns } from './column';
+import { AdminUser } from '../../../types';
 
 interface UsersTableProps {
-  users: UserProfile[];
+  users: AdminUser[];
 }
 
 export const UsersTable = ({ users }: UsersTableProps) => {
+  const columns = useColumns();
   const table = useReactTable({
     data: users,
     columns,

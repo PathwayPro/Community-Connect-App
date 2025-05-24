@@ -9,8 +9,6 @@ export const newsFormSchema = z.object({
   title: z.string({
     required_error: 'Title is required'
   }),
-  // subtitle: z.string().optional(),
-  // keywords: z.string().optional(),
   details: z.string({
     required_error: 'Content is required'
   }),
@@ -76,9 +74,26 @@ export const resourceFormSchema = z.object({
       required_error: 'Details are required'
     })
     .min(10, 'Details must be at least 10 characters'),
-  type: z.enum(resourceTypeValues),
-  link: z.string().regex(urlPattern, 'Must be a valid URL').optional(),
-  file: z.instanceof(File).optional()
+  type: z.enum(resourceTypeValues, {
+    required_error: 'Resource type is required'
+  }),
+  link: z
+    .string({
+      required_error: 'Link is required'
+    })
+    .regex(urlPattern, 'Must be a valid URL'),
+  file: z
+    .any()
+    .optional()
+    .refine(
+      (file) => {
+        if (!file) return true;
+        return file instanceof File;
+      },
+      {
+        message: 'Invalid file format'
+      }
+    )
 });
 
 export type ResourceFormValues = z.infer<typeof resourceFormSchema>;

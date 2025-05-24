@@ -5,7 +5,7 @@ import { Button } from '@/shared/components/ui/button';
 import { UserPlus } from 'lucide-react';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { UsersTable } from './admin-table/user-table';
-import { useUserStore } from '@/features/user-profile/store';
+import { useAdminStore } from '../../store';
 import { useEffect } from 'react';
 import { PaginationComponent } from '@/shared/components/pagination/pagination';
 
@@ -14,11 +14,11 @@ export const UserManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  const { users, isLoading, fetchUsers } = useUserStore();
+  const { users, isLoading, fetchUsers } = useAdminStore();
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    fetchUsers({ page: currentPage, limit: ITEMS_PER_PAGE });
+  }, [fetchUsers, currentPage]);
 
   const filteredUsers = useMemo(() => {
     if (!searchQuery) return users;
@@ -26,8 +26,7 @@ export const UserManagement = () => {
       (user) =>
         user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (user.email &&
-          user.email.toLowerCase().includes(searchQuery.toLowerCase()))
+        user.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [users, searchQuery]);
 

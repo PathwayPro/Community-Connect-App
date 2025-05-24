@@ -1,9 +1,9 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import {
-  NewsForm,
+  NewsFormWrapper,
   NewsList,
-  EditNewsForm
+  EditNewsFormWrapper
 } from '@/features/resources/components';
 
 interface NewsPageProps {
@@ -31,7 +31,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
       return (
         <Suspense fallback={<NewsFormSkeleton />}>
           <div className="flex w-full justify-center">
-            <NewsForm />
+            <NewsFormWrapper />
           </div>
         </Suspense>
       );
@@ -42,7 +42,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
       return (
         <Suspense fallback={<NewsFormSkeleton />}>
           <div className="flex w-full justify-center">
-            <EditNewsForm id={id} />
+            <EditNewsFormWrapper id={id} />
           </div>
         </Suspense>
       );

@@ -6,6 +6,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import {
@@ -19,7 +20,8 @@ import { EmailService } from '../auth/services/email.service';
 import { findUserById, userEmailExists } from 'src/common/utils/helper';
 import { RolesEnum } from 'src/auth/util';
 import { SettingsService } from '../settings/settings.services';
-
+import { FileValidationEnum } from 'src/files/util/files-validation.enum';
+import { FilesService } from 'src/files/files.service';
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
@@ -29,6 +31,7 @@ export class UsersService {
     private readonly authService: AuthService,
     private readonly emailService: EmailService,
     private readonly settingsService: SettingsService,
+    private readonly filesService: FilesService,
   ) {}
 
   // User Registration and Creation
@@ -193,8 +196,15 @@ export class UsersService {
     currentUserId: number,
     targetUserId: number,
     updateData: UpdateUserDto,
+    file?: Express.Multer.File,
+    resumeFile?: Express.Multer.File,
   ): Promise<ReadUserDto> {
+    console.log('updateData', updateData);
+
     try {
+      let fileLink = null;
+      let resumeLink = null;
+
       const existingUser = await this.prisma.users.findUnique({
         where: { id: targetUserId },
       });
@@ -213,14 +223,44 @@ export class UsersService {
         );
       }
 
-      // Update skills if provided
-      if (updateData.skills) {
-        const updatedSkills = await this.addUserSkillsFormatted(
-          targetUserId,
-          updateData.skills as unknown as number[],
+      // update the user's profile picture and only attempt yo upload if file was provided
+      if (file) {
+        const uploadedFile = await this.filesService.upload(
+          FileValidationEnum.PROFILE_PICTURE,
+          file,
         );
 
-        if (!updatedSkills) {
+        if (!uploadedFile) {
+          throw new BadRequestException('Failed to upload file');
+        }
+
+        fileLink = `${uploadedFile.path}/${uploadedFile.fileName}`;
+      }
+
+      // update the user's resume and only attempt yo upload if resumeFile was provided
+      if (resumeFile) {
+        const uploadedResume = await this.filesService.upload(
+          FileValidationEnum.RESUME,
+          resumeFile,
+        );
+
+        if (!uploadedResume) {
+          throw new BadRequestException('Failed to upload resume');
+        }
+
+        resumeLink = `${uploadedResume.path}/${uploadedResume.fileName}`;
+      }
+
+      // Handle skills update - if skills is provided (even empty array), update them
+      if (updateData.skills !== undefined) {
+        try {
+          const updatedSkills = await this.addUserSkillsFormatted(
+            targetUserId,
+            updateData.skills as unknown as number[],
+          );
+          // No need to check updatedSkills since addUserSkillsFormatted handles empty arrays
+        } catch (error) {
+          this.logger.error(`Error updating skills: ${error.message}`);
           throw new InternalServerErrorException(
             'There was an error updating your skills. Please try again later.',
           );
@@ -240,7 +280,8 @@ export class UsersService {
           profession: updateData.profession,
           experience: updateData.experience,
           bio: updateData.bio,
-          picture_upload_link: updateData.pictureUploadLink,
+          picture_upload_link: fileLink,
+          resume_upload_link: resumeLink,
           arrival_in_canada: updateData.arrivalInCanada,
           goal_id: updateData.goalId,
           linkedin_link: updateData.linkedinLink,
@@ -289,37 +330,53 @@ export class UsersService {
   }
 
   async deleteUser(
-    userId: number,
     currentUserId: number,
+    targetUserId: number,
   ): Promise<{ message: string }> {
-    if (isNaN(userId)) {
+    if (isNaN(targetUserId)) {
       throw new HttpException('Invalid user ID', HttpStatus.BAD_REQUEST);
     }
 
     try {
-      const user = await findUserById(this.prisma, userId);
+      // check if the user is an admin
+      const currentUser = await this.prisma.users.findUnique({
+        where: { id: currentUserId },
+        select: { id: true, role: true },
+      });
 
-      if (!user) {
-        throw new NotFoundException(`User with ID ${userId} not found`);
+      if (!currentUser) {
+        throw new NotFoundException(`User with ID ${currentUserId} not found`);
       }
 
-      if (user.id !== currentUserId && user.role !== RolesEnum.ADMIN) {
+      // check if the target user exists
+      const targetUser = await findUserById(this.prisma, targetUserId);
+
+      if (!targetUser) {
+        throw new NotFoundException(`User with ID ${targetUserId} not found`);
+      }
+
+      // check if the current user is same as target user or current user is an admin
+      if (
+        currentUser.id !== targetUser.id &&
+        currentUser.role !== RolesEnum.ADMIN
+      ) {
         throw new UnauthorizedException(
           'You are not allowed to delete this user',
         );
       }
 
       await this.prisma.users.update({
-        where: { id: userId },
+        where: { id: targetUserId },
         data: { deleted_at: true },
       });
-      return { message: `User with ID ${userId} deleted successfully` };
+
+      return { message: `User with ID ${targetUserId} deleted successfully` };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
 
-      this.logger.error(`Failed to delete user ${userId}:`, error);
+      this.logger.error(`Failed to delete user ${targetUserId}:`, error);
       throw new HttpException(
         'Failed to delete user',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -491,11 +548,32 @@ export class UsersService {
     skills: string | number[],
   ) {
     try {
+      // Handle null/undefined input
+      if (!skills) {
+        return [];
+      }
+
       // Transform skills input into array of integers
-      const skillsToArray =
-        typeof skills === 'string'
-          ? JSON.parse(skills).map((item: any) => parseInt(item, 10))
-          : skills.map((item: any) => parseInt(item, 10));
+      let skillsToArray: number[];
+      try {
+        skillsToArray =
+          typeof skills === 'string'
+            ? JSON.parse(skills).map((item: any) => parseInt(item, 10))
+            : skills.map((item: any) => parseInt(item, 10));
+      } catch (parseError) {
+        this.logger.error(`Error parsing skills: ${parseError.message}`);
+        return [];
+      }
+
+      // Remove previous skills for the user
+      await this.prisma.usersSkills.deleteMany({
+        where: { user_id: user_id },
+      });
+
+      // If no skills provided or parsing failed, return empty array
+      if (!skillsToArray || !skillsToArray.length) {
+        return [];
+      }
 
       // Validate only existing skills and return formatted values
       const validSkillIds = await this.prisma.skills
@@ -510,25 +588,17 @@ export class UsersService {
           })),
         );
 
-      // Remove previous skills for the user
-      await this.prisma.usersSkills.deleteMany({
-        where: { user_id: user_id },
-      });
-
       // Add validated skills to the user
-      const userSkills = await this.prisma.usersSkills.createMany({
-        data: validSkillIds,
-        skipDuplicates: true,
-      });
-
-      if (!userSkills || userSkills.count < 1) {
-        throw new InternalServerErrorException(
-          'There was an error saving your skills. Please try again later or edit your profile.',
-        );
+      if (validSkillIds.length > 0) {
+        await this.prisma.usersSkills.createMany({
+          data: validSkillIds,
+          skipDuplicates: true,
+        });
       }
 
       return validSkillIds;
     } catch (error) {
+      this.logger.error(`Error in addUserSkillsFormatted: ${error.message}`);
       throw new InternalServerErrorException(
         'Error saving skills: ' + error.message,
       );

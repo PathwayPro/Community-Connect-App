@@ -3,13 +3,13 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
   Query,
   UseInterceptors,
   UploadedFile,
+  Put,
 } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/create-news.dto';
@@ -156,7 +156,7 @@ export class NewsController {
   }
 
   @Roles('ADMIN')
-  @Patch(':id')
+  @Put(':id')
   @UseInterceptors(FileInterceptor('file'))
   @ApiBody({ type: UpdateNewsDto })
   @ApiOkResponse({ type: News })
@@ -175,6 +175,7 @@ export class NewsController {
     @Body() updateNewsDto: UpdateNewsDto,
     @UploadedFile() file: Express.Multer.File | null,
   ) {
+    console.log('UPDATE NEWS:', updateNewsDto);
     const updateNews: UpdateNewsDto = {
       title: updateNewsDto.title,
       details: updateNewsDto.details,
@@ -185,6 +186,7 @@ export class NewsController {
           ? updateNewsDto.published === 'true'
           : updateNewsDto.published,
     };
+
     return this.newsService.update(+id, updateNews, file);
   }
 

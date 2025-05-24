@@ -314,6 +314,7 @@ model Resources {
   updated_at DateTime @default(now())
   user       users    @relation(fields: [user_id], references: [id])
   user_id    Int
+  file       String?
 }
 
 // INTERESTS

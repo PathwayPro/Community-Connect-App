@@ -29,11 +29,17 @@ import { SalaryRangesModule } from './salary_ranges/salary_ranges.module';
 import { SettingsModule } from './settings/settings.module';
 import { ContactUsModule } from './contact_us/contact_us.module';
 import { SkillsModule } from './skills/skills.module';
-
+import { AdminModule } from './admin/admin.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public', 'uploads'),
+      serveRoot: '/uploads',
     }),
     JwtModule.registerAsync({
       global: true,
@@ -65,6 +71,7 @@ import { SkillsModule } from './skills/skills.module';
     SettingsModule,
     ContactUsModule,
     SkillsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [

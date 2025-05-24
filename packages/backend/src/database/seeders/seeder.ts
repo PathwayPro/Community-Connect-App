@@ -6,6 +6,8 @@ import { UsersData } from './data/users.seed';
 import { PrismaClient } from '@prisma/client';
 import { GoalsData } from './data/goals.seed';
 import { InterestsData } from './data/interests';
+import { SkillsData } from './data/skills.seed';
+import { UsersSkillsData } from './data/users-skills.seed';
 
 const prisma = new PrismaClient();
 
@@ -13,6 +15,16 @@ const emptyTables = async () => {
   try {
     // DELETING IN ORDER TO PREVENT FK ERRORS
     console.log('\n\n 1. DELETING DATA (IN ORDER) TO PREVENT FK ERRORS:\n');
+
+    // USERS-SKILLS
+    const usersSkillsStatus = (await prisma.usersSkills.deleteMany({}))
+      ? 'OK'
+      : 'ERROR';
+    console.log(`     - USERS SKILLS (${usersSkillsStatus}!)`);
+
+    // SKILLS
+    const skillsStatus = (await prisma.skills.deleteMany({})) ? 'OK' : 'ERROR';
+    console.log(`     - SKILLS (${skillsStatus}!)`);
 
     // USERS-INTERESTS
     const usersInterestsStatus = (await prisma.usersInterests.deleteMany({}))
@@ -286,6 +298,50 @@ const seedUsersInterests = async () => {
     }
 }
 */
+const seedSkills = async () => {
+  try {
+    console.log(
+      `\n\n\n 14. SEEDING TABLE SKILLS:   (${SkillsData.length} records)\n`,
+    );
+    for (const skill of SkillsData) {
+      if (await prisma.skills.create({ data: skill }))
+        console.log(`     SKILL ID: ${skill.id} created - - - - - - - > OK! `);
+      else
+        console.log(
+          `     SKILL ID: ${skill.id} created - - - - - - - > ERROR! `,
+        );
+    }
+  } catch (error) {
+    throw new InternalServerErrorException(
+      'There was an error seeding skills:',
+      error,
+    );
+  }
+};
+
+const seedUsersSkills = async () => {
+  try {
+    console.log(
+      `\n\n\n 15. SEEDING TABLE USERS-SKILLS:   (${UsersSkillsData.length} records)\n`,
+    );
+    for (const userSkill of UsersSkillsData) {
+      if (await prisma.usersSkills.create({ data: userSkill }))
+        console.log(
+          `     USER-SKILL: User ${userSkill.user_id} - Skill ${userSkill.skill_id} created - - - - - - - > OK! `,
+        );
+      else
+        console.log(
+          `     USER-SKILL: User ${userSkill.user_id} - Skill ${userSkill.skill_id} created - - - - - - - > ERROR! `,
+        );
+    }
+  } catch (error) {
+    throw new InternalServerErrorException(
+      'There was an error seeding user-skill relationships:',
+      error,
+    );
+  }
+};
+
 const seedAll = async () => {
   console.log(
     '\n\n         - - - - - - - - - - - - - - \n       | R U N N I N G   S E E D E R | \n         - - - - - - - - - - - - - - \n\n',
@@ -304,6 +360,8 @@ const seedAll = async () => {
   // await seedNews()
   // await seedResources()
   await seedInterests();
+  await seedSkills();
+  await seedUsersSkills();
   // await seedUsersInterests()
 };
 

@@ -31,7 +31,7 @@ export interface UserProfile {
   countryOfOrigin?: string;
   workStatus?: string;
   companyName?: string;
-  skills?: string[];
+  skills?: number[];
   activelySearching?: boolean;
   status?: string;
   updatedAt?: string;

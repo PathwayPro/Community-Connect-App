@@ -1,3 +1,4 @@
+import { PDFPreview } from '@/shared/components/pdf/pdf-preview';
 import { Button } from '@/shared/components/ui/button';
 import {
   Dialog,
@@ -8,27 +9,28 @@ import {
 } from '@/shared/components/ui/dialog';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { LinkIcon } from 'lucide-react';
-import Image from 'next/image';
 
 interface ResourcePreviewCardProps {
   isOpen: boolean;
   onClose: () => void;
-  image: string;
   title: string;
   details: string;
   link: string;
   type: string;
+  file: string;
 }
 
 export function ResourcePreviewCard({
   isOpen,
   onClose,
-  image,
   title,
   details,
   link,
-  type
+  type,
+  file
 }: ResourcePreviewCardProps) {
+  console.log('file in preview card: ', file);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="min-w-[1000px]">
@@ -43,14 +45,17 @@ export function ResourcePreviewCard({
 
         <div className="flex h-[688px] flex-col gap-4 rounded-2xl bg-neutral-light-300 p-4">
           <ScrollArea className="h-[500px]">
-            {/* <div className="relative aspect-video h-[500px] w-full"> */}
-            <Image
-              src={image || '/event/placeholder-2.jpg'}
-              alt={title}
-              fill
-              className="h-full w-[350px] rounded-2xl"
+            <PDFPreview
+              filePath={file}
+              showControls={true}
+              onDownload={() => {
+                // Optional: handle download
+                window.open(
+                  `${process.env.NEXT_PUBLIC_API_URL}/files/${file}`,
+                  '_blank'
+                );
+              }}
             />
-            {/* </div> */}
           </ScrollArea>
           <h2 className="text-h3 font-semibold">{title}</h2>
 

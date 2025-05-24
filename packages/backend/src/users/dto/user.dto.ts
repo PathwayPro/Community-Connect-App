@@ -156,14 +156,6 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  pictureUploadLink?: string;
-
-  @IsOptional()
-  @IsString()
-  resumeUploadLink?: string;
-
-  @IsOptional()
-  @IsString()
   linkedinLink?: string;
 
   @IsOptional()

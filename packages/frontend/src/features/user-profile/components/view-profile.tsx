@@ -160,7 +160,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
         label: 'Skills',
         value: displayedUser?.skills
           ? displayedUser.skills
-              .map((skillId: string) => getSkillLabel(skillId, skills))
+              .map((skillId: number) => getSkillLabel(skillId, skills))
               .join(', ')
           : 'Not specified'
       }

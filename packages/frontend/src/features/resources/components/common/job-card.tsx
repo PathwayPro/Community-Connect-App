@@ -21,7 +21,7 @@ interface JobCardProps {
     from: number;
     to: number;
   };
-  file?: File;
+  image?: string;
   onLearnMore: () => void;
 }
 
@@ -34,11 +34,15 @@ export function JobCard({
   link_apply,
   experience,
   salary_range,
-  file,
+  image,
   onLearnMore
 }: JobCardProps) {
+  console.log('image in the job card :', image);
+
   const location = `${city}, ${province}`;
-  const companyLogoUrl = file ? URL.createObjectURL(file) : undefined;
+  const companyLogoUrl = image
+    ? `${process.env.NEXT_PUBLIC_API_URL}/files/${image}`
+    : undefined;
 
   const handleApply = () => {
     window.open(link_apply, '_blank');

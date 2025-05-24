@@ -5,14 +5,36 @@ import { FormInput } from '@/shared/components/form/form-input';
 import { FormTextarea } from '@/shared/components/form/form-textarea';
 import { resourceTypes } from '../../lib/constants/enums';
 import { useFormContext } from 'react-hook-form';
+import { FileUpload } from '@/shared/components/upload/file-upload';
 
-export const ResourceForm = () => {
+interface ResourceFormProps {
+  onFileUpload: (files: File[]) => Promise<void>;
+}
+
+export const ResourceForm = ({ onFileUpload }: ResourceFormProps) => {
   const {
-    formState: { errors }
+    formState: { errors },
+    setValue
   } = useFormContext();
+
+  const handleFileUpload = async (files: File[]) => {
+    if (files.length > 0) {
+      setValue('file', files[0], { shouldValidate: true });
+      await onFileUpload(files);
+    }
+  };
 
   return (
     <div className="flex w-full flex-col gap-4">
+      <FileUpload
+        title="Upload Resource File"
+        maxSize={10}
+        acceptedFileTypes={['JPG', 'JPEG', 'PNG', 'PDF', 'DOC', 'DOCX']}
+        multiple={false}
+        uploadIcon="fileIcon"
+        onUpload={handleFileUpload}
+      />
+
       <FormSelect
         name="type"
         label="Resource Type"
@@ -26,7 +48,7 @@ export const ResourceForm = () => {
           name="title"
           label="Resource Title"
           placeholder="Enter resource title"
-          customError="Title is required"
+          customError={errors.title?.message as string}
           required
         />
       </div>
@@ -35,7 +57,7 @@ export const ResourceForm = () => {
         name="details"
         label="Resource Details"
         placeholder="Write resource details..."
-        customError="Details are required"
+        customError={errors.details?.message as string}
         maxLength={400}
         required
       />
@@ -48,6 +70,7 @@ export const ResourceForm = () => {
           leftLabel="https://"
           placeholder="Enter resource link"
           customError={errors.link?.message as string}
+          required
         />
       </div>
     </div>

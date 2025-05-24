@@ -21,7 +21,7 @@ import {
 } from '@/shared/components/ui/select';
 import { resourceTypes } from '../lib/constants/enums';
 import { ExpandedJobCard } from './common/expanded-job-card';
-import { News, Resource } from '@/features/resources/types';
+import { News } from '@/features/resources/types';
 import { useNewsStore } from '../store/news.store';
 import { useEffect } from 'react';
 import { useResourcesStore } from '../store/resources.store';
@@ -57,10 +57,6 @@ const filterFeaturedNews = (news: News[]) => {
   return news.filter((item) => item.type === 'FEATURED_POST');
 };
 
-const filterResources = (resources: Resource[], type: string) => {
-  return resources.filter((item) => item.type === type);
-};
-
 export const NewsList = () => {
   const router = useRouter();
   const { news, fetchNews, isLoading: isNewsLoading } = useNewsStore();
@@ -76,7 +72,7 @@ export const NewsList = () => {
     isLoading: isOpportunitiesLoading
   } = useOpportunityStore();
 
-  const { hasPermission, role } = useRole();
+  const { hasPermission } = useRole();
   const { isLoading: isUserLoading } = useUserStore();
 
   // Don't render permission-dependent UI until user data is loaded
@@ -84,16 +80,6 @@ export const NewsList = () => {
   const canCreateResource = !isUserLoading && hasPermission('create:resource');
   const canCreateOpportunity =
     !isUserLoading && hasPermission('create:opportunity');
-
-  // Add debug logging to help troubleshoot
-  useEffect(() => {
-    console.log('Current user role:', role);
-    console.log('Permission checks:', {
-      canCreateNews,
-      canCreateResource,
-      canCreateOpportunity
-    });
-  }, [role, canCreateNews, canCreateResource, canCreateOpportunity]);
 
   useEffect(() => {
     fetchNews();
@@ -108,6 +94,8 @@ export const NewsList = () => {
   );
   const [selectedResourceType, setSelectedResourceType] =
     useState<string>('ALL');
+
+  console.log('news hereeeee: ', opportunities);
 
   // Filter news items by category
   const newsItems = news;
@@ -130,7 +118,7 @@ export const NewsList = () => {
   const ITEMS_PER_PAGE = 10;
 
   // Pagination helper functions
-  const paginateItems = <T,>(items: T[], page: number) => {
+  const paginateItems = <T,>(items: T[], page: number): T[] => {
     const startIndex = (page - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     return items.slice(startIndex, endIndex);
@@ -152,7 +140,11 @@ export const NewsList = () => {
   const filteredResources =
     selectedResourceType === 'ALL'
       ? resourceItems
-      : filterResources(resourceItems, selectedResourceType);
+      : resourceItems.filter((item) => {
+          const itemType =
+            typeof item.type === 'string' ? item.type : item.type[0]?.value;
+          return itemType === selectedResourceType;
+        });
 
   const paginatedResources = paginateItems(filteredResources, resourcePage);
 
@@ -162,10 +154,14 @@ export const NewsList = () => {
       icon={Newspaper}
       title="No News Available"
       description="There are no news articles available at the moment."
-      action={{
-        label: 'Create News Article',
-        onClick: () => router.push('/resources/create?mode=news')
-      }}
+      action={
+        canCreateNews
+          ? {
+              label: 'Create News Article',
+              onClick: () => router.push('/resources/create?mode=news')
+            }
+          : undefined
+      }
     />
   );
 
@@ -174,10 +170,15 @@ export const NewsList = () => {
       icon={FileText}
       title="No Resources Available"
       description="There are no resources in the content library that match your selected type."
-      action={{
-        label: 'Add Resource',
-        onClick: () => router.push('/resources/create?mode=contentLibrary')
-      }}
+      action={
+        canCreateResource
+          ? {
+              label: 'Add Resource',
+              onClick: () =>
+                router.push('/resources/create?mode=contentLibrary')
+            }
+          : undefined
+      }
     />
   );
 
@@ -186,10 +187,14 @@ export const NewsList = () => {
       icon={Briefcase}
       title="No Opportunities Available"
       description="There are no job opportunities available at the moment."
-      action={{
-        label: 'Create Opportunity',
-        onClick: () => router.push('/resources/create?mode=opportunities')
-      }}
+      action={
+        canCreateOpportunity
+          ? {
+              label: 'Create Opportunity',
+              onClick: () => router.push('/resources/create?mode=opportunities')
+            }
+          : undefined
+      }
     />
   );
 
@@ -402,7 +407,11 @@ export const NewsList = () => {
                   <>
                     <div className="grid grid-cols-2 gap-6">
                       {paginatedResources.map((item) => (
-                        <ResourceCard key={item.id} {...item} />
+                        <ResourceCard
+                          key={item.id}
+                          {...item}
+                          file={item.file || ''}
+                        />
                       ))}
                     </div>
                     <PaginationComponent

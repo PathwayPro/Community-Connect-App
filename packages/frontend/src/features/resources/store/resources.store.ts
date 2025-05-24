@@ -1,22 +1,21 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Resource } from '../types';
+import { ResourceDto } from '../dto/resource-dto';
 import { resourceApi } from '../api/resource-api';
-import { CreateResourceDto, UpdateResourceDto } from '../dto/resource-dto';
 import { useRouter } from 'next/navigation';
 
 interface ResourcesState {
-  resources: Resource[];
+  resources: ResourceDto[];
   isLoading: boolean;
   error: string | null;
   router?: ReturnType<typeof useRouter>;
 
   // Actions
   fetchResources: () => Promise<void>;
-  createResource: (data: CreateResourceDto) => Promise<Resource | undefined>;
-  updateResource: (id: string, data: UpdateResourceDto) => Promise<void>;
+  createResource: (data: FormData) => Promise<ResourceDto | undefined>;
+  updateResource: (id: string, data: FormData) => Promise<void>;
   deleteResource: (id: string) => Promise<void>;
-  getResourceById: (id: string) => Promise<Resource | undefined>;
+  getResourceById: (id: string) => Promise<ResourceDto | undefined>;
 }
 
 export const useResourcesStore = create<ResourcesState>()(
@@ -37,7 +36,7 @@ export const useResourcesStore = create<ResourcesState>()(
         }
       },
 
-      createResource: async (data: CreateResourceDto) => {
+      createResource: async (data: FormData) => {
         const { router } = get();
         try {
           set({ isLoading: true, error: null });
@@ -59,7 +58,7 @@ export const useResourcesStore = create<ResourcesState>()(
         }
       },
 
-      updateResource: async (id: string, data: UpdateResourceDto) => {
+      updateResource: async (id: string, data: FormData) => {
         const { router } = get();
         try {
           set({ isLoading: true, error: null });

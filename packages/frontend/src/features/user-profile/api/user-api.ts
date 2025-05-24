@@ -16,7 +16,7 @@ export const userApi = {
   getUserByEmail: (email: string) =>
     apiMethods.get<UserProfile>(`/users/email/${email}`),
 
-  updateUserProfile: (data: UserProfile, id: number) =>
+  updateUserProfile: (data: FormData, id: number) =>
     apiMethods.put<UserProfile>(`/users/${id}`, data),
 
   deleteUserProfile: (id: number) =>
@@ -24,5 +24,8 @@ export const userApi = {
 
   getSkills: () => apiMethods.get<SkillsResponse[]>('/skills'),
 
-  getProfessions: () => apiMethods.get<string[]>('/users/professions')
+  getProfessions: () => apiMethods.get<string[]>('/users/professions'),
+
+  // file view
+  fileView: (path: string) => apiMethods.get<string>(`/files/${path}`)
 };
