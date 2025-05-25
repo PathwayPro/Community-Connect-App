@@ -153,7 +153,6 @@ export const FeaturedNewsCard = ({
           <ImagePreview
             imagePath={image}
             alt={title}
-            className="rounded-[20px] object-cover"
             fallbackImage="/public/news/3.png"
             fill={true}
             priority={true}

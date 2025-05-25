@@ -41,7 +41,7 @@ export function ExpandedJobCard({
     link_apply: opportunity.link_apply,
     settings: opportunity.settings,
     experience: opportunity.experience,
-    file: opportunity.file
+    image: opportunity.image
   };
 
   const [isDeleting, setIsDeleting] = useState(false);
@@ -131,7 +131,7 @@ export function ExpandedJobCard({
         {/* Company Avatar */}
         <Avatar className="h-24 w-24 border border-neutral-light-500 bg-white">
           <AvatarImage
-            src={opportunity.file?.name}
+            src={`${process.env.NEXT_PUBLIC_API_URL}/files/${opportunity.image}`}
             alt={`${opportunity.company} logo`}
           />
           <AvatarFallback>{opportunity.company[0]}</AvatarFallback>

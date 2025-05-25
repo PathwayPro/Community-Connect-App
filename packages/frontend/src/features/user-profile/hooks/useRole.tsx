@@ -75,7 +75,10 @@ const rolePermissions: Record<Exclude<UserRole, undefined>, Permission[]> = {
     'delete:mentees',
     'create:thread',
     'edit:thread',
-    'delete:thread'
+    'delete:thread',
+    'create:event',
+    'edit:event',
+    'delete:event'
   ],
   USER: ['edit:profile', 'create:thread', 'edit:thread', 'delete:thread']
 };
@@ -111,14 +114,8 @@ export const useRole = () => {
     (requiredPermission: Permission, resourceOwnerId?: string): boolean => {
       // Return false if user or role is undefined
       if (!user || !role) {
-        console.log('Permission check failed: No user or role');
         return false;
       }
-
-      // For debugging - log the current check
-      console.log(
-        `Checking permission: ${requiredPermission} for role: ${role}`
-      );
 
       // Admin role has all permissions
       if (role === 'ADMIN') {
@@ -130,12 +127,6 @@ export const useRole = () => {
 
       // Check if the required permission is in the list of permissions for this role
       const hasPermissionForRole = permissions.includes(requiredPermission);
-
-      // Log the result for debugging
-      console.log(
-        `Has permission ${requiredPermission}:`,
-        hasPermissionForRole
-      );
 
       // If user's role doesn't include this permission, return false immediately
       if (!hasPermissionForRole) {

@@ -4,7 +4,7 @@ import { News } from '../types';
 import { newsApi } from '../api/news-api';
 import { CreateNewsDto, UpdateNewsDto } from '../dto/news-dto';
 import { useRouter } from 'next/navigation';
-
+import { ApiResponse } from '@/shared/types';
 interface NewsStore {
   // State
   news: News[];
@@ -18,7 +18,7 @@ interface NewsStore {
   fetchNewsById: (id: string) => Promise<void>;
   createNews: (data: CreateNewsDto) => Promise<News | null>;
   updateNews: (id: string, data: UpdateNewsDto) => Promise<void>;
-  editNews: (id: string, data: UpdateNewsDto) => Promise<void>;
+  editNews: (id: string, data: FormData) => Promise<ApiResponse<News>>;
   deleteNews: (id: string) => Promise<boolean | undefined>;
   clearError: () => void;
   revalidate: () => void;
@@ -43,6 +43,8 @@ export const useNewsStore = create<NewsStore>()(
           if (!response.success) {
             throw new Error(response.message || 'Failed to fetch news');
           }
+
+          console.log('response.data: ', response.data);
 
           set({ news: response.data, isLoading: false });
         } catch (error) {
@@ -118,14 +120,26 @@ export const useNewsStore = create<NewsStore>()(
       },
 
       editNews: async (id: string, data: UpdateNewsDto) => {
+        console.log('data in news store nowwwwwwwwwwwwwww: ', data);
+
         try {
           set({ isLoading: true, error: null });
+
+          // Ensure published is a boolean
+          if (data.published !== undefined) {
+            const publishedValue =
+              typeof data.published === 'string'
+                ? data.published === 'true'
+                : Boolean(data.published);
+            data.published = publishedValue;
+          }
+
           const response = await newsApi.editNews(id, data);
 
           if (response.success) {
             set((state) => ({
               news: state.news.map((item) =>
-                item.id === id ? { ...item, ...data } : item
+                item.id === id ? response.data : item
               ),
               currentNews: response.data,
               isLoading: false
@@ -136,8 +150,11 @@ export const useNewsStore = create<NewsStore>()(
               return newState;
             });
           }
+
+          return response;
         } catch (error) {
           set({ error: (error as Error).message, isLoading: false });
+          throw error; // Re-throw to handle in the component
         }
       },
 

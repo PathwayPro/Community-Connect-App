@@ -9,6 +9,7 @@ import {
   IsInt,
   IsUrl,
   IsDateString,
+  Matches,
 } from 'class-validator';
 
 export class CreateEventDto {
@@ -91,26 +92,38 @@ export class CreateEventDto {
   // end_date?: Date; // Format ISO 8601
 
   @ApiProperty({
-    description: 'Event start time',
+    description: 'Event start time (format: HH:mm AM/PM or HH:mm)',
     example: '09:00 AM',
   })
   @IsString()
+  @Matches(
+    /^(0?[1-9]|1[0-2]):[0-5][0-9] (AM|PM)$|^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
+    {
+      message: 'Time must be in format HH:mm AM/PM or HH:mm',
+    },
+  )
   start_time: string;
 
   @ApiProperty({
-    description: 'Event end time',
+    description: 'Event end time (format: HH:mm AM/PM or HH:mm)',
     example: '09:00 AM',
   })
   @IsString()
+  @Matches(
+    /^(0?[1-9]|1[0-2]):[0-5][0-9] (AM|PM)$|^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
+    {
+      message: 'Time must be in format HH:mm AM/PM or HH:mm',
+    },
+  )
   end_time: string;
 
-  @ApiProperty({
-    description: 'Event image file',
-    type: 'string',
-    format: 'binary',
-  })
-  @IsOptional()
-  file?: Express.Multer.File;
+  // @ApiProperty({
+  //   description: 'Event image file',
+  //   type: 'string',
+  //   format: 'binary',
+  // })
+  // @IsOptional()
+  // file?: Express.Multer.File;
 
   @ApiProperty({
     description:
@@ -140,5 +153,13 @@ export class CreateEventDto {
       'DEFAULT: TRUE. To allow or prevent users to send subscriptions',
   })
   @IsBoolean()
+  @IsOptional()
+  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.toLowerCase() === 'true';
+    }
+    return value;
+  })
   accept_subscriptions: boolean = true;
 }

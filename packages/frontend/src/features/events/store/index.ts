@@ -45,8 +45,8 @@ export const useEventStore = create<EventState>()(
         set({ isLoading: true, error: null });
 
         console.log('FormData contents:');
-        for (const [key, value] of formData.entries()) {
-          console.log(`${key}:`, value);
+        for (const pair of formData.entries()) {
+          console.log(`${pair[0]}:`, pair[1]);
         }
 
         const response = await eventApi.createEvent(formData);

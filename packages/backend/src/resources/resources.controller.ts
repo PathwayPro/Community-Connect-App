@@ -3,12 +3,15 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
   Query,
+  UploadedFile,
+  UseInterceptors,
+  Patch,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ResourcesService } from './resources.service';
 import { CreateResourceDto } from './dto/create-resource.dto';
 import { FilterResourceDto } from './dto/filter-resource.dto';
@@ -26,6 +29,7 @@ import {
   ApiQuery,
   ApiOkResponse,
   ApiNotFoundResponse,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { Resource } from './entities/resource.entity';
 
@@ -37,6 +41,8 @@ export class ResourcesController {
 
   @Roles('ADMIN', 'MENTOR')
   @Post()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateResourceDto })
   @ApiCreatedResponse({ type: Resource })
   @ApiInternalServerErrorResponse({
@@ -51,14 +57,9 @@ export class ResourcesController {
   create(
     @GetUser() user: JwtPayload,
     @Body() createResourceDto: CreateResourceDto,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
-    const newResource = {
-      title: createResourceDto.title,
-      details: createResourceDto.details,
-      type: createResourceDto.type,
-      link: createResourceDto.link,
-    };
-    return this.resourcesService.create(user, newResource);
+    return this.resourcesService.create(user, createResourceDto, file);
   }
 
   @Public()
@@ -91,8 +92,8 @@ export class ResourcesController {
         ? new Date(filterResourceDto.date_from)
         : null,
       date_to: filterDateTo ? new Date(filterDateTo.toISOString()) : null,
+      file: filterResourceDto.file,
     };
-    console.log('fiters all:', appliedFilters);
     return this.resourcesService.findAll(appliedFilters);
   }
 
@@ -113,6 +114,8 @@ export class ResourcesController {
 
   @Roles('ADMIN', 'MENTOR')
   @Patch(':id')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UpdateResourceDto })
   @ApiOkResponse({ type: Resource })
   @ApiNotFoundResponse({ description: 'There is no Resource with ID #[:id]' })
@@ -129,14 +132,9 @@ export class ResourcesController {
     @GetUser() user: JwtPayload,
     @Param('id') id: string,
     @Body() updateResourceDto: UpdateResourceDto,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
-    const updateResource = {
-      title: updateResourceDto.title,
-      details: updateResourceDto.details,
-      type: updateResourceDto.type,
-      link: updateResourceDto.link,
-    };
-    return this.resourcesService.update(user, +id, updateResource);
+    return this.resourcesService.update(user, +id, updateResourceDto, file);
   }
 
   @Roles('ADMIN', 'MENTOR')

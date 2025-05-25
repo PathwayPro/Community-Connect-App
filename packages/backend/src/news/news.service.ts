@@ -84,6 +84,7 @@ export class NewsService {
 
       const data = {
         ...createNewsDto,
+        published: true,
         created_at: new Date(),
         updated_at: new Date(),
         image: image ? image.path + '/' + image.fileName : null,

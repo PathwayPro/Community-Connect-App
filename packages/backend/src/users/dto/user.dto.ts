@@ -108,102 +108,131 @@ export class CreateUserDto {
 export class UpdateUserDto {
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   firstName?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   middleName?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   lastName?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   dob?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   ageRange?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   arrivalInCanada?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   goalId?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   province?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   city?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   profession?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   experience?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   bio?: string;
 
   @IsOptional()
   @IsString()
-  pictureUploadLink?: string;
-
-  @IsOptional()
-  @IsString()
-  resumeUploadLink?: string;
-
-  @IsOptional()
-  @IsString()
+  @Transform(({ value }) => value || undefined)
   linkedinLink?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   githubLink?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   twitterLink?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   portfolioLink?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   otherLinks?: string;
 
   @IsOptional()
   @IsArray()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    return value || [];
+  })
   additionalLinks?: string[];
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   languages?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   countryOfOrigin?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   workStatus?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value || undefined)
   companyName?: string;
 
   @IsOptional()
-  @IsBoolean()
+  @IsString()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value || false;
+  })
   activelySearching?: boolean;
 
   @ApiPropertyOptional({
@@ -211,26 +240,29 @@ export class UpdateUserDto {
     example: [1, 2, 3],
   })
   @IsOptional()
-  @IsArray()
-  @IsInt({ each: true })
+  @IsString()
   @Transform(({ value }) => {
     if (typeof value === 'string') {
-      return JSON.parse(value).map((item: any) => parseInt(item, 10));
-    } else if (Array.isArray(value)) {
-      return value.map((item: any) => parseInt(item, 10));
-    } else {
-      return [];
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed)
+          ? parsed.map((item: any) => parseInt(item, 10))
+          : [];
+      } catch (e) {
+        return [];
+      }
     }
+    return value || [];
   })
   skills?: number[];
 
-  @IsOptional()
-  @IsDate()
-  lastLogin?: Date;
+  // @IsOptional()
+  // @IsDate()
+  // lastLogin?: Date;
 
-  @IsOptional()
-  @IsBoolean()
-  deletedAt?: boolean;
+  // @IsOptional()
+  // @IsBoolean()
+  // deletedAt?: boolean;
 }
 
 export class DeleteUserDto {

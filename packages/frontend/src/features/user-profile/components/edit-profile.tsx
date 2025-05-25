@@ -16,23 +16,30 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { UserProfileFormData, userProfileSchema } from '../lib/validations';
-import { userApi } from '../api/user-api';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '../store';
 import { useFetchProfile } from '../hooks/use-fetch-profile';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
-import { SkillsResponse } from '../types';
+import { SkillsResponse, UserProfile } from '../types';
+import { toast } from 'sonner';
 
-function getStepContent(step: number, skills: SkillsResponse[]) {
+function getStepContent(
+  step: number,
+  skills: SkillsResponse[],
+  onProfilePictureUpload: (files: File[]) => Promise<void>,
+  onResumeUpload: (files: File[]) => Promise<void>
+) {
   console.log('STEP HERE', step);
   switch (step) {
     case 1:
-      return <PersonalInfoForm />;
+      return (
+        <PersonalInfoForm onProfilePictureUpload={onProfilePictureUpload} />
+      );
     case 2:
       return <SocialLinksForm />;
     case 3:
-      return <UploadResume skills={skills} />;
+      return <UploadResume skills={skills} onResumeUpload={onResumeUpload} />;
     case 4:
       return <GoalsForm />;
     default:
@@ -46,7 +53,12 @@ export const EditProfile = () => {
   const { user } = useUserStore();
   const { isLoading, error } = useFetchProfile();
   const { showAlert } = useAlertDialog();
-  const { skills, fetchSkills } = useUserStore();
+  const { skills, updateUser, fetchSkills } = useUserStore();
+  const [selectedProfilePictureFile, setSelectedProfilePictureFile] =
+    useState<File | null>(null);
+  const [selectedResumeFile, setSelectedResumeFile] = useState<File | null>(
+    null
+  );
 
   const methods = useForm<UserProfileFormData>({
     mode: 'onChange',
@@ -65,7 +77,7 @@ export const EditProfile = () => {
         bio: user?.bio || '',
         pictureUploadLink: user?.pictureUploadLink || '',
         arrivalInCanada: user?.arrivalInCanada || '',
-        goalId: user?.goalId || undefined,
+        goalId: user?.goalId || '',
         linkedinLink: user?.linkedinLink || '',
         githubLink: user?.githubLink || '',
         twitterLink: user?.twitterLink || '',
@@ -76,7 +88,7 @@ export const EditProfile = () => {
         companyName: user?.companyName || '',
         countryOfOrigin: user?.countryOfOrigin || '',
         activelySearching: user?.activelySearching || false,
-        skills: user?.skills?.map(String) || []
+        skills: user?.skills?.map(Number) || []
       }),
       [user]
     )
@@ -121,6 +133,36 @@ export const EditProfile = () => {
     setActiveStep((prevStep) => prevStep - 1);
   };
 
+  const handleProfilePictureUpload = async (files: File[]) => {
+    try {
+      if (files && files.length > 0) {
+        setSelectedProfilePictureFile(files[0]);
+        toast.success('Image uploaded successfully');
+      } else {
+        setSelectedProfilePictureFile(null);
+        toast.error('No file selected.');
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      toast.error('Failed to upload image');
+    }
+  };
+
+  const handleResumeUpload = async (files: File[]) => {
+    try {
+      if (files && files.length > 0) {
+        setSelectedResumeFile(files[0]);
+        toast.success('Resume uploaded successfully');
+      } else {
+        setSelectedResumeFile(null);
+        toast.error('No file selected.');
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      toast.error('Failed to upload resume');
+    }
+  };
+
   const onSubmit = async (data: UserProfileFormData) => {
     if (activeStep !== 4) {
       handleNext();
@@ -129,7 +171,63 @@ export const EditProfile = () => {
 
     try {
       console.log('Submitting data:', data);
-      const response = await userApi.updateUserProfile(data, Number(user?.id));
+
+      // Create FormData for file upload
+      const formData = new FormData();
+
+      // Append form data with empty string fallback
+      formData.append('firstName', data.firstName ?? '');
+      formData.append('lastName', data.lastName ?? '');
+      formData.append('city', data.city ?? '');
+      formData.append('bio', data.bio ?? '');
+      formData.append('dob', data.dob ?? '');
+      formData.append('province', data.province ?? '');
+      formData.append('ageRange', data.ageRange ?? '');
+      formData.append('countryOfOrigin', data.countryOfOrigin ?? '');
+      formData.append('languages', data.languages ?? '');
+      formData.append('profession', data.profession ?? '');
+      formData.append('experience', data.experience ?? '');
+
+      // Handle arrays with proper stringification
+      formData.append('skills', JSON.stringify(data.skills ?? []));
+      formData.append(
+        'additionalLinks',
+        JSON.stringify(data.additionalLinks ?? [])
+      );
+
+      // Handle other fields
+      formData.append('arrivalInCanada', data.arrivalInCanada ?? '');
+      formData.append('goalId', data.goalId ?? '');
+      formData.append('linkedinLink', data.linkedinLink ?? '');
+      formData.append('githubLink', data.githubLink ?? '');
+      formData.append('twitterLink', data.twitterLink ?? '');
+      formData.append('portfolioLink', data.portfolioLink ?? '');
+      formData.append('otherLinks', data.otherLinks ?? '');
+      formData.append('workStatus', data.workStatus ?? '');
+      formData.append('companyName', data.companyName ?? '');
+
+      // Handle boolean with proper string conversion
+      formData.append(
+        'activelySearching',
+        String(data.activelySearching ?? false)
+      );
+
+      // Handle file uploads
+      if (selectedProfilePictureFile) {
+        formData.append('pictureUploadLink', selectedProfilePictureFile);
+      }
+
+      if (selectedResumeFile) {
+        formData.append('resumeUploadLink', selectedResumeFile);
+      }
+
+      // Log the form data for debugging
+      console.log(
+        'Form data being sent:',
+        Object.fromEntries(formData.entries())
+      );
+
+      const response = await updateUser(formData, Number(user?.id));
 
       if (response.success !== true) {
         throw new Error(response.message || 'Failed to update profile');
@@ -197,7 +295,12 @@ export const EditProfile = () => {
       <CardContent className="flex flex-col justify-center gap-4">
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {getStepContent(activeStep, skills)}
+            {getStepContent(
+              activeStep,
+              skills,
+              handleProfilePictureUpload,
+              handleResumeUpload
+            )}
             <div className="flex w-full justify-between pt-5">
               <IconButton
                 className="w-[180px]"

@@ -15,6 +15,7 @@ import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { DeleteModal } from '../../../../shared/components/modal/delete-modal';
 import { Permission, useRole } from '@/features/user-profile/hooks/useRole';
 import { useUserStore } from '@/features/user-profile/store';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 
 interface NewsCardProps {
   id?: string;
@@ -165,12 +166,12 @@ export const NewsCard = ({
 
         {/* Image */}
         <div className="relative h-[320px] w-full">
-          <Image
-            src={image || '/event/placeholder-2.jpg'}
+          <ImagePreview
+            imagePath={image}
             alt={title}
-            className="object-cover"
-            fill
-            priority
+            fallbackImage="/public/news/3.png"
+            fill={true}
+            priority={true}
             sizes="(max-width: 768px) 100vw, 50vw"
           />
         </div>

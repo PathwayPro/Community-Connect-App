@@ -35,6 +35,17 @@ export class SettingsService {
     updateSettingsDto: UpdateSettingsDto,
   ) {
     try {
+      // First check if settings exist
+      const existingSettings = await this.prisma.userSettings.findUnique({
+        where: { userId },
+      });
+
+      // If settings don't exist, create them first
+      if (!existingSettings) {
+        await this.createUserSettings(userId);
+      }
+
+      // Now update the settings
       const updatedSettings = await this.prisma.userSettings.update({
         where: { userId },
         data: updateSettingsDto,

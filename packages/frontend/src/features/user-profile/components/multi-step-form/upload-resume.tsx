@@ -7,8 +7,14 @@ import { Switch } from '@/shared/components/ui/switch';
 import { useFormContext } from 'react-hook-form';
 import { UserProfileFormData } from '../../lib/validations';
 import { SkillsResponse } from '../../types';
+import { toast } from 'sonner';
 
-export const UploadResume = ({ skills }: { skills: SkillsResponse[] }) => {
+interface UploadResumeProps {
+  skills: SkillsResponse[];
+  onResumeUpload: (files: File[]) => Promise<void>;
+}
+
+export const UploadResume = ({ skills, onResumeUpload }: UploadResumeProps) => {
   const {
     setValue,
     formState: { errors },
@@ -17,14 +23,25 @@ export const UploadResume = ({ skills }: { skills: SkillsResponse[] }) => {
     register
   } = useFormContext<UserProfileFormData>();
 
-  console.log('skills', skills);
-
   // Register the field and watch its value for reactivity
   register('activelySearching');
   const activelySearching = watch('activelySearching');
 
-  console.log(errors);
-  console.log(getValues());
+  console.log('errors in upload resume :', errors);
+  console.log('getValues in upload resume :', getValues());
+
+  const handleFileUpload = async (files: File[]) => {
+    try {
+      if (files.length > 0) {
+        setValue('resumeUploadLink', files[0], { shouldValidate: true });
+        await onResumeUpload(files);
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      toast.error('Failed to upload resume');
+    }
+  };
+
   return (
     <div>
       <FileUpload
@@ -34,17 +51,7 @@ export const UploadResume = ({ skills }: { skills: SkillsResponse[] }) => {
         multiple={false}
         uploadIcon="fileIcon"
         disablePreview={true}
-        onUpload={async (files) => {
-          // Implement your upload logic here
-          // e.g., using FormData and fetch
-          const formData = new FormData();
-          files.forEach((file) => formData.append('files', file));
-
-          await fetch('/api/upload', {
-            method: 'POST',
-            body: formData
-          });
-        }}
+        onUpload={handleFileUpload}
       />
 
       <div className="mt-6 flex w-full flex-col gap-4">

@@ -55,6 +55,7 @@ export interface Resource {
     picture_upload_link: string;
   };
   type: string;
+  file: string;
 }
 
 export interface ResourceFilters {

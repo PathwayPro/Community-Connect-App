@@ -16,13 +16,25 @@ export const userApi = {
   getUserByEmail: (email: string) =>
     apiMethods.get<UserProfile>(`/users/email/${email}`),
 
-  updateUserProfile: (data: UserProfile, id: number) =>
-    apiMethods.put<UserProfile>(`/users/${id}`, data),
+  updateUserProfile: (data: FormData | UserProfile, id: number) => {
+    console.log('data in user api: ', data);
+
+    if (data instanceof FormData) {
+      for (const pair of data.entries()) {
+        console.log(pair[0], ':', pair[1]);
+      }
+    }
+
+    return apiMethods.patch<UserProfile>(`/users/${id}`, data);
+  },
 
   deleteUserProfile: (id: number) =>
     apiMethods.delete<UserProfile>(`/users/${id}`),
 
   getSkills: () => apiMethods.get<SkillsResponse[]>('/skills'),
 
-  getProfessions: () => apiMethods.get<string[]>('/users/professions')
+  getProfessions: () => apiMethods.get<string[]>('/users/professions'),
+
+  // file view
+  fileView: (path: string) => apiMethods.get<string>(`/files/${path}`)
 };

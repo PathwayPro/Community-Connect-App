@@ -27,14 +27,13 @@ import {
 import { useNewsStore } from '../store';
 import { useOpportunityStore } from '../store';
 import { useResourcesStore } from '../store';
-import { CreateNewsDto } from '../dto/news-dto';
-import { CreateResourceDto } from '../dto/resource-dto';
 import { CreateOpportunityDto } from '../dto/opportunity-dto';
 import { WorkSettings } from '../lib/constants/enums';
-import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { PermissionWrapper } from '@/shared/components/navigation/permission-wrapper/permission-wrapper';
+import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 
 type FormMode = 'news' | 'contentLibrary' | 'opportunities';
 type FormValues = {
@@ -43,7 +42,7 @@ type FormValues = {
   opportunities: OpportunityFormValues;
 };
 
-export const EditNewsForm = ({ id }: { id: string }) => {
+const EditNewsForm = ({ id }: { id: string }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode') as FormMode;
@@ -55,7 +54,7 @@ export const EditNewsForm = ({ id }: { id: string }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { updateNews } = useNewsStore();
+  const { editNews } = useNewsStore();
   const { updateResource } = useResourcesStore();
   const { editOpportunity, salaryRanges, fetchSalaryRanges } =
     useOpportunityStore();
@@ -132,7 +131,9 @@ export const EditNewsForm = ({ id }: { id: string }) => {
 
   const onSubmit = async (data: FormValues[typeof mode]) => {
     try {
-      const actions = {
+      type ActionMap = Record<FormMode, () => Promise<void>>;
+
+      const actions: ActionMap = {
         news: async () => {
           const newsData = data as NewsFormValues;
           const formData = new FormData();
@@ -140,7 +141,7 @@ export const EditNewsForm = ({ id }: { id: string }) => {
           // Append form data
           Object.entries(newsData).forEach(([key, value]) => {
             if (value !== undefined && value !== null) {
-              formData.append(key, value.toString());
+              formData.append(key, String(value));
             }
           });
 
@@ -149,7 +150,7 @@ export const EditNewsForm = ({ id }: { id: string }) => {
             const formattedLink = newsData.link.startsWith('http')
               ? newsData.link
               : `https://${newsData.link}`;
-            formData.append('link', formattedLink);
+            formData.set('link', formattedLink);
           }
 
           // Append file if exists
@@ -157,36 +158,57 @@ export const EditNewsForm = ({ id }: { id: string }) => {
             formData.append('file', selectedFile);
           }
 
-          await updateNews(id, formData as unknown as CreateNewsDto);
-          showAlert({
-            title: 'Success',
-            description: 'News updated successfully',
-            type: 'success',
-            redirect: '/resources'
-          });
+          console.log('form data in edit news form: ', formData);
+
+          const response = await editNews(id, formData);
+
+          console.log('response in edit news form: ', response);
+
+          if (response?.success) {
+            showAlert({
+              title: 'Success',
+              description: 'News updated successfully',
+              type: 'success',
+              redirect: '/resources'
+            });
+          }
         },
         contentLibrary: async () => {
           const resourceData = data as ResourceFormValues;
+          const formData = new FormData();
+
+          // Append form data
+          Object.entries(resourceData).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              formData.append(key, String(value));
+            }
+          });
 
           // Handle link formatting
           if (resourceData.link) {
             const formattedLink = resourceData.link.startsWith('http')
               ? resourceData.link
               : `https://${resourceData.link}`;
-            resourceData.link = formattedLink;
+            formData.set('link', formattedLink);
           }
 
-          await updateResource(
-            id,
-            resourceData as unknown as CreateResourceDto
-          );
+          // Append file if exists
+          if (selectedFile) {
+            formData.append('file', selectedFile);
+          }
 
-          showAlert({
-            title: 'Success',
-            description: 'Resource updated successfully',
-            type: 'success',
-            redirect: '/resources'
-          });
+          const response = await updateResource(id, formData);
+
+          console.log('response in edit resource form: ', response);
+
+          if (response?.success) {
+            showAlert({
+              title: 'Success',
+              description: 'Resource updated successfully',
+              type: 'success',
+              redirect: '/resources'
+            });
+          }
         },
         opportunities: async () => {
           const opportunityData = data as OpportunityFormValues;
@@ -212,17 +234,21 @@ export const EditNewsForm = ({ id }: { id: string }) => {
             formData.append('file', selectedFile);
           }
 
-          await editOpportunity(
+          const response = await editOpportunity(
             Number(id),
             formData as unknown as CreateOpportunityDto
           );
 
-          showAlert({
-            title: 'Success',
-            description: 'Opportunity updated successfully',
-            type: 'success',
-            redirect: '/resources'
-          });
+          console.log('response in edit opportunity form: ', response);
+
+          if (response?.success) {
+            showAlert({
+              title: 'Success',
+              description: 'Opportunity updated successfully',
+              type: 'success',
+              redirect: '/resources'
+            });
+          }
         }
       };
 
@@ -242,7 +268,7 @@ export const EditNewsForm = ({ id }: { id: string }) => {
 
   const formComponents = {
     news: <BaseForm onFileUpload={handleFileUpload} />,
-    contentLibrary: <ResourceForm />,
+    contentLibrary: <ResourceForm onFileUpload={handleFileUpload} />,
     opportunities: (
       <OpportunityForm
         salaryRanges={salaryRanges}
@@ -308,5 +334,17 @@ export const EditNewsForm = ({ id }: { id: string }) => {
         </FormProvider>
       </CardContent>
     </Card>
+  );
+};
+
+export const EditNewsFormWrapper = ({ id }: { id: string }) => {
+  return (
+    <PermissionWrapper
+      requiredRoles={['ADMIN', 'MENTOR']}
+      fallbackRoute="/resources"
+      permissionDeniedMessage="Only administrators can access this page."
+    >
+      <EditNewsForm id={id} />
+    </PermissionWrapper>
   );
 };

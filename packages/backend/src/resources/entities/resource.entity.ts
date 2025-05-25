@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsInt, IsNotEmpty, IsUrl, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsNotEmpty,
+  IsUrl,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 import { ResourceType } from '@prisma/client';
 
 export class Resource {
@@ -36,4 +43,9 @@ export class Resource {
   @ApiProperty()
   @IsInt()
   user_id: number;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  file: string;
 }

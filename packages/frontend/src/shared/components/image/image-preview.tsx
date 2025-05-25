@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { env } from '@/env.mjs';
 
 /**
  * NewsImage Component
@@ -39,18 +38,8 @@ export const ImagePreview = ({
    * @returns {string} - The complete image URL
    */
   const getImageUrl = (path: string | undefined) => {
-    // If error occurred or no image path or if it contains 'undefined', return fallback
-    if (imgError || !path || path.includes('undefined')) {
-      return fallbackImage;
-    }
-
-    // If the image path starts with a slash, it's a relative path
-    if (path.startsWith('/')) {
-      return path;
-    }
-
-    // Otherwise, construct the full URL with the API base URL
-    return `${env.NEXT_PUBLIC_API_URL}/files/${path}`;
+    if (imgError || !path || path.includes('undefined')) return fallbackImage;
+    return `${process.env.NEXT_PUBLIC_API_URL}/files/${path}`;
   };
 
   const handleError = () => {
@@ -64,7 +53,7 @@ export const ImagePreview = ({
         alt={alt}
         width={!fill ? width : undefined}
         height={!fill ? height : undefined}
-        className={`object-cover ${className}`}
+        className={`rounded-xl object-cover ${className}`}
         onError={handleError}
         fill={fill}
         priority={priority}

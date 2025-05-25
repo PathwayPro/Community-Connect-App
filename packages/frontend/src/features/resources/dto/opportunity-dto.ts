@@ -15,15 +15,15 @@ export interface OpportunityDto {
     from: number;
     to: number;
   };
-  file?: File;
+  image?: string;
 }
 
-export interface CreateOpportunityDto extends Omit<OpportunityDto, 'file'> {
-  file?: File | null;
+export interface CreateOpportunityDto extends Omit<OpportunityDto, 'image'> {
+  image?: string;
 }
 
 export interface UpdateOpportunityDto extends Partial<CreateOpportunityDto> {
-  file?: File | null;
+  image?: string;
 }
 
 export interface OpportunityResponseDto extends OpportunityDto {

@@ -60,4 +60,12 @@ export class FilterResourceDto {
   @IsDateString()
   @IsOptional()
   date_to?: Date; // Format ISO 8601
+
+  @ApiPropertyOptional({
+    description: 'File name containing this word / phrase',
+    example: 'LIKE "%search%"',
+  })
+  @IsString()
+  @IsOptional()
+  file?: string;
 }

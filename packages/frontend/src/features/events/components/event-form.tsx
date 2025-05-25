@@ -1,6 +1,9 @@
 'use client';
 
 import React from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useEventStore } from '../store';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import {
   Card,
@@ -10,31 +13,19 @@ import {
 } from '@/shared/components/ui/card';
 import { BaseForm } from './common/base-form';
 import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import {
   eventFormSchema,
   EventFormValues,
   EventsTypes
 } from '../lib/validation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEventStore } from '../store';
 import { TimeLocationForm } from './common/time-location-form';
 import { UpdateEventDto } from '../dto';
-import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
+import { PermissionWrapper } from '@/shared/components/navigation/permission-wrapper/permission-wrapper';
+import { AxiosError } from 'axios';
 
-// function getStepContent(step: number) {
-//   switch (step) {
-//     case 1:
-//       return <BaseForm />;
-//     case 2:
-//       return <TimeLocationForm />;
-//     default:
-//       return 'Unknown step';
-//   }
-// }
-
-// Move checkStepValidity outside the component to prevent recreation on each render
+// Add this before the EventForm component
 const checkStepValidity = (
   formValues: EventFormValues,
   activeStep: number,
@@ -48,58 +39,44 @@ const checkStepValidity = (
       'link',
       'is_free'
     ];
-
-    // Check if all required fields for step 1 are valid
     const hasErrors = step1Fields.some(
       (field) => formState.errors[field as keyof EventFormValues]
     );
-
-    // Check if all required fields have values
     const hasValues =
       formValues.title?.length >= 3 &&
       formValues.description?.length >= 20 &&
       formValues.category_id?.length > 0;
-
     return hasValues && !hasErrors;
   } else if (activeStep === 2) {
     const step2Fields = ['start_date', 'start_time', 'end_time', 'type'];
-
-    // Check if required fields for step 2 are valid
     const hasErrors = step2Fields.some(
       (field) => formState.errors[field as keyof EventFormValues]
     );
-
-    // Check if all required fields for step 2 have values
     const hasValues =
       formValues.start_date?.length > 0 &&
       formValues.start_time?.length > 0 &&
       formValues.end_time?.length > 0;
-
     return hasValues && !hasErrors;
   }
-
   return false;
 };
 
-export const EventForm = () => {
+// Make EventForm an internal component (no export)
+const EventForm = () => {
   const router = useRouter();
   const { createEvent, editEvent } = useEventStore();
   const { showAlert } = useAlertDialog();
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
-
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [activeStep, setActiveStep] = React.useState(1);
 
   const eventData: UpdateEventDto = searchParams.get('data')
     ? JSON.parse(decodeURIComponent(searchParams.get('data')!))
     : null;
 
-  // Get the state from router if it exists
   const isEdit = pathname.startsWith('/events/edit');
-
   const eventButtonText = isEdit ? 'Update Event' : 'Publish Event';
-
-  const [activeStep, setActiveStep] = React.useState(1);
 
   const defaultValues = {
     title: eventData?.title || '',
@@ -114,7 +91,6 @@ export const EventForm = () => {
     start_date: eventData?.start_date || '',
     start_time: eventData?.start_time || '',
     end_time: eventData?.end_time || '',
-    // end_date: eventData?.end_date || '',
     file: eventData?.file || undefined
   };
 
@@ -140,64 +116,68 @@ export const EventForm = () => {
     try {
       const formData = new FormData();
 
-      // Handle file upload
+      // Add file first if it exists
       if (selectedFile) {
         formData.append('file', selectedFile);
+        console.log(
+          'File added to FormData:',
+          selectedFile.name,
+          selectedFile.type,
+          selectedFile.size
+        );
       }
 
-      // Handle dates and times
+      // Handle start_date - ensure it's properly formatted
       if (data.start_date) {
         const startDate = new Date(data.start_date);
+        // Send as ISO string to match the DTO expectation
         formData.append('start_date', startDate.toISOString());
+        console.log('start_date added:', startDate.toISOString());
       }
 
-      // Handle link formatting
+      // Handle link - ensure it has protocol
       if (data.link) {
         const formattedLink = data.link.startsWith('http')
           ? data.link
           : `https://${data.link}`;
         formData.append('link', formattedLink);
+        console.log('link added:', formattedLink);
       }
 
-      // Handle category_id - ensure it's a number
+      // Handle category_id - ensure it's a string for FormData
       if (data.category_id) {
         formData.append('category_id', String(data.category_id));
+        console.log('category_id added:', data.category_id);
       }
 
-      // Handle location - ensure it's set
+      // Add required fields with proper defaults
+      formData.append('title', data.title || '');
+      formData.append('description', data.description || '');
       formData.append('location', data.location || 'Online');
+      formData.append('start_time', data.start_time || '');
+      formData.append('end_time', data.end_time || '');
+      formData.append('type', data.type || EventsTypes.PUBLIC);
 
-      // Handle boolean fields
-      formData.append('is_free', String(data.is_free));
-      formData.append('requires_confirmation', String(false));
-      formData.append('accept_subscriptions', String(true));
+      // Handle boolean values - convert to string for FormData
+      formData.append('is_free', String(data.is_free ?? true));
+      formData.append(
+        'requires_confirmation',
+        String(data.requires_confirmation ?? false)
+      );
+      formData.append(
+        'accept_subscriptions',
+        String(data.accept_subscriptions ?? true)
+      );
 
-      // Append all other form fields
-      Object.entries(data).forEach(([key, value]) => {
-        if (
-          key !== 'file' && // Skip file as it's handled separately
-          key !== 'start_date' && // Skip dates as they're handled separately
-          key !== 'link' && // Skip link as it's handled separately
-          key !== 'category_id' && // Skip category_id as it's handled separately
-          key !== 'location' && // Skip location as it's handled separately
-          key !== 'is_free' && // Skip boolean fields as they're handled separately
-          key !== 'requires_confirmation' && // Skip boolean fields as they're handled separately
-          key !== 'accept_subscriptions' && // Skip boolean fields as they're handled separately
-          value !== undefined &&
-          value !== null
-        ) {
-          formData.append(key, String(value));
-        }
-      });
-
-      console.log('FormData contents in the event form:');
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
+      // Log all FormData entries before sending
+      console.log('Final FormData contents:');
+      for (const pair of formData.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
       }
 
-      // Submit the form
+      let result;
       if (isEdit && eventData) {
-        const result = await editEvent(eventData.id, formData);
+        result = await editEvent(eventData.id, formData);
         if (result) {
           showAlert({
             type: 'success',
@@ -207,12 +187,7 @@ export const EventForm = () => {
           });
         }
       } else {
-        console.log('FormData contents:');
-        for (const [key, value] of formData.entries()) {
-          console.log(`${key}:`, value);
-        }
-
-        const result = await createEvent(formData);
+        result = await createEvent(formData);
         if (result) {
           showAlert({
             type: 'success',
@@ -224,13 +199,23 @@ export const EventForm = () => {
       }
     } catch (error) {
       console.error('Form submission error:', error);
+
+      // More detailed error logging
+      if (error instanceof AxiosError && error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+      }
+
       showAlert({
         type: 'error',
         title: isEdit ? 'Event Update Failed' : 'Event Creation Failed',
         description:
-          error instanceof Error
-            ? error.message
-            : 'Please check your input and try again.'
+          error instanceof AxiosError
+            ? error.response?.data?.message
+            : error instanceof Error
+              ? error.message
+              : 'Please check your input and try again.'
       });
     }
   };
@@ -299,4 +284,18 @@ export const EventForm = () => {
   );
 };
 
-export default EventForm;
+// Named export
+export const EventFormWrapper = () => {
+  return (
+    <PermissionWrapper
+      requiredRoles={['ADMIN', 'MENTOR']}
+      fallbackRoute="/events"
+      permissionDeniedMessage="Only administrators can access this page."
+    >
+      <EventForm />
+    </PermissionWrapper>
+  );
+};
+
+// Default export
+export default EventFormWrapper;
