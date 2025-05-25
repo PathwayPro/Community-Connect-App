@@ -2,8 +2,11 @@ import { api } from './axios-instance';
 import { ApiResponse } from '../types';
 
 export const apiMethods = {
-  get: async <T>(url: string) => {
-    const response = await api.get<ApiResponse<T>>(url);
+  get: async <T>(
+    url: string,
+    config?: { params?: Record<string, unknown> }
+  ) => {
+    const response = await api.get<ApiResponse<T>>(url, config);
     return response.data;
   },
 
