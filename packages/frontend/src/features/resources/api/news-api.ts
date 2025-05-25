@@ -10,10 +10,13 @@ export const newsApi = {
   getNewsById: (id: string) => apiMethods.get<News>(`/news/${id}`),
 
   updateNews: (id: string, data: UpdateNewsDto) =>
-    apiMethods.patch<News>(`/news/${id}`, data),
-
-  editNews: (id: string, data: FormData | UpdateNewsDto) =>
     apiMethods.put<News>(`/news/${id}`, data),
+
+  editNews: (id: string, data: FormData | UpdateNewsDto) => {
+    console.log('data in news api fileeee : ', data);
+
+    return apiMethods.patch<News>(`/news/${id}`, data);
+  },
 
   deleteNews: (id: string) => apiMethods.delete<News>(`/news/${id}`)
 };

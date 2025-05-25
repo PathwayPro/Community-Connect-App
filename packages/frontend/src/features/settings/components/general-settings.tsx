@@ -82,12 +82,15 @@ export const GeneralSettings = () => {
   const onSubmit = async (data: GeneralSettingsFormValues) => {
     try {
       // Here you would typically save the data to your backend
-      await updateSettings(data);
-      showAlert({
-        type: 'success',
-        title: 'Settings Updated Successfully!',
-        description: 'Your settings have been saved.'
-      });
+      const response = await updateSettings(data);
+
+      if (response.success) {
+        showAlert({
+          type: 'success',
+          title: 'Settings Updated Successfully!',
+          description: 'Your settings have been saved.'
+        });
+      }
     } catch (error) {
       console.error('Error updating settings:', error);
       showAlert({

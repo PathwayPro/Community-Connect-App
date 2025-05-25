@@ -4,7 +4,7 @@ import { News } from '../types';
 import { newsApi } from '../api/news-api';
 import { CreateNewsDto, UpdateNewsDto } from '../dto/news-dto';
 import { useRouter } from 'next/navigation';
-
+import { ApiResponse } from '@/shared/types';
 interface NewsStore {
   // State
   news: News[];
@@ -18,7 +18,7 @@ interface NewsStore {
   fetchNewsById: (id: string) => Promise<void>;
   createNews: (data: CreateNewsDto) => Promise<News | null>;
   updateNews: (id: string, data: UpdateNewsDto) => Promise<void>;
-  editNews: (id: string, data: FormData) => Promise<News | undefined>;
+  editNews: (id: string, data: FormData) => Promise<ApiResponse<News>>;
   deleteNews: (id: string) => Promise<boolean | undefined>;
   clearError: () => void;
   revalidate: () => void;
@@ -120,6 +120,8 @@ export const useNewsStore = create<NewsStore>()(
       },
 
       editNews: async (id: string, data: UpdateNewsDto) => {
+        console.log('data in news store nowwwwwwwwwwwwwww: ', data);
+
         try {
           set({ isLoading: true, error: null });
 
@@ -149,7 +151,7 @@ export const useNewsStore = create<NewsStore>()(
             });
           }
 
-          return response.data;
+          return response;
         } catch (error) {
           set({ error: (error as Error).message, isLoading: false });
           throw error; // Re-throw to handle in the component

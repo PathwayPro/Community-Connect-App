@@ -294,8 +294,8 @@ export class UsersService {
           company_name: updateData.companyName,
           country_of_origin: updateData.countryOfOrigin,
           actively_searching: updateData.activelySearching,
-          last_login: updateData.lastLogin,
-          deleted_at: updateData.deletedAt,
+          // last_login: updateData.lastLogin,
+          // deleted_at: updateData.deletedAt,
         },
       });
 

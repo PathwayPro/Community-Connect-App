@@ -11,7 +11,7 @@ export const resourceApi = {
     apiMethods.get<ResourceDto>(`/resources/${id}`),
 
   updateResource: (id: string, data: FormData) =>
-    apiMethods.put<ResourceDto>(`/resources/${id}`, data),
+    apiMethods.patch<ResourceDto>(`/resources/${id}`, data),
 
   deleteResource: (id: string) =>
     apiMethods.delete<ResourceDto>(`/resources/${id}`)

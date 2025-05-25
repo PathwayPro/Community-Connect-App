@@ -5,13 +5,15 @@ import {
   Get,
   Param,
   Post,
-  Put,
+  Patch,
   UseGuards,
   ParseIntPipe,
   UseInterceptors,
   UploadedFiles,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -69,7 +71,7 @@ export class UsersController {
     return await this.usersService.getUserByEmail(email);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'pictureUploadLink', maxCount: 1 },
@@ -98,6 +100,10 @@ export class UsersController {
       const resumeUploadLink = files?.resumeUploadLink?.[0];
 
       if (!updateUserDto) {
+        console.log(
+          'updateUserDto is undefined. Raw request body:',
+          updateUserDto,
+        );
         throw new BadRequestException('Update data is required');
       }
 

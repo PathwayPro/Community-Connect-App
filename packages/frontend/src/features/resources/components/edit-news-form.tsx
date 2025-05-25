@@ -158,13 +158,20 @@ const EditNewsForm = ({ id }: { id: string }) => {
             formData.append('file', selectedFile);
           }
 
-          await editNews(id, formData);
-          showAlert({
-            title: 'Success',
-            description: 'News updated successfully',
-            type: 'success',
-            redirect: '/resources'
-          });
+          console.log('form data in edit news form: ', formData);
+
+          const response = await editNews(id, formData);
+
+          console.log('response in edit news form: ', response);
+
+          if (response?.success) {
+            showAlert({
+              title: 'Success',
+              description: 'News updated successfully',
+              type: 'success',
+              redirect: '/resources'
+            });
+          }
         },
         contentLibrary: async () => {
           const resourceData = data as ResourceFormValues;
@@ -190,13 +197,18 @@ const EditNewsForm = ({ id }: { id: string }) => {
             formData.append('file', selectedFile);
           }
 
-          await updateResource(id, formData);
-          showAlert({
-            title: 'Success',
-            description: 'Resource updated successfully',
-            type: 'success',
-            redirect: '/resources'
-          });
+          const response = await updateResource(id, formData);
+
+          console.log('response in edit resource form: ', response);
+
+          if (response?.success) {
+            showAlert({
+              title: 'Success',
+              description: 'Resource updated successfully',
+              type: 'success',
+              redirect: '/resources'
+            });
+          }
         },
         opportunities: async () => {
           const opportunityData = data as OpportunityFormValues;
@@ -222,17 +234,21 @@ const EditNewsForm = ({ id }: { id: string }) => {
             formData.append('file', selectedFile);
           }
 
-          await editOpportunity(
+          const response = await editOpportunity(
             Number(id),
             formData as unknown as CreateOpportunityDto
           );
 
-          showAlert({
-            title: 'Success',
-            description: 'Opportunity updated successfully',
-            type: 'success',
-            redirect: '/resources'
-          });
+          console.log('response in edit opportunity form: ', response);
+
+          if (response?.success) {
+            showAlert({
+              title: 'Success',
+              description: 'Opportunity updated successfully',
+              type: 'success',
+              redirect: '/resources'
+            });
+          }
         }
       };
 

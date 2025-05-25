@@ -32,6 +32,13 @@ export const apiMethods = {
     data: FormData | unknown,
     headers?: Record<string, string>
   ) => {
+    if (data instanceof FormData) {
+      // Log FormData contents for debugging
+      for (const pair of data.entries()) {
+        console.log('FormData entry in PUT request:', pair[0], pair[1]);
+      }
+    }
+
     const response = await api.put<ApiResponse<T>>(url, data, { headers });
     return response.data;
   },
@@ -41,6 +48,14 @@ export const apiMethods = {
     data: FormData | unknown,
     headers?: Record<string, string>
   ) => {
+    console.log('data in patch method: ', data);
+
+    if (data instanceof FormData) {
+      for (const pair of data.entries()) {
+        console.log('FormData entry in PATCH request:', pair[0], pair[1]);
+      }
+    }
+
     const response = await api.patch<ApiResponse<T>>(url, data, { headers });
     return response.data;
   },

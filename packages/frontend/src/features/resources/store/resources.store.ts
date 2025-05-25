@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { ResourceDto } from '../dto/resource-dto';
 import { resourceApi } from '../api/resource-api';
 import { useRouter } from 'next/navigation';
-
+import { ApiResponse } from '@/shared/types';
 interface ResourcesState {
   resources: ResourceDto[];
   isLoading: boolean;
@@ -13,7 +13,7 @@ interface ResourcesState {
   // Actions
   fetchResources: () => Promise<void>;
   createResource: (data: FormData) => Promise<ResourceDto | undefined>;
-  updateResource: (id: string, data: FormData) => Promise<void>;
+  updateResource: (id: string, data: FormData) => Promise<ApiResponse<ResourceDto>>;
   deleteResource: (id: string) => Promise<void>;
   getResourceById: (id: string) => Promise<ResourceDto | undefined>;
 }
@@ -70,9 +70,7 @@ export const useResourcesStore = create<ResourcesState>()(
             isLoading: false
           }));
 
-          if (router) {
-            router.push('/resources');
-          }
+          return response;
         } catch (error) {
           const errorMessage = (error as Error).message;
           set({ error: errorMessage, isLoading: false });

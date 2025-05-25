@@ -9,7 +9,7 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
-  Put,
+  Patch,
 } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/create-news.dto';
@@ -156,7 +156,7 @@ export class NewsController {
   }
 
   @Roles('ADMIN')
-  @Put(':id')
+  @Patch(':id')
   @UseInterceptors(FileInterceptor('file'))
   @ApiBody({ type: UpdateNewsDto })
   @ApiOkResponse({ type: News })

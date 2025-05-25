@@ -3,7 +3,6 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { UserProfile, UserResponse, SkillsResponse } from '../types';
 import { userApi } from '../api/user-api';
 import React from 'react';
-
 interface UserState {
   user: UserProfile | null;
   users: UserProfile[];
@@ -24,7 +23,7 @@ interface UserState {
   fetchSkills: () => Promise<UserResponse<SkillsResponse[]>>;
   fetchProfessions: () => Promise<UserResponse<string[]>>;
   updateUser: (
-    data: FormData,
+    data: FormData | UserProfile,
     id: number
   ) => Promise<UserResponse<UserProfile>>;
   deleteUser: (id: number) => Promise<UserResponse<UserProfile>>;
@@ -149,13 +148,19 @@ export const useUserStore = create<UserState>()(
         }
       },
 
-      updateUser: async (data: FormData, id: number) => {
+      updateUser: async (data: FormData | UserProfile, id: number) => {
         try {
-          for (const pair of data.entries()) {
-            console.log('pair', pair);
+          console.log('data in update user store: ', data);
+
+          if (data instanceof FormData) {
+            console.log('FormData in store before API call:');
+            for (const pair of data.entries()) {
+              console.log(pair[0], pair[1]);
+            }
           }
 
           set({ isLoading: true, error: null });
+
           const response = await userApi.updateUserProfile(data, id);
 
           if (!response.success) {
@@ -163,8 +168,10 @@ export const useUserStore = create<UserState>()(
           }
 
           set({ user: response.data, isLoading: false });
+
           return response;
         } catch (error) {
+          console.error('Error in updateUser:', error);
           set({ error: 'Failed to update user', isLoading: false });
           throw error;
         }

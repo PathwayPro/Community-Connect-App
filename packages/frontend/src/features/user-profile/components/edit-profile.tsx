@@ -21,7 +21,7 @@ import { useUserStore } from '../store';
 import { useFetchProfile } from '../hooks/use-fetch-profile';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
-import { SkillsResponse } from '../types';
+import { SkillsResponse, UserProfile } from '../types';
 import { toast } from 'sonner';
 
 function getStepContent(
@@ -77,7 +77,7 @@ export const EditProfile = () => {
         bio: user?.bio || '',
         pictureUploadLink: user?.pictureUploadLink || '',
         arrivalInCanada: user?.arrivalInCanada || '',
-        goalId: user?.goalId || undefined,
+        goalId: user?.goalId || '',
         linkedinLink: user?.linkedinLink || '',
         githubLink: user?.githubLink || '',
         twitterLink: user?.twitterLink || '',
@@ -175,7 +175,7 @@ export const EditProfile = () => {
       // Create FormData for file upload
       const formData = new FormData();
 
-      // Append form data with null checks and proper field names
+      // Append form data with empty string fallback
       formData.append('firstName', data.firstName ?? '');
       formData.append('lastName', data.lastName ?? '');
       formData.append('city', data.city ?? '');
@@ -188,26 +188,28 @@ export const EditProfile = () => {
       formData.append('profession', data.profession ?? '');
       formData.append('experience', data.experience ?? '');
 
-      // Convert skills array to numbers and stringify
-      const skillsArray = data.skills?.map((skill) => Number(skill)) ?? [];
-      formData.append('skills', JSON.stringify(skillsArray));
+      // Handle arrays with proper stringification
+      formData.append('skills', JSON.stringify(data.skills ?? []));
+      formData.append(
+        'additionalLinks',
+        JSON.stringify(data.additionalLinks ?? [])
+      );
 
+      // Handle other fields
       formData.append('arrivalInCanada', data.arrivalInCanada ?? '');
-      formData.append('goalId', data.goalId?.toString() ?? '');
+      formData.append('goalId', data.goalId ?? '');
       formData.append('linkedinLink', data.linkedinLink ?? '');
       formData.append('githubLink', data.githubLink ?? '');
       formData.append('twitterLink', data.twitterLink ?? '');
       formData.append('portfolioLink', data.portfolioLink ?? '');
       formData.append('otherLinks', data.otherLinks ?? '');
-      formData.append(
-        'additionalLinks',
-        JSON.stringify(data.additionalLinks ?? [])
-      );
       formData.append('workStatus', data.workStatus ?? '');
       formData.append('companyName', data.companyName ?? '');
+
+      // Handle boolean with proper string conversion
       formData.append(
         'activelySearching',
-        data.activelySearching?.toString() ?? 'false'
+        String(data.activelySearching ?? false)
       );
 
       // Handle file uploads

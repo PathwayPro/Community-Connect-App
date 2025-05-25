@@ -24,6 +24,7 @@ import {
 } from '@/features/user-profile/store';
 import { formatDate } from 'date-fns';
 import { useRole } from '@/features/user-profile/hooks/useRole';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 
 interface EventInfoProps {
   icon: React.ReactNode;
@@ -125,68 +126,77 @@ export const EventCard = ({
   };
 
   return (
-    <Card className="overflow-hidden rounded-[24px]">
+    <Card className="overflow-hidden rounded-2xl border border-neutral-light-300 bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl">
       <AlertDialogUI />
-      <div className="grid grid-cols-2 gap-4">
-        <div className="p-4">
-          <Image
-            src={image || '/event/placeholder.jpg'}
-            alt={title}
-            className="h-full w-full rounded-[20px] object-cover"
-            width={300}
-            height={200}
-            priority
-          />
+      <div className="flex h-full flex-col md:flex-row">
+        {/* Image Section */}
+        <div className="flex w-full items-center justify-center p-4 md:w-2/5 md:p-6">
+          <div className="group aspect-[16/9] w-full overflow-hidden rounded-xl border border-neutral-light-400 bg-neutral-light-100">
+            <ImagePreview
+              imagePath={image}
+              alt={title}
+              width={640}
+              height={360}
+              priority
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-3 p-4">
-          <div className="flex items-start justify-between gap-2">
-            <h2 className="line-clamp-1 font-semibold">{title}</h2>
-            <div className="flex items-center justify-center rounded-full bg-primary-300 p-3">
-              <div className="flex items-center gap-2">
-                {!is_free && <DollarSign className="h-5 w-5 text-secondary" />}
-                {type === EventType.PRIVATE ? (
-                  <LockIcon className="h-5 w-5 text-white" />
-                ) : (
-                  <UnlockIcon className="h-5 w-5 text-white" />
+        {/* Content Section */}
+        <div className="flex flex-1 flex-col justify-between gap-4 p-4 md:p-6">
+          <div className="flex flex-col gap-2">
+            {/* Title and Icon */}
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="line-clamp-1 text-heading-h4 font-semibold text-neutral-dark-700">
+                {title}
+              </h2>
+              <span className="flex items-center rounded-full bg-primary-300 p-2">
+                {!is_free && (
+                  <DollarSign className="mr-1 h-5 w-5 text-secondary-500" />
                 )}
-              </div>
+                {type === EventType.PRIVATE ? (
+                  <LockIcon className="h-5 w-5 text-primary-500" />
+                ) : (
+                  <UnlockIcon className="h-5 w-5 text-primary-500" />
+                )}
+              </span>
+            </div>
+            {/* Description */}
+            <p className="line-clamp-3 text-paragraph-base text-neutral-dark-300">
+              {description}
+            </p>
+            {/* Info Row */}
+            <div className="mt-2 flex flex-wrap gap-4 text-primary-700">
+              <EventInfo
+                icon={<Calendar className="h-4 w-4" />}
+                text={
+                  start_date ? formatDate(start_date, 'PP') : 'No date provided'
+                }
+              />
+              <EventInfo
+                icon={<MapPin className="h-4 w-4" />}
+                text={location || 'No location provided'}
+              />
+              <EventInfo
+                icon={<Clock className="h-4 w-4" />}
+                text={`${start_time} - ${end_time}`}
+              />
             </div>
           </div>
-
-          <p className="line-clamp-2 text-justify text-base text-muted-foreground">
-            {description}
-          </p>
-
-          <div className="space-y-2 text-primary">
-            <EventInfo
-              icon={<Calendar className="h-4 w-4" />}
-              text={
-                start_date ? formatDate(start_date, 'PP') : 'No date provided'
-              }
-            />
-            <EventInfo
-              icon={<MapPin className="h-4 w-4" />}
-              text={location || 'No location provided'}
-            />
-            <EventInfo
-              icon={<Clock className="h-4 w-4" />}
-              text={`${start_time} - ${end_time}`}
-            />
-          </div>
-
-          <div className="mt-auto space-y-2">
+          {/* Buttons Row */}
+          <div className="mt-4 flex w-full gap-3">
             <IconButton
               label="Learn More"
               rightIcon="arrowRight"
-              className="w-full"
+              className="flex-1 transition-transform duration-200 hover:scale-105"
               onClick={handleLearnMore}
             />
             {canEdit && (
               <IconButton
                 label="Edit Details"
                 rightIcon="pencil"
-                className="w-full"
+                className="flex-1 transition-transform duration-200 hover:scale-105"
                 onClick={handleEdit}
               />
             )}
@@ -195,7 +205,7 @@ export const EventCard = ({
                 label="Delete Event"
                 rightIcon="delete"
                 variant="outline"
-                className="w-full hover:border-destructive hover:bg-destructive hover:text-white"
+                className="flex-1 transition-transform duration-200 hover:scale-105 hover:border-destructive hover:bg-destructive hover:text-white"
                 onClick={() => setIsDeleteModalOpen(true)}
               />
             )}

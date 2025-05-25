@@ -4,12 +4,12 @@ import {
   Post,
   Body,
   Param,
-  Put,
   Delete,
   UseGuards,
   Query,
   UploadedFile,
   UseInterceptors,
+  Patch,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ResourcesService } from './resources.service';
@@ -113,7 +113,7 @@ export class ResourcesController {
   }
 
   @Roles('ADMIN', 'MENTOR')
-  @Put(':id')
+  @Patch(':id')
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UpdateResourceDto })
