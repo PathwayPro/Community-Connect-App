@@ -182,6 +182,7 @@ export class BlogService {
         user: { connect: { id: user.sub } },
         image: image ? image.path + '/' + image.fileName : null,
         message: newPost.message,
+        published: true,
       };
       const post = await this.prisma.posts.create({
         data: postData,
@@ -208,6 +209,7 @@ export class BlogService {
         user: { connect: { id: user.sub } },
         post: { connect: { id: newComment.post_id } },
         message: newComment.message,
+        published: true,
       };
       const comment = await this.prisma.postsComments.create({
         data: commentData,

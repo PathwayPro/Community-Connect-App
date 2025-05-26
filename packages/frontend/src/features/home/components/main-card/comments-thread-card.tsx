@@ -137,12 +137,12 @@ export const CommentsThreadCard = ({
     }
 
     const commentSubmit = await createComment(selectedThread.id, comment);
-
-    if (setShowCommentSection) {
-      setShowCommentSection(false);
-    }
-    setShowCommentSearchbar(false);
-    setShowCommentInput(false);
+    fetchThreadComments(selectedThread.id);
+    // if (setShowCommentSection) {
+    //   setShowCommentSection(true);
+    // }
+    // setShowCommentSearchbar(false);
+    // setShowCommentInput(false);
 
     return commentSubmit;
   };

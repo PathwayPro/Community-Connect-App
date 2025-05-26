@@ -18,7 +18,7 @@ interface BlogState {
   // Actions
   fetchThreads: (params?: ThreadsParams) => Promise<void>;
   fetchThreadComments: (post_id: number) => Promise<void>;
-  createThread: (content: string) => Promise<void>;
+  createThread: (content: string) => Promise<boolean>;
   createComment: (post_id: number, content: string) => Promise<void>;
   toggleLike: (post_id: number) => Promise<LikeThreadResponse>;
   toggleSave: (post_id: number) => Promise<SaveThreadResponse>;
@@ -77,9 +77,9 @@ export const useBlogStore = create<BlogState>()(
 
           console.log('| - - - - - - - > RESPONSE CREANDO THREAD:', response);
 
-          const message = response.data.content;
+          return response.success;
 
-          //set({ threadMessages: data, isLoading: false });
+          //set({ threadMessages: message, isLoading: false });
         } catch (error) {
           set({
             error:

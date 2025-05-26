@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { HomeInfobar } from './infobar/home-infobar';
 import { HomeSidebar } from './sidebar/home-sidebar';
-import { mockThreads, sortOptions, Thread } from '../lib/mock-data'; // SACAR MOCK THREADS SOALMENTE
+import { sortOptions, Thread } from '../lib/mock-data';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { ThreadSearchbar, SortComponent } from './common';
 import {
@@ -39,7 +39,7 @@ export const Home = () => {
   const [activeFilterTab, setActiveFilterTab] = useState<string>('THREADS');
   const [viewThreads, setViewThreads] = useState<boolean>(false);
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
-  const [showCommentSection, setShowCommentSection] = useState(false);
+  const [showCommentSection, setShowCommentSection] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const {
@@ -59,10 +59,13 @@ export const Home = () => {
     try {
       // Handle the thread submission here
       console.log('Thread submitted:', content, attachments);
-      // await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated API call
-      const threadSubmit = await createThread(content);
       setDraftContent('');
       setIsCreatingThread(true);
+      const threadSubmit = await createThread(content);
+      if (threadSubmit) {
+        fetchThreads({ filter: activeFilterTab, order_by: sort });
+      }
+      setIsCreatingThread(false);
     } catch (error) {
       console.error('Error submitting thread:', error);
     }
