@@ -11,7 +11,7 @@ import { ChartCard } from './common/chart-card';
 import { MetricCard } from './metric-card';
 import { UserStatusChart } from './user-status-chart';
 import { useAdminStore } from '@/features/admin/store/admin-store';
-import { AnalyticsPeriod } from '@/features/admin/api/admin-api';
+import { AnalyticsPeriod } from '@/features/admin/types';
 import { UserX } from 'lucide-react';
 
 export const selectOptions = [
@@ -174,7 +174,7 @@ export const Analytics = () => {
       {/* Charts Row */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* User Status Distribution */}
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+        <div className="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
               User Status Distribution
@@ -186,7 +186,13 @@ export const Analytics = () => {
               data={{
                 totalUsers: overviewMetrics.totalUsers,
                 deletedUsers: overviewMetrics.deletedUsers,
-                unverifiedUsers: overviewMetrics.unverifiedUsers
+                unverifiedUsers: overviewMetrics.unverifiedUsers,
+                activeUsersPercentage: overviewMetrics.activeUsersPercentage,
+                inactiveUsersPercentage:
+                  overviewMetrics.inactiveUsersPercentage,
+                unverifiedUsersPercentage:
+                  overviewMetrics.unverifiedUsersPercentage,
+                deletedUsersPercentage: overviewMetrics.deletedUsersPercentage
               }}
             />
           ) : (

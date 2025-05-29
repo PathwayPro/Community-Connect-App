@@ -15,16 +15,8 @@ import {
   AvatarFallback
 } from '@/shared/components/ui/avatar';
 import { AdminUser } from '../../../types';
-import { useAdminStore } from '../../../store/admin-store';
-import { useState } from 'react';
-import { EditUserModal } from '../../modals/edit-user-modal';
-import { ChangeRoleModal } from '../../modals/change-role-modal';
-import { RestoreUserModal } from '../../modals/restore-user-modal';
 import { toast } from 'sonner';
-import { ForgotPasswordCredentials } from '@/features/auth/types';
-import { DeleteModal } from '@/shared/components/modal/delete-modal';
 import { useAuthContext } from '@/features/auth/providers/auth-context';
-import { ViewUserModal } from '../../modals/view-user-modal';
 
 const getStatusColor = (status: AdminUser['status']) => {
   switch (status) {
@@ -46,59 +38,24 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleString();
 };
 
-export const useColumns = () => {
-  const { setSelectedUser, resetUserPassword, deleteUser } = useAdminStore();
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
-  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] =
-    useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+interface UseColumnsProps {
+  onViewUser: (user: AdminUser) => void;
+  onEditUser: (user: AdminUser) => void;
+  onChangeRole: (user: AdminUser) => void;
+  onDeleteUser: (user: AdminUser) => void;
+  onRestoreUser: (user: AdminUser) => void;
+  onResetPassword: (user: AdminUser) => void;
+}
+
+export const useColumns = ({
+  onViewUser,
+  onEditUser,
+  onChangeRole,
+  onDeleteUser,
+  onRestoreUser,
+  onResetPassword
+}: UseColumnsProps) => {
   const { user: currentUser } = useAuthContext();
-
-  const handleViewUser = (user: AdminUser) => {
-    setSelectedUser(user);
-    setSelectedUserId(user.id);
-    setIsViewModalOpen(true);
-  };
-
-  const handleEditUser = (user: AdminUser) => {
-    setSelectedUser(user);
-    setSelectedUserId(user.id);
-    setIsEditModalOpen(true);
-  };
-
-  const handleChangeRole = (user: AdminUser) => {
-    setSelectedUser(user);
-    setSelectedUserId(user.id);
-    setIsRoleModalOpen(true);
-  };
-
-  const handleResetPassword = async (user: AdminUser) => {
-    try {
-      await resetUserPassword({
-        email: user.email
-      } as ForgotPasswordCredentials);
-      toast.success('Password reset email sent successfully');
-      setIsResetPasswordModalOpen(false);
-    } catch (error) {
-      console.error(error);
-      toast.error('Failed to send password reset email');
-    }
-  };
-
-  const handleDeleteUser = async (user: AdminUser) => {
-    try {
-      await deleteUser(user.id);
-      toast.success('User deleted successfully');
-      setIsDeleteModalOpen(false);
-    } catch (error) {
-      console.error(error);
-      toast.error('Failed to delete user');
-    }
-  };
 
   const columns: ColumnDef<AdminUser>[] = [
     {
@@ -189,137 +146,62 @@ export const useColumns = () => {
         const isDeleted = user.status === 'DELETED';
 
         return (
-          <>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuSeparator />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onViewUser(user)}>
+                View User
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onEditUser(user)}
+                disabled={isDeleted}
+              >
+                Edit User
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onChangeRole(user)}
+                disabled={isDeleted}
+              >
+                Change Role
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onResetPassword(user)}
+                disabled={isDeleted}
+              >
+                Reset Password
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {isDeleted ? (
                 <DropdownMenuItem
-                  onClick={() => handleViewUser(user)}
-                  disabled={isDeleted}
+                  className="text-green-600"
+                  onClick={() => onRestoreUser(user)}
                 >
-                  View User
+                  Restore User
                 </DropdownMenuItem>
+              ) : (
                 <DropdownMenuItem
-                  onClick={() => handleEditUser(user)}
-                  disabled={isDeleted}
-                >
-                  Edit User
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleChangeRole(user)}
-                  disabled={isDeleted}
-                >
-                  Change Role
-                </DropdownMenuItem>
-                <DropdownMenuItem
+                  className="text-red-600"
                   onClick={() => {
-                    setSelectedUser(user);
-                    setSelectedUserId(user.id);
-                    setIsResetPasswordModalOpen(true);
+                    if (isCurrentUser) {
+                      toast.error('You cannot delete your own account');
+                      return;
+                    }
+                    onDeleteUser(user);
                   }}
-                  disabled={isDeleted}
+                  disabled={isCurrentUser}
                 >
-                  Reset Password
+                  Delete User
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {isDeleted ? (
-                  <DropdownMenuItem
-                    className="text-green-600"
-                    onClick={() => {
-                      setSelectedUser(user);
-                      setSelectedUserId(user.id);
-                      setIsRestoreModalOpen(true);
-                    }}
-                  >
-                    Restore User
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem
-                    className="text-red-600"
-                    onClick={() => {
-                      if (isCurrentUser) {
-                        toast.error('You cannot delete your own account');
-                        return;
-                      }
-                      setSelectedUser(user);
-                      setSelectedUserId(user.id);
-                      setIsDeleteModalOpen(true);
-                    }}
-                    disabled={isCurrentUser}
-                  >
-                    Delete User
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {selectedUserId === user.id && (
-              <>
-                <ViewUserModal
-                  isOpen={isViewModalOpen}
-                  onClose={() => {
-                    setIsViewModalOpen(false);
-                    setSelectedUserId(null);
-                  }}
-                  userId={user.id}
-                />
-                <EditUserModal
-                  isOpen={isEditModalOpen}
-                  onClose={() => {
-                    setIsEditModalOpen(false);
-                    setSelectedUserId(null);
-                  }}
-                  userId={user.id}
-                />
-                <ChangeRoleModal
-                  isOpen={isRoleModalOpen}
-                  onClose={() => {
-                    setIsRoleModalOpen(false);
-                    setSelectedUserId(null);
-                  }}
-                  userId={user.id}
-                />
-                <DeleteModal
-                  isOpen={isDeleteModalOpen}
-                  onClose={() => {
-                    setIsDeleteModalOpen(false);
-                    setSelectedUserId(null);
-                  }}
-                  onConfirm={() => handleDeleteUser(user)}
-                  isDeleting={false}
-                  title="Delete User"
-                  description={`Are you sure you want to delete ${user.firstName} ${user.lastName}? This action cannot be undone.`}
-                />
-                <RestoreUserModal
-                  isOpen={isRestoreModalOpen}
-                  onClose={() => {
-                    setIsRestoreModalOpen(false);
-                    setSelectedUserId(null);
-                  }}
-                  userId={user.id}
-                  userName={`${user.firstName} ${user.lastName}`}
-                />
-                <DeleteModal
-                  isOpen={isResetPasswordModalOpen}
-                  onClose={() => {
-                    setIsResetPasswordModalOpen(false);
-                    setSelectedUserId(null);
-                  }}
-                  onConfirm={() => handleResetPassword(user)}
-                  isDeleting={false}
-                  title="Reset Password"
-                  description={`Are you sure you want to send a password reset link to ${user.firstName} ${user.lastName}? They will receive an email with instructions to reset their password.`}
-                />
-              </>
-            )}
-          </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         );
       }
     }

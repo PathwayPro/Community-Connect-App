@@ -1,7 +1,7 @@
 'use client';
 import { AnalyticsSelect } from './common/analytics-select';
 import { selectOptions } from './analytics';
-import { UserActivityData } from '@/features/admin/api/admin-api';
+import { UserActivityData } from '@/features/admin/types';
 
 interface UserActivityProps {
   data: UserActivityData[];

@@ -80,11 +80,27 @@ export class AdminService {
         },
       });
 
-      // Get unverified users count (non-deleted users with unverified email)
+      // Get unverified users count (non-deleted email users with unverified email)
       const unverifiedUsers = await this.prisma.users.count({
         where: {
           deleted_at: false,
+          provider: 'email',
           email_verified: false,
+        },
+      });
+
+      // Get inactive users count (non-deleted users who haven't logged in during the period)
+      const inactiveUsers = await this.prisma.users.count({
+        where: {
+          deleted_at: false,
+          OR: [
+            { last_login: null },
+            {
+              last_login: {
+                lt: startDate,
+              },
+            },
+          ],
         },
       });
 
@@ -169,10 +185,28 @@ export class AdminService {
                 100,
             );
 
+      // Convert all user metrics to percentages
+      const totalUsersPercentage = 100; // Base reference
+      const deletedUsersPercentage =
+        totalUsers === 0 ? 0 : Math.round((deletedUsers / totalUsers) * 100);
+      const activeUsersPercentage =
+        totalUsers === 0 ? 0 : Math.round((activeUsers / totalUsers) * 100);
+      const inactiveUsersPercentage =
+        totalUsers === 0 ? 0 : Math.round((inactiveUsers / totalUsers) * 100);
+      const unverifiedUsersPercentage =
+        totalUsers === 0 ? 0 : Math.round((unverifiedUsers / totalUsers) * 100);
+
       return {
         totalUsers,
         deletedUsers,
+        activeUsers,
+        inactiveUsers,
         unverifiedUsers,
+        totalUsersPercentage,
+        deletedUsersPercentage,
+        activeUsersPercentage,
+        inactiveUsersPercentage,
+        unverifiedUsersPercentage,
         userGrowthRate,
         userGrowthRateChange,
         engagementRate,

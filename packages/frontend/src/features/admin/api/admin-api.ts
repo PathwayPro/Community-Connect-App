@@ -1,35 +1,13 @@
 import { apiMethods } from '@/shared/api';
-import { AdminUser, UserRole } from '../types';
-
-export type AnalyticsPeriod = 'daily' | 'weekly' | 'monthly' | 'yearly';
-
-export interface OverviewMetrics {
-  totalUsers: number;
-  userGrowthRate: number;
-  engagementRate: number;
-  engagementRateChange: number;
-  deletedUsers: number;
-  unverifiedUsers: number;
-}
-
-export interface NewUsersData {
-  currentValue: number;
-  chartData: Array<{ label: string; value: number }>;
-}
-
-export interface UserDistribution {
-  totalUsers: number;
-  data: Array<{
-    name: string;
-    value: number;
-    color: string;
-  }>;
-}
-
-export interface UserActivityData {
-  type: string;
-  count: number;
-}
+import {
+  AdminUser,
+  UserRole,
+  OverviewMetrics,
+  NewUsersData,
+  UserDistribution,
+  UserActivityData,
+  AnalyticsPeriod
+} from '../types';
 
 export const adminApi = {
   getAllUsers: (query: {

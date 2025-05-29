@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { adminApi } from '../api/admin-api';
 import {
-  adminApi,
   AnalyticsPeriod,
   OverviewMetrics,
   NewUsersData,
   UserDistribution,
   UserActivityData
-} from '../api/admin-api';
+} from '../types';
 import { AdminUser, UserRole } from '../types';
 import { authApi } from '@/features/auth/api/auth-api';
 import { ForgotPasswordCredentials } from '@/features/auth/types';

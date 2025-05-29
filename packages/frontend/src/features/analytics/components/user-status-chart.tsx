@@ -4,6 +4,10 @@ interface UserStatusData {
   totalUsers: number;
   deletedUsers: number;
   unverifiedUsers: number;
+  activeUsersPercentage: number;
+  inactiveUsersPercentage: number;
+  unverifiedUsersPercentage: number;
+  deletedUsersPercentage: number;
 }
 
 interface UserStatusChartProps {
@@ -11,23 +15,27 @@ interface UserStatusChartProps {
 }
 
 export const UserStatusChart = ({ data }: UserStatusChartProps) => {
-  const activeUsers =
-    data.totalUsers - data.deletedUsers - data.unverifiedUsers;
+  console.log('status data :', data);
 
   const chartData = [
     {
-      name: 'Active Users',
-      value: activeUsers,
+      name: 'Active',
+      value: data.activeUsersPercentage,
       color: '#5a71b6'
     },
     {
-      name: 'Unverified Users',
-      value: data.unverifiedUsers,
+      name: 'Inactive',
+      value: data.inactiveUsersPercentage,
       color: '#c8cee1'
     },
     {
-      name: 'Deleted Users',
-      value: data.deletedUsers,
+      name: 'Unverified',
+      value: data.unverifiedUsersPercentage,
+      color: '#eead53'
+    },
+    {
+      name: 'Deleted',
+      value: data.deletedUsersPercentage,
       color: '#f27c7c'
     }
   ];
