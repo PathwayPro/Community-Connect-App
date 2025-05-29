@@ -63,36 +63,65 @@ export const EditProfile = () => {
   const methods = useForm<UserProfileFormData>({
     mode: 'onChange',
     resolver: zodResolver(userProfileSchema),
-    values: useMemo(
-      () => ({
-        firstName: user?.firstName || '',
-        lastName: user?.lastName || '',
-        province: user?.province || '',
-        city: user?.city || '',
-        dob: user?.dob || '',
-        ageRange: user?.ageRange || '',
-        languages: user?.languages || '',
-        profession: user?.profession || '',
-        experience: user?.experience || '',
-        bio: user?.bio || '',
-        pictureUploadLink: user?.pictureUploadLink || '',
-        arrivalInCanada: user?.arrivalInCanada || '',
-        goalId: user?.goalId || '',
-        linkedinLink: user?.linkedinLink || '',
-        githubLink: user?.githubLink || '',
-        twitterLink: user?.twitterLink || '',
-        portfolioLink: user?.portfolioLink || '',
-        otherLinks: user?.otherLinks || '',
-        additionalLinks: user?.additionalLinks || [],
-        workStatus: user?.workStatus || '',
-        companyName: user?.companyName || '',
-        countryOfOrigin: user?.countryOfOrigin || '',
-        activelySearching: user?.activelySearching || false,
-        skills: user?.skills?.map(Number) || []
-      }),
-      [user]
-    )
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      province: '',
+      city: '',
+      dob: '',
+      ageRange: '',
+      languages: '',
+      profession: '',
+      experience: '',
+      bio: '',
+      pictureUploadLink: '',
+      arrivalInCanada: '',
+      goalId: '',
+      linkedinLink: '',
+      githubLink: '',
+      twitterLink: '',
+      portfolioLink: '',
+      otherLinks: '',
+      additionalLinks: [],
+      workStatus: '',
+      companyName: '',
+      countryOfOrigin: '',
+      activelySearching: false,
+      skills: []
+    }
   });
+
+  // Update form values when user data changes
+  useEffect(() => {
+    if (user) {
+      methods.reset({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        province: user.province || '',
+        city: user.city || '',
+        dob: user.dob || '',
+        ageRange: user.ageRange || '',
+        languages: user.languages || '',
+        profession: user.profession || '',
+        experience: user.experience || '',
+        bio: user.bio || '',
+        pictureUploadLink: user.pictureUploadLink || '',
+        arrivalInCanada: user.arrivalInCanada || '',
+        goalId: user.goalId || '',
+        linkedinLink: user.linkedinLink || '',
+        githubLink: user.githubLink || '',
+        twitterLink: user.twitterLink || '',
+        portfolioLink: user.portfolioLink || '',
+        otherLinks: user.otherLinks || '',
+        additionalLinks: user.additionalLinks || [],
+        workStatus: user.workStatus || '',
+        companyName: user.companyName || '',
+        countryOfOrigin: user.countryOfOrigin || '',
+        activelySearching: user.activelySearching || false,
+        skills: user.skills?.map(Number) || []
+      });
+    }
+  }, [user, methods]);
 
   useEffect(() => {
     console.log('Form Values:', methods.getValues());
@@ -170,62 +199,41 @@ export const EditProfile = () => {
     }
 
     try {
-      console.log('Submitting data:', data);
+      console.log('Form data to submit:', data);
 
       // Create FormData for file upload
       const formData = new FormData();
 
-      // Append form data with empty string fallback
-      formData.append('firstName', data.firstName ?? '');
-      formData.append('lastName', data.lastName ?? '');
-      formData.append('city', data.city ?? '');
-      formData.append('bio', data.bio ?? '');
-      formData.append('dob', data.dob ?? '');
-      formData.append('province', data.province ?? '');
-      formData.append('ageRange', data.ageRange ?? '');
-      formData.append('countryOfOrigin', data.countryOfOrigin ?? '');
-      formData.append('languages', data.languages ?? '');
-      formData.append('profession', data.profession ?? '');
-      formData.append('experience', data.experience ?? '');
+      // Append all form fields
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value));
+            console.log(`Appending array ${key}:`, value);
+          } else if (typeof value === 'boolean') {
+            formData.append(key, String(value));
+            console.log(`Appending boolean ${key}:`, value);
+          } else {
+            formData.append(key, String(value));
+            console.log(`Appending ${key}:`, value);
+          }
+        }
+      });
 
-      // Handle arrays with proper stringification
-      formData.append('skills', JSON.stringify(data.skills ?? []));
-      formData.append(
-        'additionalLinks',
-        JSON.stringify(data.additionalLinks ?? [])
-      );
-
-      // Handle other fields
-      formData.append('arrivalInCanada', data.arrivalInCanada ?? '');
-      formData.append('goalId', data.goalId ?? '');
-      formData.append('linkedinLink', data.linkedinLink ?? '');
-      formData.append('githubLink', data.githubLink ?? '');
-      formData.append('twitterLink', data.twitterLink ?? '');
-      formData.append('portfolioLink', data.portfolioLink ?? '');
-      formData.append('otherLinks', data.otherLinks ?? '');
-      formData.append('workStatus', data.workStatus ?? '');
-      formData.append('companyName', data.companyName ?? '');
-
-      // Handle boolean with proper string conversion
-      formData.append(
-        'activelySearching',
-        String(data.activelySearching ?? false)
-      );
-
-      // Handle file uploads
+      // Handle file uploads separately
       if (selectedProfilePictureFile) {
         formData.append('pictureUploadLink', selectedProfilePictureFile);
+        console.log('Appending profile picture file');
       }
 
       if (selectedResumeFile) {
         formData.append('resumeUploadLink', selectedResumeFile);
+        console.log('Appending resume file');
       }
 
       // Log the form data for debugging
-      console.log(
-        'Form data being sent:',
-        Object.fromEntries(formData.entries())
-      );
+      const formDataObj = Object.fromEntries(formData.entries());
+      console.log('Final FormData contents:', formDataObj);
 
       const response = await updateUser(formData, Number(user?.id));
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Button } from '@/shared/components/ui/button';
 import {
   Dialog,
@@ -7,7 +8,7 @@ import {
   DialogFooter,
   DialogDescription
 } from '@/shared/components/ui/dialog';
-import { useAdminStore } from '../../store';
+import { useAdminStore } from '../../store/admin-store';
 import { toast } from 'sonner';
 import { useState } from 'react';
 

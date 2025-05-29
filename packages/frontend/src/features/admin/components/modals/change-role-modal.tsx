@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/shared/components/ui/select';
-import { useAdminStore } from '../../store';
+import { useAdminStore } from '../../store/admin-store';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { UserRole } from '../../types';

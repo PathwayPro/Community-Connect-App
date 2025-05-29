@@ -1,117 +1,61 @@
-'use client';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useState } from 'react';
 
-import { useState, useEffect } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
-import { Button } from '@/shared/components/ui/button';
-import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
-import { cn } from '@/shared/lib/utils';
+export const PdfPreview = ({ filePath }: { filePath: string }) => {
+  const [zoom, setZoom] = useState(100);
 
-interface PDFPreviewProps {
-  filePath: string;
-  className?: string;
-  showControls?: boolean;
-  initialPage?: number;
-  onDownload?: () => void;
-}
-
-export const PDFPreview = ({
-  filePath,
-  className,
-  showControls = true,
-  initialPage = 1,
-  onDownload
-}: PDFPreviewProps) => {
-  const [numPages, setNumPages] = useState<number>(0);
-  const [pageNumber, setPageNumber] = useState<number>(initialPage);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Configure PDF.js worker
-  useEffect(() => {
-    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-  }, []);
-
-  const pdfUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/${filePath}`;
-
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-    setIsLoading(false);
-    setError(null);
+  const handleDownload = () => {
+    // Open the PDF in a new tab
+    window.open(filePath, '_blank', 'noopener,noreferrer');
   };
-
-  const onDocumentLoadError = (error: Error) => {
-    console.error('Error loading PDF:', error);
-    setError('Failed to load PDF. Please try again later.');
-    setIsLoading(false);
-  };
-
-  const changePage = (offset: number) => {
-    setPageNumber((prevPageNumber) => {
-      const newPageNumber = prevPageNumber + offset;
-      return Math.min(Math.max(1, newPageNumber), numPages);
-    });
-  };
-
-  const previousPage = () => changePage(-1);
-  const nextPage = () => changePage(1);
 
   return (
-    <div className={cn('flex flex-col items-center gap-4', className)}>
-      <div className="relative w-full">
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-neutral-50">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          </div>
-        )}
-        {error && (
-          <div className="flex items-center justify-center p-4 text-destructive">
-            {error}
-          </div>
-        )}
-        <Document
-          file={pdfUrl}
-          onLoadSuccess={onDocumentLoadSuccess}
-          onLoadError={onDocumentLoadError}
-          loading={null}
-          className="flex justify-center"
+    <div className="mx-auto w-full max-w-4xl rounded-lg shadow-lg">
+      {/* PDF display area */}
+      <div className="flex justify-center">
+        <div
+          className="overflow-hidden rounded-lg border bg-white shadow-sm"
+          style={{
+            width: `${Math.min(1000 * (zoom / 100), 1000)}px`,
+            maxWidth: '100%'
+          }}
         >
-          <Page
-            pageNumber={pageNumber}
-            renderTextLayer={false}
-            renderAnnotationLayer={false}
-            className="max-w-full"
+          {/* PDF iframe - this is the simplest approach */}
+          <iframe
+            src={`${filePath}#zoom=${zoom}`}
+            className="h-[600px] w-full border-0"
+            title="PDF Viewer"
+            style={{
+              transform: `scale(${zoom / 100})`,
+              transformOrigin: 'top left',
+              width: `${100 / (zoom / 100)}%`,
+              height: `${600 / (zoom / 100)}px`
+            }}
           />
-        </Document>
+        </div>
       </div>
 
-      {showControls && !error && (
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={previousPage}
-            disabled={pageNumber <= 1}
+      {/* Alternative: Simple embed for broader compatibility */}
+      <div className="border-t bg-gray-50 p-4">
+        <div className="text-center text-sm text-gray-600">
+          If the PDF doesn&apos;t display properly, you can{' '}
+          <button
+            onClick={handleDownload}
+            className="text-blue-500 underline hover:text-blue-700"
           >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm">
-            Page {pageNumber} of {numPages}
-          </span>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={nextPage}
-            disabled={pageNumber >= numPages}
+            download it directly
+          </button>{' '}
+          or{' '}
+          <a
+            href={filePath}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 underline hover:text-blue-700"
           >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          {onDownload && (
-            <Button variant="outline" size="icon" onClick={onDownload}>
-              <Download className="h-4 w-4" />
-            </Button>
-          )}
+            open in new tab
+          </a>
         </div>
-      )}
+      </div>
     </div>
   );
 };

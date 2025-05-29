@@ -14,7 +14,7 @@ import { ChartAreaIcon } from 'lucide-react';
 import { PermissionWrapper } from '@/shared/components/navigation/permission-wrapper/permission-wrapper';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeTab, setActiveTab] = useState('analytics');
 
   return (
     <div className="container mx-auto space-y-6 py-6">

@@ -9,7 +9,6 @@ import {
   DollarSign
 } from 'lucide-react';
 import { Card } from '@/shared/components/ui/card';
-import Image from 'next/image';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { useRouter } from 'next/navigation';
 import { EventType, Event, EventWithHost } from '../../types';
@@ -134,6 +133,7 @@ export const EventCard = ({
           <div className="group aspect-[16/9] w-full overflow-hidden rounded-xl border border-neutral-light-400 bg-neutral-light-100">
             <ImagePreview
               imagePath={image}
+              fallbackImage={'/event/placeholder.jpg'}
               alt={title}
               width={640}
               height={360}

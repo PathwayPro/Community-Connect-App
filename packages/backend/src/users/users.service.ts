@@ -399,6 +399,7 @@ export class UsersService {
         email: userData.email,
         password_hash: userData.passwordHash,
         provider: 'email',
+        created_at: new Date(),
       },
     });
 

@@ -15,7 +15,7 @@ import {
   AvatarFallback
 } from '@/shared/components/ui/avatar';
 import { AdminUser } from '../../../types';
-import { useAdminStore } from '../../../store';
+import { useAdminStore } from '../../../store/admin-store';
 import { useState } from 'react';
 import { EditUserModal } from '../../modals/edit-user-modal';
 import { ChangeRoleModal } from '../../modals/change-role-modal';
@@ -24,6 +24,7 @@ import { toast } from 'sonner';
 import { ForgotPasswordCredentials } from '@/features/auth/types';
 import { DeleteModal } from '@/shared/components/modal/delete-modal';
 import { useAuthContext } from '@/features/auth/providers/auth-context';
+import { ViewUserModal } from '../../modals/view-user-modal';
 
 const getStatusColor = (status: AdminUser['status']) => {
   switch (status) {
@@ -48,6 +49,7 @@ const formatDate = (dateString: string) => {
 export const useColumns = () => {
   const { setSelectedUser, resetUserPassword, deleteUser } = useAdminStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
@@ -55,6 +57,12 @@ export const useColumns = () => {
     useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const { user: currentUser } = useAuthContext();
+
+  const handleViewUser = (user: AdminUser) => {
+    setSelectedUser(user);
+    setSelectedUserId(user.id);
+    setIsViewModalOpen(true);
+  };
 
   const handleEditUser = (user: AdminUser) => {
     setSelectedUser(user);
@@ -137,6 +145,31 @@ export const useColumns = () => {
       }
     },
     {
+      accessorKey: 'city',
+      header: 'City',
+      cell: ({ row }) => row.original.city || '-'
+    },
+    {
+      accessorKey: 'province',
+      header: 'Province',
+      cell: ({ row }) => row.original.province || '-'
+    },
+    {
+      accessorKey: 'companyName',
+      header: 'Company',
+      cell: ({ row }) => row.original.companyName || '-'
+    },
+    {
+      accessorKey: 'experience',
+      header: 'Experience',
+      cell: ({ row }) => row.original.experience || '-'
+    },
+    {
+      accessorKey: 'workStatus',
+      header: 'Work Status',
+      cell: ({ row }) => row.original.workStatus || '-'
+    },
+    {
       accessorKey: 'lastLogin',
       header: 'Last Login',
       cell: ({ row }) => {
@@ -167,6 +200,12 @@ export const useColumns = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => handleViewUser(user)}
+                  disabled={isDeleted}
+                >
+                  View User
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => handleEditUser(user)}
                   disabled={isDeleted}
@@ -223,6 +262,14 @@ export const useColumns = () => {
 
             {selectedUserId === user.id && (
               <>
+                <ViewUserModal
+                  isOpen={isViewModalOpen}
+                  onClose={() => {
+                    setIsViewModalOpen(false);
+                    setSelectedUserId(null);
+                  }}
+                  userId={user.id}
+                />
                 <EditUserModal
                   isOpen={isEditModalOpen}
                   onClose={() => {

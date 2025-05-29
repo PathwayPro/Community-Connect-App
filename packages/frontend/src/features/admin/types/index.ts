@@ -10,6 +10,17 @@ export interface AdminUser {
   pictureUploadLink?: string;
   profession?: string;
   lastLogin?: string;
+  city?: string;
+  province?: string;
+  companyName?: string;
+  experience?: string;
+  workStatus?: string;
+  arrivalInCanada?: string;
+  skills?: number[];
+  languages?: string[];
+  bio?: string;
+  countryOfOrigin?: string;
+  activelySearching?: boolean;
 }
 
 export interface AdminState {

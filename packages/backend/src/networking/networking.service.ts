@@ -191,6 +191,7 @@ export class NetworkingService {
       const users = await this.prisma.users.findMany({
         where: {
           id: { not: userId },
+          deleted_at: false,
         },
         select: {
           id: true,
