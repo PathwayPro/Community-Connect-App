@@ -50,6 +50,7 @@ model users {
   age_range            String?
   goal_id              String?
   last_login           DateTime?
+  created_at           DateTime?
   provider             String?
   deleted_at           Boolean                     @default(false)
   // MENTOR RELATIONSHIP

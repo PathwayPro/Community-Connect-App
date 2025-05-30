@@ -4,6 +4,12 @@ export class OverviewMetrics {
   @ApiProperty({ description: 'Total number of users' })
   totalUsers: number;
 
+  @ApiProperty({ description: 'Deleted users count' })
+  deletedUsers: number;
+
+  @ApiProperty({ description: 'Unverified users count' })
+  unverifiedUsers: number;
+
   @ApiProperty({
     description: 'User count change percentage from previous period',
   })

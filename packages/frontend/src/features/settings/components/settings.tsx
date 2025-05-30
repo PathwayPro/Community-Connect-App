@@ -31,7 +31,13 @@ export const Settings = () => {
   };
 
   return (
-    <div className="container-wide grid min-h-full w-full grid-cols-1 gap-6 md:grid-cols-2">
+    <div
+      className={`container-wide grid min-h-full w-full gap-6 ${
+        isLocalAuth
+          ? 'grid-cols-1 items-center justify-center md:grid-cols-2'
+          : 'grid-cols-1 place-items-center'
+      }`}
+    >
       {isLocalAuth && (
         <div className="h-full rounded-[24px] border bg-card p-6">
           <h4 className="mb-8 font-semibold">Security and Account</h4>
@@ -42,7 +48,11 @@ export const Settings = () => {
         </div>
       )}
 
-      <div className="min-h-full rounded-[24px] border bg-card p-6">
+      <div
+        className={`min-h-full rounded-[24px] border bg-card p-6 ${
+          !isLocalAuth ? 'w-full max-w-lg' : ''
+        }`}
+      >
         <div className="mb-8 flex items-center justify-between">
           <h4 className="font-semibold">Privacy Settings</h4>
         </div>
@@ -55,7 +65,7 @@ export const Settings = () => {
           <div className="flex flex-row justify-start gap-4">
             <Button
               variant="link"
-              className="h-10 w-fit p-0 text-base"
+              className="h-10 w-fit p-0 text-base hover:text-destructive"
               onClick={handleOpen}
             >
               Delete Account
@@ -67,9 +77,9 @@ export const Settings = () => {
               onConfirm={handleConfirm}
             />
 
-            <Button variant="link" className="h-10 w-fit p-0 text-base">
+            {/* <Button variant="link" className="h-10 w-fit p-0 text-base">
               Deactivate Account
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>

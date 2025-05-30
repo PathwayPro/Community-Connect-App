@@ -267,6 +267,7 @@ export const EventDetails = ({ onShare }: EventDetailsProps) => {
         <h2 className="line-clamp-1 text-center font-bold">{title}</h2>
         <ImagePreview
           imagePath={image}
+          fallbackImage={'/event/placeholder.jpg'}
           alt={title}
           width={1200}
           height={600}

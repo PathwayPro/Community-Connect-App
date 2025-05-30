@@ -5,7 +5,12 @@ import {
   AvatarImage
 } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
-import { UserRoundIcon, MessageSquare, Linkedin } from 'lucide-react';
+import {
+  UserRoundIcon,
+  MessageSquare,
+  Linkedin,
+  Handshake
+} from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { ConnectRequest } from '@/features/messages/components/common/connect-request';
 import { useState } from 'react';
@@ -84,14 +89,15 @@ export const NetworkingCard = ({ profile }: NetworkingCardProps) => {
         </Button>
       );
     }
-
+    
     if (status === 'APPROVED') {
       return (
         <Button
-          className="h-10 w-full"
-          onClick={() => setIsRejectionModalOpen(true)}
+        className="h-10 w-full"
+        onClick={() => setIsRejectionModalOpen(true)}
         >
           Connected
+        <Handshake className="h-4 w-4" />
         </Button>
       );
     }

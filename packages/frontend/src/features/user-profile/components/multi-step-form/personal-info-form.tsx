@@ -10,7 +10,6 @@ import {
 import { toast } from 'sonner';
 import React from 'react';
 import { UserProfileFormData } from '../../lib/validations';
-import Image from 'next/image';
 
 interface PersonalInfoFormProps {
   onProfilePictureUpload: (files: File[]) => Promise<void>;

@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { adminApi } from '../api/admin-api';
+import {
+  AnalyticsPeriod,
+  OverviewMetrics,
+  NewUsersData,
+  UserDistribution,
+  UserActivityData
+} from '../types';
 import { AdminUser, UserRole } from '../types';
 import { authApi } from '@/features/auth/api/auth-api';
 import { ForgotPasswordCredentials } from '@/features/auth/types';
@@ -14,6 +21,13 @@ interface AdminState {
   page: number;
   totalPages: number;
   limit: number;
+  overviewMetrics: OverviewMetrics | null;
+  newUsersData: NewUsersData | null;
+  userDistribution: UserDistribution | null;
+  userActivityData: UserActivityData[] | null;
+  analyticsLoading: boolean;
+  analyticsError: string | null;
+  selectedPeriod: AnalyticsPeriod;
   fetchUsers: (query?: {
     page?: number;
     limit?: number;
@@ -34,10 +48,16 @@ interface AdminState {
   deleteUser: (id: number) => Promise<{ message: string }>;
   restoreUser: (id: number) => Promise<AdminUser>;
   setSelectedUser: (user: AdminUser | null) => void;
+  fetchOverviewMetrics: (period: AnalyticsPeriod) => Promise<void>;
+  fetchNewUsersData: (period: AnalyticsPeriod) => Promise<void>;
+  fetchUserDistribution: (period: AnalyticsPeriod) => Promise<void>;
+  fetchUserActivityData: (period: AnalyticsPeriod) => Promise<void>;
+  fetchAllAnalytics: (period: AnalyticsPeriod) => Promise<void>;
+  setSelectedPeriod: (period: AnalyticsPeriod) => void;
 }
 
 export const useAdminStore = create<AdminState>()(
-  devtools((set) => ({
+  devtools((set, get) => ({
     users: [],
     selectedUser: null,
     isLoading: false,
@@ -46,6 +66,13 @@ export const useAdminStore = create<AdminState>()(
     page: 1,
     totalPages: 1,
     limit: 10,
+    overviewMetrics: null,
+    newUsersData: null,
+    userDistribution: null,
+    userActivityData: null,
+    analyticsLoading: false,
+    analyticsError: null,
+    selectedPeriod: 'monthly',
 
     fetchUsers: async (query = {}) => {
       try {
@@ -221,6 +248,91 @@ export const useAdminStore = create<AdminState>()(
 
     setSelectedUser: (user) => {
       set({ selectedUser: user });
+    },
+
+    fetchOverviewMetrics: async (period) => {
+      try {
+        set({ analyticsLoading: true, analyticsError: null });
+        const response = await adminApi.getOverviewMetrics(period);
+
+        if (!response.success) {
+          throw new Error('Failed to fetch overview metrics');
+        }
+
+        set({ overviewMetrics: response.data, analyticsLoading: false });
+      } catch (error) {
+        set({
+          analyticsError: (error as Error).message,
+          analyticsLoading: false
+        });
+      }
+    },
+
+    fetchNewUsersData: async (period) => {
+      try {
+        const response = await adminApi.getNewUsersData(period);
+
+        if (!response.success) {
+          throw new Error('Failed to fetch new users data');
+        }
+
+        set({ newUsersData: response.data });
+      } catch (error) {
+        set({ analyticsError: (error as Error).message });
+      }
+    },
+
+    fetchUserDistribution: async (period) => {
+      try {
+        const response = await adminApi.getUserDistribution(period);
+
+        if (!response.success) {
+          throw new Error('Failed to fetch user distribution');
+        }
+
+        set({ userDistribution: response.data });
+      } catch (error) {
+        set({ analyticsError: (error as Error).message });
+      }
+    },
+
+    fetchUserActivityData: async (period) => {
+      try {
+        const response = await adminApi.getUserActivityData(period);
+
+        if (!response.success) {
+          throw new Error('Failed to fetch user activity data');
+        }
+
+        set({ userActivityData: response.data });
+      } catch (error) {
+        set({ analyticsError: (error as Error).message });
+      }
+    },
+
+    fetchAllAnalytics: async (period) => {
+      try {
+        set({ analyticsLoading: true, analyticsError: null });
+
+        await Promise.all([
+          get().fetchOverviewMetrics(period),
+          get().fetchNewUsersData(period),
+          get().fetchUserDistribution(period),
+          get().fetchUserActivityData(period)
+        ]);
+
+        set({ analyticsLoading: false });
+      } catch (error) {
+        set({
+          analyticsError: (error as Error).message,
+          analyticsLoading: false
+        });
+      }
+    },
+
+    setSelectedPeriod: (period) => {
+      set({ selectedPeriod: period });
+      get().fetchAllAnalytics(period);
     }
   }))
 );

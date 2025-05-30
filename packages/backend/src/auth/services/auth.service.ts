@@ -432,6 +432,7 @@ export class AuthService {
             last_name: googleUser.lastName,
             password_hash: hashedPassword,
             provider: 'google',
+            created_at: new Date(),
           },
         });
 

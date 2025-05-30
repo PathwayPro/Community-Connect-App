@@ -43,6 +43,7 @@ export const UsersData: users[] = [
     email: 'user1@sv.com',
     role: 'USER',
     ...GeneralUsersData,
+    created_at: new Date(),
   },
   {
     id: 2,
@@ -51,6 +52,7 @@ export const UsersData: users[] = [
     email: 'user2@sv.com',
     role: 'USER',
     ...GeneralUsersData,
+    created_at: new Date(),
   },
   {
     id: 7,
@@ -59,6 +61,7 @@ export const UsersData: users[] = [
     email: 'um@sv.com',
     role: 'USER',
     ...GeneralUsersData,
+    created_at: new Date(),
   },
   {
     id: 8,
@@ -67,6 +70,7 @@ export const UsersData: users[] = [
     email: 'mentor2@sv.com',
     role: 'MENTOR',
     ...GeneralUsersData,
+    created_at: new Date(),
   },
   {
     id: 9,
@@ -75,6 +79,7 @@ export const UsersData: users[] = [
     email: 'mentor3@sv.com',
     role: 'MENTOR',
     ...GeneralUsersData,
+    created_at: new Date(),
   },
   {
     id: 10,
@@ -83,6 +88,7 @@ export const UsersData: users[] = [
     email: 'admin1@sv.com',
     role: 'ADMIN',
     ...GeneralUsersData,
+    created_at: new Date(),
   },
   {
     id: 11,
@@ -91,6 +97,7 @@ export const UsersData: users[] = [
     email: 'admin2@sv.com',
     role: 'ADMIN',
     ...GeneralUsersData,
+    created_at: new Date(),
   },
 ];
 

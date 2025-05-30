@@ -11,7 +11,7 @@ import { FormInput } from '@/shared/components/form';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAdminStore } from '../../store';
+import { useAdminStore } from '../../store/admin-store';
 import { toast } from 'sonner';
 
 const editUserSchema = z.object({

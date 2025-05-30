@@ -12,30 +12,13 @@ import {
   Cell,
   Legend,
   ResponsiveContainer,
-  Label,
-  LegendType
+  Label
 } from 'recharts';
 
 interface PieChartData {
   name: string;
   value: number;
   color: string;
-}
-
-// Add this type for the Legend formatter entry
-interface PieChartLegendEntry {
-  value: string | number;
-  id?: string;
-  type?: LegendType;
-  color?: string;
-  payload?: {
-    strokeDasharray?: string | number;
-    value?: string | number;
-    name?: string;
-    percentage?: string;
-    color?: string;
-  };
-  dataKey?: string;
 }
 
 interface PieChartCardProps {
@@ -55,7 +38,7 @@ export const PieChartCard = ({
 }: PieChartCardProps) => {
   const formattedData = data.map((item) => ({
     ...item,
-    percentage: ((item.value / total) * 100).toFixed(0)
+    percentage: item.value.toFixed(0)
   }));
 
   return (
@@ -121,9 +104,9 @@ export const PieChartCard = ({
               />
             </Pie>
             <Legend
-              layout="vertical"
-              align="right"
-              verticalAlign="middle"
+              layout="horizontal"
+              align="center"
+              verticalAlign="bottom"
               iconSize={12}
               iconType="circle"
               // eslint-disable-next-line @typescript-eslint/no-explicit-any

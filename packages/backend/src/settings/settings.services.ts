@@ -2,28 +2,42 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/database';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { CreateSettingsDto } from './dto/create-settings.dto';
-import { ProfileVisibility, UserSettings } from '@prisma/client';
+import { ProfileVisibility, UserSettings, Prisma } from '@prisma/client';
 @Injectable()
 export class SettingsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getUserSettings(userId: number) {
     try {
-      const settings = await this.prisma.userSettings.findUnique({
-        where: { userId },
+      // First verify if the user exists
+      const user = await this.prisma.users.findUnique({
+        where: { id: userId },
       });
-      if (!settings) {
-        throw new NotFoundException(
-          `Settings not found for user ID #${userId}`,
-        );
+
+      if (!user) {
+        throw new NotFoundException(`User with ID ${userId} not found`);
       }
 
-      return settings;
+      // Then check if settings exist
+      const existingSettings = await this.prisma.userSettings.findUnique({
+        where: { userId },
+      });
+
+      // If settings don't exist, create them first
+      if (!existingSettings) {
+        return await this.createUserSettings(userId);
+      }
+
+      return existingSettings;
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new InternalServerErrorException(
         `Failed to retrieve settings: ${error.message}`,
       );
@@ -61,6 +75,15 @@ export class SettingsService {
 
   async createUserSettings(userId: number) {
     try {
+      // First check if settings already exist
+      const existingSettings = await this.prisma.userSettings.findUnique({
+        where: { userId },
+      });
+
+      if (existingSettings) {
+        return existingSettings;
+      }
+
       const newSettings = await this.prisma.userSettings.create({
         data: {
           userId,
@@ -73,6 +96,13 @@ export class SettingsService {
 
       return newSettings;
     } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException(
+            `Settings already exist for user ID ${userId}`,
+          );
+        }
+      }
       throw new InternalServerErrorException(
         `Failed to create settings: ${error.message}`,
       );

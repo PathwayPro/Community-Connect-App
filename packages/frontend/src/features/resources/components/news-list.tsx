@@ -450,10 +450,7 @@ export const NewsList = () => {
                       onClick={() => setSelectedJob(null)}
                       variant="outline"
                     />
-                    <ExpandedJobCard
-                      opportunity={selectedJob}
-                      onApply={() => {}}
-                    />
+                    <ExpandedJobCard opportunity={selectedJob} />
                   </>
                 ) : (
                   <>

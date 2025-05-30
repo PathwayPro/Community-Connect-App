@@ -18,12 +18,12 @@ import { useRole } from '@/features/user-profile/hooks/useRole';
 
 interface ExpandedJobCardProps {
   opportunity: OpportunityResponseDto;
-  onApply: () => void;
+  // onApply: () => void;
 }
 
 export function ExpandedJobCard({
-  opportunity,
-  onApply
+  opportunity
+  // onApply
 }: ExpandedJobCardProps) {
   const router = useRouter();
   const location = `${opportunity.city}, ${opportunity.province}`;
@@ -88,6 +88,10 @@ export function ExpandedJobCard({
       setIsDeleting(false);
       setShowDeleteDialog(false);
     }
+  };
+
+  const handleApply = () => {
+    window.open(opportunity.link_apply, '_blank');
   };
 
   return (
@@ -180,7 +184,7 @@ export function ExpandedJobCard({
         </div>
 
         {/* Apply Button */}
-        <Button onClick={onApply} className="h-12 w-[300px]">
+        <Button onClick={handleApply} className="h-12 w-[300px]">
           <Link className="h-6 w-6" />
           Apply Now
         </Button>
