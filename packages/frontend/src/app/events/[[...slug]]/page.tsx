@@ -1,8 +1,9 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import { EventDetails, EventForm } from '@/features/events/components';
+import { EventDetails } from '@/features/events/components';
 import { EventList } from '@/features/events/components';
 import { EventSubscribers } from '@/features/events/components';
+import { EventFormWrapper } from '@/features/events/components/event-form';
 
 interface EventPageProps {
   params: {
@@ -30,7 +31,7 @@ export default async function EventPage({ params }: EventPageProps) {
       return (
         <Suspense fallback={<EventFormSkeleton />}>
           <div className="flex w-full justify-center">
-            <EventForm />
+            <EventFormWrapper />
           </div>
         </Suspense>
       );
@@ -41,7 +42,7 @@ export default async function EventPage({ params }: EventPageProps) {
       return (
         <Suspense fallback={<EventFormSkeleton />}>
           <div className="flex w-full justify-center">
-            <EventForm />
+            <EventFormWrapper />
           </div>
         </Suspense>
       );

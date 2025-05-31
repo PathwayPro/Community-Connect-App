@@ -17,8 +17,8 @@ export const opportunityApi = {
   getOpportunityById: (id: number) =>
     apiMethods.get<OpportunityResponseDto>(`/opportunities/${id}`),
 
-  updateOpportunity: (id: number, data: UpdateOpportunityDto) =>
-    apiMethods.put<OpportunityResponseDto>(`/opportunities/${id}`, data),
+  updateOpportunity: (id: number, data: FormData | UpdateOpportunityDto) =>
+    apiMethods.patch<OpportunityResponseDto>(`/opportunities/${id}`, data),
 
   editOpportunity: (id: number, data: UpdateOpportunityDto) =>
     apiMethods.patch<OpportunityResponseDto>(`/opportunities/${id}`, data),

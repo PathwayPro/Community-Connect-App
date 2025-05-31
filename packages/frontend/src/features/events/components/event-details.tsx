@@ -42,6 +42,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/shared/components/ui/alert-dialog';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 
 interface EventError {
   message?: string;
@@ -264,8 +265,9 @@ export const EventDetails = ({ onShare }: EventDetailsProps) => {
       {/* Hero Image Section */}
       <Card className="rounded-[24px] p-6">
         <h2 className="line-clamp-1 text-center font-bold">{title}</h2>
-        <Image
-          src={image || '/event/placeholder.jpg'}
+        <ImagePreview
+          imagePath={image}
+          fallbackImage={'/event/placeholder.jpg'}
           alt={title}
           width={1200}
           height={600}

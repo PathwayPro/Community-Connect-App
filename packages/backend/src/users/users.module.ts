@@ -7,7 +7,7 @@ import { AuthService } from '../auth/services/auth.service';
 import { EmailService } from '../auth/services/email.service';
 import { AuthModule } from 'src/auth/auth.module';
 import { SettingsService } from 'src/settings/settings.services';
-
+import { FilesService } from 'src/files/files.service';
 @Module({
   imports: [JwtModule, forwardRef(() => AuthModule)],
   providers: [
@@ -16,6 +16,7 @@ import { SettingsService } from 'src/settings/settings.services';
     AuthService,
     EmailService,
     SettingsService,
+    FilesService,
   ],
   controllers: [UsersController],
   exports: [UsersService],

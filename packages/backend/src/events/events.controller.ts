@@ -83,6 +83,7 @@ export class EventsController {
           ? createEventDto.accept_subscriptions === 'true'
           : createEventDto.accept_subscriptions,
     };
+
     return this.eventsService.create(user, newEvent, file);
   }
 

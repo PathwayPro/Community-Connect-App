@@ -1,11 +1,8 @@
 import { arrivalInCanadaOptions } from './constants/profile';
 import { SkillsResponse } from '../types';
 
-export const getSkillLabel = (value: string, skills: SkillsResponse[]) => {
-  return (
-    skills.find((option) => option.id === Number(value))?.name ||
-    'Not specified'
-  );
+export const getSkillLabel = (value: number, skills: SkillsResponse[]) => {
+  return skills.find((option) => option.id === value)?.name || 'Not specified';
 };
 
 export const getArrivalInCanadaLabel = (value: string) => {

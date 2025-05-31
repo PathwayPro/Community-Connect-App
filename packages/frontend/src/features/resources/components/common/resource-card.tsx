@@ -22,11 +22,14 @@ interface ResourceCardProps {
   link?: string;
   details?: string;
   created_at: string;
-  type: string;
+  type: string | { value: string; label: string }[];
+  file: string;
   user: {
+    id: number;
     first_name: string;
+    middle_name?: string;
     last_name: string;
-    picture_upload_link: string;
+    role: string;
   };
 }
 
@@ -37,6 +40,7 @@ export const ResourceCard = ({
   details,
   created_at,
   type,
+  file,
   user
 }: ResourceCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,7 +65,8 @@ export const ResourceCard = ({
     title,
     link,
     details,
-    type
+    type,
+    file
   };
 
   const handleEdit = () => {
@@ -102,10 +107,11 @@ export const ResourceCard = ({
   };
 
   const getResourceImage = () => {
-    const resourceType = resourceTypes.find((item) => item.value === type);
+    const typeValue = typeof type === 'string' ? type : type[0]?.value;
+    const resourceType = resourceTypes.find((item) => item.value === typeValue);
     if (!resourceType) return '/resources/others.jpg';
 
-    switch (type) {
+    switch (typeValue) {
       case 'RESUME':
         return '/resources/resume.png';
       case 'COVER_LETTER':
@@ -140,8 +146,11 @@ export const ResourceCard = ({
   };
 
   const getResourceTypeLabel = () => {
-    const resourceType = resourceTypes.find((item) => item.value === type);
-    return resourceType ? resourceType.label : type;
+    if (typeof type === 'string') {
+      const resourceType = resourceTypes.find((item) => item.value === type);
+      return resourceType ? resourceType.label : type;
+    }
+    return type[0]?.label || 'Other';
   };
 
   return (
@@ -202,7 +211,10 @@ export const ResourceCard = ({
 
           {/* Keywords */}
           <div className="flex flex-wrap gap-2">
-            <Badge key={type} variant="secondary">
+            <Badge
+              key={typeof type === 'string' ? type : type[0]?.value}
+              variant="secondary"
+            >
               {getResourceTypeLabel()}
             </Badge>
           </div>
@@ -245,11 +257,11 @@ export const ResourceCard = ({
       <ResourcePreviewCard
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        image={getResourceImage()}
         title={title}
         details={details || ''}
         link={link || ''}
         type={getResourceTypeLabel()}
+        file={file}
       />
     </Card>
   );

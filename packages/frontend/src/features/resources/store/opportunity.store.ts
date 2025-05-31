@@ -8,6 +8,7 @@ import {
 } from '../dto/opportunity-dto';
 import { opportunityApi } from '../api/opportunity-api';
 import { useRouter } from 'next/navigation';
+import { ApiResponse } from '@/shared/types';
 
 interface OpportunityState {
   opportunities: OpportunityResponseDto[];
@@ -23,8 +24,14 @@ interface OpportunityState {
   createOpportunity: (
     data: CreateOpportunityDto
   ) => Promise<OpportunityResponseDto | null>;
-  updateOpportunity: (id: number, data: UpdateOpportunityDto) => Promise<void>;
-  editOpportunity: (id: number, data: UpdateOpportunityDto) => Promise<void>;
+  updateOpportunity: (
+    id: number,
+    data: UpdateOpportunityDto
+  ) => Promise<ApiResponse<OpportunityResponseDto>>;
+  editOpportunity: (
+    id: number,
+    data: UpdateOpportunityDto
+  ) => Promise<ApiResponse<OpportunityResponseDto> | undefined>;
   deleteOpportunity: (id: number) => Promise<void>;
   resetError: () => void;
   fetchSalaryRanges: () => Promise<void>;
@@ -83,7 +90,6 @@ export const useOpportunityStore = create<OpportunityState>()(
         },
 
         updateOpportunity: async (id: number, data: UpdateOpportunityDto) => {
-          const { router } = get();
           try {
             set({ isLoading: true, error: null });
             const response = await opportunityApi.updateOpportunity(id, data);
@@ -94,9 +100,7 @@ export const useOpportunityStore = create<OpportunityState>()(
               selectedOpportunity: response.data
             }));
 
-            if (router) {
-              router.push('/resources');
-            }
+            return response;
           } catch (error) {
             const errorMessage = (error as Error).message;
             set({ error: errorMessage });
@@ -110,12 +114,15 @@ export const useOpportunityStore = create<OpportunityState>()(
           try {
             set({ isLoading: true, error: null });
             const response = await opportunityApi.editOpportunity(id, data);
+
             set((state) => ({
               opportunities: state.opportunities.map((opp) =>
                 Number(opp.id) === id ? response.data : opp
               ),
               selectedOpportunity: response.data
             }));
+
+            return response;
           } catch (error) {
             set({ error: (error as Error).message });
           } finally {

@@ -35,6 +35,7 @@ import { WorkSettings } from '../lib/constants/enums';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { toast } from 'sonner';
+import { PermissionWrapper } from '@/shared/components/navigation/permission-wrapper/permission-wrapper';
 
 type FormMode = 'news' | 'contentLibrary' | 'opportunities';
 type FormValues = {
@@ -43,7 +44,7 @@ type FormValues = {
   opportunities: OpportunityFormValues;
 };
 
-export const NewsForm = () => {
+const NewsForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode') as FormMode;
@@ -100,7 +101,7 @@ export const NewsForm = () => {
 
   const defaultValues = {
     news: { title: '', details: '', type: '', link: '' },
-    contentLibrary: { title: '', details: '', type: '', link: '' },
+    contentLibrary: { title: '', details: '', type: '', link: '', file: null },
     opportunities: {
       job: '',
       salary_range_id: '',
@@ -125,6 +126,8 @@ export const NewsForm = () => {
     return null;
   }
 
+  console.log('methods.formState:', methods.formState.errors);
+
   const { isSubmitting, errors } = methods.formState;
 
   const handleFileUpload = async (files: File[]) => {
@@ -144,20 +147,6 @@ export const NewsForm = () => {
 
   const onSubmit = async (data: FormValues[typeof mode]) => {
     try {
-      const formData = new FormData();
-
-      // Append file if exists
-      if (selectedFile) {
-        formData.append('file', selectedFile);
-      }
-
-      // Append form data
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          formData.append(key, value.toString());
-        }
-      });
-
       const actions = {
         news: async () => {
           const newsData = data as NewsFormValues;
@@ -181,7 +170,6 @@ export const NewsForm = () => {
             formData.append('file', selectedFile);
           }
 
-          console.log('formData in news:', formData);
           const result = await createNews(formData as unknown as CreateNewsDto);
           if (result) {
             showAlert({
@@ -194,49 +182,41 @@ export const NewsForm = () => {
         },
         contentLibrary: async () => {
           const resourceData = data as ResourceFormValues;
+          const formData = new FormData();
+
+          // Append form data
+          formData.append('title', resourceData.title);
+          formData.append('details', resourceData.details);
+          formData.append('type', resourceData.type);
 
           // Handle link formatting
           if (resourceData.link) {
-            console.log('resourceData.link:', resourceData.link);
-
             const formattedLink = resourceData.link.startsWith('http')
               ? resourceData.link
               : `https://${resourceData.link}`;
-            resourceData.link = formattedLink;
+            formData.append('link', formattedLink);
           }
 
           // Append file if exists
           if (selectedFile) {
-            const formData = new FormData();
             formData.append('file', selectedFile);
-            Object.entries(resourceData).forEach(([key, value]) => {
-              if (value !== undefined && value !== null) {
-                formData.append(key, value.toString());
-              }
+          }
+
+          console.log('formData in the resource form: ', formData);
+
+          for (const pair of formData.entries()) {
+            console.log('FormData entry in resource form:', pair[0], pair[1]);
+          }
+
+          const result = await createResource(formData);
+
+          if (result) {
+            showAlert({
+              title: 'Success',
+              description: 'Resource created successfully',
+              type: 'success',
+              redirect: '/resources'
             });
-            const result = await createResource(
-              formData as unknown as CreateResourceDto
-            );
-            if (result) {
-              showAlert({
-                title: 'Success',
-                description: 'Resource created successfully',
-                type: 'success',
-                redirect: '/resources'
-              });
-            }
-          } else {
-            const result = await createResource(
-              resourceData as unknown as CreateResourceDto
-            );
-            if (result) {
-              showAlert({
-                title: 'Success',
-                description: 'Resource created successfully',
-                type: 'success',
-                redirect: '/resources'
-              });
-            }
           }
         },
         opportunities: async () => {
@@ -263,7 +243,6 @@ export const NewsForm = () => {
             formData.append('file', selectedFile);
           }
 
-          console.log('formData in opportunities:', formData);
           const result = await createOpportunity(
             formData as unknown as CreateOpportunityDto
           );
@@ -294,7 +273,7 @@ export const NewsForm = () => {
 
   const formComponents = {
     news: <BaseForm onFileUpload={handleFileUpload} />,
-    contentLibrary: <ResourceForm />,
+    contentLibrary: <ResourceForm onFileUpload={handleFileUpload} />,
     opportunities: (
       <OpportunityForm
         salaryRanges={salaryRanges}
@@ -363,5 +342,17 @@ export const NewsForm = () => {
         </FormProvider>
       </CardContent>
     </Card>
+  );
+};
+
+export const NewsFormWrapper = () => {
+  return (
+    <PermissionWrapper
+      requiredRoles={['ADMIN', 'MENTOR']}
+      fallbackRoute="/resources"
+      permissionDeniedMessage="Only administrators can access this page."
+    >
+      <NewsForm />
+    </PermissionWrapper>
   );
 };

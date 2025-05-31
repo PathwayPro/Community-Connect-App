@@ -30,3 +30,7 @@ dist/
 
 # Test coverage reports
 coverage/
+
+# Cursor rules
+.cursorrules
+

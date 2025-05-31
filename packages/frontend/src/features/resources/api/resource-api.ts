@@ -1,21 +1,18 @@
 import { apiMethods } from '@/shared/api';
-import { Resource } from '../types';
-import { CreateResourceDto, UpdateResourceDto } from '../dto/resource-dto';
+import { ResourceDto } from '../dto/resource-dto';
 
 export const resourceApi = {
-  createResource: (data: CreateResourceDto) =>
-    apiMethods.post<Resource>('/resources', data),
+  createResource: (data: FormData) =>
+    apiMethods.post<ResourceDto>('/resources', data),
 
-  getResources: () => apiMethods.get<Resource[]>('/resources'),
+  getResources: () => apiMethods.get<ResourceDto[]>('/resources'),
 
-  getResourceById: (id: string) => apiMethods.get<Resource>(`/resources/${id}`),
+  getResourceById: (id: string) =>
+    apiMethods.get<ResourceDto>(`/resources/${id}`),
 
-  updateResource: (id: string, data: UpdateResourceDto) =>
-    apiMethods.patch<Resource>(`/resources/${id}`, data),
-
-  editResource: (id: string, data: UpdateResourceDto) =>
-    apiMethods.put<Resource>(`/resources/${id}`, data),
+  updateResource: (id: string, data: FormData) =>
+    apiMethods.patch<ResourceDto>(`/resources/${id}`, data),
 
   deleteResource: (id: string) =>
-    apiMethods.delete<Resource>(`/resources/${id}`)
+    apiMethods.delete<ResourceDto>(`/resources/${id}`)
 };

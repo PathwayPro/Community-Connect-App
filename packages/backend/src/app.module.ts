@@ -29,12 +29,13 @@ import { SalaryRangesModule } from './salary_ranges/salary_ranges.module';
 import { SettingsModule } from './settings/settings.module';
 import { ContactUsModule } from './contact_us/contact_us.module';
 import { SkillsModule } from './skills/skills.module';
-
+import { AdminModule } from './admin/admin.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
     JwtModule.registerAsync({
       global: true,
       inject: [ConfigService],
@@ -65,6 +66,7 @@ import { SkillsModule } from './skills/skills.module';
     SettingsModule,
     ContactUsModule,
     SkillsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [

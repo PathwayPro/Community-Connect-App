@@ -18,12 +18,12 @@ import { useRole } from '@/features/user-profile/hooks/useRole';
 
 interface ExpandedJobCardProps {
   opportunity: OpportunityResponseDto;
-  onApply: () => void;
+  // onApply: () => void;
 }
 
 export function ExpandedJobCard({
-  opportunity,
-  onApply
+  opportunity
+  // onApply
 }: ExpandedJobCardProps) {
   const router = useRouter();
   const location = `${opportunity.city}, ${opportunity.province}`;
@@ -41,7 +41,7 @@ export function ExpandedJobCard({
     link_apply: opportunity.link_apply,
     settings: opportunity.settings,
     experience: opportunity.experience,
-    file: opportunity.file
+    image: opportunity.image
   };
 
   const [isDeleting, setIsDeleting] = useState(false);
@@ -90,6 +90,10 @@ export function ExpandedJobCard({
     }
   };
 
+  const handleApply = () => {
+    window.open(opportunity.link_apply, '_blank');
+  };
+
   return (
     <Card className="relative w-full min-w-full bg-neutral-light-100 p-4">
       <AlertDialogUI />
@@ -131,7 +135,7 @@ export function ExpandedJobCard({
         {/* Company Avatar */}
         <Avatar className="h-24 w-24 border border-neutral-light-500 bg-white">
           <AvatarImage
-            src={opportunity.file?.name}
+            src={`${process.env.NEXT_PUBLIC_API_URL}/files/${opportunity.image}`}
             alt={`${opportunity.company} logo`}
           />
           <AvatarFallback>{opportunity.company[0]}</AvatarFallback>
@@ -180,7 +184,7 @@ export function ExpandedJobCard({
         </div>
 
         {/* Apply Button */}
-        <Button onClick={onApply} className="h-12 w-[300px]">
+        <Button onClick={handleApply} className="h-12 w-[300px]">
           <Link className="h-6 w-6" />
           Apply Now
         </Button>

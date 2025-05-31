@@ -10,12 +10,18 @@ import {
   DropdownMenuTrigger
 } from '@/shared/components/ui/dropdown-menu';
 import { useAuth } from '@/features/auth/hooks/use-auth';
-import { useAuthContext } from '@/features/auth/providers/auth-context';
 import { useRouter } from 'next/navigation';
 import { SharedIcons } from '@/shared/components/icons';
+import { useUserStore } from '@/features/user-profile/store/index';
+
+export const getImageUrl = (path: string | undefined) => {
+  console.log('image path: ', path);
+  if (!path || path.includes('undefined')) return '/profile/profile.png';
+  return `${process.env.NEXT_PUBLIC_API_URL}/files/${path}`;
+};
 
 export const MainNav = () => {
-  const { user } = useAuthContext();
+  const { user } = useUserStore();
   const { logout } = useAuth();
   const router = useRouter();
 
@@ -46,11 +52,11 @@ export const MainNav = () => {
             <DropdownMenuTrigger asChild>
               <button className="focus:outline-none">
                 <Image
-                  src={user?.pictureUploadLink || '/profile/profile.png'}
+                  src={getImageUrl(user?.pictureUploadLink)}
                   alt="user profile"
                   width={48}
                   height={48}
-                  className="cursor-pointer rounded-full bg-warning-500 transition-opacity hover:opacity-80"
+                  className="aspect-square cursor-pointer rounded-full bg-warning-500 object-cover transition-opacity hover:opacity-80"
                   priority
                 />
               </button>

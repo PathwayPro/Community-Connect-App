@@ -3,6 +3,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   Injectable,
+  BadRequestException,
 } from '@nestjs/common';
 import { CreateResourceDto } from './dto/create-resource.dto';
 import { FilterResourceDto } from './dto/filter-resource.dto';
@@ -10,10 +11,15 @@ import { UpdateResourceDto } from './dto/update-resource.dto';
 import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
 import { PrismaService } from 'src/database';
 import { Prisma } from '@prisma/client';
+import { FileValidationEnum } from 'src/files/util/files-validation.enum';
+import { FilesService } from 'src/files/files.service';
 
 @Injectable()
 export class ResourcesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private filesService: FilesService,
+  ) {}
 
   getFormattedFilters(filters: FilterResourceDto): Prisma.ResourcesWhereInput {
     const formattedFilters: Prisma.ResourcesWhereInput = {};
@@ -56,12 +62,34 @@ export class ResourcesService {
     return formattedFilters;
   }
 
-  async create(user: JwtPayload, createResourceDto: CreateResourceDto) {
+  async create(
+    user: JwtPayload,
+    createResourceDto: CreateResourceDto,
+    file?: Express.Multer.File,
+  ) {
     try {
+      let fileLink = null;
+
+      // Only attempt file upload if a file was provided
+      if (file) {
+        const uploadedFile = await this.filesService.upload(
+          FileValidationEnum.RESOURCES,
+          file,
+        );
+
+        if (!uploadedFile) {
+          throw new BadRequestException('Failed to upload file');
+        }
+
+        fileLink = `${uploadedFile.path}/${uploadedFile.fileName}`;
+      }
+
       const data = {
         ...createResourceDto,
         user_id: user.sub,
+        file: fileLink,
       };
+
       const newResource = await this.prisma.resources.create({
         data,
         include: {
@@ -79,6 +107,10 @@ export class ResourcesService {
 
       return newResource;
     } catch (error) {
+      console.error('Error creating resource:', error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new InternalServerErrorException(
         'There was an error creating the resource:',
         error.message,
@@ -149,6 +181,7 @@ export class ResourcesService {
     user: JwtPayload,
     id: number,
     updateResourceDto: UpdateResourceDto,
+    file?: Express.Multer.File,
   ) {
     try {
       // Validate resource exist
@@ -164,21 +197,50 @@ export class ResourcesService {
         );
       }
 
+      let fileLink = resourceToUpdate.file;
+
+      // Only attempt file upload if a new file was provided
+      if (file) {
+        const uploadedFile = await this.filesService.upload(
+          FileValidationEnum.RESOURCES,
+          file,
+        );
+
+        if (!uploadedFile) {
+          throw new BadRequestException('Failed to upload file');
+        }
+
+        fileLink = `${uploadedFile.path}/${uploadedFile.fileName}`;
+      }
+
       // Update resource information
       const data = {
         ...updateResourceDto,
         updated_at: new Date(),
+        file: fileLink,
       };
 
       const updatedResource = await this.prisma.resources.update({
         where: { id },
-        data: data,
+        data,
+        include: {
+          user: {
+            select: {
+              id: true,
+              first_name: true,
+              middle_name: true,
+              last_name: true,
+              role: true,
+            },
+          },
+        },
       });
 
       return updatedResource;
     } catch (error) {
       throw new InternalServerErrorException(
         `Error updating resource with ID #${id}: ${error.message}`,
+        error.message,
       );
     }
   }
@@ -188,9 +250,7 @@ export class ResourcesService {
       // VALIDATE RESOURCE EXIST
       const resourceToDelete = await this.findOne(id);
       if (!resourceToDelete) {
-        throw new NotFoundException(
-          `There is no resource with ID #${id} to delete`,
-        );
+        throw new NotFoundException(`There is no resource with ID #${id}`);
       }
 
       // MENTOR can only delete their own resources
@@ -200,13 +260,14 @@ export class ResourcesService {
         );
       }
 
-      const deletedResource = await this.prisma.resources.delete({
+      await this.prisma.resources.delete({
         where: { id },
       });
-
-      return deletedResource;
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new InternalServerErrorException(
+        `Error deleting resource with ID #${id}: ${error.message}`,
+        error.message,
+      );
     }
   }
 }

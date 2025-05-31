@@ -11,9 +11,10 @@ import { UserManagement } from './common/user-management';
 import { Analytics } from '@/features/analytics/components/analytics';
 import { UsersIcon } from 'lucide-react';
 import { ChartAreaIcon } from 'lucide-react';
+import { PermissionWrapper } from '@/shared/components/navigation/permission-wrapper/permission-wrapper';
 
-export const Admin = () => {
-  const [activeTab, setActiveTab] = useState('users');
+const AdminDashboard = () => {
+  const [activeTab, setActiveTab] = useState('analytics');
 
   return (
     <div className="container mx-auto space-y-6 py-6">
@@ -55,5 +56,17 @@ export const Admin = () => {
         </TabsContent>
       </Tabs>
     </div>
+  );
+};
+
+export const Admin = () => {
+  return (
+    <PermissionWrapper
+      requiredRoles={['ADMIN']}
+      fallbackRoute="/home"
+      permissionDeniedMessage="Only administrators can access this page."
+    >
+      <AdminDashboard />
+    </PermissionWrapper>
   );
 };

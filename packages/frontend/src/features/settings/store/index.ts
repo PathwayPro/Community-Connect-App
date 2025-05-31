@@ -3,7 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { settingsApi } from '../api/settings-api';
 import { SettingsResponse } from '../types';
 import { UpdateSettingsDto } from '../dto';
-
+import { ApiResponse } from '@/shared/types';
 interface SettingsState {
   // Data
   settings: SettingsResponse | null;
@@ -17,7 +17,9 @@ interface SettingsState {
   // Actions
   getSettings: () => Promise<void>;
   getSettingsById: (id: number) => Promise<void>;
-  updateSettings: (data: UpdateSettingsDto) => Promise<void>;
+  updateSettings: (
+    data: UpdateSettingsDto
+  ) => Promise<ApiResponse<SettingsResponse>>;
   clearError: () => void;
 }
 
@@ -77,14 +79,18 @@ export const useSettingsStore = create<SettingsState>()(
           if (response.success) {
             set({ settings: response.data, isLoading: false });
           }
+
+          return response;
         } catch (error) {
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : 'Failed to update settings';
           set({
-            error:
-              error instanceof Error
-                ? error.message
-                : 'Failed to update settings',
+            error: errorMessage,
             isLoading: false
           });
+          throw new Error(errorMessage);
         }
       },
 

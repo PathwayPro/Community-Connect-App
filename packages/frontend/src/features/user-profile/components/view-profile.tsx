@@ -3,7 +3,6 @@
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { Separator } from '@/shared/components/ui/separator';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '../store';
@@ -14,13 +13,16 @@ import {
   getSkillLabel
 } from '@/features/user-profile/lib/utils';
 import { useSettingsStore } from '@/features/settings/store';
-import { useEffect } from 'react';
-import { Crown, UserCircle, UserCog } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Crown, UserCircle, UserCog, Download } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger
 } from '@/shared/components/ui/tooltip';
+import Image from 'next/image';
+import { getImageUrl } from '@/shared/components/navigation/main-nav/main-nav';
+import { PdfPreviewModal } from '@/shared/components/pdf/pdf-preview-modal';
 
 interface StatItemProps {
   label: string;
@@ -81,6 +83,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
   const { user } = useUserStore();
   const { settings, getSettingsById } = useSettingsStore();
   const { skills, fetchSkills } = useUserStore();
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
 
   const userId = slug;
 
@@ -101,7 +104,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
   // view profile data builder
   const profileDataBuilder = {
     name: `${displayedUser?.firstName} ${displayedUser?.lastName}`,
-    avatar: displayedUser?.pictureUploadLink || '/profile/profile.png',
+    avatar: displayedUser?.pictureUploadLink,
     stats: {
       menteesTutored: 24,
       groupSessions: 15,
@@ -160,7 +163,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
         label: 'Skills',
         value: displayedUser?.skills
           ? displayedUser.skills
-              .map((skillId: string) => getSkillLabel(skillId, skills))
+              .map((skillId: number) => getSkillLabel(skillId, skills))
               .join(', ')
           : 'Not specified'
       }
@@ -206,6 +209,35 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
       })) || [])
     ].filter((link) => link.value) // Remove empty links
   };
+
+  const handleViewResume = () => {
+    if (displayedUser?.resumeUploadLink) {
+      setIsResumeModalOpen(true);
+    } else {
+      alert('No resume available for this user');
+    }
+  };
+
+  const resumeActions = [
+    {
+      label: 'Close',
+      onClick: () => setIsResumeModalOpen(false),
+      variant: 'outline' as const
+    },
+    ...(displayedUser?.resumeUploadLink
+      ? [
+          {
+            label: 'Download Resume',
+            href: displayedUser.resumeUploadLink.startsWith('http')
+              ? displayedUser.resumeUploadLink
+              : `${process.env.NEXT_PUBLIC_API_URL}/files/${displayedUser.resumeUploadLink}`,
+            variant: 'default' as const,
+            icon: <Download className="h-6 w-6" />,
+            external: true
+          }
+        ]
+      : [])
+  ];
 
   if (isLoading) {
     return (
@@ -255,12 +287,12 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
           <div className="relative flex items-center gap-4">
             <div className="h-40 w-40 overflow-hidden rounded-full bg-warning-500">
               <Image
-                src={profileDataBuilder.avatar}
+                src={getImageUrl(profileDataBuilder.avatar)}
                 alt="Profile-avatar"
                 width={160}
                 height={160}
                 priority
-                className="h-full w-full object-cover"
+                className="aspect-square rounded-full bg-warning-500 object-cover"
               />
             </div>
             {displayedUser?.role && (
@@ -374,9 +406,24 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
           leftIcon="fileIcon"
           label="View Resume"
           className="w-full"
-          onClick={() => alert('Download Resume')}
+          onClick={handleViewResume}
+          disabled={!displayedUser?.resumeUploadLink}
         />
       </Card>
+
+      {/* Resume Preview Modal */}
+      <PdfPreviewModal
+        isOpen={isResumeModalOpen}
+        onClose={() => setIsResumeModalOpen(false)}
+        title={`${profileDataBuilder.name}'s Resume`}
+        description="Preview and download the resume"
+        filePath={
+          displayedUser?.resumeUploadLink?.startsWith('http')
+            ? displayedUser.resumeUploadLink
+            : `${process.env.NEXT_PUBLIC_API_URL}/files/${displayedUser?.resumeUploadLink}`
+        }
+        actions={resumeActions}
+      />
     </div>
   );
 };

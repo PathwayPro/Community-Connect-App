@@ -13,10 +13,16 @@ import {
 } from '../dto';
 
 export const eventApi = {
-  createEvent: (formData: EventFormData) =>
-    apiMethods.post<EventResponse<Event>>('/events', formData, {
-      'Content-Type': 'multipart/form-data'
-    }),
+  createEvent: (formData: EventFormData) => {
+    // Log FormData contents for debugging
+    console.log('Sending FormData to API:');
+    for (const pair of formData.entries()) {
+      console.log(`${pair[0]}:`, pair[1]);
+    }
+
+    // Don't set Content-Type header - let browser set it with boundary
+    return apiMethods.post<EventResponse<Event>>('/events', formData);
+  },
 
   getEvents: () => apiMethods.get<EventResponse<Event>>('/events'),
 
@@ -26,10 +32,16 @@ export const eventApi = {
   getEventById: (id: number) =>
     apiMethods.get<EventResponse<Event>>(`/events/${id}`),
 
-  updateEvent: (id: number, formData: EventFormData) =>
-    apiMethods.patch<EventResponse<Event>>(`/events/${id}`, formData, {
-      'Content-Type': 'multipart/form-data'
-    }),
+  updateEvent: (id: number, formData: EventFormData) => {
+    // Log FormData contents for debugging
+    console.log('Updating event with FormData:');
+    for (const pair of formData.entries()) {
+      console.log(`${pair[0]}:`, pair[1]);
+    }
+
+    // Don't set Content-Type header - let browser set it with boundary
+    return apiMethods.patch<EventResponse<Event>>(`/events/${id}`, formData);
+  },
 
   editEvent: (id: number, data: UpdateEventDto) =>
     apiMethods.put<EventResponse<Event>>(`/events/${id}`, data),

@@ -2,12 +2,13 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { tokens } from '@/shared/utils';
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
 export const api = axios.create({
-  baseURL: API_URL
-  // headers: {'Content-Type': 'application/json'}
-  // withCredentials: true
+  baseURL: API_URL,
+  headers: {
+    Accept: 'application/json, text/plain, */*'
+  }
 });
 
 // Request interceptor
@@ -17,6 +18,11 @@ api.interceptors.request.use(
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    // Only set Content-Type for non-FormData requests
+    if (!(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = 'application/json';
     }
 
     return config;

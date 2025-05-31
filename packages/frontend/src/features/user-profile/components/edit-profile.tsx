@@ -16,23 +16,30 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { UserProfileFormData, userProfileSchema } from '../lib/validations';
-import { userApi } from '../api/user-api';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '../store';
 import { useFetchProfile } from '../hooks/use-fetch-profile';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
-import { SkillsResponse } from '../types';
+import { SkillsResponse, UserProfile } from '../types';
+import { toast } from 'sonner';
 
-function getStepContent(step: number, skills: SkillsResponse[]) {
+function getStepContent(
+  step: number,
+  skills: SkillsResponse[],
+  onProfilePictureUpload: (files: File[]) => Promise<void>,
+  onResumeUpload: (files: File[]) => Promise<void>
+) {
   console.log('STEP HERE', step);
   switch (step) {
     case 1:
-      return <PersonalInfoForm />;
+      return (
+        <PersonalInfoForm onProfilePictureUpload={onProfilePictureUpload} />
+      );
     case 2:
       return <SocialLinksForm />;
     case 3:
-      return <UploadResume skills={skills} />;
+      return <UploadResume skills={skills} onResumeUpload={onResumeUpload} />;
     case 4:
       return <GoalsForm />;
     default:
@@ -46,41 +53,75 @@ export const EditProfile = () => {
   const { user } = useUserStore();
   const { isLoading, error } = useFetchProfile();
   const { showAlert } = useAlertDialog();
-  const { skills, fetchSkills } = useUserStore();
+  const { skills, updateUser, fetchSkills } = useUserStore();
+  const [selectedProfilePictureFile, setSelectedProfilePictureFile] =
+    useState<File | null>(null);
+  const [selectedResumeFile, setSelectedResumeFile] = useState<File | null>(
+    null
+  );
 
   const methods = useForm<UserProfileFormData>({
     mode: 'onChange',
     resolver: zodResolver(userProfileSchema),
-    values: useMemo(
-      () => ({
-        firstName: user?.firstName || '',
-        lastName: user?.lastName || '',
-        province: user?.province || '',
-        city: user?.city || '',
-        dob: user?.dob || '',
-        ageRange: user?.ageRange || '',
-        languages: user?.languages || '',
-        profession: user?.profession || '',
-        experience: user?.experience || '',
-        bio: user?.bio || '',
-        pictureUploadLink: user?.pictureUploadLink || '',
-        arrivalInCanada: user?.arrivalInCanada || '',
-        goalId: user?.goalId || undefined,
-        linkedinLink: user?.linkedinLink || '',
-        githubLink: user?.githubLink || '',
-        twitterLink: user?.twitterLink || '',
-        portfolioLink: user?.portfolioLink || '',
-        otherLinks: user?.otherLinks || '',
-        additionalLinks: user?.additionalLinks || [],
-        workStatus: user?.workStatus || '',
-        companyName: user?.companyName || '',
-        countryOfOrigin: user?.countryOfOrigin || '',
-        activelySearching: user?.activelySearching || false,
-        skills: user?.skills?.map(String) || []
-      }),
-      [user]
-    )
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      province: '',
+      city: '',
+      dob: '',
+      ageRange: '',
+      languages: '',
+      profession: '',
+      experience: '',
+      bio: '',
+      pictureUploadLink: '',
+      arrivalInCanada: '',
+      goalId: '',
+      linkedinLink: '',
+      githubLink: '',
+      twitterLink: '',
+      portfolioLink: '',
+      otherLinks: '',
+      additionalLinks: [],
+      workStatus: '',
+      companyName: '',
+      countryOfOrigin: '',
+      activelySearching: false,
+      skills: []
+    }
   });
+
+  // Update form values when user data changes
+  useEffect(() => {
+    if (user) {
+      methods.reset({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        province: user.province || '',
+        city: user.city || '',
+        dob: user.dob || '',
+        ageRange: user.ageRange || '',
+        languages: user.languages || '',
+        profession: user.profession || '',
+        experience: user.experience || '',
+        bio: user.bio || '',
+        pictureUploadLink: user.pictureUploadLink || '',
+        arrivalInCanada: user.arrivalInCanada || '',
+        goalId: user.goalId || '',
+        linkedinLink: user.linkedinLink || '',
+        githubLink: user.githubLink || '',
+        twitterLink: user.twitterLink || '',
+        portfolioLink: user.portfolioLink || '',
+        otherLinks: user.otherLinks || '',
+        additionalLinks: user.additionalLinks || [],
+        workStatus: user.workStatus || '',
+        companyName: user.companyName || '',
+        countryOfOrigin: user.countryOfOrigin || '',
+        activelySearching: user.activelySearching || false,
+        skills: user.skills?.map(Number) || []
+      });
+    }
+  }, [user, methods]);
 
   useEffect(() => {
     console.log('Form Values:', methods.getValues());
@@ -121,6 +162,36 @@ export const EditProfile = () => {
     setActiveStep((prevStep) => prevStep - 1);
   };
 
+  const handleProfilePictureUpload = async (files: File[]) => {
+    try {
+      if (files && files.length > 0) {
+        setSelectedProfilePictureFile(files[0]);
+        toast.success('Image uploaded successfully');
+      } else {
+        setSelectedProfilePictureFile(null);
+        toast.error('No file selected.');
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      toast.error('Failed to upload image');
+    }
+  };
+
+  const handleResumeUpload = async (files: File[]) => {
+    try {
+      if (files && files.length > 0) {
+        setSelectedResumeFile(files[0]);
+        toast.success('Resume uploaded successfully');
+      } else {
+        setSelectedResumeFile(null);
+        toast.error('No file selected.');
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      toast.error('Failed to upload resume');
+    }
+  };
+
   const onSubmit = async (data: UserProfileFormData) => {
     if (activeStep !== 4) {
       handleNext();
@@ -128,8 +199,43 @@ export const EditProfile = () => {
     }
 
     try {
-      console.log('Submitting data:', data);
-      const response = await userApi.updateUserProfile(data, Number(user?.id));
+      console.log('Form data to submit:', data);
+
+      // Create FormData for file upload
+      const formData = new FormData();
+
+      // Append all form fields
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value));
+            console.log(`Appending array ${key}:`, value);
+          } else if (typeof value === 'boolean') {
+            formData.append(key, String(value));
+            console.log(`Appending boolean ${key}:`, value);
+          } else {
+            formData.append(key, String(value));
+            console.log(`Appending ${key}:`, value);
+          }
+        }
+      });
+
+      // Handle file uploads separately
+      if (selectedProfilePictureFile) {
+        formData.append('pictureUploadLink', selectedProfilePictureFile);
+        console.log('Appending profile picture file');
+      }
+
+      if (selectedResumeFile) {
+        formData.append('resumeUploadLink', selectedResumeFile);
+        console.log('Appending resume file');
+      }
+
+      // Log the form data for debugging
+      const formDataObj = Object.fromEntries(formData.entries());
+      console.log('Final FormData contents:', formDataObj);
+
+      const response = await updateUser(formData, Number(user?.id));
 
       if (response.success !== true) {
         throw new Error(response.message || 'Failed to update profile');
@@ -197,7 +303,12 @@ export const EditProfile = () => {
       <CardContent className="flex flex-col justify-center gap-4">
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {getStepContent(activeStep, skills)}
+            {getStepContent(
+              activeStep,
+              skills,
+              handleProfilePictureUpload,
+              handleResumeUpload
+            )}
             <div className="flex w-full justify-between pt-5">
               <IconButton
                 className="w-[180px]"

@@ -11,22 +11,26 @@ import {
 } from '@/shared/components/ui/select';
 
 interface AnalyticsSelectProps {
-  options: { label: string; value: string }[];
+  options: Array<{ label: string; value: string }>;
   placeholder: string;
+  value?: string;
+  onValueChange?: (value: string) => void;
 }
 
 export const AnalyticsSelect = ({
   options,
-  placeholder
+  placeholder,
+  value,
+  onValueChange
 }: AnalyticsSelectProps) => {
   const [selectedOption, setSelectedOption] = useState<string | undefined>(
-    undefined
+    value
   );
 
   return (
     <Select
       value={selectedOption}
-      onValueChange={setSelectedOption}
+      onValueChange={onValueChange || setSelectedOption}
       defaultValue={options[0].value}
     >
       <SelectTrigger className="w-[140px] bg-white">

@@ -11,10 +11,16 @@ import { toast } from 'sonner';
 import React from 'react';
 import { UserProfileFormData } from '../../lib/validations';
 
-export const PersonalInfoForm = () => {
+interface PersonalInfoFormProps {
+  onProfilePictureUpload: (files: File[]) => Promise<void>;
+}
+
+export const PersonalInfoForm = ({
+  onProfilePictureUpload
+}: PersonalInfoFormProps) => {
   const {
-    setValue,
     watch,
+    setValue,
     formState: { errors }
   } = useFormContext<UserProfileFormData>();
 
@@ -33,19 +39,10 @@ export const PersonalInfoForm = () => {
 
   const handleFileUpload = async (files: File[]) => {
     try {
-      const formData = new FormData();
-      files.forEach((file) => formData.append('files', file));
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) throw new Error('Upload failed');
-
-      const { urls } = await response.json();
-      setValue('pictureUploadLink', urls[0], { shouldValidate: true });
-      toast.success('Profile picture uploaded successfully');
+      if (files.length > 0) {
+        setValue('pictureUploadLink', files[0], { shouldValidate: true });
+        await onProfilePictureUpload(files);
+      }
     } catch (error) {
       console.error('Upload failed:', error);
       toast.error('Failed to upload profile picture');
@@ -54,14 +51,16 @@ export const PersonalInfoForm = () => {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <FileUpload
-        title="Add Profile Picture"
-        maxSize={10}
-        acceptedFileTypes={['SVG', 'JPG', 'PNG']}
-        multiple={false}
-        uploadIcon="userRoundPlus"
-        onUpload={handleFileUpload}
-      />
+      <div className="flex flex-col items-center gap-4">
+        <FileUpload
+          title="Add Profile Picture"
+          maxSize={10}
+          acceptedFileTypes={['SVG', 'JPG', 'PNG']}
+          multiple={false}
+          uploadIcon="userRoundPlus"
+          onUpload={handleFileUpload}
+        />
+      </div>
 
       <div className="flex w-full gap-4">
         <FormInput
