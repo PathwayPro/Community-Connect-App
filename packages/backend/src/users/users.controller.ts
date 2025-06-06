@@ -92,12 +92,19 @@ export class UsersController {
       console.log('Request received:', {
         currentUserId,
         targetUserId,
-        updateUserDto,
+        updateUserDto: JSON.stringify(updateUserDto, null, 2),
         files: files ? Object.keys(files) : 'no files',
       });
 
       const pictureUploadLink = files?.pictureUploadLink?.[0];
       const resumeUploadLink = files?.resumeUploadLink?.[0];
+
+      console.log('Files extracted:', {
+        pictureFile: pictureUploadLink
+          ? pictureUploadLink.originalname
+          : 'none',
+        resumeFile: resumeUploadLink ? resumeUploadLink.originalname : 'none',
+      });
 
       if (!updateUserDto) {
         console.log(
@@ -105,6 +112,15 @@ export class UsersController {
           updateUserDto,
         );
         throw new BadRequestException('Update data is required');
+      }
+
+      // Additional validation for common issues
+      if (typeof updateUserDto !== 'object') {
+        console.log(
+          'updateUserDto is not an object, type:',
+          typeof updateUserDto,
+        );
+        throw new BadRequestException('Update data must be a valid object');
       }
 
       return await this.usersService.updateUser(
