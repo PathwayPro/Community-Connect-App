@@ -9,7 +9,7 @@ export const userProfileSchema = z.object({
   languages: z.string().optional(),
   profession: z.string().optional(),
   experience: z.string().optional(),
-  bio: z.string().min(20, 'Bio must be at least 20 characters'),
+  bio: z.string().min(10, 'Bio must be at least 10 characters'),
   email: z.string().email().optional(),
   arrivalInCanada: z.string().optional(),
   goalId: z.string().optional(),
@@ -22,7 +22,9 @@ export const userProfileSchema = z.object({
   portfolioLink: z.string().optional(),
   otherLinks: z.string().optional(),
   additionalLinks: z.array(z.string()).optional(),
-  skills: z.array(z.string().transform((val) => Number(val))).optional(),
+  skills: z
+    .array(z.union([z.string(), z.number()]).transform((val) => Number(val)))
+    .optional(),
   workStatus: z.string().optional(),
   companyName: z.string().optional(),
   countryOfOrigin: z.string().optional(),

@@ -9,7 +9,8 @@ import {
 import {
   flexRender,
   getCoreRowModel,
-  useReactTable
+  useReactTable,
+  VisibilityState
 } from '@tanstack/react-table';
 import { useColumns } from './column';
 import { AdminUser } from '../../../types';
@@ -25,9 +26,15 @@ import { ForgotPasswordCredentials } from '@/features/auth/types';
 
 interface UsersTableProps {
   users: AdminUser[];
+  columnVisibility: VisibilityState;
+  setColumnVisibility: (visibility: VisibilityState) => void;
 }
 
-export const UsersTable = ({ users }: UsersTableProps) => {
+export const UsersTable = ({
+  users,
+  columnVisibility,
+  setColumnVisibility
+}: UsersTableProps) => {
   const { setSelectedUser, resetUserPassword, deleteUser, selectedUser } =
     useAdminStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -108,7 +115,17 @@ export const UsersTable = ({ users }: UsersTableProps) => {
   const table = useReactTable({
     data: users,
     columns,
-    getCoreRowModel: getCoreRowModel()
+    getCoreRowModel: getCoreRowModel(),
+    state: {
+      columnVisibility
+    },
+    onColumnVisibilityChange: (updaterOrValue) => {
+      const newValue =
+        typeof updaterOrValue === 'function'
+          ? updaterOrValue(columnVisibility)
+          : updaterOrValue;
+      setColumnVisibility(newValue);
+    }
   });
 
   return (

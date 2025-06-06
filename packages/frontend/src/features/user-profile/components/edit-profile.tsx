@@ -74,7 +74,7 @@ export const EditProfile = () => {
       profession: '',
       experience: '',
       bio: '',
-      pictureUploadLink: '',
+      pictureUploadLink: undefined,
       arrivalInCanada: '',
       goalId: '',
       linkedinLink: '',
@@ -87,7 +87,8 @@ export const EditProfile = () => {
       companyName: '',
       countryOfOrigin: '',
       activelySearching: false,
-      skills: []
+      skills: [],
+      resumeUploadLink: undefined
     }
   });
 
@@ -105,7 +106,7 @@ export const EditProfile = () => {
         profession: user.profession || '',
         experience: user.experience || '',
         bio: user.bio || '',
-        pictureUploadLink: user.pictureUploadLink || '',
+        pictureUploadLink: user.pictureUploadLink || undefined,
         arrivalInCanada: user.arrivalInCanada || '',
         goalId: user.goalId || '',
         linkedinLink: user.linkedinLink || '',
@@ -118,7 +119,8 @@ export const EditProfile = () => {
         companyName: user.companyName || '',
         countryOfOrigin: user.countryOfOrigin || '',
         activelySearching: user.activelySearching || false,
-        skills: user.skills?.map(Number) || []
+        skills: user.skills?.map(Number) || [],
+        resumeUploadLink: user.resumeUploadLink || undefined
       });
     }
   }, [user, methods]);
@@ -135,27 +137,36 @@ export const EditProfile = () => {
   } = methods;
 
   const handleNext = async () => {
-    // const fieldsToValidate = {
-    //   1: [
-    //     'firstName',
-    //     'lastName',
-    //     'province',
-    //     'dob',
-    //     'ageRange',
-    //     'countryOfOrigin'
-    //   ],
-    //   2: ['languages', 'profession', 'experience', 'skills'],
-    //   3: ['pictureUploadLink'],
-    //   4: ['bio']
-    // }[activeStep];
+    const fieldsToValidate = {
+      1: [
+        'firstName',
+        'lastName',
+        'province',
+        'city',
+        'dob',
+        'ageRange',
+        'countryOfOrigin',
+        'languages',
+        'bio'
+      ],
+      2: [],
+      3: ['profession', 'experience', 'workStatus'],
+      4: []
+    }[activeStep];
 
-    // const isValid = await methods.trigger(
-    //   fieldsToValidate as (keyof UserProfileFormData)[]
-    // );
+    let isValid = true;
 
-    // if (isValid) {
-    setActiveStep((prevStep) => prevStep + 1);
-    // }
+    if (fieldsToValidate && fieldsToValidate.length > 0) {
+      isValid = await methods.trigger(
+        fieldsToValidate as (keyof UserProfileFormData)[]
+      );
+    }
+
+    if (isValid) {
+      setActiveStep((prevStep) => prevStep + 1);
+    } else {
+      toast.error('Please fill in all required fields before continuing.');
+    }
   };
 
   const handleBack = () => {
@@ -166,14 +177,21 @@ export const EditProfile = () => {
     try {
       if (files && files.length > 0) {
         setSelectedProfilePictureFile(files[0]);
-        toast.success('Image uploaded successfully');
+        // Update form value to trigger validation
+        methods.setValue('pictureUploadLink', files[0], {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true
+        });
+        toast.success('Profile picture uploaded successfully');
       } else {
         setSelectedProfilePictureFile(null);
+        methods.setValue('pictureUploadLink', undefined);
         toast.error('No file selected.');
       }
     } catch (error) {
       console.error('Upload failed:', error);
-      toast.error('Failed to upload image');
+      toast.error('Failed to upload profile picture');
     }
   };
 
@@ -181,9 +199,16 @@ export const EditProfile = () => {
     try {
       if (files && files.length > 0) {
         setSelectedResumeFile(files[0]);
+        // Update form value to trigger validation
+        methods.setValue('resumeUploadLink', files[0], {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true
+        });
         toast.success('Resume uploaded successfully');
       } else {
         setSelectedResumeFile(null);
+        methods.setValue('resumeUploadLink', undefined);
         toast.error('No file selected.');
       }
     } catch (error) {
@@ -207,7 +232,11 @@ export const EditProfile = () => {
       // Append all form fields
       Object.entries(data).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          if (Array.isArray(value)) {
+          if (value instanceof File) {
+            // Handle file uploads directly from form data
+            formData.append(key, value);
+            console.log(`Appending file ${key}:`, value.name);
+          } else if (Array.isArray(value)) {
             formData.append(key, JSON.stringify(value));
             console.log(`Appending array ${key}:`, value);
           } else if (typeof value === 'boolean') {
@@ -219,17 +248,6 @@ export const EditProfile = () => {
           }
         }
       });
-
-      // Handle file uploads separately
-      if (selectedProfilePictureFile) {
-        formData.append('pictureUploadLink', selectedProfilePictureFile);
-        console.log('Appending profile picture file');
-      }
-
-      if (selectedResumeFile) {
-        formData.append('resumeUploadLink', selectedResumeFile);
-        console.log('Appending resume file');
-      }
 
       // Log the form data for debugging
       const formDataObj = Object.fromEntries(formData.entries());

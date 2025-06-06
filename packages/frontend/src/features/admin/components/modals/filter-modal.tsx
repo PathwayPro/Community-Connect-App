@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,7 +14,8 @@ import { Button } from '@/shared/components/ui/button';
 import { FormInput, FormSelect } from '@/shared/components/form';
 import { FormMultiSelect } from '@/shared/components/form/form-multiselect';
 import { Switch } from '@/shared/components/ui/switch';
-import { X } from 'lucide-react';
+import { Badge } from '@/shared/components/ui/badge';
+import { X, Filter, RotateCcw } from 'lucide-react';
 import {
   provinceData,
   ageRangeData,
@@ -25,18 +26,18 @@ import {
 import { SkillsResponse } from '@/features/user-profile/types';
 
 const filterSchema = z.object({
-  province: z.string().optional(),
-  city: z.string().optional(),
-  ageRange: z.string().optional(),
-  countryOfOrigin: z.string().optional(),
-  languages: z.string().optional(),
-  profession: z.string().optional(),
-  experience: z.string().optional(),
-  workStatus: z.string().optional(),
-  companyName: z.string().optional(),
+  province: z.string().optional().or(z.literal('')),
+  city: z.string().optional().or(z.literal('')),
+  ageRange: z.string().optional().or(z.literal('')),
+  countryOfOrigin: z.string().optional().or(z.literal('')),
+  languages: z.string().optional().or(z.literal('')),
+  profession: z.string().optional().or(z.literal('')),
+  experience: z.string().optional().or(z.literal('')),
+  workStatus: z.string().optional().or(z.literal('')),
+  companyName: z.string().optional().or(z.literal('')),
   skills: z.array(z.string()).optional(),
-  goalId: z.string().optional(),
-  arrivalInCanada: z.string().optional(),
+  goalId: z.string().optional().or(z.literal('')),
+  arrivalInCanada: z.string().optional().or(z.literal('')),
   activelySearching: z.boolean().optional()
 });
 
@@ -71,14 +72,67 @@ export const FilterModal = ({
     }
   });
 
-  const { handleSubmit, reset, setValue, watch } = methods;
+  const { handleSubmit, reset, setValue, watch, formState } = methods;
+
+  // Reset form when currentFilters change (when modal opens with existing filters)
+  useEffect(() => {
+    if (isOpen) {
+      reset({
+        ...currentFilters,
+        activelySearching: currentFilters.activelySearching ?? undefined
+      });
+      setActivelySearching(currentFilters.activelySearching);
+    }
+  }, [isOpen, currentFilters, reset]);
+
+  // Watch all form values to determine if form is dirty
+  const formValues = watch();
+  const hasChanges =
+    Object.values(formValues).some((value) => {
+      if (Array.isArray(value)) return value.length > 0;
+      return value !== undefined && value !== null && value !== '';
+    }) || activelySearching !== undefined;
 
   // Helper function to clear individual fields
   const clearField = (fieldName: keyof FilterData) => {
-    setValue(fieldName, undefined as any);
-    if (fieldName === 'activelySearching') {
+    if (fieldName === 'skills') {
+      setValue(fieldName, [], { shouldDirty: true, shouldTouch: true });
+    } else if (fieldName === 'activelySearching') {
+      setValue(fieldName, undefined as any, {
+        shouldDirty: true,
+        shouldTouch: true
+      });
       setActivelySearching(undefined);
+    } else if (
+      [
+        'province',
+        'ageRange',
+        'workStatus',
+        'goalId',
+        'arrivalInCanada'
+      ].includes(fieldName)
+    ) {
+      // For select fields, reset to undefined to show placeholder
+      setValue(fieldName, undefined as any, {
+        shouldDirty: true,
+        shouldTouch: true
+      });
+    } else {
+      // For input fields, reset to empty string to clear text
+      setValue(fieldName, '' as any, { shouldDirty: true, shouldTouch: true });
     }
+  };
+
+  // Helper to check if a field has a value
+  const hasFieldValue = (fieldName: keyof FilterData) => {
+    const value = watch(fieldName);
+    if (fieldName === 'skills') {
+      return Array.isArray(value) && value.length > 0;
+    }
+    if (fieldName === 'activelySearching') {
+      return activelySearching !== undefined;
+    }
+    return value !== undefined && value !== null && value !== '';
   };
 
   const onSubmit = (data: FilterData) => {
@@ -95,6 +149,7 @@ export const FilterModal = ({
 
     const filtersWithActivelySearching = {
       ...cleanedData,
+      skills: cleanedData.skills || [],
       activelySearching
     };
     onApplyFilters(filtersWithActivelySearching);
@@ -102,18 +157,63 @@ export const FilterModal = ({
   };
 
   const handleClearFilters = () => {
-    reset();
+    reset({
+      province: undefined,
+      city: '',
+      ageRange: undefined,
+      countryOfOrigin: '',
+      languages: '',
+      profession: '',
+      experience: '',
+      workStatus: undefined,
+      companyName: '',
+      skills: [],
+      goalId: undefined,
+      arrivalInCanada: undefined,
+      activelySearching: undefined
+    });
     setActivelySearching(undefined);
     onClearFilters();
+  };
+
+  const handleClose = () => {
+    // Reset form to current filters when closing without applying
+    reset({
+      ...currentFilters,
+      activelySearching: currentFilters.activelySearching ?? undefined
+    });
+    setActivelySearching(currentFilters.activelySearching);
     onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Filter Users</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            Filter Users
+            {hasChanges && (
+              <Badge variant="secondary" className="text-xs">
+                {Object.values(formValues).filter((v) =>
+                  Array.isArray(v)
+                    ? v.length > 0
+                    : v !== undefined && v !== null && v !== ''
+                ).length + (activelySearching !== undefined ? 1 : 0)}{' '}
+                active
+              </Badge>
+            )}
+          </DialogTitle>
         </DialogHeader>
+
+        {/* Filter Description */}
+        <div className="rounded-lg bg-gray-50 p-3">
+          <p className="text-sm text-gray-600">
+            Use filters to narrow down the user list based on location,
+            demographics, professional background, and job search status. Clear
+            individual fields with the ✕ button or reset all filters at once.
+          </p>
+        </div>
 
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -126,26 +226,28 @@ export const FilterModal = ({
                   placeholder="Select province"
                   options={provinceData}
                 />
-                {watch('province') && (
+                {hasFieldValue('province') && (
                   <button
                     type="button"
                     onClick={() => clearField('province')}
-                    className="absolute right-8 top-8 rounded-full p-1 hover:bg-gray-100"
+                    className="absolute right-2 top-9 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                    title="Clear province"
                   >
-                    <X className="h-3 w-3 text-gray-400" />
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>
 
               <div className="relative">
                 <FormInput name="city" label="City" placeholder="Enter city" />
-                {watch('city') && (
+                {hasFieldValue('city') && (
                   <button
                     type="button"
                     onClick={() => clearField('city')}
-                    className="absolute right-3 top-8 rounded-full p-1 hover:bg-gray-100"
+                    className="absolute right-2 top-9 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                    title="Clear city"
                   >
-                    <X className="h-3 w-3 text-gray-400" />
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>
@@ -158,13 +260,14 @@ export const FilterModal = ({
                   placeholder="Select age range"
                   options={ageRangeData}
                 />
-                {watch('ageRange') && (
+                {hasFieldValue('ageRange') && (
                   <button
                     type="button"
                     onClick={() => clearField('ageRange')}
-                    className="absolute right-8 top-8 rounded-full p-1 hover:bg-gray-100"
+                    className="absolute right-2 top-9 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                    title="Clear age range"
                   >
-                    <X className="h-3 w-3 text-gray-400" />
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>
@@ -175,13 +278,14 @@ export const FilterModal = ({
                   label="Country of Origin"
                   placeholder="Enter country"
                 />
-                {watch('countryOfOrigin') && (
+                {hasFieldValue('countryOfOrigin') && (
                   <button
                     type="button"
                     onClick={() => clearField('countryOfOrigin')}
-                    className="absolute right-3 top-8 rounded-full p-1 hover:bg-gray-100"
+                    className="absolute right-2 top-9 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                    title="Clear country of origin"
                   >
-                    <X className="h-3 w-3 text-gray-400" />
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>
@@ -193,13 +297,14 @@ export const FilterModal = ({
                   label="Profession"
                   placeholder="Enter profession"
                 />
-                {watch('profession') && (
+                {hasFieldValue('profession') && (
                   <button
                     type="button"
                     onClick={() => clearField('profession')}
-                    className="absolute right-3 top-8 rounded-full p-1 hover:bg-gray-100"
+                    className="absolute right-2 top-9 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                    title="Clear profession"
                   >
-                    <X className="h-3 w-3 text-gray-400" />
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>
@@ -210,13 +315,14 @@ export const FilterModal = ({
                   label="Years of Experience"
                   placeholder="Enter experience"
                 />
-                {watch('experience') && (
+                {hasFieldValue('experience') && (
                   <button
                     type="button"
                     onClick={() => clearField('experience')}
-                    className="absolute right-3 top-8 rounded-full p-1 hover:bg-gray-100"
+                    className="absolute right-2 top-9 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                    title="Clear experience"
                   >
-                    <X className="h-3 w-3 text-gray-400" />
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>
@@ -228,13 +334,14 @@ export const FilterModal = ({
                   placeholder="Select work status"
                   options={workStatusData}
                 />
-                {watch('workStatus') && (
+                {hasFieldValue('workStatus') && (
                   <button
                     type="button"
                     onClick={() => clearField('workStatus')}
-                    className="absolute right-8 top-8 rounded-full p-1 hover:bg-gray-100"
+                    className="absolute right-2 top-9 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                    title="Clear work status"
                   >
-                    <X className="h-3 w-3 text-gray-400" />
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>
@@ -245,13 +352,14 @@ export const FilterModal = ({
                   label="Company Name"
                   placeholder="Enter company name"
                 />
-                {watch('companyName') && (
+                {hasFieldValue('companyName') && (
                   <button
                     type="button"
                     onClick={() => clearField('companyName')}
-                    className="absolute right-3 top-8 rounded-full p-1 hover:bg-gray-100"
+                    className="absolute right-2 top-9 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                    title="Clear company name"
                   >
-                    <X className="h-3 w-3 text-gray-400" />
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>
@@ -264,13 +372,14 @@ export const FilterModal = ({
                   placeholder="Select goal"
                   options={goalsOptions}
                 />
-                {watch('goalId') && (
+                {hasFieldValue('goalId') && (
                   <button
                     type="button"
                     onClick={() => clearField('goalId')}
-                    className="absolute right-8 top-8 rounded-full p-1 hover:bg-gray-100"
+                    className="absolute right-2 top-9 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                    title="Clear goal"
                   >
-                    <X className="h-3 w-3 text-gray-400" />
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>
@@ -282,13 +391,14 @@ export const FilterModal = ({
                   placeholder="Select years in Canada"
                   options={arrivalInCanadaOptions}
                 />
-                {watch('arrivalInCanada') && (
+                {hasFieldValue('arrivalInCanada') && (
                   <button
                     type="button"
                     onClick={() => clearField('arrivalInCanada')}
-                    className="absolute right-8 top-8 rounded-full p-1 hover:bg-gray-100"
+                    className="absolute right-2 top-9 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                    title="Clear years in Canada"
                   >
-                    <X className="h-3 w-3 text-gray-400" />
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>
@@ -299,15 +409,16 @@ export const FilterModal = ({
               <FormInput
                 name="languages"
                 label="Languages"
-                placeholder="Enter languages"
+                placeholder="Enter languages (e.g., English, French)"
               />
-              {watch('languages') && (
+              {hasFieldValue('languages') && (
                 <button
                   type="button"
                   onClick={() => clearField('languages')}
-                  className="absolute right-3 top-8 rounded-full p-1 hover:bg-gray-100"
+                  className="absolute right-2 top-9 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                  title="Clear languages"
                 >
-                  <X className="h-3 w-3 text-gray-400" />
+                  <X className="h-3 w-3" />
                 </button>
               )}
             </div>
@@ -323,73 +434,114 @@ export const FilterModal = ({
                 }))}
                 placeholder="Select skills"
               />
-              {(watch('skills')?.length ?? 0) > 0 && (
+              {hasFieldValue('skills') && (
                 <button
                   type="button"
                   onClick={() => clearField('skills')}
-                  className="absolute right-3 top-8 rounded-full p-1 hover:bg-gray-100"
+                  className="absolute right-2 top-9 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                  title="Clear selected skills"
                 >
-                  <X className="h-3 w-3 text-gray-400" />
+                  <X className="h-3 w-3" />
                 </button>
               )}
             </div>
 
             {/* Actively Searching Toggle */}
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <div>
-                <label className="text-sm font-medium">
-                  Actively Searching
-                </label>
-                <p className="text-xs text-gray-500">
-                  Filter users by job search status
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm">Any</span>
-                <Switch
-                  checked={activelySearching === true}
-                  onCheckedChange={(checked) => {
-                    if (activelySearching === true) {
-                      setActivelySearching(checked ? false : undefined);
-                    } else if (activelySearching === false) {
-                      setActivelySearching(undefined);
-                    } else {
-                      setActivelySearching(true);
-                    }
-                  }}
-                />
-                <span className="text-sm">Yes</span>
-                {activelySearching !== undefined && (
+            <div className="rounded-lg border p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium">
+                    Actively Searching for Jobs
+                  </label>
+                  <p className="text-xs text-gray-500">
+                    Filter users by their job search status
+                  </p>
+                </div>
+                {hasFieldValue('activelySearching') && (
                   <button
                     type="button"
                     onClick={() => clearField('activelySearching')}
-                    className="ml-2 rounded-full p-1 hover:bg-gray-100"
+                    className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                    title="Clear actively searching filter"
                   >
-                    <X className="h-3 w-3 text-gray-400" />
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>
+
+              <div className="mt-3 flex gap-2">
+                <Button
+                  type="button"
+                  variant={
+                    activelySearching === undefined ? 'default' : 'outline'
+                  }
+                  size="sm"
+                  onClick={() => setActivelySearching(undefined)}
+                  className="flex-1"
+                >
+                  Any Status
+                </Button>
+                <Button
+                  type="button"
+                  variant={activelySearching === true ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setActivelySearching(true)}
+                  className="flex-1"
+                >
+                  Yes
+                </Button>
+                <Button
+                  type="button"
+                  variant={activelySearching === false ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setActivelySearching(false)}
+                  className="flex-1"
+                >
+                  No
+                </Button>
+              </div>
             </div>
 
-            <DialogFooter className="flex gap-2">
+            <DialogFooter className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClearFilters}
+                  className="h-10 flex-1 sm:flex-none"
+                  disabled={!hasChanges}
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Clear All
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleClose}
+                  className="h-10 flex-1 sm:flex-none"
+                >
+                  Cancel
+                </Button>
+              </div>
               <Button
-                type="button"
-                variant="outline"
-                onClick={handleClearFilters}
-                className="h-10"
+                type="submit"
+                className="h-10 flex-1 sm:flex-none"
+                disabled={!hasChanges}
               >
-                Clear All
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={onClose}
-                className="h-10"
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="h-10">
+                <Filter className="mr-2 h-4 w-4" />
                 Apply Filters
+                {hasChanges && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 bg-white/20 text-xs"
+                  >
+                    {Object.values(formValues).filter((v) =>
+                      Array.isArray(v)
+                        ? v.length > 0
+                        : v !== undefined && v !== null && v !== ''
+                    ).length + (activelySearching !== undefined ? 1 : 0)}
+                  </Badge>
+                )}
               </Button>
             </DialogFooter>
           </form>

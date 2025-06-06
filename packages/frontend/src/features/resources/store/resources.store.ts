@@ -13,7 +13,10 @@ interface ResourcesState {
   // Actions
   fetchResources: () => Promise<void>;
   createResource: (data: FormData) => Promise<ResourceDto | undefined>;
-  updateResource: (id: string, data: FormData) => Promise<ApiResponse<ResourceDto>>;
+  updateResource: (
+    id: string,
+    data: FormData
+  ) => Promise<ApiResponse<ResourceDto>>;
   deleteResource: (id: string) => Promise<void>;
   getResourceById: (id: string) => Promise<ResourceDto | undefined>;
 }
