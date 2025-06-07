@@ -79,6 +79,7 @@ jobs:
             export EMAIL_PASS=${{ secrets.EMAIL_PASS }}
             export EMAIL_CERTIFICATE_VALIDATION=${{ secrets.EMAIL_CERTIFICATE_VALIDATION }}
             export ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+            export NO_REPLY_EMAIL=${{ secrets.NO_REPLY_EMAIL }}
 
             export EMAIL_BODY=${{ secrets.EMAIL_BODY }}
             export EMAIL_SUBJECT=${{ secrets.EMAIL_SUBJECT }}

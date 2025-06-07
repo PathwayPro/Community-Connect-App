@@ -39,7 +39,7 @@ export class EmailService {
       this.configService.get<string>('APP_ENVIRONMENT') === 'DEV';
 
     return nodemailer.createTransport({
-      host: this.config.host,
+      host: `COMMUNET <${this.config.host}>`,
       port: this.config.port,
       secure: !isDevelopment, // SET secure = false for dev environment
       auth: {
