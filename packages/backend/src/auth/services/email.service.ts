@@ -39,7 +39,7 @@ export class EmailService {
       this.configService.get<string>('APP_ENVIRONMENT') === 'DEV';
 
     return nodemailer.createTransport({
-      host: `COMMUNET <${this.config.host}>`,
+      host: this.config.host,
       port: this.config.port,
       secure: !isDevelopment, // SET secure = false for dev environment
       auth: {
@@ -57,7 +57,7 @@ export class EmailService {
   ): Promise<{ success: boolean; message: string }> {
     try {
       const info = await this.transporter.sendMail({
-        from: this.config.noReplyEmail,
+        from: `COMMUNET <${this.config.noReplyEmail}>`,
         ...options,
       });
 
