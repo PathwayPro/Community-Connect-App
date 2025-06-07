@@ -23,6 +23,7 @@ export class EmailService {
       frontendUrl: this.configService.get<string>('FRONTEND_URL'),
       jwtSecret: this.configService.get<string>('JWT_SECRET_KEY'),
       adminEmail: this.configService.get<string>('ADMIN_EMAIL'),
+      noReplyEmail: this.configService.get<string>('NO_REPLY_EMAIL'),
     };
 
     // Validate config
@@ -34,12 +35,19 @@ export class EmailService {
   }
 
   private createTransporter(): nodemailer.Transporter {
+    const isDevelopment =
+      this.configService.get<string>('APP_ENVIRONMENT') === 'DEV';
+
     return nodemailer.createTransport({
       host: this.config.host,
       port: this.config.port,
+      secure: !isDevelopment, // SET secure = false for dev environment
       auth: {
         user: this.config.user,
         pass: this.config.pass,
+      },
+      tls: {
+        rejectUnauthorized: !isDevelopment, // SET secure = false for dev environment
       },
     });
   }
@@ -49,7 +57,7 @@ export class EmailService {
   ): Promise<{ success: boolean; message: string }> {
     try {
       const info = await this.transporter.sendMail({
-        from: this.config.user,
+        from: this.config.noReplyEmail,
         ...options,
       });
 
@@ -92,6 +100,8 @@ export class EmailService {
         </html>
       `,
     });
+
+    console.log('RESPONSE EN sendVerificationEmail: ', response);
 
     return response;
   }

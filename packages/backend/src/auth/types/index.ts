@@ -24,6 +24,7 @@ export type EmailConfig = {
   frontendUrl: string;
   jwtSecret: string;
   adminEmail: string;
+  noReplyEmail: string;
 };
 
 export type EmailOptions = {
