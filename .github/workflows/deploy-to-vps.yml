@@ -71,14 +71,18 @@ jobs:
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             export DB_PORT=${{ secrets.DB_PORT }}
             export DB_USERNAME=${{ secrets.DB_USERNAME }}
+
+            export MAIL_USERNAME=${{ secrets.EMAIL_BODY }}
+            export EMAIL_HOST=${{ secrets.EMAIL_BODY }}
+            export EMAIL_PORT=${{ secrets.EMAIL_BODY }}
+            export EMAIL_USER=${{ secrets.EMAIL_BODY }}
+            export EMAIL_PASS=${{ secrets.EMAIL_BODY }}
+            export EMAIL_CERTIFICATE_VALIDATION=${{ secrets.EMAIL_BODY }}
+            export ADMIN_EMAIL=${{ secrets.EMAIL_BODY }}
+            export NO_REPLY_EMAIL=${{ secrets.EMAIL_BODY }}
+
             export EMAIL_BODY=${{ secrets.EMAIL_BODY }}
-            export EMAIL_CERTIFICATE_VALIDATION=${{ secrets.EMAIL_CERTIFICATE_VALIDATION }}
-            export EMAIL_HOST=${{ secrets.EMAIL_HOST }}
-            export EMAIL_PASS=${{ secrets.EMAIL_PASS }}
-            export EMAIL_PORT=${{ secrets.EMAIL_PORT }}
             export EMAIL_SUBJECT=${{ secrets.EMAIL_SUBJECT }}
-            export EMAIL_USER=${{ secrets.EMAIL_USER }}
-            export ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
             export FRONTEND_URL=${{ secrets.FRONTEND_URL }}
             export GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
             export GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
@@ -86,7 +90,6 @@ jobs:
             export JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION }}
             export JWT_SECRET=${{ secrets.JWT_SECRET }}
             export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-            export MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
             export PORT=${{ secrets.PORT }}
             export PRISMA_LOGS=${{ secrets.PRISMA_LOGS }}
             export UPLOAD_DIR_EVENTS=${{ secrets.UPLOAD_DIR_EVENTS }}
