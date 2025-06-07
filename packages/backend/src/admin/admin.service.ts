@@ -723,6 +723,7 @@ export class AdminService {
       return { message: 'Password reset successful' };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
+      console.log(`adminId: ${adminId}`);
       throw new InternalServerErrorException(
         `Error resetting password: ${error.message}`,
       );

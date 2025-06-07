@@ -89,15 +89,15 @@ export const NetworkingCard = ({ profile }: NetworkingCardProps) => {
         </Button>
       );
     }
-    
+
     if (status === 'APPROVED') {
       return (
         <Button
-        className="h-10 w-full"
-        onClick={() => setIsRejectionModalOpen(true)}
+          className="h-10 w-full"
+          onClick={() => setIsRejectionModalOpen(true)}
         >
           Connected
-        <Handshake className="h-4 w-4" />
+          <Handshake className="h-4 w-4" />
         </Button>
       );
     }

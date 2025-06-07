@@ -17,6 +17,9 @@ export interface Thread {
   comments: number;
   tags?: string[];
   isSaved?: boolean;
+  isLiked?: boolean;
+  liked_by_user?: boolean;
+  saved_by_user?: boolean;
 }
 
 export interface Comment {

@@ -187,6 +187,7 @@ export class NetworkingService {
     filters: FilterConnectionRequestsDto,
   ) {
     try {
+      console.log(`filters: ${filters}`);
       // Get all users except the logged-in user
       const users = await this.prisma.users.findMany({
         where: {

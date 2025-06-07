@@ -22,7 +22,10 @@ export class BlogService {
     private filesService: FilesService,
   ) {}
 
-  getPostFormattedFilters(filters: FilterPostsDto): Prisma.PostsWhereInput {
+  getPostFormattedFilters(
+    filters: FilterPostsDto,
+    user_id?: number,
+  ): Prisma.PostsWhereInput {
     const formattedFilters: Prisma.PostsWhereInput = {};
 
     if (filters?.message) {
@@ -31,12 +34,15 @@ export class BlogService {
         mode: 'insensitive',
       };
     }
+
     if (filters?.user_id) {
       formattedFilters.user_id = filters.user_id;
     }
+
     if (typeof filters?.published === 'boolean') {
       formattedFilters.published = filters.published;
     }
+
     if (filters?.date_from && filters?.date_to) {
       formattedFilters.updated_at = {
         gte: filters.date_from,
@@ -46,6 +52,22 @@ export class BlogService {
       formattedFilters.updated_at = { gte: filters.date_from };
     } else if (filters?.date_to) {
       formattedFilters.updated_at = { lte: filters.date_to };
+    }
+
+    if (filters?.filter) {
+      // SAVED | MY_THREADS | MY_MESSAGES | MY_LIKES
+      if (filters?.filter === 'MY_THREADS') {
+        formattedFilters.user_id = user_id;
+      }
+      if (filters?.filter === 'MY_LIKES') {
+        formattedFilters.likes = { some: { user_id: user_id } };
+      }
+      if (filters?.filter === 'SAVED') {
+        formattedFilters.saves = { some: { user_id: user_id } };
+      }
+      if (filters?.filter === 'MY_MESSAGES') {
+        formattedFilters.comments = { some: { user_id: user_id } };
+      }
     }
 
     return formattedFilters;
@@ -95,6 +117,10 @@ export class BlogService {
       likes_count: returnValue._count?.likes
         ? returnValue._count?.likes
         : undefined,
+      liked_by_user: returnValue.likes?.length > 0 ? true : false,
+      saved_by_user: returnValue.saves?.length > 0 ? true : false,
+      likes: undefined,
+      saves: undefined,
     };
 
     delete formattedReturnValue.message;
@@ -109,6 +135,7 @@ export class BlogService {
       first_name: true,
       middle_name: true,
       last_name: true,
+      picture_upload_link: true,
     };
   }
 
@@ -155,6 +182,7 @@ export class BlogService {
         user: { connect: { id: user.sub } },
         image: image ? image.path + '/' + image.fileName : null,
         message: newPost.message,
+        published: true,
       };
       const post = await this.prisma.posts.create({
         data: postData,
@@ -181,6 +209,7 @@ export class BlogService {
         user: { connect: { id: user.sub } },
         post: { connect: { id: newComment.post_id } },
         message: newComment.message,
+        published: true,
       };
       const comment = await this.prisma.postsComments.create({
         data: commentData,
@@ -215,26 +244,43 @@ export class BlogService {
         throw new NotFoundException(`There is no post with ID #${post_id}`);
       }
 
-      // CREATE (ADD) LIKE
-      const likeData: Prisma.PostsLikesCreateInput = {
-        user: { connect: { id: user.sub } },
-        post: { connect: { id: post_id } },
-      };
-      const like = await this.prisma.postsLikes.create({
-        data: likeData,
-        select: {
-          id: true,
-          post_id: true,
-          user_id: true,
-          created_at: true,
+      // VERIFY IF LIKE EXISTS
+      const likeExist = await this.prisma.postsLikes.findFirst({
+        where: {
+          user_id: user.sub,
+          post_id,
         },
       });
 
-      return like;
-    } catch (error) {
-      if (error.code === 'P2002') {
-        throw new BadRequestException('You have already liked this post.');
+      if (likeExist) {
+        // REMOVE LIKE IF ALREADY EXIST
+        const deletedLike = await this.prisma.postsLikes.delete({
+          where: { id: likeExist.id },
+        });
+        if (!deletedLike) {
+          throw new InternalServerErrorException(
+            `There was an error deleting the like`,
+          );
+        }
+        return { likeStatus: 'REMOVED' };
+      } else {
+        // CREATE (ADD) LIKE IF DON'T EXIST
+        const likeData: Prisma.PostsLikesCreateInput = {
+          user: { connect: { id: user.sub } },
+          post: { connect: { id: post_id } },
+        };
+        const like = await this.prisma.postsLikes.create({ data: likeData });
+        if (!like) {
+          throw new InternalServerErrorException(
+            `There was an error adding the like`,
+          );
+        }
+        return { likeStatus: 'CREATED' };
       }
+    } catch (error) {
+      // if (error.code === 'P2002') {
+      //   throw new BadRequestException('You have already liked this post.');
+      // }
       throw new BadRequestException('Error creating like: ' + error.message);
     }
   }
@@ -249,26 +295,40 @@ export class BlogService {
         throw new NotFoundException(`There is no post with ID #${post_id}`);
       }
 
-      // CREATE (ADD) SAVE
-      const saveData: Prisma.PostsSavesCreateInput = {
-        user: { connect: { id: user.sub } },
-        post: { connect: { id: post_id } },
-      };
-      const save = await this.prisma.postsSaves.create({
-        data: saveData,
-        select: {
-          id: true,
-          post_id: true,
-          user_id: true,
-          created_at: true,
+      // VERIFY IF SAVE EXISTS
+      const saveExist = await this.prisma.postsSaves.findFirst({
+        where: {
+          user_id: user.sub,
+          post_id,
         },
       });
 
-      return save;
-    } catch (error) {
-      if (error.code === 'P2002') {
-        throw new BadRequestException('You have already saved this post.');
+      if (saveExist) {
+        // REMOVE SAVE IF ALREADY EXIST
+        const deletedSave = await this.prisma.postsSaves.delete({
+          where: { id: saveExist.id },
+        });
+        if (!deletedSave) {
+          throw new InternalServerErrorException(
+            `There was an error unsaving the post`,
+          );
+        }
+        return { saveStatus: 'REMOVED' };
+      } else {
+        // CREATE (ADD) SAVE IF DON'T EXIST
+        const saveData: Prisma.PostsSavesCreateInput = {
+          user: { connect: { id: user.sub } },
+          post: { connect: { id: post_id } },
+        };
+        const save = await this.prisma.postsSaves.create({ data: saveData });
+        if (!save) {
+          throw new InternalServerErrorException(
+            `There was an error saving the post`,
+          );
+        }
+        return { saveStatus: 'CREATED' };
       }
+    } catch (error) {
       throw new BadRequestException('Error creating save: ' + error.message);
     }
   }
@@ -639,24 +699,49 @@ export class BlogService {
     return this.returnFormattedData(currentComment);
   }
 
-  async findAllPosts(filters: FilterPostsDto) {
+  async findAllPosts(filters: FilterPostsDto, user_id: number | null) {
     try {
       const appliedFilters: Prisma.PostsWhereInput =
-        this.getPostFormattedFilters(filters);
+        this.getPostFormattedFilters(filters, user_id);
 
       const posts = await this.prisma.posts.findMany({
         where: appliedFilters,
         select: {
-          ...this.getPostSelection(),
+          ...this.getPostSelection(), // Ensure this doesn't select 'likes'
           image: true,
           published: true,
           _count: {
             select: {
               comments: { where: { published: true } },
-              likes: true,
+              likes: true, // This correctly counts ALL likes for the post
             },
           },
+          likes: {
+            where: { user_id: user_id },
+            select: { id: true },
+            take: 1,
+          },
+          saves: {
+            where: { user_id: user_id },
+            select: { id: true },
+            take: 1,
+          },
         },
+        orderBy: [
+          {
+            likes:
+              filters?.order_by === 'most-liked'
+                ? { _count: 'desc' }
+                : undefined,
+          },
+          {
+            comments:
+              filters?.order_by === 'most-commented'
+                ? { _count: 'desc' }
+                : undefined,
+          },
+          { created_at: filters?.order_by === 'oldest' ? 'asc' : 'desc' },
+        ],
       });
 
       const formattedPosts = posts.map((post) =>

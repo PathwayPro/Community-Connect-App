@@ -8,7 +8,6 @@ import {
   IsDate,
   IsNotEmpty,
   IsArray,
-  IsInt,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
@@ -199,6 +198,7 @@ export class UpdateUserDto {
         const parsed = JSON.parse(value);
         return Array.isArray(parsed) ? parsed : [];
       } catch (e) {
+        console.log(`error: ${e}`);
         return [];
       }
     }
@@ -249,6 +249,7 @@ export class UpdateUserDto {
           ? parsed.map((item: any) => parseInt(item, 10))
           : [];
       } catch (e) {
+        console.log(`error: ${e}`);
         return [];
       }
     }

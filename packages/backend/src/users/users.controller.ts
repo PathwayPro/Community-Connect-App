@@ -11,9 +11,7 @@ import {
   UseInterceptors,
   UploadedFiles,
   BadRequestException,
-  Req,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';

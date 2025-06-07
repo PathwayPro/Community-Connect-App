@@ -24,15 +24,17 @@ async function bootstrap() {
         scheme: 'bearer',
         bearerFormat: 'JWT',
         in: 'header',
+        name: 'Authorization',
+        description: 'Enter your Bearer token',
       },
       'JWT',
     )
     .addTag('Authentication', 'Authentication related endpoints')
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  // const document = SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('api/docs', app, document);
+  // SwaggerModule.setup('api/docs', app, document);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -46,6 +48,14 @@ async function bootstrap() {
   );
 
   app.setGlobalPrefix('api/v1');
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      url: '/api/v1/api-json', // Update the Swagger UI to fetch the prefixed JSON
+    },
+  });
 
   await app.listen(process.env.PORT ?? 3001);
 }

@@ -10,6 +10,7 @@ import { CommentCard } from '../comment-card';
 
 import { useBlogStore } from '../../store';
 import { PostCommentResponse } from '../../types';
+import { cn } from '@/shared/lib/utils';
 
 interface ThreadCardProps {
   id: number;
@@ -25,6 +26,8 @@ interface ThreadCardProps {
   setSelectedThread?: (thread: Thread) => void | undefined;
   setShowCommentSection?: (show: boolean) => void;
   showCommentSection?: boolean;
+  liked_by_user?: boolean;
+  saved_by_user?: boolean;
 }
 
 interface CommentCardProps {
@@ -34,6 +37,8 @@ interface CommentCardProps {
   content: string;
   avatarUrl: string;
   timeAgo: string;
+  liked_by_user?: boolean;
+  saved_by_user?: boolean;
 }
 
 const transformCommentResponseToCommentCardProps = (
@@ -56,6 +61,8 @@ export const CommentsThreadCard = ({
   likes: initialLikes,
   comments,
   avatarUrl,
+  liked_by_user,
+  saved_by_user,
   viewThreads,
   selectedThread,
   setSelectedThread,
@@ -64,18 +71,22 @@ export const CommentsThreadCard = ({
 }: ThreadCardProps) => {
   const [showCommentSearchbar, setShowCommentSearchbar] = useState(true);
   const [showCommentInput, setShowCommentInput] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(liked_by_user);
+  const [isSaved, setIsSaved] = useState(saved_by_user);
   const [likes, setLikes] = useState(initialLikes);
 
   const {
     threadMessages: rawThreadMessages,
     fetchThreadComments,
+    createComment,
+    toggleLike,
+    toggleSave,
     isLoading: commentsLoading,
     error: commentsError
   } = useBlogStore();
-  const threadComments: CommentCardProps[] = rawThreadMessages.map(
-    transformCommentResponseToCommentCardProps
-  );
+  const threadComments: CommentCardProps[] = !rawThreadMessages
+    ? []
+    : rawThreadMessages.map(transformCommentResponseToCommentCardProps);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -85,13 +96,29 @@ export const CommentsThreadCard = ({
   }, [showCommentSection, selectedThread?.id, fetchThreadComments]);
 
   // handle like
-  const handleLike = () => {
+  const handleLike = async () => {
+    if (!selectedThread?.id) {
+      return;
+    }
+    const like = await toggleLike(selectedThread.id);
+
     setIsLiked(!isLiked);
     setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
   };
 
+  // handle save
+  const handleSave = async () => {
+    if (!selectedThread?.id) {
+      return;
+    }
+    const save = await toggleSave(selectedThread.id);
+
+    setIsSaved(!isSaved);
+  };
+
   // handle comment click
   const handleCommentClick = (e: React.MouseEvent) => {
+    console.log('COMMENT CLICK');
     e.stopPropagation();
     if (setShowCommentSection) {
       setShowCommentSection(!showCommentSection);
@@ -100,14 +127,24 @@ export const CommentsThreadCard = ({
     setShowCommentSearchbar(true);
   };
 
-  const handleCommentSubmit = (comment: string) => {
+  const handleCommentSubmit = async (comment: string) => {
     // Handle comment submission here
     console.log('New comment:', comment);
-    if (setShowCommentSection) {
-      setShowCommentSection(false);
+    console.log('SELECTED THREAD:', selectedThread?.id);
+
+    if (!selectedThread?.id || !content) {
+      return;
     }
-    setShowCommentSearchbar(false);
-    setShowCommentInput(false);
+
+    const commentSubmit = await createComment(selectedThread.id, comment);
+    fetchThreadComments(selectedThread.id);
+    // if (setShowCommentSection) {
+    //   setShowCommentSection(true);
+    // }
+    // setShowCommentSearchbar(false);
+    // setShowCommentInput(false);
+
+    return commentSubmit;
   };
 
   // handle view thread
@@ -176,8 +213,16 @@ export const CommentsThreadCard = ({
               <span>{comments}</span>
             </button>
           </div>
-          <button className="flex items-center gap-2 rounded-full p-1 text-gray-500 hover:bg-neutral-light-200">
-            <Bookmark className="h-5 w-5" />
+          <button
+            onClick={handleSave}
+            className="flex items-center gap-2 rounded-full p-1 text-gray-500 hover:bg-neutral-light-200"
+          >
+            <Bookmark
+              className={cn(
+                'h-5 w-5',
+                isSaved ? 'fill-primary-500 text-primary-500' : ''
+              )}
+            />
           </button>
         </BaseThreadCard.Actions>
 

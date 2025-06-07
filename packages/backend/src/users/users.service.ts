@@ -258,6 +258,7 @@ export class UsersService {
             targetUserId,
             updateData.skills as unknown as number[],
           );
+          console.log(`updatedSkills: ${updatedSkills}`);
           // No need to check updatedSkills since addUserSkillsFormatted handles empty arrays
         } catch (error) {
           this.logger.error(`Error updating skills: ${error.message}`);

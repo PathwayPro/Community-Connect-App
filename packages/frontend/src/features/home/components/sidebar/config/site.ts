@@ -5,31 +5,17 @@ export const navItems: {
   personalNavItems: NavItemProps[];
 } = {
   menuNavItems: [
-    {
-      icon: 'list',
-      label: 'Threads'
-    },
-    {
-      icon: 'tag',
-      label: 'Tags'
-    },
-    {
-      icon: 'bookmark',
-      label: 'Saved'
-    }
+    { icon: 'list', label: 'Threads', filter: 'THREADS' },
+    // {icon: 'tag',label: 'Tags'},
+    { icon: 'bookmark', label: 'Saved', filter: 'SAVED' }
   ],
   personalNavItems: [
-    {
-      icon: 'list',
-      label: 'Your Threads'
-    },
+    { icon: 'list', label: 'Your Threads', filter: 'MY_THREADS' },
     {
       icon: 'messageSquare',
-      label: 'Your Contributions'
+      label: 'Your Contributions',
+      filter: 'MY_MESSAGES'
     },
-    {
-      icon: 'heart',
-      label: 'Your Reactions'
-    }
+    { icon: 'heart', label: 'Your Reactions', filter: 'MY_LIKES' }
   ]
 };

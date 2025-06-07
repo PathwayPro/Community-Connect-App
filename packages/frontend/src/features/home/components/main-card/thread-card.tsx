@@ -7,6 +7,8 @@ import { BaseThreadCard } from './base-thread-card';
 import { useState } from 'react';
 import { cn } from '@/shared/lib/utils';
 import { Badge } from '@/shared/components/ui/badge';
+import { useBlogStore } from '../../store';
+import { boolean } from 'zod';
 
 interface ThreadCardProps {
   id: number;
@@ -19,6 +21,10 @@ interface ThreadCardProps {
   avatarUrl: string;
   tags?: string[];
   isSaved?: boolean;
+  isLiked?: boolean;
+  liked_by_user?: boolean;
+  saved_by_user?: boolean;
+  isCommented?: boolean;
   viewThreads: () => void;
   selectedThread?: Thread;
   setSelectedThread?: (thread: Thread) => void | undefined;
@@ -39,14 +45,33 @@ export const ThreadCard = ({
   selectedThread,
   setSelectedThread,
   setShowCommentSection,
-  isSaved
+  liked_by_user,
+  isCommented,
+  saved_by_user
 }: ThreadCardProps) => {
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(liked_by_user);
+  const [isSaved, setIsSaved] = useState(saved_by_user);
   const [likes, setLikes] = useState(initialLikes);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
+  const { toggleLike, toggleSave } = useBlogStore();
+
+  const handleLike = async () => {
+    if (!id) {
+      return;
+    }
+    const like = await toggleLike(id);
+    const liked: boolean = like ? true : false;
+    setIsLiked(liked);
+    setLikes((prev) => (liked ? prev + 1 : prev - 1));
+  };
+
+  const handleSave = async () => {
+    if (!id) {
+      return;
+    }
+    const save = await toggleSave(id);
+    const saved: boolean = save ? true : false;
+    setIsSaved(saved);
   };
 
   // handle view thread
@@ -58,11 +83,16 @@ export const ThreadCard = ({
         authorUsername: '',
         timeAgo,
         content,
-        avatarUrl,
-        imageUrl: imageUrl || '',
+        avatarUrl:
+          avatarUrl ||
+          'https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png',
+        imageUrl:
+          imageUrl ||
+          'https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png',
         likes,
         comments,
-        isSaved: isSaved
+        saved_by_user: isSaved,
+        liked_by_user: isLiked
       });
     }
     viewThreads();
@@ -76,7 +106,7 @@ export const ThreadCard = ({
     }
   };
 
-  console.log('this is hte isSaved', isSaved);
+  // console.log('this is hte isSaved', isSaved);
 
   return (
     <ThreadCardProvider
@@ -133,21 +163,22 @@ export const ThreadCard = ({
               className="flex items-center gap-2 rounded-full p-1 px-2 text-gray-500 hover:bg-neutral-light-200 group-hover:bg-neutral-light-200"
             >
               <Heart
-                className={`h-5 w-5 transition-colors duration-200 ${
-                  isLiked ? 'fill-red-500 text-red-500' : ''
-                }`}
+                className={`h-5 w-5 transition-colors duration-200 ${isLiked ? 'fill-red-500 text-red-500' : ''}`}
               />
               <span>{likes}</span>
             </button>
             <button
-              className="flex items-center gap-2 rounded-full p-1 px-2 text-gray-500 hover:bg-neutral-light-200"
               onClick={handleCommentClick}
+              className="flex items-center gap-2 rounded-full p-1 px-2 text-gray-500 hover:bg-neutral-light-200"
             >
               <MessageSquare className="h-5 w-5" />
               <span>{comments}</span>
             </button>
           </div>
-          <button className="flex items-center gap-2 rounded-full p-1 text-gray-500 hover:bg-neutral-light-200">
+          <button
+            onClick={handleSave}
+            className="flex items-center gap-2 rounded-full p-1 text-gray-500 hover:bg-neutral-light-200"
+          >
             <Bookmark
               className={cn(
                 'h-5 w-5',

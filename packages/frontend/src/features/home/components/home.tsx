@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { HomeInfobar } from './infobar/home-infobar';
 import { HomeSidebar } from './sidebar/home-sidebar';
-import { mockThreads, sortOptions, Thread } from '../lib/mock-data'; // SACAR MOCK THREADS SOALMENTE
+import { sortOptions, Thread } from '../lib/mock-data';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { ThreadSearchbar, SortComponent } from './common';
 import {
@@ -13,7 +13,7 @@ import {
   TagComponent
 } from './main-card';
 import { useBlogStore } from '../store';
-import { ThreadResponse, PostCommentResponse } from '../types';
+import { ThreadResponse, PostCommentResponse, NavItemProps } from '../types';
 
 const transformThreadResponseToThread = (response: ThreadResponse): Thread => ({
   id: response.id,
@@ -21,10 +21,12 @@ const transformThreadResponseToThread = (response: ThreadResponse): Thread => ({
   authorUsername: response.user.first_name,
   timeAgo: response.created_at,
   content: response.content,
-  avatarUrl: '',
+  avatarUrl: response.user.picture_upload_link || '',
   imageUrl: '',
-  likes: 14,
-  comments: 21,
+  likes: response.likes_count || 0,
+  comments: response.comments_count || 0,
+  liked_by_user: response.liked_by_user || false,
+  saved_by_user: response.saved_by_user || false,
   tags: [],
   isSaved: false
 });
@@ -34,30 +36,35 @@ export const Home = () => {
   const [isCreatingThread, setIsCreatingThread] = useState(false);
   const [draftContent, setDraftContent] = useState('');
   const [activeTab, setActiveTab] = useState<string>('Threads');
+  const [activeFilterTab, setActiveFilterTab] = useState<string>('THREADS');
   const [viewThreads, setViewThreads] = useState<boolean>(false);
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
-  const [showCommentSection, setShowCommentSection] = useState(false);
+  const [showCommentSection, setShowCommentSection] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const {
     threads: rawThreads,
     fetchThreads,
+    createThread,
     isLoading,
     error
   } = useBlogStore(); // Get threads, loading, and error from store
   const threads: Thread[] = rawThreads.map(transformThreadResponseToThread); // Transform the API response
 
   useEffect(() => {
-    console.log('POR LO MENOS LLEGA AL USE EFFECT!');
-    fetchThreads();
+    fetchThreads({ filter: activeFilterTab, order_by: sort });
   }, [activeTab, sort, selectedTags, fetchThreads]); // Include fetchThreads in the dependency array
 
   const handleThreadSubmit = async (content: string, attachments: File[]) => {
     try {
       // Handle the thread submission here
       console.log('Thread submitted:', content, attachments);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated API call
       setDraftContent('');
+      setIsCreatingThread(true);
+      const threadSubmit = await createThread(content);
+      if (threadSubmit) {
+        fetchThreads({ filter: activeFilterTab, order_by: sort });
+      }
       setIsCreatingThread(false);
     } catch (error) {
       console.error('Error submitting thread:', error);
@@ -75,30 +82,19 @@ export const Home = () => {
   };
 
   const filteredThreads = threads.filter((thread) => {
-    if (activeTab === 'Tags') {
-      if (selectedTags.length === 0) return true;
-      return thread?.tags?.some((tag: string) => selectedTags.includes(tag)); // Adjust if your API returns tags differently
-    } else if (activeTab === 'Saved') {
-      return thread.isSaved; // Adjust if your API returns saved status
-    }
+    // if (activeTab === 'Tags') {
+    //   if (selectedTags.length === 0) return true;
+    //   return thread?.tags?.some((tag: string) => selectedTags.includes(tag)); // Adjust if your API returns tags differently
+    // } else if (activeTab === 'Saved') {
+    //   return thread.isSaved; // Adjust if your API returns saved status
+    // }
     return true;
   });
 
-  // console.log('| - - - - - - - > FILTERED THREADS 2: ', filteredThreads2)
-
-  // ORIGINAL CJ
-  // const filteredThreads = mockThreads.filter((thread) => {
-  //   if (activeTab === 'Tags') {
-  //     // Filter by selected tags
-  //     if (selectedTags.length === 0) return true;
-  //     return thread?.tags?.some((tag: string) => selectedTags.includes(tag));
-  //   } else if (activeTab === 'Saved') {
-  //     // Filter saved threads
-  //     return thread.isSaved;
-  //   }
-  //   // Show all threads for other tabs
-  //   return true;
-  // });
+  const handleActiveTab = (tab: NavItemProps) => {
+    setActiveFilterTab(tab.filter || 'THREADS');
+    setActiveTab(tab.label);
+  };
 
   console.log('| - - - - - - - > FILTERED THREADS 1: ', filteredThreads);
 
@@ -107,7 +103,10 @@ export const Home = () => {
       <div className="grid grid-cols-12 gap-8">
         {/* Left column - 1 part */}
         <div className="sticky top-0 col-span-3 h-fit rounded-2xl border bg-card p-4">
-          <HomeSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+          <HomeSidebar
+            activeTab={activeTab}
+            handleActiveTab={handleActiveTab}
+          />
         </div>
 
         {/* Middle column */}

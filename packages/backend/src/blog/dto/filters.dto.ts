@@ -9,10 +9,7 @@ import {
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class FilterPostsDto {
-  @ApiPropertyOptional({
-    description: 'Posts containing this word / phrase',
-    example: 'LIKE "%search%"',
-  })
+  @ApiPropertyOptional({ description: 'Posts containing this word / phrase' })
   @IsString()
   @IsOptional()
   message?: string;
@@ -53,6 +50,24 @@ export class FilterPostsDto {
   @IsDateString()
   @IsOptional()
   date_to?: Date; // Format ISO 8601
+
+  @ApiPropertyOptional({
+    description: 'Fronted filter (sidebar)',
+    example:
+      'THREADS (ignored - default) | SAVED | MY_THREADS | MY_MESSAGES | MY_LIKES',
+  })
+  @IsString()
+  @IsOptional()
+  filter?: string;
+
+  @ApiPropertyOptional({
+    description: 'Fronted filter (sidebar)',
+    example:
+      'newest (ignored - default) | oldest | most-liked | most-commented',
+  })
+  @IsString()
+  @IsOptional()
+  order_by?: string;
 }
 
 export class FilterCommentsDto {

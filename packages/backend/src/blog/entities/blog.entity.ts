@@ -65,6 +65,16 @@ export class PostEntity {
   @IsOptional()
   @IsInt()
   comments_count: number;
+
+  @ApiPropertyOptional({ description: 'If the user already liked the post' })
+  @IsOptional()
+  @IsBoolean()
+  liked_by_user: boolean;
+
+  @ApiPropertyOptional({ description: 'If the user already saved the post' })
+  @IsOptional()
+  @IsBoolean()
+  saved_by_user: boolean;
 }
 
 export class PostResponseMin {
@@ -154,6 +164,24 @@ export class Like {
   })
   @IsDateString()
   created_at: string;
+}
+
+export class LikeThreadResponse {
+  @ApiProperty({
+    description: 'REMOVED | CREATED',
+    example: 'REMOVED | CREATED',
+  })
+  @IsString()
+  likeStatus: string;
+}
+
+export class SaveThreadResponse {
+  @ApiProperty({
+    description: 'REMOVED | CREATED',
+    example: 'REMOVED | CREATED',
+  })
+  @IsString()
+  saveStatus: string;
 }
 
 export class Save {

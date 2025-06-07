@@ -8,6 +8,9 @@ CREATE TYPE "users_roles" AS ENUM ('USER', 'MENTOR', 'ADMIN');
 CREATE TYPE "mentors_status" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED');
 
 -- CreateEnum
+CREATE TYPE "mentees_status" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED');
+
+-- CreateEnum
 CREATE TYPE "EventsTypes" AS ENUM ('PUBLIC', 'PRIVATE');
 
 -- CreateEnum
@@ -20,7 +23,22 @@ CREATE TYPE "EventsSubscriptionsStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'APPR
 CREATE TYPE "NewsType" AS ENUM ('FEATURED_POST', 'EDITORS_PICK');
 
 -- CreateEnum
+CREATE TYPE "ResourceType" AS ENUM ('RESUME', 'COVER_LETTER', 'LINKEDIN', 'BUSINESS_CARD', 'EMAIL_SIGNATURE', 'PORTFOLIO', 'PERSONAL_BRANDING', 'JOB_APPLICATION_TRACKER', 'INTERVIEW_PREP', 'NETWORKING_TIPS', 'CAREER_PLANNING', 'SALARY_NEGOTIATION', 'INVOICE', 'BANNER', 'OTHER');
+
+-- CreateEnum
 CREATE TYPE "ConnectionRequestsStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+
+-- CreateEnum
+CREATE TYPE "WorkSettings" AS ENUM ('REMOTE', 'HYBRID', 'ON_SITE');
+
+-- CreateEnum
+CREATE TYPE "ProfileVisibility" AS ENUM ('PUBLIC', 'CONNECTIONS_ONLY', 'PRIVATE');
+
+-- CreateEnum
+CREATE TYPE "ContactUsStatus" AS ENUM ('PENDING', 'SENT', 'FAILED');
+
+-- CreateEnum
+CREATE TYPE "NewsletterStatus" AS ENUM ('PENDING', 'SUBSCRIBED', 'UNSUBSCRIBED');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -56,9 +74,12 @@ CREATE TABLE "users" (
     "work_status" TEXT,
     "company_name" TEXT,
     "actively_searching" BOOLEAN,
-    "skills" TEXT[],
     "age_range" TEXT,
     "goal_id" TEXT,
+    "last_login" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3),
+    "provider" TEXT,
+    "deleted_at" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -76,6 +97,17 @@ CREATE TABLE "mentors" (
     "user_id" INTEGER NOT NULL,
 
     CONSTRAINT "mentors_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "mentees" (
+    "id" SERIAL NOT NULL,
+    "resume" TEXT NOT NULL,
+    "reason" TEXT NOT NULL,
+    "status" "mentees_status" NOT NULL DEFAULT 'PENDING',
+    "user_id" INTEGER NOT NULL,
+
+    CONSTRAINT "mentees_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -209,10 +241,13 @@ CREATE TABLE "News" (
 CREATE TABLE "Resources" (
     "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
+    "details" TEXT NOT NULL,
+    "type" "ResourceType" NOT NULL,
     "link" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "user_id" INTEGER NOT NULL,
+    "file" TEXT,
 
     CONSTRAINT "Resources_pkey" PRIMARY KEY ("id")
 );
@@ -231,6 +266,22 @@ CREATE TABLE "UsersInterests" (
     "interest_id" INTEGER NOT NULL,
 
     CONSTRAINT "UsersInterests_pkey" PRIMARY KEY ("user_id","interest_id")
+);
+
+-- CreateTable
+CREATE TABLE "Skills" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "Skills_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UsersSkills" (
+    "user_id" INTEGER NOT NULL,
+    "skill_id" INTEGER NOT NULL,
+
+    CONSTRAINT "UsersSkills_pkey" PRIMARY KEY ("user_id","skill_id")
 );
 
 -- CreateTable
@@ -320,6 +371,72 @@ CREATE TABLE "UsersGoals" (
     CONSTRAINT "UsersGoals_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "SalaryRanges" (
+    "id" SERIAL NOT NULL,
+    "from" INTEGER NOT NULL,
+    "to" INTEGER NOT NULL,
+
+    CONSTRAINT "SalaryRanges_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Opportunities" (
+    "id" SERIAL NOT NULL,
+    "job" TEXT NOT NULL,
+    "company" TEXT NOT NULL,
+    "province" TEXT NOT NULL,
+    "city" TEXT NOT NULL,
+    "salary_range_id" INTEGER NOT NULL,
+    "settings" "WorkSettings" NOT NULL,
+    "link_apply" TEXT NOT NULL,
+    "link_post" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "experience" TEXT,
+    "image" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Opportunities_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UserSettings" (
+    "id" SERIAL NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "shareBirthDate" BOOLEAN NOT NULL DEFAULT true,
+    "shareContactDetails" BOOLEAN NOT NULL DEFAULT true,
+    "shareSocialLinks" BOOLEAN NOT NULL DEFAULT true,
+    "profileVisibility" "ProfileVisibility" NOT NULL DEFAULT 'PUBLIC',
+
+    CONSTRAINT "UserSettings_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ContactUs" (
+    "id" SERIAL NOT NULL,
+    "first_name" TEXT NOT NULL,
+    "last_name" TEXT,
+    "company_name" TEXT,
+    "email" TEXT NOT NULL,
+    "phone" TEXT,
+    "contact_message" TEXT NOT NULL,
+    "status" "ContactUsStatus" NOT NULL DEFAULT 'PENDING',
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ContactUs_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "NewsletterSubscriptions" (
+    "id" SERIAL NOT NULL,
+    "email" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "status" "NewsletterStatus" NOT NULL DEFAULT 'PENDING',
+
+    CONSTRAINT "NewsletterSubscriptions_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -327,13 +444,22 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 CREATE UNIQUE INDEX "mentors_user_id_key" ON "mentors"("user_id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "mentees_user_id_key" ON "mentees"("user_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "PostsLikes_user_id_post_id_key" ON "PostsLikes"("user_id", "post_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PostsSaves_user_id_post_id_key" ON "PostsSaves"("user_id", "post_id");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "UserSettings_userId_key" ON "UserSettings"("userId");
+
 -- AddForeignKey
 ALTER TABLE "mentors" ADD CONSTRAINT "mentors_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "mentees" ADD CONSTRAINT "mentees_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Events" ADD CONSTRAINT "Events_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "EventsCategories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -387,6 +513,12 @@ ALTER TABLE "UsersInterests" ADD CONSTRAINT "UsersInterests_user_id_fkey" FOREIG
 ALTER TABLE "UsersInterests" ADD CONSTRAINT "UsersInterests_interest_id_fkey" FOREIGN KEY ("interest_id") REFERENCES "Interests"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "UsersSkills" ADD CONSTRAINT "UsersSkills_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UsersSkills" ADD CONSTRAINT "UsersSkills_skill_id_fkey" FOREIGN KEY ("skill_id") REFERENCES "Skills"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "ConnectionRequests" ADD CONSTRAINT "ConnectionRequests_sender_id_fkey" FOREIGN KEY ("sender_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -424,3 +556,10 @@ ALTER TABLE "PostsSaves" ADD CONSTRAINT "PostsSaves_user_id_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "PostsSaves" ADD CONSTRAINT "PostsSaves_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "Posts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Opportunities" ADD CONSTRAINT "Opportunities_salary_range_id_fkey" FOREIGN KEY ("salary_range_id") REFERENCES "SalaryRanges"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserSettings" ADD CONSTRAINT "UserSettings_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+

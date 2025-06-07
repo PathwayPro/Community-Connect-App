@@ -28,6 +28,7 @@ export const ThreadInput = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
+    console.log('NEW THREAD SUBMIT');
     if (!content.trim() && attachments.length === 0) return;
 
     setIsSubmitting(true);
@@ -52,11 +53,11 @@ export const ThreadInput = ({
 
   return (
     <div
+      onClick={(e) => e.stopPropagation()}
       className={cn(
         'space-y-4 rounded-xl border bg-card p-4 shadow-md',
         className
       )}
-      onClick={(e) => e.stopPropagation()}
     >
       <div className="flex gap-6">
         <Avatar className="h-11 w-11 bg-warning-500">
@@ -99,8 +100,8 @@ export const ThreadInput = ({
 
               <div className="flex gap-2">
                 <Button
-                  variant="outline"
                   onClick={handleCancel}
+                  variant="outline"
                   className="h-10 w-fit rounded-xl"
                 >
                   Cancel
