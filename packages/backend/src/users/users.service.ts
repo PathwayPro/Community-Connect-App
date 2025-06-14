@@ -435,19 +435,80 @@ export class UsersService {
   private async createUserInDatabase(
     userData: CreateUserDto,
   ): Promise<ReadUserDto> {
-    const newUser = await this.prisma.users.create({
-      data: {
-        first_name: userData.firstName,
-        middle_name: userData.middleName,
-        last_name: userData.lastName,
-        email: userData.email,
-        password_hash: userData.passwordHash,
-        provider: 'email',
-        created_at: new Date(),
-      },
-    });
+    try {
+      // First check if user with email already exists
+      const existingUser = await this.prisma.users.findUnique({
+        where: { email: userData.email },
+      });
 
-    return this.mapToReadUserDto(newUser);
+      if (existingUser) {
+        throw new HttpException(
+          'User with this email already exists',
+          HttpStatus.CONFLICT,
+        );
+      }
+
+      // Try to create the user
+      try {
+        const newUser = await this.prisma.users.create({
+          data: {
+            first_name: userData.firstName,
+            middle_name: userData.middleName,
+            last_name: userData.lastName,
+            email: userData.email,
+            password_hash: userData.passwordHash,
+            provider: 'email',
+            created_at: new Date(),
+            role: 'USER',
+            deleted_at: false,
+            email_verified: false,
+          },
+        });
+
+        return this.mapToReadUserDto(newUser);
+      } catch (createError) {
+        // If we get a unique constraint error on id, try to fix the sequence
+        if (
+          createError.code === 'P2002' &&
+          createError.meta?.target?.includes('id')
+        ) {
+          // Force a sequence reset
+          await this.prisma.$queryRaw`
+            SELECT setval('users_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM users), true);
+          `;
+
+          // Try creating the user again
+          const newUser = await this.prisma.users.create({
+            data: {
+              first_name: userData.firstName,
+              middle_name: userData.middleName,
+              last_name: userData.lastName,
+              email: userData.email,
+              password_hash: userData.passwordHash,
+              provider: 'email',
+              created_at: new Date(),
+              role: 'USER',
+              deleted_at: false,
+              email_verified: false,
+            },
+          });
+
+          return this.mapToReadUserDto(newUser);
+        }
+        throw createError;
+      }
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      this.logger.error(
+        `Error creating user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new HttpException(
+        'Failed to create user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   private async setupEmailVerification(
