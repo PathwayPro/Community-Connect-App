@@ -199,9 +199,18 @@ export class UsersService {
     file?: Express.Multer.File,
     resumeFile?: Express.Multer.File,
   ): Promise<ReadUserDto> {
-    console.log('updateData', updateData);
+    console.log('updateData received:', JSON.stringify(updateData, null, 2));
+    console.log('file received:', file ? file.originalname : 'no file');
+    console.log(
+      'resumeFile received:',
+      resumeFile ? resumeFile.originalname : 'no resume file',
+    );
 
     try {
+      // Validate updateData is not empty
+      if (!updateData || Object.keys(updateData).length === 0) {
+        throw new BadRequestException('Update data cannot be empty');
+      }
       let fileLink = null;
       let resumeLink = null;
 
@@ -223,7 +232,7 @@ export class UsersService {
         );
       }
 
-      // update the user's profile picture and only attempt yo upload if file was provided
+      // update the user's profile picture and only attempt to upload if file was provided
       if (file) {
         const uploadedFile = await this.filesService.upload(
           FileValidationEnum.PROFILE_PICTURE,
@@ -231,13 +240,16 @@ export class UsersService {
         );
 
         if (!uploadedFile) {
-          throw new BadRequestException('Failed to upload file');
+          throw new BadRequestException('Failed to upload profile picture');
         }
 
         fileLink = `${uploadedFile.path}/${uploadedFile.fileName}`;
+      } else {
+        // Preserve existing profile picture if no new file is provided
+        fileLink = existingUser.picture_upload_link;
       }
 
-      // update the user's resume and only attempt yo upload if resumeFile was provided
+      // update the user's resume and only attempt to upload if resumeFile was provided
       if (resumeFile) {
         const uploadedResume = await this.filesService.upload(
           FileValidationEnum.RESUME,
@@ -249,6 +261,9 @@ export class UsersService {
         }
 
         resumeLink = `${uploadedResume.path}/${uploadedResume.fileName}`;
+      } else {
+        // Preserve existing resume if no new file is provided
+        resumeLink = existingUser.resume_upload_link;
       }
 
       // Handle skills update - if skills is provided (even empty array), update them
@@ -268,36 +283,64 @@ export class UsersService {
         }
       }
 
+      // Build update data object with fallbacks to existing values
+      const updateDataObject: any = {};
+
+      if (updateData.firstName !== undefined)
+        updateDataObject.first_name = updateData.firstName;
+      if (updateData.lastName !== undefined)
+        updateDataObject.last_name = updateData.lastName;
+      if (updateData.province !== undefined)
+        updateDataObject.province = updateData.province;
+      if (updateData.city !== undefined)
+        updateDataObject.city = updateData.city;
+      if (updateData.dob !== undefined) updateDataObject.dob = updateData.dob;
+      if (updateData.ageRange !== undefined)
+        updateDataObject.age_range = updateData.ageRange;
+      if (updateData.languages !== undefined)
+        updateDataObject.languages = updateData.languages;
+      if (updateData.profession !== undefined)
+        updateDataObject.profession = updateData.profession;
+      if (updateData.experience !== undefined)
+        updateDataObject.experience = updateData.experience;
+      if (updateData.bio !== undefined) updateDataObject.bio = updateData.bio;
+      if (updateData.arrivalInCanada !== undefined)
+        updateDataObject.arrival_in_canada = updateData.arrivalInCanada;
+      if (updateData.goalId !== undefined)
+        updateDataObject.goal_id = updateData.goalId;
+      if (updateData.linkedinLink !== undefined)
+        updateDataObject.linkedin_link = updateData.linkedinLink;
+      if (updateData.githubLink !== undefined)
+        updateDataObject.github_link = updateData.githubLink;
+      if (updateData.twitterLink !== undefined)
+        updateDataObject.twitter_link = updateData.twitterLink;
+      if (updateData.portfolioLink !== undefined)
+        updateDataObject.portfolio_link = updateData.portfolioLink;
+      if (updateData.otherLinks !== undefined)
+        updateDataObject.other_links = updateData.otherLinks;
+      if (updateData.additionalLinks !== undefined)
+        updateDataObject.additional_links = updateData.additionalLinks;
+      if (updateData.workStatus !== undefined)
+        updateDataObject.work_status = updateData.workStatus;
+      if (updateData.companyName !== undefined)
+        updateDataObject.company_name = updateData.companyName;
+      if (updateData.countryOfOrigin !== undefined)
+        updateDataObject.country_of_origin = updateData.countryOfOrigin;
+      if (updateData.activelySearching !== undefined)
+        updateDataObject.actively_searching = updateData.activelySearching;
+
+      // Always update file links since we've determined them above
+      updateDataObject.picture_upload_link = fileLink;
+      updateDataObject.resume_upload_link = resumeLink;
+
+      console.log(
+        'Final update data object:',
+        JSON.stringify(updateDataObject, null, 2),
+      );
+
       const updatedUser = await this.prisma.users.update({
         where: { id: targetUserId },
-        data: {
-          first_name: updateData.firstName,
-          last_name: updateData.lastName,
-          province: updateData.province,
-          city: updateData.city,
-          dob: updateData.dob,
-          age_range: updateData.ageRange,
-          languages: updateData.languages,
-          profession: updateData.profession,
-          experience: updateData.experience,
-          bio: updateData.bio,
-          picture_upload_link: fileLink,
-          resume_upload_link: resumeLink,
-          arrival_in_canada: updateData.arrivalInCanada,
-          goal_id: updateData.goalId,
-          linkedin_link: updateData.linkedinLink,
-          github_link: updateData.githubLink,
-          twitter_link: updateData.twitterLink,
-          portfolio_link: updateData.portfolioLink,
-          other_links: updateData.otherLinks,
-          additional_links: updateData.additionalLinks,
-          work_status: updateData.workStatus,
-          company_name: updateData.companyName,
-          country_of_origin: updateData.countryOfOrigin,
-          actively_searching: updateData.activelySearching,
-          // last_login: updateData.lastLogin,
-          // deleted_at: updateData.deletedAt,
-        },
+        data: updateDataObject,
       });
 
       const updatedUserDto = this.mapToReadUserDto(updatedUser);

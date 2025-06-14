@@ -33,7 +33,11 @@ export const UploadResume = ({ skills, onResumeUpload }: UploadResumeProps) => {
   const handleFileUpload = async (files: File[]) => {
     try {
       if (files.length > 0) {
-        setValue('resumeUploadLink', files[0], { shouldValidate: true });
+        setValue('resumeUploadLink', files[0], {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true
+        });
         await onResumeUpload(files);
       }
     } catch (error) {

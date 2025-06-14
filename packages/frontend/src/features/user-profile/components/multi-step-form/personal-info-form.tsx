@@ -40,7 +40,11 @@ export const PersonalInfoForm = ({
   const handleFileUpload = async (files: File[]) => {
     try {
       if (files.length > 0) {
-        setValue('pictureUploadLink', files[0], { shouldValidate: true });
+        setValue('pictureUploadLink', files[0], {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true
+        });
         await onProfilePictureUpload(files);
       }
     } catch (error) {

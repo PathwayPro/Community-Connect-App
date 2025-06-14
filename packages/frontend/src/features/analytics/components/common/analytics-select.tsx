@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Select,
@@ -23,18 +23,31 @@ export const AnalyticsSelect = ({
   value,
   onValueChange
 }: AnalyticsSelectProps) => {
-  const [selectedOption, setSelectedOption] = useState<string | undefined>(
-    value
+  const [selectedOption, setSelectedOption] = useState<string>(
+    value || options[0]?.value || ''
   );
 
+  // Update local state when prop changes
+  useEffect(() => {
+    if (value !== undefined) {
+      setSelectedOption(value);
+    }
+  }, [value]);
+
+  const handleValueChange = (newValue: string) => {
+    setSelectedOption(newValue);
+    onValueChange?.(newValue);
+  };
+
+  // Find the selected option label for display
+  const selectedLabel =
+    options.find((option) => option.value === selectedOption)?.label ||
+    placeholder;
+
   return (
-    <Select
-      value={selectedOption}
-      onValueChange={onValueChange || setSelectedOption}
-      defaultValue={options[0].value}
-    >
+    <Select value={selectedOption} onValueChange={handleValueChange}>
       <SelectTrigger className="w-[140px] bg-white">
-        <SelectValue placeholder={placeholder} />
+        <SelectValue placeholder={placeholder}>{selectedLabel}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         {options.map((option) => (
