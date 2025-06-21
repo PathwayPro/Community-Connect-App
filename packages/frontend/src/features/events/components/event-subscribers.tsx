@@ -77,11 +77,31 @@ export const EventSubscribers = ({ eventId }: { eventId: string }) => {
       return subscriber.status === EventSubscriptionStatus.APPROVED;
     } else if (activeTab === 'rejected') {
       return subscriber.status === EventSubscriptionStatus.REJECTED;
+    } else if (activeTab === 'pending') {
+      return subscriber.status === EventSubscriptionStatus.PENDING;
     }
 
     // "all" tab shows everyone
     return true;
   });
+
+  const getTabCounts = () => {
+    const counts = {
+      all: eventSubscriptions.length,
+      pending: eventSubscriptions.filter(
+        (s) => s.status === EventSubscriptionStatus.PENDING
+      ).length,
+      approved: eventSubscriptions.filter(
+        (s) => s.status === EventSubscriptionStatus.APPROVED
+      ).length,
+      rejected: eventSubscriptions.filter(
+        (s) => s.status === EventSubscriptionStatus.REJECTED
+      ).length
+    };
+    return counts;
+  };
+
+  const tabCounts = getTabCounts();
 
   return (
     <div className="container mx-auto max-w-4xl space-y-6 rounded-[24px] bg-white px-6 py-6 shadow-md">
@@ -120,14 +140,25 @@ export const EventSubscribers = ({ eventId }: { eventId: string }) => {
         />
 
         <Tabs defaultValue="all" onValueChange={setActiveTab} className="mb-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="all">All Subscribers</TabsTrigger>
-            <TabsTrigger value="approved">Approved</TabsTrigger>
-            <TabsTrigger value="rejected">Rejected</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="all">All ({tabCounts.all})</TabsTrigger>
+            <TabsTrigger value="pending">
+              Pending ({tabCounts.pending})
+            </TabsTrigger>
+            <TabsTrigger value="approved">
+              Approved ({tabCounts.approved})
+            </TabsTrigger>
+            <TabsTrigger value="rejected">
+              Rejected ({tabCounts.rejected})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="all" className="mt-4 space-y-4">
             {renderSubscribersList(filteredSubscribers, 'all')}
+          </TabsContent>
+
+          <TabsContent value="pending" className="mt-4 space-y-4">
+            {renderSubscribersList(filteredSubscribers, 'pending')}
           </TabsContent>
 
           <TabsContent value="approved" className="mt-4 space-y-4">
@@ -168,9 +199,11 @@ export const EventSubscribers = ({ eventId }: { eventId: string }) => {
           description={
             tabType === 'all'
               ? 'Try a different search query or check back later.'
-              : tabType === 'approved'
-                ? 'No approved subscribers yet.'
-                : 'No rejected subscribers yet.'
+              : tabType === 'pending'
+                ? 'No pending subscribers yet.'
+                : tabType === 'approved'
+                  ? 'No approved subscribers yet.'
+                  : 'No rejected subscribers yet.'
           }
           icon={UserIcon}
         />
