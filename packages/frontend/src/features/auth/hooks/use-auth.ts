@@ -27,10 +27,7 @@ export function useAuth() {
   const login = async (credentials: LoginCredentials) => {
     try {
       setIsLoading(true);
-      console.log('login data in hook:', credentials);
       const response = await authApi.login(credentials);
-
-      console.log('login response in hook:', response);
 
       if (!response.data.tokens) {
         throw new Error('No tokens received from login request');
@@ -38,8 +35,6 @@ export function useAuth() {
 
       const accessToken = response.data.tokens.accessToken;
       const refreshToken = response.data.tokens.refreshToken;
-
-      console.log('accessToken', accessToken);
 
       Cookies.set('accessToken', accessToken, {
         secure: true,
@@ -52,8 +47,6 @@ export function useAuth() {
 
       if (accessToken && refreshToken) {
         const responseUserData = await userApi.getUserProfile();
-
-        console.log('responseUserData', responseUserData);
 
         if (responseUserData.success) {
           // Store user data in localStorage
@@ -87,8 +80,6 @@ export function useAuth() {
     try {
       setIsLoading(true);
       const response = await authApi.register(credentials);
-
-      console.log('register response in hook:', response);
 
       if (response.success) {
         showAlert({
@@ -250,13 +241,9 @@ export function useAuth() {
 
       logoutContext();
 
-      console.log('logout response', response);
-
       return response;
     } catch (error) {
       console.error('Logout error:', error);
-
-      console.log('logging out');
 
       logoutContext();
 
