@@ -1,7 +1,9 @@
-import { BadRequestException,
+import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException } from '@nestjs/common';
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateGoalDto } from './dto/create-goal.dto';
 import { UpdateGoalDto } from './dto/update-goal.dto';
 import { PrismaService } from 'src/database';
@@ -17,9 +19,7 @@ export class GoalsService {
       });
       return goal;
     } catch (error) {
-      throw new BadRequestException(
-        'Error creating goal: ' + error.message,
-      );
+      throw new BadRequestException('Error creating goal: ' + error.message);
     }
   }
 
@@ -53,27 +53,25 @@ export class GoalsService {
   }
 
   async update(id: number, updateGoalDto: UpdateGoalDto) {
-      try {
-        // Validate goal existence
-        const goalToUpdate = await this.findOne(id);
-  
-        if (goalToUpdate) {
-          // Update goal information
-          const updatedGoal = await this.prisma.usersGoals.update({
-            where: { id },
-            data: updateGoalDto,
-          });
-  
-          return updatedGoal;
-        } else {
-          throw new NotFoundException(`Goal with ID: ${id} not found.`);
-        }
-      } catch (error) {
-        throw new BadRequestException(
-          'Error updating goal: ' + error.message,
-        );
+    try {
+      // Validate goal existence
+      const goalToUpdate = await this.findOne(id);
+
+      if (goalToUpdate) {
+        // Update goal information
+        const updatedGoal = await this.prisma.usersGoals.update({
+          where: { id },
+          data: updateGoalDto,
+        });
+
+        return updatedGoal;
+      } else {
+        throw new NotFoundException(`Goal with ID: ${id} not found.`);
       }
+    } catch (error) {
+      throw new BadRequestException('Error updating goal: ' + error.message);
     }
+  }
 
   remove(id: number) {
     return `This action removes a #${id} goal`;

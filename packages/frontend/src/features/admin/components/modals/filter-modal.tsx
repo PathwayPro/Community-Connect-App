@@ -8,7 +8,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter
+  DialogFooter,
+  DialogDescription
 } from '@/shared/components/ui/dialog';
 import { Button } from '@/shared/components/ui/button';
 import { FormInput, FormSelect } from '@/shared/components/form';
@@ -204,16 +205,12 @@ export const FilterModal = ({
               </Badge>
             )}
           </DialogTitle>
+          <DialogDescription className="rounded-lg bg-gray-50 p-3 text-gray-600">
+            Filter users by location, demographics, professional background, and
+            job search status. Clear individual fields with the ✕ button or
+            reset all filters at once.
+          </DialogDescription>
         </DialogHeader>
-
-        {/* Filter Description */}
-        <div className="rounded-lg bg-gray-50 p-3">
-          <p className="text-sm text-gray-600">
-            Use filters to narrow down the user list based on location,
-            demographics, professional background, and job search status. Clear
-            individual fields with the ✕ button or reset all filters at once.
-          </p>
-        </div>
 
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
