@@ -6,7 +6,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter
+  DialogFooter,
+  DialogDescription
 } from '@/shared/components/ui/dialog';
 import { Button } from '@/shared/components/ui/button';
 import { Checkbox } from '@/shared/components/ui/checkbox';
@@ -226,6 +227,9 @@ export const ExportDataModal = ({
             <Download className="h-5 w-5" />
             Export User Data
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Export user data to a CSV or Excel file.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">

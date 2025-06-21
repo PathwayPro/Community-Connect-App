@@ -1,4 +1,4 @@
 export interface FileValidations {
-    allowedMimeTypes: string[];
-    maxSizeInBytes: number;
+  allowedMimeTypes: string[];
+  maxSizeInBytes: number;
 }

@@ -55,14 +55,11 @@ export function AuthForm() {
   });
 
   const onSubmit = async (data: AuthFormValues) => {
-    console.log('auth data :', data);
-
     try {
       if (isRegisterPage) {
         await register(data as RegisterFormValues);
         form.reset();
       } else {
-        console.log('login data :', data);
         await login(data as LoginFormValues);
         form.reset();
       }
@@ -73,7 +70,6 @@ export function AuthForm() {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
-    console.log('google sign in');
     window.location.href = process.env.NEXT_PUBLIC_API_URL + '/auth/google';
   };
 
