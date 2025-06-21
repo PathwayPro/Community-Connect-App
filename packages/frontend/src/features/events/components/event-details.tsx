@@ -24,6 +24,7 @@ import { EventsTypes } from '../lib/validation';
 import { toSentenceCase } from '@/shared/lib/utils';
 import { formatDate } from 'date-fns';
 import { ConnectRequest } from '@/features/messages/components/common/connect-request';
+import { ShareModal } from './share-modal';
 import { useEffect, useState } from 'react';
 import {
   useUserStore,
@@ -64,12 +65,12 @@ interface EventError {
 
 interface EventDetailsProps {
   onBack?: () => void;
-  onShare?: () => void;
 }
 
-export const EventDetails = ({ onShare }: EventDetailsProps) => {
+export const EventDetails = ({ onBack }: EventDetailsProps) => {
   const router = useRouter();
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const { user } = useUserStore();
   const { createEventSubscription } = useEventStore();
   const { showAlert } = useAlertDialog();
@@ -255,7 +256,7 @@ export const EventDetails = ({ onShare }: EventDetailsProps) => {
           Back
         </Button>
         <div className="flex gap-2">
-          <Button onClick={onShare} className="h-10">
+          <Button onClick={() => setIsShareModalOpen(true)} className="h-10">
             <Share2 className="h-5 w-5" />
             Share
           </Button>
@@ -417,6 +418,29 @@ export const EventDetails = ({ onShare }: EventDetailsProps) => {
           Register Now
         </Button>
       )}
+
+      {/* Modals */}
+      <ConnectRequest
+        isOpen={isConnectModalOpen}
+        onClose={() => setIsConnectModalOpen(false)}
+        onSubmit={handleConnectSubmit}
+      />
+
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        eventData={{
+          id: eventData.id,
+          title: eventData.title,
+          description: eventData.description,
+          location: eventData.location,
+          start_date: eventData.start_date,
+          start_time: eventData.start_time,
+          end_time: eventData.end_time,
+          image: eventData.image,
+          host_name: eventData.host_name
+        }}
+      />
     </div>
   );
 };

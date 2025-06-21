@@ -1,8 +1,15 @@
 export interface Connection {
-  id: number;
-  user_id: number;
-  connected_user_id: number;
   created_at: Date;
+  sender: {
+    id: number;
+    first_name: string;
+    last_name: string;
+  };
+  recipient: {
+    id: number;
+    first_name: string;
+    last_name: string;
+  };
 }
 
 export interface ConnectionRequestResponse<T> {
