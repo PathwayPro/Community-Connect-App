@@ -6,10 +6,5 @@ import { useRouter } from 'next/navigation';
 export default function EventPage() {
   const router = useRouter();
 
-  return (
-    <EventDetails
-      onBack={() => router.back()}
-      onShare={() => console.log('Share clicked')}
-    />
-  );
+  return <EventDetails onBack={() => router.back()} />;
 }
