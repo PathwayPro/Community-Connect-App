@@ -17,8 +17,7 @@ import {
   UserIcon
 } from 'lucide-react';
 import Image from 'next/image';
-import { notFound, useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { EventSubscriptionStatus, EventWithHost } from '../types';
 import { EventsTypes } from '../lib/validation';
 import { toSentenceCase } from '@/shared/lib/utils';
@@ -63,16 +62,12 @@ interface EventError {
   };
 }
 
-interface EventDetailsProps {
-  onBack?: () => void;
-}
-
-export const EventDetails = ({ onBack }: EventDetailsProps) => {
+export const EventDetails = () => {
   const router = useRouter();
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const { user } = useUserStore();
-  const { createEventSubscription } = useEventStore();
+  const { createEventSubscription, fetchEvent, event } = useEventStore();
   const { showAlert } = useAlertDialog();
   const {
     eventSubscriptions,
@@ -80,19 +75,69 @@ export const EventDetails = ({ onBack }: EventDetailsProps) => {
     updateEventSubscription
   } = useEventStore();
   const [isUnregisterDialogOpen, setIsUnregisterDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Initialize user store
   useInitializeUserStore();
 
-  const searchParams = useSearchParams();
+  // Get event ID from URL path
+  const pathname = usePathname();
+  const eventId = pathname.split('/').pop();
 
-  const eventData: EventWithHost = searchParams.get('data')
-    ? JSON.parse(decodeURIComponent(searchParams.get('data')!))
-    : null;
+  // Fetch event data
+  useEffect(() => {
+    const loadEvent = async () => {
+      if (eventId) {
+        try {
+          setIsLoading(true);
+          await fetchEvent(Number(eventId));
+        } catch (error) {
+          console.error('Error fetching event:', error);
+          showAlert({
+            type: 'error',
+            title: 'Error Loading Event',
+            description: 'Failed to load event data. Please try again.'
+          });
+          router.push('/events');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
 
-  if (!eventData) {
-    notFound();
+    loadEvent();
+  }, [eventId, fetchEvent, showAlert, router]);
+
+  // Fetch event subscriptions
+  useEffect(() => {
+    if (user?.id && event?.id) {
+      fetchEventSubscriptions({
+        event_id: Number(event.id),
+        user_id: Number(user?.id)
+      });
+    }
+  }, [fetchEventSubscriptions, event?.id, user?.id]);
+
+  // Show loading state
+  if (isLoading || !event) {
+    return (
+      <div className="flex w-full justify-center">
+        <Card className="flex w-[840px] flex-col rounded-[24px]">
+          <div className="flex items-center justify-center p-8">
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary-500"></div>
+          </div>
+        </Card>
+      </div>
+    );
   }
+
+  const eventData: EventWithHost = {
+    ...event,
+    isHost:
+      user?.id !== undefined &&
+      event.host_id !== undefined &&
+      Number(user.id) === Number(event.host_id)
+  };
 
   const handleConnectSubmit = (message: string) => {
     console.log('Connect message:', message);
@@ -121,13 +166,6 @@ export const EventDetails = ({ onBack }: EventDetailsProps) => {
     user?.id !== undefined &&
     host_id !== undefined &&
     Number(user.id) === Number(host_id);
-
-  useEffect(() => {
-    fetchEventSubscriptions({
-      event_id: Number(eventData.id),
-      user_id: Number(user?.id)
-    });
-  }, [fetchEventSubscriptions, eventData.id, user?.id]);
 
   const status = eventSubscriptions[0]?.status;
 
@@ -348,11 +386,13 @@ export const EventDetails = ({ onBack }: EventDetailsProps) => {
         <h2 className="mb-4 text-xl font-semibold">Hosted by</h2>
         <div className="flex gap-6">
           <Avatar className="h-[100px] w-[100px] bg-warning-500">
-            <Image
-              src={host_image || '/profile/profile.png'}
-              alt={'Host'}
+            <ImagePreview
+              imagePath={host_image}
+              fallbackImage={'/profile/profile.png'}
+              alt={host_name}
               width={100}
               height={100}
+              className="h-full w-full object-cover"
               priority
             />
           </Avatar>

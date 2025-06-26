@@ -12,6 +12,7 @@ interface EventState {
   events: Event[];
   eventCategories: EventCategory[];
   event: Event | null;
+  eventForEdit: Event | null;
   isLoading: boolean;
   eventSubscriptions: EventSubscription[];
   error: string | null;
@@ -27,8 +28,10 @@ interface EventState {
   ) => Promise<EventSubscription>;
   editEvent: (id: number, formData: EventFormData) => Promise<Event>;
   fetchEvent: (id: number) => Promise<void>;
+  fetchEventForEdit: (id: number) => Promise<void>;
   fetchEventCategories: () => Promise<void>;
   deleteEvent: (id: number) => Promise<void>;
+  clearEventForEdit: () => void;
   revalidate: () => void;
 }
 
@@ -37,6 +40,7 @@ export const useEventStore = create<EventState>()(
     events: [],
     eventCategories: [],
     event: null,
+    eventForEdit: null,
     isLoading: false,
     eventSubscriptions: [],
     error: null,
@@ -98,6 +102,7 @@ export const useEventStore = create<EventState>()(
         }
 
         const event = response.data;
+        console.log('event response data  in fecth event: ', response);
         set({ event: event as unknown as Event, isLoading: false });
       } catch (error) {
         set({ error: (error as Error).message, isLoading: false });
@@ -251,6 +256,26 @@ export const useEventStore = create<EventState>()(
       } catch (error) {
         set({ error: (error as Error).message, isLoading: false });
       }
+    },
+
+    fetchEventForEdit: async (id: number) => {
+      try {
+        set({ isLoading: true, error: null });
+        const response = await eventApi.getEventById(id);
+
+        if (!response.success) {
+          throw new Error('Failed to fetch event for edit');
+        }
+
+        const event = response.data;
+        set({ eventForEdit: event as unknown as Event, isLoading: false });
+      } catch (error) {
+        set({ error: (error as Error).message, isLoading: false });
+      }
+    },
+
+    clearEventForEdit: () => {
+      set({ eventForEdit: null });
     },
 
     revalidate: () => {

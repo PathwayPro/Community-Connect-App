@@ -35,7 +35,8 @@ export const eventFormSchema = z.object({
   accept_subscriptions: z.boolean().default(true),
   start_date: z.string().min(1, 'Event start date is required'),
   start_time: z.string().min(1, 'Start time is required'),
-  end_time: z.string().min(1, 'End time is required')
+  end_time: z.string().min(1, 'End time is required'),
+  removeEventImage: z.boolean().optional()
 });
 
 export type EventFormValues = z.infer<typeof eventFormSchema>;

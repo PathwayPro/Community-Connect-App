@@ -11,7 +11,7 @@ import {
 import { Card } from '@/shared/components/ui/card';
 import { IconButton } from '@/shared/components/ui/icon-button';
 import { useRouter } from 'next/navigation';
-import { EventType, Event, EventWithHost } from '../../types';
+import { EventType, Event } from '../../types';
 import { useEventStore } from '@/features/events/store/index';
 import { useState } from 'react';
 import { DeleteModal } from '@/shared/components/modal/delete-modal';
@@ -48,8 +48,7 @@ export const EventCard = ({
   start_date,
   start_time,
   end_time,
-  host_id,
-  ...eventProps
+  host_id
 }: Event) => {
   const router = useRouter();
   const { deleteEvent } = useEventStore();
@@ -73,32 +72,12 @@ export const EventCard = ({
   const canDelete =
     hasRole('ADMIN') || (isHost && hasPermission('delete:event'));
 
-  const eventData = {
-    id,
-    title,
-    description,
-    location,
-    image,
-    is_free,
-    type,
-    start_date,
-    start_time,
-    end_time,
-    host_id,
-    isHost,
-    ...eventProps
-  } as EventWithHost;
-
   const handleLearnMore = () => {
-    router.push(
-      `/events/${id}?data=${encodeURIComponent(JSON.stringify(eventData))}`
-    );
+    router.push(`/events/${id}`);
   };
 
   const handleEdit = () => {
-    router.push(
-      `/events/edit/${id}?data=${encodeURIComponent(JSON.stringify(eventData))}`
-    );
+    router.push(`/events/edit/${id}`);
   };
 
   const handleDelete = async () => {
