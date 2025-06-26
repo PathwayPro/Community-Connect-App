@@ -11,6 +11,8 @@ import {
   UseInterceptors,
   UploadedFiles,
   BadRequestException,
+  Logger,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
@@ -19,10 +21,13 @@ import { Public } from '../auth/decorators/public.decorator';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { RolesGuard } from '../auth/guards';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
+  private readonly logger = new Logger(UsersController.name);
+
   constructor(private readonly usersService: UsersService) {}
 
   @Public()
@@ -79,7 +84,7 @@ export class UsersController {
   async updateUser(
     @GetUser('sub') currentUserId: number,
     @Param('id', ParseIntPipe) targetUserId: number,
-    @Body() updateUserDto: UpdateUserDto,
+    @Req() request: Request,
     @UploadedFiles()
     files: {
       pictureUploadLink?: Express.Multer.File[];
@@ -87,54 +92,109 @@ export class UsersController {
     },
   ) {
     try {
-      console.log('Request received:', {
-        currentUserId,
-        targetUserId,
-        updateUserDto: JSON.stringify(updateUserDto, null, 2),
-        files: files ? Object.keys(files) : 'no files',
-      });
+      this.logger.debug(
+        `Update request for user ${targetUserId} by user ${currentUserId}`,
+      );
 
-      const pictureUploadLink = files?.pictureUploadLink?.[0];
-      const resumeUploadLink = files?.resumeUploadLink?.[0];
+      // Parse FormData fields manually since @Body() doesn't work with FormData
+      const updateUserDto = this.parseFormDataToUpdateUserDto(request.body);
 
-      console.log('Files extracted:', {
-        pictureFile: pictureUploadLink
-          ? pictureUploadLink.originalname
-          : 'none',
-        resumeFile: resumeUploadLink ? resumeUploadLink.originalname : 'none',
-      });
-
-      if (!updateUserDto) {
-        console.log(
-          'updateUserDto is undefined. Raw request body:',
-          updateUserDto,
-        );
-        throw new BadRequestException('Update data is required');
+      // Validate updateUserDto
+      if (!updateUserDto || Object.keys(updateUserDto).length === 0) {
+        throw new BadRequestException('Update data cannot be empty');
       }
 
-      // Additional validation for common issues
-      if (typeof updateUserDto !== 'object') {
-        console.log(
-          'updateUserDto is not an object, type:',
-          typeof updateUserDto,
-        );
-        throw new BadRequestException('Update data must be a valid object');
-      }
+      // Extract files
+      const profilePictureFile = files?.pictureUploadLink?.[0];
+      const resumeFile = files?.resumeUploadLink?.[0];
+
+      this.logger.debug(
+        `Files received: profile=${profilePictureFile?.originalname || 'none'}, resume=${resumeFile?.originalname || 'none'}`,
+      );
+
+      this.logger.debug(
+        `Parsed update data: ${JSON.stringify(updateUserDto, null, 2)}`,
+      );
 
       return await this.usersService.updateUser(
         currentUserId,
         targetUserId,
         updateUserDto,
-        pictureUploadLink,
-        resumeUploadLink,
+        profilePictureFile,
+        resumeFile,
       );
     } catch (error) {
-      console.error('Error in updateUser:', error);
+      this.logger.error(
+        `Error updating user ${targetUserId}: ${error.message}`,
+      );
+
       if (error instanceof BadRequestException) {
         throw error;
       }
+
       throw new BadRequestException(error.message || 'Failed to update user');
     }
+  }
+
+  private parseFormDataToUpdateUserDto(body: any): UpdateUserDto {
+    const updateUserDto = new UpdateUserDto();
+
+    // Map FormData fields to UpdateUserDto properties
+    if (body.firstName !== undefined) updateUserDto.firstName = body.firstName;
+    if (body.middleName !== undefined)
+      updateUserDto.middleName = body.middleName;
+    if (body.lastName !== undefined) updateUserDto.lastName = body.lastName;
+    if (body.dob !== undefined) updateUserDto.dob = body.dob;
+    if (body.ageRange !== undefined) updateUserDto.ageRange = body.ageRange;
+    if (body.arrivalInCanada !== undefined)
+      updateUserDto.arrivalInCanada = body.arrivalInCanada;
+    if (body.goalId !== undefined) updateUserDto.goalId = body.goalId;
+    if (body.province !== undefined) updateUserDto.province = body.province;
+    if (body.city !== undefined) updateUserDto.city = body.city;
+    if (body.profession !== undefined)
+      updateUserDto.profession = body.profession;
+    if (body.experience !== undefined)
+      updateUserDto.experience = body.experience;
+    if (body.bio !== undefined) updateUserDto.bio = body.bio;
+    if (body.linkedinLink !== undefined)
+      updateUserDto.linkedinLink = body.linkedinLink;
+    if (body.githubLink !== undefined)
+      updateUserDto.githubLink = body.githubLink;
+    if (body.twitterLink !== undefined)
+      updateUserDto.twitterLink = body.twitterLink;
+    if (body.portfolioLink !== undefined)
+      updateUserDto.portfolioLink = body.portfolioLink;
+    if (body.otherLinks !== undefined)
+      updateUserDto.otherLinks = body.otherLinks;
+    if (body.languages !== undefined) updateUserDto.languages = body.languages;
+    if (body.countryOfOrigin !== undefined)
+      updateUserDto.countryOfOrigin = body.countryOfOrigin;
+    if (body.workStatus !== undefined)
+      updateUserDto.workStatus = body.workStatus;
+    if (body.companyName !== undefined)
+      updateUserDto.companyName = body.companyName;
+    if (body.activelySearching !== undefined) {
+      updateUserDto.activelySearching = body.activelySearching === 'true';
+    }
+
+    // Handle arrays that come as JSON strings
+    if (body.additionalLinks !== undefined) {
+      try {
+        updateUserDto.additionalLinks = JSON.parse(body.additionalLinks);
+      } catch {
+        updateUserDto.additionalLinks = [];
+      }
+    }
+
+    if (body.skills !== undefined) {
+      try {
+        updateUserDto.skills = JSON.parse(body.skills);
+      } catch {
+        updateUserDto.skills = [];
+      }
+    }
+
+    return updateUserDto;
   }
 
   @Delete(':id')
@@ -142,7 +202,10 @@ export class UsersController {
     @GetUser('sub') currentUserId: number,
     @Param('id', ParseIntPipe) targetUserId: number,
   ) {
-    console.log('current user :', currentUserId, targetUserId);
+    this.logger.debug(
+      `Delete request for user ${targetUserId} by user ${currentUserId}`,
+    );
+
     return await this.usersService.deleteUser(currentUserId, targetUserId);
   }
 }

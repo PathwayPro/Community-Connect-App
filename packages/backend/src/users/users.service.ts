@@ -22,6 +22,7 @@ import { RolesEnum } from 'src/auth/util';
 import { SettingsService } from '../settings/settings.services';
 import { FileValidationEnum } from 'src/files/util/files-validation.enum';
 import { FilesService } from 'src/files/files.service';
+
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
@@ -118,11 +119,9 @@ export class UsersService {
   async getUsersPublicInfo(): Promise<PublicReadUserDto[]> {
     const users = await this.prisma.users.findMany({});
 
-    console.log('users in public', users);
+    this.logger.debug(`Found ${users.length} users for public info`);
 
     const publicUsers = users.map((user) => this.mapToPublicReadUserDto(user));
-
-    console.log('publicUsers', publicUsers);
 
     return publicUsers;
   }
@@ -196,23 +195,16 @@ export class UsersService {
     currentUserId: number,
     targetUserId: number,
     updateData: UpdateUserDto,
-    file?: Express.Multer.File,
+    profilePictureFile?: Express.Multer.File,
     resumeFile?: Express.Multer.File,
   ): Promise<ReadUserDto> {
-    console.log('updateData received:', JSON.stringify(updateData, null, 2));
-    console.log('file received:', file ? file.originalname : 'no file');
-    console.log(
-      'resumeFile received:',
-      resumeFile ? resumeFile.originalname : 'no resume file',
-    );
+    this.logger.debug(`Updating user ${targetUserId} by user ${currentUserId}`);
 
     try {
       // Validate updateData is not empty
       if (!updateData || Object.keys(updateData).length === 0) {
         throw new BadRequestException('Update data cannot be empty');
       }
-      let fileLink = null;
-      let resumeLink = null;
 
       const existingUser = await this.prisma.users.findUnique({
         where: { id: targetUserId },
@@ -232,110 +224,27 @@ export class UsersService {
         );
       }
 
-      // update the user's profile picture and only attempt to upload if file was provided
-      if (file) {
-        const uploadedFile = await this.filesService.upload(
-          FileValidationEnum.PROFILE_PICTURE,
-          file,
-        );
+      // Handle file uploads
+      const { profilePictureLink, resumeLink } = await this.handleFileUploads(
+        existingUser,
+        profilePictureFile,
+        resumeFile,
+      );
 
-        if (!uploadedFile) {
-          throw new BadRequestException('Failed to upload profile picture');
-        }
-
-        fileLink = `${uploadedFile.path}/${uploadedFile.fileName}`;
-      } else {
-        // Preserve existing profile picture if no new file is provided
-        fileLink = existingUser.picture_upload_link;
-      }
-
-      // update the user's resume and only attempt to upload if resumeFile was provided
-      if (resumeFile) {
-        const uploadedResume = await this.filesService.upload(
-          FileValidationEnum.RESUME,
-          resumeFile,
-        );
-
-        if (!uploadedResume) {
-          throw new BadRequestException('Failed to upload resume');
-        }
-
-        resumeLink = `${uploadedResume.path}/${uploadedResume.fileName}`;
-      } else {
-        // Preserve existing resume if no new file is provided
-        resumeLink = existingUser.resume_upload_link;
-      }
-
-      // Handle skills update - if skills is provided (even empty array), update them
+      // Handle skills update
       if (updateData.skills !== undefined) {
-        try {
-          const updatedSkills = await this.addUserSkillsFormatted(
-            targetUserId,
-            updateData.skills as unknown as number[],
-          );
-          console.log(`updatedSkills: ${updatedSkills}`);
-          // No need to check updatedSkills since addUserSkillsFormatted handles empty arrays
-        } catch (error) {
-          this.logger.error(`Error updating skills: ${error.message}`);
-          throw new InternalServerErrorException(
-            'There was an error updating your skills. Please try again later.',
-          );
-        }
+        await this.updateUserSkills(targetUserId, updateData.skills);
       }
 
-      // Build update data object with fallbacks to existing values
-      const updateDataObject: any = {};
+      // Build update data object
+      const updateDataObject = this.buildUpdateDataObject(
+        updateData,
+        profilePictureLink,
+        resumeLink,
+      );
 
-      if (updateData.firstName !== undefined)
-        updateDataObject.first_name = updateData.firstName;
-      if (updateData.lastName !== undefined)
-        updateDataObject.last_name = updateData.lastName;
-      if (updateData.province !== undefined)
-        updateDataObject.province = updateData.province;
-      if (updateData.city !== undefined)
-        updateDataObject.city = updateData.city;
-      if (updateData.dob !== undefined) updateDataObject.dob = updateData.dob;
-      if (updateData.ageRange !== undefined)
-        updateDataObject.age_range = updateData.ageRange;
-      if (updateData.languages !== undefined)
-        updateDataObject.languages = updateData.languages;
-      if (updateData.profession !== undefined)
-        updateDataObject.profession = updateData.profession;
-      if (updateData.experience !== undefined)
-        updateDataObject.experience = updateData.experience;
-      if (updateData.bio !== undefined) updateDataObject.bio = updateData.bio;
-      if (updateData.arrivalInCanada !== undefined)
-        updateDataObject.arrival_in_canada = updateData.arrivalInCanada;
-      if (updateData.goalId !== undefined)
-        updateDataObject.goal_id = updateData.goalId;
-      if (updateData.linkedinLink !== undefined)
-        updateDataObject.linkedin_link = updateData.linkedinLink;
-      if (updateData.githubLink !== undefined)
-        updateDataObject.github_link = updateData.githubLink;
-      if (updateData.twitterLink !== undefined)
-        updateDataObject.twitter_link = updateData.twitterLink;
-      if (updateData.portfolioLink !== undefined)
-        updateDataObject.portfolio_link = updateData.portfolioLink;
-      if (updateData.otherLinks !== undefined)
-        updateDataObject.other_links = updateData.otherLinks;
-      if (updateData.additionalLinks !== undefined)
-        updateDataObject.additional_links = updateData.additionalLinks;
-      if (updateData.workStatus !== undefined)
-        updateDataObject.work_status = updateData.workStatus;
-      if (updateData.companyName !== undefined)
-        updateDataObject.company_name = updateData.companyName;
-      if (updateData.countryOfOrigin !== undefined)
-        updateDataObject.country_of_origin = updateData.countryOfOrigin;
-      if (updateData.activelySearching !== undefined)
-        updateDataObject.actively_searching = updateData.activelySearching;
-
-      // Always update file links since we've determined them above
-      updateDataObject.picture_upload_link = fileLink;
-      updateDataObject.resume_upload_link = resumeLink;
-
-      console.log(
-        'Final update data object:',
-        JSON.stringify(updateDataObject, null, 2),
+      this.logger.debug(
+        `Updating user with data: ${JSON.stringify(updateDataObject, null, 2)}`,
       );
 
       const updatedUser = await this.prisma.users.update({
@@ -373,6 +282,152 @@ export class UsersService {
     }
   }
 
+  private async handleFileUploads(
+    existingUser: any,
+    profilePictureFile?: Express.Multer.File,
+    resumeFile?: Express.Multer.File,
+  ): Promise<{ profilePictureLink: string | null; resumeLink: string | null }> {
+    let profilePictureLink = existingUser.picture_upload_link;
+    let resumeLink = existingUser.resume_upload_link;
+
+    // Handle profile picture upload
+    if (profilePictureFile) {
+      try {
+        const uploadedFile = await this.filesService.upload(
+          FileValidationEnum.PROFILE_PICTURE,
+          profilePictureFile,
+        );
+
+        if (!uploadedFile) {
+          throw new BadRequestException('Failed to upload profile picture');
+        }
+
+        profilePictureLink = `${uploadedFile.path}/${uploadedFile.fileName}`;
+        this.logger.debug(`Profile picture uploaded: ${profilePictureLink}`);
+      } catch (error) {
+        this.logger.error(`Profile picture upload failed: ${error.message}`);
+        throw new BadRequestException('Failed to upload profile picture');
+      }
+    }
+
+    // Handle resume upload
+    if (resumeFile) {
+      try {
+        const uploadedResume = await this.filesService.upload(
+          FileValidationEnum.RESUME,
+          resumeFile,
+        );
+
+        if (!uploadedResume) {
+          throw new BadRequestException('Failed to upload resume');
+        }
+
+        resumeLink = `${uploadedResume.path}/${uploadedResume.fileName}`;
+        this.logger.debug(`Resume uploaded: ${resumeLink}`);
+      } catch (error) {
+        this.logger.error(`Resume upload failed: ${error.message}`);
+        throw new BadRequestException('Failed to upload resume');
+      }
+    }
+
+    return { profilePictureLink, resumeLink };
+  }
+
+  private async updateUserSkills(
+    userId: number,
+    skills: number[],
+  ): Promise<void> {
+    try {
+      // Remove previous skills for the user
+      await this.prisma.usersSkills.deleteMany({
+        where: { user_id: userId },
+      });
+
+      // If no skills provided, return early
+      if (!skills || !skills.length) {
+        return;
+      }
+
+      // Validate only existing skills
+      const validSkillIds = await this.prisma.skills
+        .findMany({
+          where: { id: { in: skills } },
+          select: { id: true },
+        })
+        .then((skills) =>
+          skills.map((skill) => ({
+            user_id: userId,
+            skill_id: skill.id,
+          })),
+        );
+
+      // Add validated skills to the user
+      if (validSkillIds.length > 0) {
+        await this.prisma.usersSkills.createMany({
+          data: validSkillIds,
+          skipDuplicates: true,
+        });
+      }
+
+      this.logger.debug(
+        `Updated ${validSkillIds.length} skills for user ${userId}`,
+      );
+    } catch (error) {
+      this.logger.error(`Error updating skills: ${error.message}`);
+      throw new InternalServerErrorException(
+        'There was an error updating your skills. Please try again later.',
+      );
+    }
+  }
+
+  private buildUpdateDataObject(
+    updateData: UpdateUserDto,
+    profilePictureLink: string | null,
+    resumeLink: string | null,
+  ): any {
+    const updateDataObject: any = {};
+
+    // Map UpdateUserDto fields to database fields
+    const fieldMappings = {
+      firstName: 'first_name',
+      lastName: 'last_name',
+      middleName: 'middle_name',
+      province: 'province',
+      city: 'city',
+      dob: 'dob',
+      ageRange: 'age_range',
+      languages: 'languages',
+      profession: 'profession',
+      experience: 'experience',
+      bio: 'bio',
+      arrivalInCanada: 'arrival_in_canada',
+      goalId: 'goal_id',
+      linkedinLink: 'linkedin_link',
+      githubLink: 'github_link',
+      twitterLink: 'twitter_link',
+      portfolioLink: 'portfolio_link',
+      otherLinks: 'other_links',
+      additionalLinks: 'additional_links',
+      workStatus: 'work_status',
+      companyName: 'company_name',
+      countryOfOrigin: 'country_of_origin',
+      activelySearching: 'actively_searching',
+    };
+
+    // Only include fields that are defined in updateData
+    Object.entries(fieldMappings).forEach(([dtoField, dbField]) => {
+      if (updateData[dtoField] !== undefined) {
+        updateDataObject[dbField] = updateData[dtoField];
+      }
+    });
+
+    // Always update file links
+    updateDataObject.picture_upload_link = profilePictureLink;
+    updateDataObject.resume_upload_link = resumeLink;
+
+    return updateDataObject;
+  }
+
   async deleteUser(
     currentUserId: number,
     targetUserId: number,
@@ -382,7 +437,7 @@ export class UsersService {
     }
 
     try {
-      // check if the user is an admin
+      // Check if the user is an admin
       const currentUser = await this.prisma.users.findUnique({
         where: { id: currentUserId },
         select: { id: true, role: true },
@@ -392,14 +447,14 @@ export class UsersService {
         throw new NotFoundException(`User with ID ${currentUserId} not found`);
       }
 
-      // check if the target user exists
+      // Check if the target user exists
       const targetUser = await findUserById(this.prisma, targetUserId);
 
       if (!targetUser) {
         throw new NotFoundException(`User with ID ${targetUserId} not found`);
       }
 
-      // check if the current user is same as target user or current user is an admin
+      // Check if the current user is same as target user or current user is an admin
       if (
         currentUser.id !== targetUser.id &&
         currentUser.role !== RolesEnum.ADMIN
@@ -426,6 +481,32 @@ export class UsersService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async getUserProfessions(): Promise<string[]> {
+    // Get all users and extract their professions
+    const users = await this.prisma.users.findMany({
+      where: {
+        deleted_at: false,
+        profession: {
+          not: null,
+        },
+      },
+      select: {
+        profession: true,
+      },
+    });
+
+    // Extract professions and filter out any empty strings
+    const allProfessions = users
+      .map((user) => user.profession)
+      .filter((profession) => profession && profession.trim() !== '');
+
+    // Create a unique list using Set
+    const uniqueProfessions = [...new Set(allProfessions)];
+
+    // Sort alphabetically
+    return uniqueProfessions.sort();
   }
 
   private convertToDateTime(dateString: string | Date): Date {
@@ -533,32 +614,6 @@ export class UsersService {
     }
   }
 
-  async getUserProfessions(): Promise<string[]> {
-    // Get all users and extract their professions
-    const users = await this.prisma.users.findMany({
-      where: {
-        deleted_at: false,
-        profession: {
-          not: null,
-        },
-      },
-      select: {
-        profession: true,
-      },
-    });
-
-    // Extract professions and filter out any empty strings
-    const allProfessions = users
-      .map((user) => user.profession)
-      .filter((profession) => profession && profession.trim() !== '');
-
-    // Create a unique list using Set
-    const uniqueProfessions = [...new Set(allProfessions)];
-
-    // Sort alphabetically
-    return uniqueProfessions.sort();
-  }
-
   private mapToReadUserDto(user: any): ReadUserDto {
     const readUser = new ReadUserDto();
 
@@ -647,67 +702,5 @@ export class UsersService {
       provider: user.provider,
     });
     return publicUser;
-  }
-
-  private async addUserSkillsFormatted(
-    user_id: number,
-    skills: string | number[],
-  ) {
-    try {
-      // Handle null/undefined input
-      if (!skills) {
-        return [];
-      }
-
-      // Transform skills input into array of integers
-      let skillsToArray: number[];
-      try {
-        skillsToArray =
-          typeof skills === 'string'
-            ? JSON.parse(skills).map((item: any) => parseInt(item, 10))
-            : skills.map((item: any) => parseInt(item, 10));
-      } catch (parseError) {
-        this.logger.error(`Error parsing skills: ${parseError.message}`);
-        return [];
-      }
-
-      // Remove previous skills for the user
-      await this.prisma.usersSkills.deleteMany({
-        where: { user_id: user_id },
-      });
-
-      // If no skills provided or parsing failed, return empty array
-      if (!skillsToArray || !skillsToArray.length) {
-        return [];
-      }
-
-      // Validate only existing skills and return formatted values
-      const validSkillIds = await this.prisma.skills
-        .findMany({
-          where: { id: { in: skillsToArray } },
-          select: { id: true },
-        })
-        .then((skills) =>
-          skills.map((skill) => ({
-            user_id: user_id,
-            skill_id: skill.id,
-          })),
-        );
-
-      // Add validated skills to the user
-      if (validSkillIds.length > 0) {
-        await this.prisma.usersSkills.createMany({
-          data: validSkillIds,
-          skipDuplicates: true,
-        });
-      }
-
-      return validSkillIds;
-    } catch (error) {
-      this.logger.error(`Error in addUserSkillsFormatted: ${error.message}`);
-      throw new InternalServerErrorException(
-        'Error saving skills: ' + error.message,
-      );
-    }
   }
 }
