@@ -417,6 +417,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
         onClose={() => setIsResumeModalOpen(false)}
         title={`${profileDataBuilder.name}'s Resume`}
         description="Preview and download the resume"
+        height="h-full"
         filePath={
           displayedUser?.resumeUploadLink?.startsWith('http')
             ? displayedUser.resumeUploadLink

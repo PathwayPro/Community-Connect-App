@@ -11,6 +11,13 @@ interface FileWithPreview extends File {
   preview?: string;
 }
 
+interface ExistingFile {
+  name: string;
+  url: string;
+  type: string;
+  size?: number;
+}
+
 interface UploadStatus {
   progress: number;
   error?: string;
@@ -23,9 +30,11 @@ interface FileUploadProps {
   maxFiles?: number;
   multiple?: boolean;
   onUpload?: (files: File[]) => Promise<void>;
+  onRemove?: (fileName: string) => void;
   uploadIcon?: keyof typeof SharedIcons;
   title?: string;
   disablePreview?: boolean;
+  existingFiles?: ExistingFile[];
 }
 
 export const FileUpload = ({
@@ -36,9 +45,11 @@ export const FileUpload = ({
   maxFiles = 5,
   multiple = true,
   onUpload,
+  onRemove,
   uploadIcon = 'uploadCloud',
   title = 'Upload Files',
-  disablePreview = false
+  disablePreview = false,
+  existingFiles = []
 }: FileUploadProps) => {
   const normalizedAcceptedTypes = Array.isArray(acceptedFileTypes)
     ? acceptedFileTypes.reduce((acc, type) => {
@@ -63,6 +74,18 @@ export const FileUpload = ({
     Record<string, UploadStatus>
   >({});
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  // Initialize with existing files
+  useEffect(() => {
+    if (existingFiles.length > 0 && files.length === 0) {
+      // Mark existing files as successfully uploaded
+      const existingStatus: Record<string, UploadStatus> = {};
+      existingFiles.forEach((file) => {
+        existingStatus[file.name] = { progress: 100, success: true };
+      });
+      setUploadStatus(existingStatus);
+    }
+  }, [existingFiles, files.length]);
 
   useEffect(() => {
     return () => {
@@ -155,7 +178,42 @@ export const FileUpload = ({
       delete newStatus[fileName];
       return newStatus;
     });
+
+    // Call onRemove callback for existing files
+    if (onRemove) {
+      onRemove(fileName);
+    }
   };
+
+  const removeExistingFile = (fileName: string) => {
+    setUploadStatus((prev) => {
+      const newStatus = { ...prev };
+      delete newStatus[fileName];
+      return newStatus;
+    });
+
+    // Call onRemove callback for existing files
+    if (onRemove) {
+      onRemove(fileName);
+    }
+  };
+
+  const allFiles = [
+    ...existingFiles.map((file) => ({
+      name: file.name,
+      url: file.url,
+      type: file.type,
+      size: file.size || 0,
+      isExisting: true
+    })),
+    ...files.map((file) => ({
+      name: file.name,
+      url: file.preview || '',
+      type: file.type,
+      size: file.size,
+      isExisting: false
+    }))
+  ];
 
   return (
     <div className="w-full">
@@ -179,7 +237,7 @@ export const FileUpload = ({
               <input {...getInputProps()} />
               <h6 className="mb-6">{title}</h6>
 
-              {files.length === 0 ? (
+              {allFiles.length === 0 ? (
                 <>
                   <Icon className="mb-4 h-10 w-10 text-neutral-500" />
                   <div className="text-center">
@@ -196,19 +254,19 @@ export const FileUpload = ({
                 </>
               ) : (
                 <div className="w-full space-y-4">
-                  {files.map((file) => (
+                  {allFiles.map((file) => (
                     <div
                       key={file.name}
                       className="flex flex-col gap-4 rounded-lg bg-neutral-50 px-3"
                     >
-                      {file.preview ? (
+                      {file.type.startsWith('image/') && !disablePreview ? (
                         <Image
-                          src={file.preview}
+                          src={file.url}
                           alt={file.name}
                           className="mx-auto h-32 w-32 cursor-pointer rounded-full border border-neutral-200 object-cover"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedImage(file.preview ?? null);
+                            setSelectedImage(file.url);
                           }}
                           width={128}
                           height={128}
@@ -221,6 +279,11 @@ export const FileUpload = ({
                         <div className="flex w-full items-center justify-between">
                           <p className="flex-1 truncate text-sm font-medium">
                             {file.name}
+                            {file.isExisting && (
+                              <span className="ml-2 text-xs text-neutral-500">
+                                (existing)
+                              </span>
+                            )}
                           </p>
                           <div className="flex items-center gap-2">
                             {uploadStatus[file.name]?.success && (
@@ -235,7 +298,11 @@ export const FileUpload = ({
                               className="h-5 w-5"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                removeFile(file.name);
+                                if (file.isExisting) {
+                                  removeExistingFile(file.name);
+                                } else {
+                                  removeFile(file.name);
+                                }
                               }}
                             >
                               <SharedIcons.delete className="h-4 w-4 stroke-error-600" />

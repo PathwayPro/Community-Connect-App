@@ -28,18 +28,29 @@ function getStepContent(
   step: number,
   skills: SkillsResponse[],
   onProfilePictureUpload: (files: File[]) => Promise<void>,
-  onResumeUpload: (files: File[]) => Promise<void>
+  onResumeUpload: (files: File[]) => Promise<void>,
+  existingProfilePicture?: string,
+  existingResume?: string
 ) {
   console.log('STEP HERE', step);
   switch (step) {
     case 1:
       return (
-        <PersonalInfoForm onProfilePictureUpload={onProfilePictureUpload} />
+        <PersonalInfoForm
+          onProfilePictureUpload={onProfilePictureUpload}
+          existingProfilePicture={existingProfilePicture}
+        />
       );
     case 2:
       return <SocialLinksForm />;
     case 3:
-      return <UploadResume skills={skills} onResumeUpload={onResumeUpload} />;
+      return (
+        <UploadResume
+          skills={skills}
+          onResumeUpload={onResumeUpload}
+          existingResume={existingResume}
+        />
+      );
     case 4:
       return <GoalsForm />;
     default:
@@ -325,7 +336,9 @@ export const EditProfile = () => {
               activeStep,
               skills,
               handleProfilePictureUpload,
-              handleResumeUpload
+              handleResumeUpload,
+              user?.pictureUploadLink,
+              user?.resumeUploadLink
             )}
             <div className="flex w-full justify-between pt-5">
               <IconButton

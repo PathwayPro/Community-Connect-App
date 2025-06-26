@@ -28,7 +28,9 @@ export const userProfileSchema = z.object({
   workStatus: z.string().optional(),
   companyName: z.string().optional(),
   countryOfOrigin: z.string().optional(),
-  activelySearching: z.boolean().optional().default(false)
+  activelySearching: z.boolean().optional().default(false),
+  removeProfilePicture: z.boolean().optional(),
+  removeResume: z.boolean().optional()
 });
 
 export type UserProfileFormData = z.infer<typeof userProfileSchema>;

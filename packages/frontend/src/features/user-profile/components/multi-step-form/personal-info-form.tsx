@@ -8,21 +8,26 @@ import {
   provinceData
 } from '@/features/user-profile/lib/constants/profile';
 import { toast } from 'sonner';
-import React from 'react';
+import React, { useState } from 'react';
 import { UserProfileFormData } from '../../lib/validations';
+import { getImageUrl } from '@/shared/components/navigation/main-nav/main-nav';
 
 interface PersonalInfoFormProps {
   onProfilePictureUpload: (files: File[]) => Promise<void>;
+  existingProfilePicture?: string;
 }
 
 export const PersonalInfoForm = ({
-  onProfilePictureUpload
+  onProfilePictureUpload,
+  existingProfilePicture
 }: PersonalInfoFormProps) => {
   const {
     watch,
     setValue,
     formState: { errors }
   } = useFormContext<UserProfileFormData>();
+
+  const [removeProfilePicture, setRemoveProfilePicture] = useState(false);
 
   // Watch values for debugging
   const firstName = watch('firstName');
@@ -45,6 +50,7 @@ export const PersonalInfoForm = ({
           shouldDirty: true,
           shouldTouch: true
         });
+        setRemoveProfilePicture(false); // Reset removal flag when new file is uploaded
         await onProfilePictureUpload(files);
       }
     } catch (error) {
@@ -52,6 +58,40 @@ export const PersonalInfoForm = ({
       toast.error('Failed to upload profile picture');
     }
   };
+
+  const handleFileRemove = (fileName: string) => {
+    // Clear the form value when existing file is removed
+    setValue('pictureUploadLink', undefined, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
+
+    // Set removal flag for backend
+    setRemoveProfilePicture(true);
+
+    // Store removal flag in form data
+    setValue('removeProfilePicture', true, {
+      shouldValidate: false,
+      shouldDirty: true,
+      shouldTouch: false
+    });
+
+    toast.success('Profile picture removed');
+  };
+
+  // Prepare existing file for display
+  const existingFiles =
+    existingProfilePicture && !removeProfilePicture
+      ? [
+          {
+            name: existingProfilePicture.split('/').pop() || 'profile-picture',
+            url: getImageUrl(existingProfilePicture),
+            type: 'image/jpeg', // Default type, could be enhanced to detect actual type
+            size: 0
+          }
+        ]
+      : [];
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -63,6 +103,8 @@ export const PersonalInfoForm = ({
           multiple={false}
           uploadIcon="userRoundPlus"
           onUpload={handleFileUpload}
+          onRemove={handleFileRemove}
+          existingFiles={existingFiles}
         />
       </div>
 

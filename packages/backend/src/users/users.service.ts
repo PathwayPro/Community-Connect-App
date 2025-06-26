@@ -197,6 +197,8 @@ export class UsersService {
     updateData: UpdateUserDto,
     profilePictureFile?: Express.Multer.File,
     resumeFile?: Express.Multer.File,
+    removeProfilePicture?: boolean,
+    removeResume?: boolean,
   ): Promise<ReadUserDto> {
     this.logger.debug(`Updating user ${targetUserId} by user ${currentUserId}`);
 
@@ -224,11 +226,13 @@ export class UsersService {
         );
       }
 
-      // Handle file uploads
+      // Handle file uploads and removals
       const { profilePictureLink, resumeLink } = await this.handleFileUploads(
         existingUser,
         profilePictureFile,
         resumeFile,
+        removeProfilePicture,
+        removeResume,
       );
 
       // Handle skills update
@@ -286,13 +290,23 @@ export class UsersService {
     existingUser: any,
     profilePictureFile?: Express.Multer.File,
     resumeFile?: Express.Multer.File,
+    removeProfilePicture?: boolean,
+    removeResume?: boolean,
   ): Promise<{ profilePictureLink: string | null; resumeLink: string | null }> {
     let profilePictureLink = existingUser.picture_upload_link;
     let resumeLink = existingUser.resume_upload_link;
 
-    // Handle profile picture upload
+    // Handle profile picture upload or removal
     if (profilePictureFile) {
       try {
+        // Delete old profile picture if it exists
+        if (existingUser.picture_upload_link) {
+          await this.filesService.deleteFile(existingUser.picture_upload_link);
+          this.logger.debug(
+            `Deleted old profile picture: ${existingUser.picture_upload_link}`,
+          );
+        }
+
         const uploadedFile = await this.filesService.upload(
           FileValidationEnum.PROFILE_PICTURE,
           profilePictureFile,
@@ -308,11 +322,31 @@ export class UsersService {
         this.logger.error(`Profile picture upload failed: ${error.message}`);
         throw new BadRequestException('Failed to upload profile picture');
       }
+    } else if (removeProfilePicture && existingUser.picture_upload_link) {
+      // Handle profile picture removal
+      try {
+        await this.filesService.deleteFile(existingUser.picture_upload_link);
+        this.logger.debug(
+          `Deleted profile picture: ${existingUser.picture_upload_link}`,
+        );
+        profilePictureLink = null;
+      } catch (error) {
+        this.logger.error(`Profile picture deletion failed: ${error.message}`);
+        // Don't throw error for deletion failure, just log it
+      }
     }
 
-    // Handle resume upload
+    // Handle resume upload or removal
     if (resumeFile) {
       try {
+        // Delete old resume if it exists
+        if (existingUser.resume_upload_link) {
+          await this.filesService.deleteFile(existingUser.resume_upload_link);
+          this.logger.debug(
+            `Deleted old resume: ${existingUser.resume_upload_link}`,
+          );
+        }
+
         const uploadedResume = await this.filesService.upload(
           FileValidationEnum.RESUME,
           resumeFile,
@@ -327,6 +361,16 @@ export class UsersService {
       } catch (error) {
         this.logger.error(`Resume upload failed: ${error.message}`);
         throw new BadRequestException('Failed to upload resume');
+      }
+    } else if (removeResume && existingUser.resume_upload_link) {
+      // Handle resume removal
+      try {
+        await this.filesService.deleteFile(existingUser.resume_upload_link);
+        this.logger.debug(`Deleted resume: ${existingUser.resume_upload_link}`);
+        resumeLink = null;
+      } catch (error) {
+        this.logger.error(`Resume deletion failed: ${error.message}`);
+        // Don't throw error for deletion failure, just log it
       }
     }
 

@@ -108,8 +108,15 @@ export class UsersController {
       const profilePictureFile = files?.pictureUploadLink?.[0];
       const resumeFile = files?.resumeUploadLink?.[0];
 
+      // Check for file removal indicators
+      const removeProfilePicture = request.body.removeProfilePicture === 'true';
+      const removeResume = request.body.removeResume === 'true';
+
       this.logger.debug(
         `Files received: profile=${profilePictureFile?.originalname || 'none'}, resume=${resumeFile?.originalname || 'none'}`,
+      );
+      this.logger.debug(
+        `File removal indicators: profile=${removeProfilePicture}, resume=${removeResume}`,
       );
 
       this.logger.debug(
@@ -122,6 +129,8 @@ export class UsersController {
         updateUserDto,
         profilePictureFile,
         resumeFile,
+        removeProfilePicture,
+        removeResume,
       );
     } catch (error) {
       this.logger.error(

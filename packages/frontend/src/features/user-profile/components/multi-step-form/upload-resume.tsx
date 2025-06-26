@@ -8,13 +8,19 @@ import { useFormContext } from 'react-hook-form';
 import { UserProfileFormData } from '../../lib/validations';
 import { SkillsResponse } from '../../types';
 import { toast } from 'sonner';
+import { useState } from 'react';
 
 interface UploadResumeProps {
   skills: SkillsResponse[];
   onResumeUpload: (files: File[]) => Promise<void>;
+  existingResume?: string;
 }
 
-export const UploadResume = ({ skills, onResumeUpload }: UploadResumeProps) => {
+export const UploadResume = ({
+  skills,
+  onResumeUpload,
+  existingResume
+}: UploadResumeProps) => {
   const {
     setValue,
     formState: { errors },
@@ -22,6 +28,8 @@ export const UploadResume = ({ skills, onResumeUpload }: UploadResumeProps) => {
     watch,
     register
   } = useFormContext<UserProfileFormData>();
+
+  const [removeResume, setRemoveResume] = useState(false);
 
   // Register the field and watch its value for reactivity
   register('activelySearching');
@@ -38,6 +46,7 @@ export const UploadResume = ({ skills, onResumeUpload }: UploadResumeProps) => {
           shouldDirty: true,
           shouldTouch: true
         });
+        setRemoveResume(false); // Reset removal flag when new file is uploaded
         await onResumeUpload(files);
       }
     } catch (error) {
@@ -45,6 +54,40 @@ export const UploadResume = ({ skills, onResumeUpload }: UploadResumeProps) => {
       toast.error('Failed to upload resume');
     }
   };
+
+  const handleFileRemove = (fileName: string) => {
+    // Clear the form value when existing file is removed
+    setValue('resumeUploadLink', undefined, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
+
+    // Set removal flag for backend
+    setRemoveResume(true);
+
+    // Store removal flag in form data
+    setValue('removeResume', true, {
+      shouldValidate: false,
+      shouldDirty: true,
+      shouldTouch: false
+    });
+
+    toast.success('Resume removed');
+  };
+
+  // Prepare existing file for display
+  const existingFiles =
+    existingResume && !removeResume
+      ? [
+          {
+            name: existingResume.split('/').pop() || 'resume',
+            url: `${process.env.NEXT_PUBLIC_API_URL}/files/${existingResume}`,
+            type: 'application/pdf', // Default type, could be enhanced to detect actual type
+            size: 0
+          }
+        ]
+      : [];
 
   return (
     <div>
@@ -56,6 +99,8 @@ export const UploadResume = ({ skills, onResumeUpload }: UploadResumeProps) => {
         uploadIcon="fileIcon"
         disablePreview={true}
         onUpload={handleFileUpload}
+        onRemove={handleFileRemove}
+        existingFiles={existingFiles}
       />
 
       <div className="mt-6 flex w-full flex-col gap-4">
