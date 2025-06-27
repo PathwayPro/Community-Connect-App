@@ -80,20 +80,7 @@ export const NewsCard = ({
     (isCreator && hasPermission(permissions.delete as Permission));
 
   const handleEdit = () => {
-    const newsData = {
-      id,
-      title,
-      details,
-      type,
-      image,
-      link,
-      created_at,
-      user
-    };
-
-    router.push(
-      `/resources/edit/${id}?mode=news&data=${encodeURIComponent(JSON.stringify(newsData))}`
-    );
+    router.push(`/resources/edit/${id}?mode=news`);
   };
 
   const handleDelete = () => {

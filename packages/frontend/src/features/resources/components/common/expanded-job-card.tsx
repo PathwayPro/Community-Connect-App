@@ -55,11 +55,7 @@ export function ExpandedJobCard({
   const canDelete = hasRole('ADMIN') || hasPermission('delete:opportunity');
 
   const handleEdit = () => {
-    router.push(
-      `/resources/edit/${opportunity.id}?mode=opportunities&data=${encodeURIComponent(
-        JSON.stringify(formData)
-      )}`
-    );
+    router.push(`/resources/edit/${opportunity.id}?mode=opportunities`);
   };
 
   const handleDelete = () => {

@@ -70,11 +70,7 @@ export const ResourceCard = ({
   };
 
   const handleEdit = () => {
-    router.push(
-      `/resources/edit/${id}?mode=contentLibrary&data=${encodeURIComponent(
-        JSON.stringify(formData)
-      )}`
-    );
+    router.push(`/resources/edit/${id}?mode=contentLibrary`);
   };
 
   const handleDelete = () => {

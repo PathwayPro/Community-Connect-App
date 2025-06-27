@@ -11,9 +11,18 @@ import { useFormContext } from 'react-hook-form';
 
 interface BaseFormProps {
   onFileUpload: (files: File[]) => Promise<void>;
+  existingFiles?: Array<{
+    name: string;
+    url: string;
+    type: string;
+    size: number;
+  }>;
 }
 
-export const BaseForm = ({ onFileUpload }: BaseFormProps) => {
+export const BaseForm = ({
+  onFileUpload,
+  existingFiles = []
+}: BaseFormProps) => {
   const {
     formState: { errors }
   } = useFormContext();
@@ -36,6 +45,7 @@ export const BaseForm = ({ onFileUpload }: BaseFormProps) => {
         multiple={false}
         uploadIcon="image"
         onUpload={handlePosterUpload}
+        existingFiles={existingFiles}
       />
 
       <div className="flex w-full gap-4">

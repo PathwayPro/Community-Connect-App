@@ -9,9 +9,18 @@ import { FileUpload } from '@/shared/components/upload/file-upload';
 
 interface ResourceFormProps {
   onFileUpload: (files: File[]) => Promise<void>;
+  existingFiles?: Array<{
+    name: string;
+    url: string;
+    type: string;
+    size: number;
+  }>;
 }
 
-export const ResourceForm = ({ onFileUpload }: ResourceFormProps) => {
+export const ResourceForm = ({
+  onFileUpload,
+  existingFiles = []
+}: ResourceFormProps) => {
   const {
     formState: { errors },
     setValue
@@ -33,6 +42,7 @@ export const ResourceForm = ({ onFileUpload }: ResourceFormProps) => {
         multiple={false}
         uploadIcon="fileIcon"
         onUpload={handleFileUpload}
+        existingFiles={existingFiles}
       />
 
       <FormSelect

@@ -27,10 +27,17 @@ const experienceOptions = [
 
 export const OpportunityForm = ({
   salaryRanges,
-  onFileUpload
+  onFileUpload,
+  existingFiles = []
 }: {
   salaryRanges: SalaryRangeResponseDto[];
   onFileUpload: (files: File[]) => Promise<void>;
+  existingFiles?: Array<{
+    name: string;
+    url: string;
+    type: string;
+    size: number;
+  }>;
 }) => {
   const {
     setValue,
@@ -86,6 +93,7 @@ export const OpportunityForm = ({
         multiple={false}
         uploadIcon="image"
         onUpload={handleCompanyLogoUpload}
+        existingFiles={existingFiles}
       />
       <Label className="mt-2">Location</Label>
       <div className="flex w-full gap-4">
@@ -131,20 +139,23 @@ export const OpportunityForm = ({
         customError={errors.link_apply?.message as string}
         required
       />
+
       <FormInput
         name="link_post"
-        label="Job Posting Link"
-        placeholder="Enter job posting URL"
+        label="Link to Job Post"
+        placeholder="Enter job post URL"
         hasLabelInput={true}
         leftLabel="https://"
         customError={errors.link_post?.message as string}
         required
       />
+
       <FormTextarea
         name="description"
         label="Job Description"
-        placeholder="Write the job description..."
+        placeholder="Write job description..."
         customError={errors.description?.message as string}
+        maxLength={1000}
         required
       />
     </div>

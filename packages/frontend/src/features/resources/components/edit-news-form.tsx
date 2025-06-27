@@ -34,6 +34,9 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { PermissionWrapper } from '@/shared/components/navigation/permission-wrapper/permission-wrapper';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
+import { News } from '../types';
+import { ResourceDto } from '../dto/resource-dto';
+import { OpportunityResponseDto } from '../dto/opportunity-dto';
 
 type FormMode = 'news' | 'contentLibrary' | 'opportunities';
 type FormValues = {
@@ -42,22 +45,27 @@ type FormValues = {
   opportunities: OpportunityFormValues;
 };
 
+type EditData = News | ResourceDto | OpportunityResponseDto | null;
+
 const EditNewsForm = ({ id }: { id: string }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode') as FormMode;
-  const formData = searchParams.get('data')
-    ? JSON.parse(decodeURIComponent(searchParams.get('data')!))
-    : null;
 
   const { showAlert } = useAlertDialog();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [editData, setEditData] = useState<EditData>(null);
 
-  const { editNews } = useNewsStore();
-  const { updateResource } = useResourcesStore();
-  const { editOpportunity, salaryRanges, fetchSalaryRanges } =
-    useOpportunityStore();
+  const { editNews, fetchNewsById, currentNews } = useNewsStore();
+  const { updateResource, getResourceById } = useResourcesStore();
+  const {
+    editOpportunity,
+    salaryRanges,
+    fetchSalaryRanges,
+    fetchOpportunityById,
+    selectedOpportunity
+  } = useOpportunityStore();
 
   console.log('id in the edit news form:', id);
 
@@ -65,8 +73,22 @@ const EditNewsForm = ({ id }: { id: string }) => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        if (mode === 'opportunities') {
+
+        // Fetch the specific item data based on mode
+        if (mode === 'news') {
+          await fetchNewsById(id);
+          // The news data will be available in the store
+          // We'll get it from the store in the form initialization
+        } else if (mode === 'contentLibrary') {
+          const resourceData = await getResourceById(id);
+          if (resourceData) {
+            setEditData(resourceData);
+          }
+        } else if (mode === 'opportunities') {
           await fetchSalaryRanges();
+          await fetchOpportunityById(Number(id));
+          // The opportunity data will be available in the store
+          // We'll get it from the store in the form initialization
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -80,7 +102,29 @@ const EditNewsForm = ({ id }: { id: string }) => {
       }
     };
     fetchData();
-  }, [mode, fetchSalaryRanges, showAlert]);
+  }, [
+    mode,
+    id,
+    fetchNewsById,
+    getResourceById,
+    fetchSalaryRanges,
+    fetchOpportunityById,
+    showAlert
+  ]);
+
+  // Update editData when selectedOpportunity changes (for opportunities)
+  useEffect(() => {
+    if (mode === 'opportunities' && selectedOpportunity) {
+      setEditData(selectedOpportunity);
+    }
+  }, [mode, selectedOpportunity]);
+
+  // Update editData when currentNews changes (for news)
+  useEffect(() => {
+    if (mode === 'news' && currentNews) {
+      setEditData(currentNews);
+    }
+  }, [mode, currentNews]);
 
   const formSchema = {
     news: newsFormSchema,
@@ -88,28 +132,26 @@ const EditNewsForm = ({ id }: { id: string }) => {
     opportunities: opportunityFormSchema
   }[mode || 'news'];
 
-  const defaultValues =
-    formData ||
-    {
-      news: { title: '', details: '', type: '', link: '' },
-      contentLibrary: { title: '', details: '', type: '', link: '' },
-      opportunities: {
-        job: '',
-        salary_range_id: '',
-        description: '',
-        link_post: '',
-        link_apply: '',
-        company: '',
-        province: '',
-        city: '',
-        settings: WorkSettings.REMOTE
-      }
-    }[mode || 'news'];
+  const defaultValues = {
+    news: { title: '', details: '', type: '', link: '' },
+    contentLibrary: { title: '', details: '', type: '', link: '' },
+    opportunities: {
+      job: '',
+      salary_range_id: '',
+      description: '',
+      link_post: '',
+      link_apply: '',
+      company: '',
+      province: '',
+      city: '',
+      settings: WorkSettings.REMOTE
+    }
+  }[mode || 'news'];
 
   const methods = useForm<FormValues[typeof mode]>({
     resolver: zodResolver(formSchema),
     defaultValues,
-    values: formData
+    values: editData as FormValues[typeof mode] | undefined
   });
 
   const { isSubmitting, errors } = methods.formState;
@@ -266,13 +308,70 @@ const EditNewsForm = ({ id }: { id: string }) => {
     }
   };
 
+  // Prepare existing files for display
+  const getExistingFiles = () => {
+    if (!editData) return [];
+
+    if (mode === 'news' && 'image' in editData && editData.image) {
+      return [
+        {
+          name: editData.image.split('/').pop() || 'news-image',
+          url: editData.image.startsWith('http')
+            ? editData.image
+            : `${process.env.NEXT_PUBLIC_API_URL}/files/${editData.image}`,
+          type: 'image/jpeg',
+          size: 0
+        }
+      ];
+    }
+
+    if (mode === 'contentLibrary' && 'file' in editData && editData.file) {
+      return [
+        {
+          name: editData.file.split('/').pop() || 'resource-file',
+          url: editData.file.startsWith('http')
+            ? editData.file
+            : `${process.env.NEXT_PUBLIC_API_URL}/files/${editData.file}`,
+          type: 'application/pdf',
+          size: 0
+        }
+      ];
+    }
+
+    if (mode === 'opportunities' && 'image' in editData && editData.image) {
+      return [
+        {
+          name: editData.image.split('/').pop() || 'company-logo',
+          url: editData.image.startsWith('http')
+            ? editData.image
+            : `${process.env.NEXT_PUBLIC_API_URL}/files/${editData.image}`,
+          type: 'image/jpeg',
+          size: 0
+        }
+      ];
+    }
+
+    return [];
+  };
+
   const formComponents = {
-    news: <BaseForm onFileUpload={handleFileUpload} />,
-    contentLibrary: <ResourceForm onFileUpload={handleFileUpload} />,
+    news: (
+      <BaseForm
+        onFileUpload={handleFileUpload}
+        existingFiles={getExistingFiles()}
+      />
+    ),
+    contentLibrary: (
+      <ResourceForm
+        onFileUpload={handleFileUpload}
+        existingFiles={getExistingFiles()}
+      />
+    ),
     opportunities: (
       <OpportunityForm
         salaryRanges={salaryRanges}
         onFileUpload={handleFileUpload}
+        existingFiles={getExistingFiles()}
       />
     )
   };
