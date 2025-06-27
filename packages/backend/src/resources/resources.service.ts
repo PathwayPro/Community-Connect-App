@@ -199,8 +199,21 @@ export class ResourcesService {
 
       let fileLink = resourceToUpdate.file;
 
-      // Only attempt file upload if a new file was provided
-      if (file) {
+      // Handle file updates
+      if (updateResourceDto.removeFile && resourceToUpdate.file) {
+        // Delete existing file
+        try {
+          await this.filesService.deleteFile(resourceToUpdate.file);
+          console.log(
+            `Deleted existing resource file: ${resourceToUpdate.file}`,
+          );
+        } catch (error) {
+          console.error('Error deleting existing resource file:', error);
+          // Continue with update even if file deletion fails
+        }
+        fileLink = undefined;
+      } else if (file) {
+        // Upload new file
         const uploadedFile = await this.filesService.upload(
           FileValidationEnum.RESOURCES,
           file,

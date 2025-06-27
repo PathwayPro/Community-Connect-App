@@ -195,6 +195,11 @@ const EditNewsForm = ({ id }: { id: string }) => {
             formData.set('link', formattedLink);
           }
 
+          // Handle file removal flag
+          if (newsData.removeImage) {
+            formData.append('removeImage', 'true');
+          }
+
           // Append file if exists
           if (selectedFile) {
             formData.append('file', selectedFile);
@@ -234,6 +239,11 @@ const EditNewsForm = ({ id }: { id: string }) => {
             formData.set('link', formattedLink);
           }
 
+          // Handle file removal flag
+          if (resourceData.removeFile) {
+            formData.append('removeFile', 'true');
+          }
+
           // Append file if exists
           if (selectedFile) {
             formData.append('file', selectedFile);
@@ -265,11 +275,19 @@ const EditNewsForm = ({ id }: { id: string }) => {
                   ? value.toString()
                   : `https://${value.toString()}`;
                 opportunityData[key] = formattedLink;
+              } else if (key === 'salary_range_id' && value) {
+                // salary_range_id is now a number, just convert to string for FormData
+                formData.append(key, value.toString());
               } else {
                 formData.append(key, value.toString());
               }
             }
           });
+
+          // Handle file removal flag
+          if (opportunityData.removeImage) {
+            formData.append('removeImage', 'true');
+          }
 
           // Append file if exists
           if (selectedFile) {

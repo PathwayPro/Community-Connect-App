@@ -6,6 +6,8 @@ import { FormTextarea } from '@/shared/components/form/form-textarea';
 import { resourceTypes } from '../../lib/constants/enums';
 import { useFormContext } from 'react-hook-form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface ResourceFormProps {
   onFileUpload: (files: File[]) => Promise<void>;
@@ -26,12 +28,40 @@ export const ResourceForm = ({
     setValue
   } = useFormContext();
 
+  const [removeResourceFile, setRemoveResourceFile] = useState(false);
+
   const handleFileUpload = async (files: File[]) => {
     if (files.length > 0) {
       setValue('file', files[0], { shouldValidate: true });
       await onFileUpload(files);
+      setRemoveResourceFile(false); // Reset removal flag when new file is uploaded
     }
   };
+
+  const handleFileRemove = () => {
+    // Clear the form value when existing file is removed
+    setValue('file', null, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
+
+    // Set removal flag for backend
+    setRemoveResourceFile(true);
+
+    // Store removal flag in form data
+    setValue('removeFile', true, {
+      shouldValidate: false,
+      shouldDirty: true,
+      shouldTouch: false
+    });
+
+    toast.success('Resource file removed');
+  };
+
+  // Prepare existing files for display
+  const displayFiles =
+    existingFiles && !removeResourceFile ? existingFiles : [];
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -42,7 +72,8 @@ export const ResourceForm = ({
         multiple={false}
         uploadIcon="fileIcon"
         onUpload={handleFileUpload}
-        existingFiles={existingFiles}
+        onRemove={handleFileRemove}
+        existingFiles={displayFiles}
       />
 
       <FormSelect

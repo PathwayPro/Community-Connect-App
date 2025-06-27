@@ -232,6 +232,9 @@ const NewsForm = () => {
                   ? value.toString()
                   : `https://${value.toString()}`;
                 formData.append(key, formattedLink);
+              } else if (key === 'salary_range_id' && value) {
+                // salary_range_id is now a number, just convert to string for FormData
+                formData.append(key, value.toString());
               } else {
                 formData.append(key, value.toString());
               }

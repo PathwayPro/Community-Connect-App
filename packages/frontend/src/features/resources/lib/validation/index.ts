@@ -18,7 +18,8 @@ export const newsFormSchema = z.object({
       required_error: 'Link is required'
     })
     .regex(urlPattern, 'Must be a valid URL'),
-  published: z.boolean().optional().default(true)
+  published: z.boolean().optional().default(true),
+  removeImage: z.boolean().optional()
 });
 
 export type NewsFormValues = z.infer<typeof newsFormSchema>;
@@ -36,7 +37,13 @@ export const opportunityFormSchema = z.object({
   experience: z.string({
     required_error: 'Experience is required'
   }),
-  salary_range_id: z.string().optional(),
+  salary_range_id: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((val) => {
+      if (val === undefined || val === null) return undefined;
+      return typeof val === 'string' ? parseInt(val, 10) : val;
+    }),
   settings: z.enum(Object.values(WorkSettings) as [string, ...string[]]),
   province: z.string({
     required_error: 'Province is required'
@@ -54,7 +61,8 @@ export const opportunityFormSchema = z.object({
       required_error: 'Job post link is required'
     })
     .regex(urlPattern, 'Must be a valid URL'),
-  file: z.instanceof(File).optional()
+  file: z.instanceof(File).optional().nullable(),
+  removeImage: z.boolean().optional()
 });
 
 export type OpportunityFormValues = z.infer<typeof opportunityFormSchema>;
@@ -93,7 +101,8 @@ export const resourceFormSchema = z.object({
       {
         message: 'Invalid file format'
       }
-    )
+    ),
+  removeFile: z.boolean().optional()
 });
 
 export type ResourceFormValues = z.infer<typeof resourceFormSchema>;

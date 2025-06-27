@@ -4,7 +4,7 @@ import { FormInput } from '@/shared/components/form';
 import { FormTextarea } from '@/shared/components/form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
-import React from 'react';
+import React, { useState } from 'react';
 import { NewsType } from '../../lib/constants/enums';
 import { FormRadio } from '@/shared/components/form/form-radio';
 import { useFormContext } from 'react-hook-form';
@@ -24,17 +24,45 @@ export const BaseForm = ({
   existingFiles = []
 }: BaseFormProps) => {
   const {
+    setValue,
     formState: { errors }
   } = useFormContext();
+
+  const [removeNewsImage, setRemoveNewsImage] = useState(false);
 
   const handlePosterUpload = async (files: File[]) => {
     try {
       await onFileUpload(files);
+      setRemoveNewsImage(false); // Reset removal flag when new file is uploaded
     } catch (error) {
       console.error('Upload failed:', error);
       toast.error('Failed to upload news image');
     }
   };
+
+  const handleFileRemove = () => {
+    // Clear the form value when existing file is removed
+    setValue('file', null, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
+
+    // Set removal flag for backend
+    setRemoveNewsImage(true);
+
+    // Store removal flag in form data
+    setValue('removeImage', true, {
+      shouldValidate: false,
+      shouldDirty: true,
+      shouldTouch: false
+    });
+
+    toast.success('News image removed');
+  };
+
+  // Prepare existing files for display
+  const displayFiles = existingFiles && !removeNewsImage ? existingFiles : [];
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -45,7 +73,8 @@ export const BaseForm = ({
         multiple={false}
         uploadIcon="image"
         onUpload={handlePosterUpload}
-        existingFiles={existingFiles}
+        onRemove={handleFileRemove}
+        existingFiles={displayFiles}
       />
 
       <div className="flex w-full gap-4">
