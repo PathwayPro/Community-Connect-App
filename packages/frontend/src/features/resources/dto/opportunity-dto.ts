@@ -2,7 +2,7 @@ import { WorkSettings } from '../lib/constants/enums';
 
 export interface OpportunityDto {
   job: string;
-  salary_range_id: string;
+  salary_range_id: number;
   company: string;
   province: string;
   city: string;
@@ -34,7 +34,7 @@ export interface OpportunityResponseDto extends OpportunityDto {
 
 export interface FilterOpportunityDto {
   job?: string;
-  salary_range_id?: string;
+  salary_range_id?: number;
   company?: string;
   province?: string;
   city?: string;

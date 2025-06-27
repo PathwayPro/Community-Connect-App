@@ -5,6 +5,7 @@ import { useFormContext } from 'react-hook-form';
 import { EventFormValues, EventsTypes } from '../../lib/validation';
 import { FormDatePicker } from '@/shared/components/form/form-date-picker';
 import { timeOptions } from '../../lib/constants';
+import { Event } from '../../types';
 
 const eventTypeOptions = [
   {
@@ -17,7 +18,13 @@ const eventTypeOptions = [
   }
 ];
 
-export const TimeLocationForm = () => {
+interface TimeLocationFormProps {
+  existingEventData?: Event | null;
+}
+
+export const TimeLocationForm = ({
+  existingEventData
+}: TimeLocationFormProps) => {
   const {
     setValue,
     watch,
@@ -27,6 +34,49 @@ export const TimeLocationForm = () => {
 
   const startTime = watch('start_time');
   const endTime = watch('end_time');
+
+  // Pre-populate form with existing event data
+  useEffect(() => {
+    if (existingEventData) {
+      console.log(
+        'TimeLocationForm - Pre-populating with existing data:',
+        existingEventData
+      );
+
+      // Set start date
+      if (existingEventData.start_date) {
+        setValue('start_date', existingEventData.start_date, {
+          shouldValidate: true
+        });
+      }
+
+      // Set start time
+      if (existingEventData.start_time) {
+        setValue('start_time', existingEventData.start_time, {
+          shouldValidate: true
+        });
+      }
+
+      // Set end time
+      if (existingEventData.end_time) {
+        setValue('end_time', existingEventData.end_time, {
+          shouldValidate: true
+        });
+      }
+
+      // Set event type
+      if (existingEventData.type) {
+        setValue('type', existingEventData.type, { shouldValidate: true });
+      }
+
+      // Set location
+      if (existingEventData.location) {
+        setValue('location', existingEventData.location, {
+          shouldValidate: true
+        });
+      }
+    }
+  }, [existingEventData, setValue]);
 
   // Validate end time whenever start time or end time changes
   useEffect(() => {

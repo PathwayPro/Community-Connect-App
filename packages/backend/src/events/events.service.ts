@@ -217,15 +217,37 @@ export class EventsService {
       // VALIDATE EVENT EXIST
       const event = await this.prisma.events.findFirst({
         where: { id },
-        include: { category: true },
+        include: {
+          category: true,
+          managers: true,
+        },
       });
       if (!event) {
         throw new NotFoundException(`There is no event with ID: ${id}.`);
       }
 
+      // Get host information from event managers
+      let eventWithHost = event;
+      if (event.managers && event.managers.length > 0) {
+        const manager_id = event.managers[0].user_id;
+        const hostUser = await this.prisma.users.findUnique({
+          where: { id: manager_id },
+        });
+
+        if (hostUser) {
+          eventWithHost = {
+            ...event,
+            host_id: hostUser.id,
+            host_name: `${hostUser.first_name} ${hostUser.last_name}`,
+            host_bio: hostUser.bio,
+            host_image: hostUser.picture_upload_link,
+          } as any; // Type assertion to allow host fields
+        }
+      }
+
       // IF EVENT TYPE IS "PUBLIC" OR USER ROLE IS ADMIN, ALWAYS RETURN THE EVENT
       if (event.type === 'PUBLIC' || user_role === 'ADMIN') {
-        return event;
+        return eventWithHost;
       }
 
       // IF EVENT TYPE IS "PRIVATE" AND THERE IS NO USER, RETURN UNAUTHORIZED EXCEPTION
@@ -242,7 +264,7 @@ export class EventsService {
         id,
       );
       if (isEventManager) {
-        return event;
+        return eventWithHost;
       }
 
       // 2. IF IS NOT MANAGER, VALIDATE INVITATION
@@ -251,7 +273,7 @@ export class EventsService {
         id,
       );
       if (isEventInvitee) {
-        return event;
+        return eventWithHost;
       }
 
       // IF THE EVENT IS PRIVATE, AND THE USER IS NOT INVITED OR A MANAGER, RETURN UNAUTHORIZED EXECPTION
@@ -272,6 +294,7 @@ export class EventsService {
     user: JwtPayload,
     updateEventDto: UpdateEventDto,
     file: Express.Multer.File | null,
+    removeEventImage: boolean = false,
   ) {
     try {
       // VALIDATE EVENT EXIST OR THROW EXCEPTION
@@ -296,13 +319,32 @@ export class EventsService {
         ? await this.validateEventCategory(updateEventDto.category_id)
         : null;
 
-      // UPLOAD IMAGE AND GET THE LINK OR NULL
-      const image = file ? await this.uploadImage(file) : null;
+      // Handle image updates
+      let imagePath: string | undefined;
+
+      if (removeEventImage && eventToUpdate.image) {
+        // Delete existing image file
+        try {
+          await this.filesService.deleteFile(eventToUpdate.image);
+          console.log(`Deleted existing event image: ${eventToUpdate.image}`);
+        } catch (error) {
+          console.error('Error deleting existing event image:', error);
+          // Continue with update even if file deletion fails
+        }
+        imagePath = undefined;
+      } else if (file) {
+        // Upload new image
+        const uploadedImage = await this.uploadImage(file);
+        imagePath = uploadedImage.path + '/' + uploadedImage.fileName;
+      } else {
+        // Keep existing image
+        imagePath = eventToUpdate.image;
+      }
 
       // UPDATE EVENT INFORMATION
       const eventData = {
         ...updateEventDto,
-        image: image ? image.path + '/' + image.fileName : undefined,
+        image: imagePath,
         category_id: category ? category.id : undefined,
       };
 

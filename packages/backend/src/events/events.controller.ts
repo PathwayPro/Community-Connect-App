@@ -224,7 +224,17 @@ export class EventsController {
           ? updateEventDto.accept_subscriptions === 'true'
           : updateEventDto.accept_subscriptions,
     };
-    return this.eventsService.update(+id, user, updatedEvent, file);
+
+    // Check for file removal flag
+    const removeEventImage = updateEventDto.removeEventImage === 'true';
+
+    return this.eventsService.update(
+      +id,
+      user,
+      updatedEvent,
+      file,
+      removeEventImage,
+    );
   }
 
   @Roles('ADMIN', 'MENTOR')

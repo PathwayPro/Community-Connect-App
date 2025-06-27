@@ -27,10 +27,17 @@ const experienceOptions = [
 
 export const OpportunityForm = ({
   salaryRanges,
-  onFileUpload
+  onFileUpload,
+  existingFiles = []
 }: {
   salaryRanges: SalaryRangeResponseDto[];
   onFileUpload: (files: File[]) => Promise<void>;
+  existingFiles?: Array<{
+    name: string;
+    url: string;
+    type: string;
+    size: number;
+  }>;
 }) => {
   const {
     setValue,
@@ -39,6 +46,7 @@ export const OpportunityForm = ({
   } = useFormContext<OpportunityFormValues>();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [removeCompanyLogo, setRemoveCompanyLogo] = useState(false);
 
   // Ensure salary range options are properly formatted
   const formattedSalaryRanges =
@@ -52,6 +60,7 @@ export const OpportunityForm = ({
       if (files && files.length > 0) {
         setSelectedFile(files[0]);
         await onFileUpload(files);
+        setRemoveCompanyLogo(false); // Reset removal flag when new file is uploaded
         toast.success('Company logo uploaded successfully');
       } else {
         setSelectedFile(null);
@@ -62,6 +71,30 @@ export const OpportunityForm = ({
       toast.error('Failed to upload company logo');
     }
   };
+
+  const handleFileRemove = () => {
+    // Clear the form value when existing file is removed
+    setValue('file', null, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
+
+    // Set removal flag for backend
+    setRemoveCompanyLogo(true);
+
+    // Store removal flag in form data
+    setValue('removeImage', true, {
+      shouldValidate: false,
+      shouldDirty: true,
+      shouldTouch: false
+    });
+
+    toast.success('Company logo removed');
+  };
+
+  // Prepare existing files for display
+  const displayFiles = existingFiles && !removeCompanyLogo ? existingFiles : [];
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -86,6 +119,8 @@ export const OpportunityForm = ({
         multiple={false}
         uploadIcon="image"
         onUpload={handleCompanyLogoUpload}
+        existingFiles={displayFiles}
+        onRemove={handleFileRemove}
       />
       <Label className="mt-2">Location</Label>
       <div className="flex w-full gap-4">
@@ -131,20 +166,23 @@ export const OpportunityForm = ({
         customError={errors.link_apply?.message as string}
         required
       />
+
       <FormInput
         name="link_post"
-        label="Job Posting Link"
-        placeholder="Enter job posting URL"
+        label="Link to Job Post"
+        placeholder="Enter job post URL"
         hasLabelInput={true}
         leftLabel="https://"
         customError={errors.link_post?.message as string}
         required
       />
+
       <FormTextarea
         name="description"
         label="Job Description"
-        placeholder="Write the job description..."
+        placeholder="Write job description..."
         customError={errors.description?.message as string}
+        maxLength={1000}
         required
       />
     </div>

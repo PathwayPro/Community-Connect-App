@@ -47,8 +47,8 @@ export function PdfPreviewModal({
   children,
   actions = [],
   maxWidth = 'min-w-[1000px]',
-  height = 'h-[800px]',
-  scrollAreaHeight = 'h-[600px]'
+  height = 'min-h-[800px]',
+  scrollAreaHeight = 'min-h-[600px]'
 }: PdfPreviewModalProps) {
   const defaultActions: PdfPreviewModalAction[] = [
     {

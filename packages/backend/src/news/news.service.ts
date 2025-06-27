@@ -217,14 +217,33 @@ export class NewsService {
         throw new NotFoundException(`There is no News with ID #${id}`);
       }
 
-      // Get image link if there is one
-      const image = file ? await this.uploadImage(file) : null;
+      // Handle image updates
+      let imagePath: string | undefined;
+
+      if (updateNewsDto.removeImage && newsToUpdate.image) {
+        // Delete existing image file
+        try {
+          await this.filesService.deleteFile(newsToUpdate.image);
+          console.log(`Deleted existing news image: ${newsToUpdate.image}`);
+        } catch (error) {
+          console.error('Error deleting existing news image:', error);
+          // Continue with update even if file deletion fails
+        }
+        imagePath = undefined;
+      } else if (file) {
+        // Upload new image
+        const uploadedImage = await this.uploadImage(file);
+        imagePath = uploadedImage.path + '/' + uploadedImage.fileName;
+      } else {
+        // Keep existing image
+        imagePath = newsToUpdate.image;
+      }
 
       // Update news information
       const data = {
         ...updateNewsDto,
         updated_at: new Date(),
-        image: image ? image.path + '/' + image.fileName : null,
+        image: imagePath,
       };
 
       const updatedNews = await this.prisma.news.update({

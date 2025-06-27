@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/swagger';
 import { CreateEventDto } from './create-event.dto';
-import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { EventsTypes } from '@prisma/client';
 import { Transform, Type } from 'class-transformer';
 
@@ -41,4 +41,8 @@ export class UpdateEventDto extends PartialType(CreateEventDto) {
     return value;
   })
   accept_subscriptions?: boolean;
+
+  @IsString()
+  @IsOptional()
+  removeEventImage?: string;
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEventStore } from '../store';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { IconButton } from '@/shared/components/ui/icon-button';
@@ -20,7 +20,6 @@ import {
 } from '../lib/validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { TimeLocationForm } from './common/time-location-form';
-import { UpdateEventDto } from '../dto';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { PermissionWrapper } from '@/shared/components/navigation/permission-wrapper/permission-wrapper';
 import { AxiosError } from 'axios';
@@ -45,17 +44,25 @@ const checkStepValidity = (
     const hasValues =
       formValues.title?.length >= 3 &&
       formValues.description?.length >= 20 &&
-      formValues.category_id?.length > 0;
+      formValues.category_id?.length > 0 &&
+      formValues.link?.length > 0;
     return hasValues && !hasErrors;
   } else if (activeStep === 2) {
-    const step2Fields = ['start_date', 'start_time', 'end_time', 'type'];
+    const step2Fields = [
+      'start_date',
+      'start_time',
+      'end_time',
+      'type',
+      'location'
+    ];
     const hasErrors = step2Fields.some(
       (field) => formState.errors[field as keyof EventFormValues]
     );
     const hasValues =
       formValues.start_date?.length > 0 &&
       formValues.start_time?.length > 0 &&
-      formValues.end_time?.length > 0;
+      formValues.end_time?.length > 0 &&
+      formValues.location?.length > 0;
     return hasValues && !hasErrors;
   }
   return false;
@@ -64,34 +71,76 @@ const checkStepValidity = (
 // Make EventForm an internal component (no export)
 const EventForm = () => {
   const router = useRouter();
-  const { createEvent, editEvent } = useEventStore();
+  const {
+    createEvent,
+    editEvent,
+    fetchEventForEdit,
+    eventForEdit,
+    clearEventForEdit
+  } = useEventStore();
   const { showAlert } = useAlertDialog();
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [activeStep, setActiveStep] = React.useState(1);
-
-  const eventData: UpdateEventDto = searchParams.get('data')
-    ? JSON.parse(decodeURIComponent(searchParams.get('data')!))
-    : null;
+  const [isLoadingEvent, setIsLoadingEvent] = React.useState(false);
 
   const isEdit = pathname.startsWith('/events/edit');
+  const eventId = isEdit ? pathname.split('/').pop() : null;
   const eventButtonText = isEdit ? 'Update Event' : 'Publish Event';
 
+  // Fetch event data for editing
+  React.useEffect(() => {
+    if (isEdit && eventId) {
+      const fetchEvent = async () => {
+        try {
+          setIsLoadingEvent(true);
+          await fetchEventForEdit(Number(eventId));
+        } catch (error) {
+          console.error('Error fetching event for edit:', error);
+          showAlert({
+            type: 'error',
+            title: 'Error Loading Event',
+            description:
+              'Failed to load event data for editing. Please try again.'
+          });
+          router.push('/events');
+        } finally {
+          setIsLoadingEvent(false);
+        }
+      };
+      fetchEvent();
+    }
+
+    // Cleanup function to clear event data when component unmounts
+    return () => {
+      if (isEdit) {
+        clearEventForEdit();
+      }
+    };
+  }, [
+    isEdit,
+    eventId,
+    fetchEventForEdit,
+    clearEventForEdit,
+    showAlert,
+    router
+  ]);
+
   const defaultValues = {
-    title: eventData?.title || '',
-    description: eventData?.description || '',
-    category_id: eventData?.category_id?.toString() || '',
-    location: eventData?.location || '',
-    link: eventData?.link || '',
-    is_free: eventData?.is_free ?? true,
-    type: eventData?.type || EventsTypes.PUBLIC,
+    title: eventForEdit?.title || '',
+    description: eventForEdit?.description || '',
+    category_id: eventForEdit?.category_id?.toString() || '',
+    location: eventForEdit?.location || '',
+    link: eventForEdit?.link || '',
+    is_free: eventForEdit?.is_free ?? true,
+    type: eventForEdit?.type || EventsTypes.PUBLIC,
     requires_confirmation: false,
     accept_subscriptions: true,
-    start_date: eventData?.start_date || '',
-    start_time: eventData?.start_time || '',
-    end_time: eventData?.end_time || '',
-    file: eventData?.file || undefined
+    start_date: eventForEdit?.start_date || '',
+    start_time: eventForEdit?.start_time || '',
+    end_time: eventForEdit?.end_time || '',
+    file: undefined,
+    removeEventImage: false
   };
 
   const methods = useForm<EventFormValues>({
@@ -99,6 +148,31 @@ const EventForm = () => {
     defaultValues,
     mode: 'onChange'
   });
+
+  // Update form values when event data is loaded
+  React.useEffect(() => {
+    if (eventForEdit && isEdit) {
+      console.log('EventForm - Loading existing event data:', eventForEdit);
+      const newDefaultValues = {
+        title: eventForEdit.title || '',
+        description: eventForEdit.description || '',
+        category_id: eventForEdit.category_id?.toString() || '',
+        location: eventForEdit.location || '',
+        link: eventForEdit.link || '',
+        is_free: eventForEdit.is_free ?? true,
+        type: eventForEdit.type || EventsTypes.PUBLIC,
+        requires_confirmation: false,
+        accept_subscriptions: true,
+        start_date: eventForEdit.start_date || '',
+        start_time: eventForEdit.start_time || '',
+        end_time: eventForEdit.end_time || '',
+        file: undefined,
+        removeEventImage: false
+      };
+      console.log('EventForm - Setting form values:', newDefaultValues);
+      methods.reset(newDefaultValues);
+    }
+  }, [eventForEdit, isEdit, methods]);
 
   const handleFileSelect = (file: File | null) => {
     setSelectedFile(file);
@@ -125,6 +199,12 @@ const EventForm = () => {
           selectedFile.type,
           selectedFile.size
         );
+      }
+
+      // Handle file removal flag
+      if (data.removeEventImage) {
+        formData.append('removeEventImage', 'true');
+        console.log('Event image removal flag added');
       }
 
       // Handle start_date - ensure it's properly formatted
@@ -176,8 +256,8 @@ const EventForm = () => {
       }
 
       let result;
-      if (isEdit && eventData) {
-        result = await editEvent(eventData.id, formData);
+      if (isEdit && eventForEdit) {
+        result = await editEvent(eventForEdit.id, formData);
         if (result) {
           showAlert({
             type: 'success',
@@ -220,6 +300,32 @@ const EventForm = () => {
     }
   };
 
+  // Show loading state while fetching event data
+  if (isLoadingEvent) {
+    return (
+      <Card className="flex w-[840px] flex-col rounded-[24px]">
+        <CardHeader className="justify-center p-8">
+          <CardTitle className="flex flex-col space-y-6 text-center">
+            <div className="relative flex items-center justify-center gap-2">
+              <IconButton
+                leftIcon="arrowLeft"
+                variant="ghost"
+                className="absolute left-0 h-10 w-10"
+                onClick={() => router.back()}
+              />
+              <h2 className="font-semibold">Loading Event...</h2>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col justify-center gap-4">
+          <div className="flex items-center justify-center p-8">
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary-500"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="flex w-[840px] flex-col rounded-[24px]">
       <AlertDialogUI />
@@ -245,9 +351,12 @@ const EventForm = () => {
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
             {activeStep === 1 ? (
-              <BaseForm onFileSelect={handleFileSelect} />
+              <BaseForm
+                onFileSelect={handleFileSelect}
+                existingEventImage={eventForEdit?.image}
+              />
             ) : (
-              <TimeLocationForm />
+              <TimeLocationForm existingEventData={eventForEdit} />
             )}
             <div className="flex w-full gap-4 pt-5">
               {activeStep === 2 && (

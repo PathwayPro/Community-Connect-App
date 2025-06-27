@@ -16,6 +16,7 @@ export interface News {
   details: string;
   type: string;
   link: string;
+  image?: string;
   published: boolean;
   created_at: string;
   updated_at: string;

@@ -192,8 +192,29 @@ export class OpportunitiesService {
         throw new NotFoundException(`There is no Opportunity with ID #${id}`);
       }
 
-      // Get image link if there is one
-      const image = file ? await this.uploadImage(file) : null;
+      // Handle image updates
+      let imagePath: string | undefined;
+
+      if (updateOpportunityDto.removeImage && opportunityToUpdate.image) {
+        // Delete existing image file
+        try {
+          await this.filesService.deleteFile(opportunityToUpdate.image);
+          console.log(
+            `Deleted existing opportunity image: ${opportunityToUpdate.image}`,
+          );
+        } catch (error) {
+          console.error('Error deleting existing opportunity image:', error);
+          // Continue with update even if file deletion fails
+        }
+        imagePath = undefined;
+      } else if (file) {
+        // Upload new image
+        const uploadedImage = await this.uploadImage(file);
+        imagePath = uploadedImage.path + '/' + uploadedImage.fileName;
+      } else {
+        // Keep existing image
+        imagePath = opportunityToUpdate.image;
+      }
 
       // Update opportunity information
       const data = {
@@ -218,7 +239,7 @@ export class OpportunitiesService {
           ? updateOpportunityDto.description
           : undefined,
         updated_at: new Date(),
-        image: image ? image.path + '/' + image.fileName : undefined,
+        image: imagePath,
         salary_range: updateOpportunityDto.salary_range_id
           ? { connect: { id: updateOpportunityDto.salary_range_id } }
           : undefined,

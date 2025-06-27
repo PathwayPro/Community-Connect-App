@@ -73,9 +73,7 @@ export const FeaturedNewsCard = ({
   const fullName = `${user.first_name} ${user.last_name}`;
 
   const handleEdit = () => {
-    router.push(
-      `/resources/edit/${id}?mode=news&data=${encodeURIComponent(JSON.stringify(newsData))}`
-    );
+    router.push(`/resources/edit/${id}?mode=news`);
   };
 
   const handleDelete = () => {

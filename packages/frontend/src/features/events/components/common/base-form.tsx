@@ -3,16 +3,20 @@ import { FormInput, FormSelect } from '@/shared/components/form';
 import { FormTextarea } from '@/shared/components/form';
 import { FileUpload } from '@/shared/components/upload/file-upload';
 import { toast } from 'sonner';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EventFormValues, FreePaidOptions } from '../../lib/validation';
 import { CustomSwitch } from '@/shared/components/custom-switch/custom-switch';
 import { useEventStore } from '../../store';
 
 interface BaseFormProps {
   onFileSelect?: (file: File | null) => void;
+  existingEventImage?: string;
 }
 
-export const BaseForm = ({ onFileSelect }: BaseFormProps) => {
+export const BaseForm = ({
+  onFileSelect,
+  existingEventImage
+}: BaseFormProps) => {
   const {
     setValue,
     watch,
@@ -20,6 +24,7 @@ export const BaseForm = ({ onFileSelect }: BaseFormProps) => {
   } = useFormContext<EventFormValues>();
 
   const { eventCategories, fetchEventCategories } = useEventStore();
+  const [removeEventImage, setRemoveEventImage] = useState(false);
 
   useEffect(() => {
     fetchEventCategories();
@@ -52,6 +57,7 @@ export const BaseForm = ({ onFileSelect }: BaseFormProps) => {
         }
         // Set a temporary value for form validation
         setValue('file', file, { shouldValidate: true });
+        setRemoveEventImage(false); // Reset removal flag when new file is uploaded
         toast.success('Event image uploaded successfully');
       } else {
         if (onFileSelect) {
@@ -66,6 +72,47 @@ export const BaseForm = ({ onFileSelect }: BaseFormProps) => {
     }
   };
 
+  const handleFileRemove = () => {
+    // Clear the form value when existing file is removed
+    setValue('file', null, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
+
+    // Set removal flag for backend
+    setRemoveEventImage(true);
+
+    // Store removal flag in form data
+    setValue('removeEventImage', true, {
+      shouldValidate: false,
+      shouldDirty: true,
+      shouldTouch: false
+    });
+
+    toast.success('Event image removed');
+  };
+
+  // Prepare existing file for display
+  const existingFiles =
+    existingEventImage && !removeEventImage
+      ? [
+          {
+            name: existingEventImage.split('/').pop() || 'event-image',
+            url: existingEventImage.startsWith('http')
+              ? existingEventImage
+              : `${process.env.NEXT_PUBLIC_API_URL}/files/${existingEventImage}`,
+            type: 'image/jpeg', // Default type, could be enhanced to detect actual type
+            size: 0
+          }
+        ]
+      : [];
+
+  // Debug logging
+  console.log('BaseForm - existingEventImage:', existingEventImage);
+  console.log('BaseForm - existingFiles:', existingFiles);
+  console.log('BaseForm - removeEventImage:', removeEventImage);
+
   return (
     <div className="flex w-full flex-col gap-4">
       <FileUpload
@@ -75,6 +122,8 @@ export const BaseForm = ({ onFileSelect }: BaseFormProps) => {
         multiple={false}
         uploadIcon="image"
         onUpload={handleImageUpload}
+        onRemove={handleFileRemove}
+        existingFiles={existingFiles}
       />
 
       <div className="flex w-full gap-4">

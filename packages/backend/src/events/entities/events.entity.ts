@@ -92,6 +92,26 @@ export class Events {
   @IsInt()
   category_id: number;
 
+  @ApiProperty()
+  @IsOptional()
+  @IsInt()
+  host_id?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  host_name?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  host_bio?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  host_image?: string;
+
   /*
   @ValidateNested({ each: true })
   @Type(() => EventsDates)

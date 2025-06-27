@@ -148,4 +148,55 @@ export class FilesService {
       throw error;
     }
   }
+
+  async deleteFile(filePath: string): Promise<boolean> {
+    try {
+      if (!filePath) {
+        return false;
+      }
+
+      const publicDir = this.configService.get<string>('UPLOAD_DIR_ROOT');
+      const fullPath = path.join(publicDir, filePath);
+
+      // Check if file exists before attempting to delete
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+        console.log(`File deleted successfully: ${fullPath}`);
+        return true;
+      } else {
+        console.log(`File not found for deletion: ${fullPath}`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`Error deleting file ${filePath}:`, error);
+      return false;
+    }
+  }
+
+  async deleteFiles(
+    filePaths: string[],
+  ): Promise<{ success: boolean; deleted: string[]; failed: string[] }> {
+    const deleted: string[] = [];
+    const failed: string[] = [];
+
+    for (const filePath of filePaths) {
+      try {
+        const success = await this.deleteFile(filePath);
+        if (success) {
+          deleted.push(filePath);
+        } else {
+          failed.push(filePath);
+        }
+      } catch (error) {
+        console.error(`Error deleting file ${filePath}:`, error);
+        failed.push(filePath);
+      }
+    }
+
+    return {
+      success: failed.length === 0,
+      deleted,
+      failed,
+    };
+  }
 }
