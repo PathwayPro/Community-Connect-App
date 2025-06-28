@@ -14,11 +14,13 @@ import {
 } from './main-card';
 import { useBlogStore } from '../store';
 import { ThreadResponse, PostCommentResponse, NavItemProps } from '../types';
+import { useUserStore } from '@/features/user-profile/store';
 
 const transformThreadResponseToThread = (response: ThreadResponse): Thread => ({
   id: response.id,
   authorName: response.user.first_name + ' ' + response.user.last_name,
   authorUsername: response.user.first_name,
+  authorEmail: response.user.email,
   timeAgo: response.created_at,
   content: response.content,
   avatarUrl: response.user.picture_upload_link || '',
@@ -41,6 +43,7 @@ export const Home = () => {
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
   const [showCommentSection, setShowCommentSection] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const { user } = useUserStore();
 
   const {
     threads: rawThreads,
@@ -110,7 +113,7 @@ export const Home = () => {
         </div>
 
         {/* Middle column */}
-        <div className="relative col-span-6 min-h-screen gap-4 overflow-y-auto rounded-2xl border bg-muted bg-neutral-light-100 p-4">
+        <div className="relative col-span-7 min-h-screen gap-4 overflow-y-auto rounded-2xl border bg-muted bg-neutral-light-100 p-4">
           {viewThreads && selectedThread ? (
             <div className="flex flex-col gap-4">
               <IconButton
@@ -170,6 +173,7 @@ export const Home = () => {
                     viewThreads={handleViewThreads}
                     setSelectedThread={setSelectedThread}
                     setShowCommentSection={setShowCommentSection}
+                    isOwner={thread.authorEmail === user?.email}
                   />
                 ))}
               </div>
@@ -178,9 +182,9 @@ export const Home = () => {
         </div>
 
         {/* Right column */}
-        <div className="sticky top-0 col-span-3 h-fit rounded-2xl border bg-muted bg-white p-4">
+        {/* <div className="sticky top-0 col-span-3 h-fit rounded-2xl border bg-muted bg-white p-4">
           <HomeInfobar />
-        </div>
+        </div> */}
       </div>
     </div>
   );

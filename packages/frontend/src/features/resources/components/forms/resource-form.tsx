@@ -66,7 +66,7 @@ export const ResourceForm = ({
   return (
     <div className="flex w-full flex-col gap-4">
       <FileUpload
-        title="Upload Resource File"
+        title="Upload Resource File (Optional)"
         maxSize={10}
         acceptedFileTypes={['JPG', 'JPEG', 'PNG', 'PDF', 'DOC', 'DOCX']}
         multiple={false}
@@ -106,12 +106,11 @@ export const ResourceForm = ({
       <div className="flex w-full gap-4">
         <FormInput
           name="link"
-          label="Resource Link"
+          label="Resource Link (Optional)"
           hasLabelInput={true}
           leftLabel="https://"
           placeholder="Enter resource link"
           customError={errors.link?.message as string}
-          required
         />
       </div>
     </div>

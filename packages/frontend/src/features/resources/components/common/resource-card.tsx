@@ -228,13 +228,15 @@ export const ResourceCard = ({
 
           {/* Action Buttons */}
           <div className="flex flex-col gap-2">
-            <IconButton
-              label="Preview Resource"
-              leftIcon="eye"
-              iconClassName="text-white"
-              className="w-full"
-              onClick={() => setIsOpen(true)}
-            />
+            {file && (
+              <IconButton
+                label="Preview Resource"
+                leftIcon="eye"
+                iconClassName="text-white"
+                className="w-full"
+                onClick={() => setIsOpen(true)}
+              />
+            )}
             {link && (
               <IconButton
                 label="View Resource"

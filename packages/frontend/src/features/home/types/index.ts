@@ -18,6 +18,7 @@ interface UserPosts {
   first_name: string;
   middle_name: string;
   last_name: string;
+  email: string;
   picture_upload_link?: string;
 }
 
@@ -45,7 +46,7 @@ export interface SaveThreadResponse {
 export interface PostCommentResponse {
   id: number;
   message: string;
-  created_at: string;
+  updated_at: string;
   published: false;
   user: UserPosts;
   post: {

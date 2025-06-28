@@ -8,7 +8,6 @@ import { useState } from 'react';
 import { cn } from '@/shared/lib/utils';
 import { Badge } from '@/shared/components/ui/badge';
 import { useBlogStore } from '../../store';
-import { boolean } from 'zod';
 
 interface ThreadCardProps {
   id: number;
@@ -29,6 +28,7 @@ interface ThreadCardProps {
   selectedThread?: Thread;
   setSelectedThread?: (thread: Thread) => void | undefined;
   setShowCommentSection?: (show: boolean) => void;
+  isOwner?: boolean;
 }
 
 export const ThreadCard = ({
@@ -47,7 +47,8 @@ export const ThreadCard = ({
   setShowCommentSection,
   liked_by_user,
   isCommented,
-  saved_by_user
+  saved_by_user,
+  isOwner
 }: ThreadCardProps) => {
   const [isLiked, setIsLiked] = useState(liked_by_user);
   const [isSaved, setIsSaved] = useState(saved_by_user);
@@ -81,6 +82,7 @@ export const ThreadCard = ({
         id,
         authorName,
         authorUsername: '',
+        authorEmail: '',
         timeAgo,
         content,
         avatarUrl:
@@ -119,13 +121,25 @@ export const ThreadCard = ({
             avatarUrl={avatarUrl}
             timeAgo={timeAgo}
           />
-          <Button
-            variant="secondary"
-            className="h-12 rounded-full"
-            onClick={handleViewThread}
-          >
-            View thread
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              className="h-10 rounded-full"
+              onClick={handleViewThread}
+            >
+              View thread
+            </Button>
+
+            {isOwner && (
+              <Button
+                variant="outline"
+                className="h-10 rounded-full"
+                onClick={handleViewThread}
+              >
+                Edit thread
+              </Button>
+            )}
+          </div>
         </BaseThreadCard.Header>
 
         <BaseThreadCard.Content>

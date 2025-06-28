@@ -71,38 +71,47 @@ const resourceTypeValues = Object.values(resourceTypes).map(
   (type) => type.value
 ) as [string, ...string[]];
 
-export const resourceFormSchema = z.object({
-  title: z
-    .string({
-      required_error: 'Title is required'
-    })
-    .min(3, 'Title must be at least 3 characters'),
-  details: z
-    .string({
-      required_error: 'Details are required'
-    })
-    .min(10, 'Details must be at least 10 characters'),
-  type: z.enum(resourceTypeValues, {
-    required_error: 'Resource type is required'
-  }),
-  link: z
-    .string({
-      required_error: 'Link is required'
-    })
-    .regex(urlPattern, 'Must be a valid URL'),
-  file: z
-    .any()
-    .optional()
-    .refine(
-      (file) => {
-        if (!file) return true;
-        return file instanceof File;
-      },
-      {
-        message: 'Invalid file format'
-      }
-    ),
-  removeFile: z.boolean().optional()
-});
+export const resourceFormSchema = z
+  .object({
+    title: z
+      .string({
+        required_error: 'Title is required'
+      })
+      .min(3, 'Title must be at least 3 characters'),
+    details: z
+      .string({
+        required_error: 'Details are required'
+      })
+      .min(10, 'Details must be at least 10 characters'),
+    type: z.enum(resourceTypeValues, {
+      required_error: 'Resource type is required'
+    }),
+    link: z.string().regex(urlPattern, 'Must be a valid URL').optional(),
+    file: z
+      .any()
+      .optional()
+      .refine(
+        (file) => {
+          if (!file) return true;
+          return file instanceof File;
+        },
+        {
+          message: 'Invalid file format'
+        }
+      ),
+    removeFile: z.boolean().optional()
+  })
+  .refine(
+    (data) => {
+      // At least one of link or file must be present
+      const hasLink = data.link && data.link.trim() !== '';
+      const hasFile = data.file && !data.removeFile;
+      return hasLink || hasFile;
+    },
+    {
+      message: 'Either a link or file must be provided',
+      path: ['link'] // This will show the error on the link field
+    }
+  );
 
 export type ResourceFormValues = z.infer<typeof resourceFormSchema>;

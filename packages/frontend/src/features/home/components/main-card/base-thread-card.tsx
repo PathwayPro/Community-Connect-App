@@ -5,6 +5,7 @@ import {
 } from '@/shared/components/ui/avatar';
 import { cn } from '@/shared/lib/utils';
 import { ComponentPropsWithoutRef, createContext, useContext } from 'react';
+import { transformDateTimeToTimeAgo } from '../../lib/utils';
 
 interface BaseThreadCardProps extends ComponentPropsWithoutRef<'div'> {
   children: React.ReactNode;
@@ -25,7 +26,7 @@ export const BaseThreadCard = ({
   return (
     <div
       className={cn(
-        'h-fit max-w-[710px] space-y-3 rounded-xl border border-neutral-light-200 bg-white p-4 shadow-sm',
+        'h-fit max-w-full space-y-3 rounded-xl border border-neutral-light-200 bg-white p-4 shadow-sm',
         className
       )}
       {...props}
@@ -55,6 +56,8 @@ BaseThreadCard.Author = function ThreadCardAuthor({
   avatarUrl: string;
   timeAgo: string;
 }) {
+  console.log('this is the timeAgo in the author', timeAgo);
+
   return (
     <div className="flex gap-3">
       <Avatar className="h-16 w-16 bg-warning-500">
@@ -63,7 +66,9 @@ BaseThreadCard.Author = function ThreadCardAuthor({
       </Avatar>
       <div className="flex flex-col">
         <span className="font-semibold">{name}</span>
-        <span className="text-gray-500">{timeAgo}</span>
+        <span className="text-gray-500">
+          {transformDateTimeToTimeAgo(timeAgo)}
+        </span>
       </div>
     </div>
   );

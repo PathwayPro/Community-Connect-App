@@ -5,9 +5,7 @@ import { ThreadCardProvider } from './base-thread-card';
 import { BaseThreadCard } from './base-thread-card';
 import { ThreadSearchbar, ThreadCommentInput } from '../common';
 import { useState, useEffect } from 'react';
-import { mockComments } from '../../lib/mock-data';
 import { CommentCard } from '../comment-card';
-
 import { useBlogStore } from '../../store';
 import { PostCommentResponse } from '../../types';
 import { cn } from '@/shared/lib/utils';
@@ -49,7 +47,7 @@ const transformCommentResponseToCommentCardProps = (
   authorName: `${response.user.first_name} ${response.user.last_name}`,
   content: response.message,
   avatarUrl: '',
-  timeAgo: response.created_at
+  timeAgo: response.updated_at
 });
 
 export const CommentsThreadCard = ({
@@ -154,6 +152,7 @@ export const CommentsThreadCard = ({
         id,
         authorName,
         authorUsername: '',
+        authorEmail: '',
         timeAgo,
         content,
         avatarUrl,
