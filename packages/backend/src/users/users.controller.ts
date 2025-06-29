@@ -14,15 +14,40 @@ import {
   Logger,
   Req,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBody,
+  ApiParam,
+  ApiBearerAuth,
+  ApiUnauthorizedResponse,
+  ApiBadRequestResponse,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiConsumes,
+} from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  ReadUserDto,
+  PublicReadUserDto,
+} from './dto/user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { RolesGuard } from '../auth/guards';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
+import {
+  UserRegistrationResponseDto,
+  UserDeleteResponseDto,
+  ProfessionsResponseDto,
+  UserUpdateResponseDto,
+} from './dto/user-response.dto';
 
+@ApiTags('Users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
@@ -32,49 +57,191 @@ export class UsersController {
 
   @Public()
   @Post('register')
+  @ApiOperation({
+    summary: 'Register new user',
+    description: 'Create a new user account with email and password',
+  })
+  @ApiBody({
+    type: CreateUserDto,
+    description: 'User registration data',
+  })
+  @ApiCreatedResponse({
+    description: 'User successfully registered',
+    type: UserRegistrationResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data or email already exists',
+  })
   async registerUser(@Body() createUserDto: CreateUserDto) {
     return await this.usersService.registerUser(createUserDto);
   }
 
   @Public()
   @Get('public-data')
+  @ApiOperation({
+    summary: 'Get public user data',
+    description:
+      'Retrieve public information for all users (no authentication required)',
+  })
+  @ApiOkResponse({
+    description: 'Public user data retrieved successfully',
+    type: [PublicReadUserDto],
+  })
   getUsersPublicData() {
     return this.usersService.getUsersPublicInfo();
   }
 
   @Public()
   @Get('professions')
+  @ApiOperation({
+    summary: 'Get user professions',
+    description: 'Retrieve list of all user professions',
+  })
+  @ApiOkResponse({
+    description: 'Professions retrieved successfully',
+    type: ProfessionsResponseDto,
+  })
   async getProfessions() {
     return await this.usersService.getUserProfessions();
   }
 
   @Public()
   @Get('public-data/:userId')
+  @ApiOperation({
+    summary: 'Get public user data by ID',
+    description:
+      'Retrieve public information for a specific user (no authentication required)',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'User ID',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'Public user data retrieved successfully',
+    type: PublicReadUserDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+  })
   async getUserPublicDataById(@Param('userId') userId: string) {
     return await this.usersService.getUserPublicInfoById(userId);
   }
 
   @Get('all')
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Get all users',
+    description: 'Retrieve all users (requires authentication)',
+  })
+  @ApiOkResponse({
+    description: 'All users retrieved successfully',
+    type: [ReadUserDto],
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
   async getAllUsers() {
     return this.usersService.getUsers();
   }
 
   @Get('profile')
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Get current user profile',
+    description: "Retrieve the authenticated user's profile information",
+  })
+  @ApiOkResponse({
+    description: 'User profile retrieved successfully',
+    type: ReadUserDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
   async getUserProfile(@GetUser('sub') userId: string) {
     return await this.usersService.getUserById(userId);
   }
 
   @Get(':id')
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Get user by ID',
+    description: 'Retrieve user information by user ID',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'User retrieved successfully',
+    type: ReadUserDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+  })
   async getUserById(@Param('id') userId: string) {
     return await this.usersService.getUserById(userId);
   }
 
   @Get('email/:email')
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Get user by email',
+    description: 'Retrieve user information by email address',
+  })
+  @ApiParam({
+    name: 'email',
+    description: 'User email address',
+    example: 'john.doe@example.com',
+  })
+  @ApiOkResponse({
+    description: 'User retrieved successfully',
+    type: ReadUserDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+  })
   async getUserByEmail(@Param('email') email: string) {
     return await this.usersService.getUserByEmail(email);
   }
 
   @Patch(':id')
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Update user',
+    description:
+      'Update user information including profile picture and resume uploads',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID to update',
+    example: '1',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: UpdateUserDto,
+    description: 'User update data and optional file uploads',
+  })
+  @ApiOkResponse({
+    description: 'User updated successfully',
+    type: UserUpdateResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data or update failed',
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+  })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'pictureUploadLink', maxCount: 1 },
@@ -207,6 +374,26 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Delete user',
+    description: 'Delete a user account (requires appropriate permissions)',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID to delete',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'User deleted successfully',
+    type: UserDeleteResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+  })
   async deleteUser(
     @GetUser('sub') currentUserId: number,
     @Param('id', ParseIntPipe) targetUserId: number,
