@@ -1,7 +1,12 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { mentorshipApi } from '../api/mentorship-api';
-import { InterestsResponse, MentorResponse, MenteeResponse } from '../types';
+import {
+  InterestsResponse,
+  MentorResponse,
+  MenteeResponse,
+  PendingApplicationResponse
+} from '../types';
 
 interface MentorshipState {
   mentors: MentorResponse[];
@@ -10,12 +15,14 @@ interface MentorshipState {
   isLoading: boolean;
   error: string | null;
   mentor: MentorResponse | null;
+  pendingApplications: PendingApplicationResponse | null;
 
   // Actions
   createMentor: (mentorData: FormData) => Promise<MentorResponse>;
   createMentee: (menteeData: FormData) => Promise<MenteeResponse>;
   fetchInterests: () => Promise<InterestsResponse[]>;
   getMentor: (mentorId: number) => Promise<MentorResponse>;
+  getPendingApplications: () => Promise<PendingApplicationResponse>;
 }
 
 export const useMentorshipStore = create<MentorshipState>()(
@@ -64,6 +71,12 @@ export const useMentorshipStore = create<MentorshipState>()(
       getMentor: async (mentorId: number) => {
         const response = await mentorshipApi.getMentor(mentorId);
         set({ mentor: response.data });
+        return response;
+      },
+
+      getPendingApplications: async () => {
+        const response = await mentorshipApi.getPendingApplications();
+        set({ pendingApplications: response.data });
         return response;
       },
 

@@ -1,5 +1,10 @@
 import { apiMethods } from '@/shared/api';
-import { InterestsResponse, MentorResponse, MenteeResponse } from '../types';
+import {
+  InterestsResponse,
+  MentorResponse,
+  MenteeResponse,
+  PendingApplicationResponse
+} from '../types';
 
 export const mentorshipApi = {
   getInterests: () => apiMethods.get<InterestsResponse[]>('/interests'),
@@ -11,5 +16,8 @@ export const mentorshipApi = {
     apiMethods.post<MenteeResponse>('/mentees', data),
 
   getMentor: (mentorId: number) =>
-    apiMethods.get<MentorResponse>(`/mentors/${mentorId}`)
+    apiMethods.get<MentorResponse>(`/mentors/${mentorId}`),
+
+  getPendingApplications: () =>
+    apiMethods.get<PendingApplicationResponse>(`/users/pending-applications`)
 };

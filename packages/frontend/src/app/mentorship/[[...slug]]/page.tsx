@@ -1,5 +1,6 @@
-import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
+'use client';
+
+import { Suspense, useEffect, useState } from 'react';
 import MentorForm from '@/features/mentorship/components/mentor-form';
 import MenteeForm from '@/features/mentorship/components/mentee-form';
 import MentorshipApply from '@/features/mentorship/components/mentorship-apply';
@@ -7,7 +8,10 @@ import { MentorshipWaitlist } from '@/features/mentorship/components/mentorship-
 import MentorDashboard from '@/features/mentorship/components/mentor-dashboard';
 import MenteeDashboard from '@/features/mentorship/components/mentee-dashboard';
 import { MentorshipAdminPage } from '@/features/mentorship/components/mentorship-admin-page';
-import { MentorProfile } from '@/features/mentorship/components/mentor-profile';
+// import { MentorProfile } from '@/features/mentorship/components/mentor-profile';
+import { useRole } from '@/features/user-profile/hooks/useRole';
+import { mentorshipApi } from '@/features/mentorship/api/mentorship-api';
+import { PendingApplicationResponse } from '@/features/mentorship/types';
 
 interface MentorshipPageProps {
   params: {
@@ -16,48 +20,73 @@ interface MentorshipPageProps {
 }
 
 export default function MentorshipPage({ params }: MentorshipPageProps) {
+  console.log('| - - - - - - - > PARAMS EN LAYOUT:', params);
+  const { role, hasRole } = useRole();
+  const [pendingApplication, setPendingApplication] =
+    useState<PendingApplicationResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPendingApplication = async () => {
+      if (role === 'USER') {
+        try {
+          const response = await mentorshipApi.getPendingApplications();
+          setPendingApplication(response.data);
+        } catch (error) {
+          console.error('Error fetching pending application:', error);
+          setPendingApplication(null);
+        }
+      }
+      setLoading(false);
+    };
+
+    fetchPendingApplication();
+  }, [role]);
+
   const renderContent = () => {
-    // If no slug, render main mentorship page
-    if (!params.slug?.length) {
-      return (
-        <div className="flex w-full justify-center">
-          <MentorshipApply />
-        </div>
-      );
+    // If loading, show loading state
+    if (loading) {
+      return <div>Loading...</div>;
     }
 
-    // Handle first level routes
-    switch (params.slug[0]) {
-      case 'mentor-dashboard':
+    // Role-based routing for main mentorship page
+    if (role) {
+      if (hasRole('ADMIN')) {
+        return <MentorshipAdminPage />;
+      }
+
+      if (hasRole('MENTOR')) {
         return <MentorDashboard />;
+      }
 
-      case 'mentee-dashboard':
+      if (hasRole('MENTEE')) {
         return <MenteeDashboard />;
+      }
 
+      if (hasRole('USER')) {
+        if (pendingApplication) {
+          return (
+            <MentorshipWaitlist
+              applicationDate={pendingApplication.created_at || null}
+              activityType={pendingApplication.activityType || null}
+              applicationStatus={pendingApplication.status || null}
+            />
+          );
+        }
+      }
+    }
+
+    // Application forms
+    switch (params?.slug?.[0]) {
       case 'mentor':
         return <MentorForm />;
 
       case 'mentee':
         return <MenteeForm />;
-
-      case 'waitlist':
-        return (
-          <MentorshipWaitlist
-            applicationDate={new Date()}
-            activityType={params.slug[1]}
-          />
-        );
-
-      case 'admin':
-        // Check for nested admin routes
-        if (params.slug[1] === 'mentor-profile') {
-          return <MentorProfile />;
-        }
-        return <MentorshipAdminPage />;
-
-      default:
-        notFound();
     }
+
+    // Fallback for unauthenticated users or unknown roles
+    return <MentorshipApply />;
   };
 
   return (

@@ -47,7 +47,7 @@ export const useUserStore = create<UserState>()(
           set({ isLoading: true, error: null });
           const response = await userApi.getUserProfile();
 
-          console.log('response IN STORE', response);
+          // console.log('response IN STORE', response);
 
           if (!response.success) {
             throw new Error('Failed to fetch user profile');

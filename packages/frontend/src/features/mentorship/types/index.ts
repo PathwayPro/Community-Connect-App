@@ -41,3 +41,9 @@ export interface MenteeResponse {
   status: MenteeStatus;
   user_id: number;
 }
+
+export interface PendingApplicationResponse {
+  status: MenteeStatus | MentorStatus;
+  created_at: string;
+  activityType: 'MENTOR' | 'MENTEE';
+}

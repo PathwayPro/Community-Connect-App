@@ -7,14 +7,43 @@ import {
 import { format } from 'date-fns';
 
 interface MentorshipWaitlistProps {
-  applicationDate: Date;
-  activityType: string;
+  applicationDate: string | null;
+  activityType: string | null;
+  applicationStatus: string | null;
 }
+
+const parseDateString = (dateString: string): Date => {
+  const parsedDate = new Date(dateString);
+  if (isNaN(parsedDate.getTime())) {
+    console.log(
+      'Invalid date string received by MentorshipWaitlist:',
+      dateString,
+      'returning current date.'
+    );
+    return new Date(); // Fallback
+  }
+  return parsedDate;
+};
 
 export function MentorshipWaitlist({
   applicationDate,
-  activityType
+  activityType,
+  applicationStatus
 }: MentorshipWaitlistProps) {
+  const dateObject = applicationDate ? parseDateString(applicationDate) : null;
+
+  const formattedDisplayDate = dateObject
+    ? (() => {
+        try {
+          const result = format(dateObject, 'MMMM dd, yyyy');
+          return result;
+        } catch (error) {
+          console.error('Error formatting date in MentorshipWaitlist:', error);
+          return 'Date not available';
+        }
+      })()
+    : null;
+
   return (
     <div className="flex h-full w-full items-center justify-center">
       <Card className="mx-auto my-8 w-full max-w-4xl">
@@ -30,14 +59,24 @@ export function MentorshipWaitlist({
               is currently under review.
             </p>
             <div className="space-y-2">
-              <p>
-                <span className="font-medium">Application Date:</span>{' '}
-                {format(applicationDate, 'MMMM dd, yyyy')}
-              </p>
-              <p>
-                <span className="font-medium">Activity Type:</span>{' '}
-                {activityType}
-              </p>
+              {formattedDisplayDate && (
+                <p>
+                  <span className="font-medium">Application Date:</span>{' '}
+                  {formattedDisplayDate}
+                </p>
+              )}
+              {activityType && (
+                <p>
+                  <span className="font-medium">Activity Type:</span>{' '}
+                  {activityType}
+                </p>
+              )}
+              {applicationStatus && (
+                <p>
+                  <span className="font-medium">Application Status:</span>{' '}
+                  {applicationStatus}
+                </p>
+              )}
             </div>
             <div className="mt-6 border-t pt-6">
               <p className="text-sm text-muted-foreground">
