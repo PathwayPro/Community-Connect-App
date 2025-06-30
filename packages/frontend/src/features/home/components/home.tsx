@@ -16,6 +16,10 @@ import { useBlogStore } from '../store';
 import { ThreadResponse, PostCommentResponse, NavItemProps } from '../types';
 import { useUserStore } from '@/features/user-profile/store';
 import { EditThreadModal } from './common/edit-thread-modal';
+import { Checkbox } from '@/shared/components/ui/checkbox';
+import { useRole } from '@/features/user-profile/hooks/useRole';
+import { CircleOff, Trash2, FlagIcon } from 'lucide-react';
+import { Button } from '@/shared/components/ui/button';
 
 const transformThreadResponseToThread = (response: ThreadResponse): Thread => ({
   id: response.id,
@@ -48,7 +52,11 @@ export const Home = () => {
   const [editThreadContent, setEditThreadContent] = useState('');
   const [editThreadLoading, setEditThreadLoading] = useState(false);
   const [editThreadId, setEditThreadId] = useState<number | null>(null);
+  const [selectedThreadIds, setSelectedThreadIds] = useState<number[]>([]);
   const { user } = useUserStore();
+  const { hasRole } = useRole();
+  const isAdmin = hasRole('ADMIN');
+  const userId = user?.id;
 
   const {
     threads: rawThreads,
@@ -131,6 +139,60 @@ export const Home = () => {
 
   console.log('| - - - - - - - > FILTERED THREADS 1: ', filteredThreads);
 
+  // Ownership logic
+  const isThreadOwner = (thread: Thread) => thread.authorEmail === user?.email;
+  const canSelectThread = (thread: Thread) => isAdmin || isThreadOwner(thread);
+  const allOwnedByUser =
+    filteredThreads.length > 0 && filteredThreads.every(isThreadOwner);
+
+  // Selection logic
+  const visibleThreadIds = filteredThreads
+    .filter(canSelectThread)
+    .map((t) => t.id);
+  const allSelected =
+    visibleThreadIds.length > 0 &&
+    visibleThreadIds.every((id) => selectedThreadIds.includes(id));
+  const someSelected = selectedThreadIds.length > 0;
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedThreadIds(visibleThreadIds);
+    } else {
+      setSelectedThreadIds([]);
+    }
+  };
+
+  const handleSelectThread = (id: number, checked: boolean) => {
+    setSelectedThreadIds((prev) =>
+      checked ? [...prev, id] : prev.filter((tid) => tid !== id)
+    );
+  };
+
+  // Bulk actions (UI only)
+  const handleBulkDelete = () => {
+    setSelectedThreadIds([]);
+  };
+  const handleBulkFlag = () => {
+    setSelectedThreadIds([]);
+  };
+  const handleBulkBlock = () => {
+    setSelectedThreadIds([]);
+  };
+
+  // Determine if all selected threads are owned by the user
+  const allSelectedOwnedByUser =
+    someSelected &&
+    selectedThreadIds.every((id) => {
+      const thread = filteredThreads.find((t) => t.id === id);
+      return thread && isThreadOwner(thread);
+    });
+
+  // Show Select All if admin or all visible threads are owned by user
+  const showSelectAll = isAdmin || allOwnedByUser;
+
+  // Show bulk bar if admin or (thread creator and all selected are theirs)
+  const showBulkBar = someSelected && (isAdmin || allSelectedOwnedByUser);
+
   return (
     <div className="container-wide px-0" onClick={handleOutsideClick}>
       <div className="grid grid-cols-12 gap-8">
@@ -195,6 +257,53 @@ export const Home = () => {
                   options={sortOptions}
                 />
               </div>
+              {showSelectAll && (
+                <div className="mb-8 flex items-center justify-between gap-4 pl-4">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={allSelected}
+                      onCheckedChange={handleSelectAll}
+                      aria-label="Select all threads"
+                    />
+                    <span className="text-sm font-medium">Select All</span>
+                  </div>
+                  {showBulkBar && (
+                    <div className="flex items-center gap-4 rounded-lg bg-white p-2 shadow">
+                      <span className="pl-2 text-center font-semibold">
+                        {selectedThreadIds.length} selected
+                      </span>
+                      <Button
+                        variant="outline"
+                        className="h-10 min-w-24 text-sm"
+                        onClick={handleBulkDelete}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                      </Button>
+                      {isAdmin && (
+                        <Button
+                          variant="outline"
+                          className="h-10 min-w-24 text-sm"
+                          onClick={handleBulkFlag}
+                        >
+                          <FlagIcon className="h-4 w-4" />
+                          Flag
+                        </Button>
+                      )}
+                      {isAdmin && (
+                        <Button
+                          variant="outline"
+                          onClick={handleBulkBlock}
+                          className="h-10 min-w-24 text-sm text-red-600 hover:bg-red-50 hover:text-red-600"
+                        >
+                          <CircleOff className="h-4 w-4 text-red-600" />
+                          Block User/s
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="flex flex-col gap-8">
                 {filteredThreads.map((thread) => (
                   <ThreadCard
@@ -203,8 +312,14 @@ export const Home = () => {
                     viewThreads={handleViewThreads}
                     setSelectedThread={setSelectedThread}
                     setShowCommentSection={setShowCommentSection}
-                    isOwner={thread.authorEmail === user?.email}
+                    isOwner={isThreadOwner(thread)}
                     onEditThread={handleEditThread}
+                    showCheckbox={canSelectThread(thread)}
+                    selected={selectedThreadIds.includes(thread.id)}
+                    onSelect={(checked: boolean) =>
+                      canSelectThread(thread) &&
+                      handleSelectThread(thread.id, checked)
+                    }
                   />
                 ))}
               </div>

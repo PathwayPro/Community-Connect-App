@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { cn } from '@/shared/lib/utils';
 import { Badge } from '@/shared/components/ui/badge';
 import { useBlogStore } from '../../store';
+import { Checkbox } from '@/shared/components/ui/checkbox';
 
 interface ThreadCardProps {
   id: number;
@@ -30,6 +31,9 @@ interface ThreadCardProps {
   setShowCommentSection?: (show: boolean) => void;
   isOwner?: boolean;
   onEditThread?: (thread: Thread) => void;
+  showCheckbox?: boolean;
+  selected?: boolean;
+  onSelect?: (checked: boolean) => void;
 }
 
 export const ThreadCard = ({
@@ -50,7 +54,10 @@ export const ThreadCard = ({
   isCommented,
   saved_by_user,
   isOwner,
-  onEditThread
+  onEditThread,
+  showCheckbox = false,
+  selected = false,
+  onSelect
 }: ThreadCardProps) => {
   const [isLiked, setIsLiked] = useState(liked_by_user);
   const [isSaved, setIsSaved] = useState(saved_by_user);
@@ -138,11 +145,20 @@ export const ThreadCard = ({
     >
       <BaseThreadCard>
         <BaseThreadCard.Header>
-          <BaseThreadCard.Author
-            name={authorName}
-            avatarUrl={avatarUrl}
-            timeAgo={timeAgo}
-          />
+          <div className="flex items-center gap-2">
+            {showCheckbox && (
+              <Checkbox
+                checked={selected}
+                onCheckedChange={onSelect}
+                aria-label="Select thread"
+              />
+            )}
+            <BaseThreadCard.Author
+              name={authorName}
+              avatarUrl={avatarUrl}
+              timeAgo={timeAgo}
+            />
+          </div>
           <div className="flex items-center gap-2">
             <Button
               variant="secondary"
