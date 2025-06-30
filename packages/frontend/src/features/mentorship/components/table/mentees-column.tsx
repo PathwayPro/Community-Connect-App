@@ -1,12 +1,12 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Mentee } from './data';
 import {
   Avatar,
   AvatarFallback,
   AvatarImage
 } from '@/shared/components/ui/avatar';
+import { Mentee } from '../../types';
 
 export const menteesColumns: ColumnDef<Mentee>[] = [
   {

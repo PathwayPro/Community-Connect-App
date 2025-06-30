@@ -1,16 +1,4 @@
-import { MentorshipAdmin, RatingsGroup } from '../../types';
-
-export type Mentee = {
-  id: string;
-  identity: {
-    avatar: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  date: string;
-  profession: string;
-};
+import { Mentee, MentorshipAdmin, RatingsGroup } from '../../types';
 
 export type Sessions = {
   id: string;

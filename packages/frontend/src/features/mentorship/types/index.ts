@@ -84,3 +84,15 @@ export interface MentorshipAdmin {
   review?: string;
   ratingsGroup?: RatingsGroup;
 }
+
+export type Mentee = {
+  id: string;
+  identity: {
+    avatar: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  date: string;
+  profession: string;
+};

@@ -34,21 +34,15 @@ export const MentorshipAdminPage = () => {
     adminMentorshipTotals,
     getAdminMentorshipTotals,
     adminMentorApplications,
-    getAdminMentorApplications
+    getAdminMentorApplications,
+    adminMenteeApplications,
+    getAdminMenteeApplications
   } = useMentorshipStore();
 
   useEffect(() => {
-    console.log('| - - - - - - > ENTRA USE EFFECT');
-    console.log(
-      '| - - - - - - > adminMentorApplications:',
-      adminMentorApplications
-    );
     getAdminMentorshipTotals();
     getAdminMentorApplications();
-    console.log(
-      '| - - - - - - > adminMentorApplications:',
-      adminMentorApplications
-    );
+    getAdminMenteeApplications();
   }, []);
 
   const filteredData = useMemo(() => {
