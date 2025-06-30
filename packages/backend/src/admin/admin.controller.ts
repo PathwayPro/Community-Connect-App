@@ -17,6 +17,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
   ApiParam,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard, RolesGuard } from 'src/auth/guards';
 import { Roles, GetUser } from 'src/auth/decorators';
@@ -38,6 +39,7 @@ import {
   PaginatedUsers,
   UserManagementItem,
 } from './entities/user-management.entity';
+import { AdminMentorshipDashboardTotals } from './entities/mentorship.entity';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Admin')
@@ -195,5 +197,20 @@ export class AdminController {
       resetUserPasswordDto.password,
       adminId,
     );
+  }
+
+  @Roles('ADMIN')
+  @Get('mentorship/total-applications')
+  @ApiOkResponse({ type: AdminMentorshipDashboardTotals })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized access' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Total mentors, mentees, and applications',
+    description:
+      'Get totals for current mentors and mentees, and applications from the last month and current month',
+  })
+  @ApiBearerAuth('JWT')
+  async getAdminMentorshipTotals() {
+    return await this.adminService.getAdminMentorshipTotals();
   }
 }

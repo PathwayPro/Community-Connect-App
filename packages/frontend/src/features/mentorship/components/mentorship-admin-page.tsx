@@ -19,16 +19,22 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/shared/components/ui/select';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { PaginationComponent } from '@/shared/components/pagination/pagination';
 import { bestMatchesColumns } from './table/best-matches-column';
 import { IconInput } from '@/shared/components/ui/icon-input';
+import { useMentorshipStore } from '../store';
 
 export const MentorshipAdminPage = () => {
   const { user } = useUserStore();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedStatus, setSelectedStatus] = useState('All');
   const ITEMS_PER_PAGE = 10;
+  const { adminMentorshipTotals, getAdminMentorshipTotals } =
+    useMentorshipStore();
+  useEffect(() => {
+    getAdminMentorshipTotals();
+  }, []);
 
   const filteredData = useMemo(() => {
     if (selectedStatus === 'All') return mentorshipAdminData;
@@ -49,6 +55,38 @@ export const MentorshipAdminPage = () => {
 
   console.log('totalPages', totalPages);
 
+  const mentorApplicationsTrendValue = useMemo(() => {
+    const currentMonth =
+      adminMentorshipTotals?.mentorApplicationsCurrentMonth > 0
+        ? adminMentorshipTotals?.mentorApplicationsCurrentMonth
+        : 1;
+    const lastMonth =
+      adminMentorshipTotals?.mentorApplicationsLastMonth > 0
+        ? adminMentorshipTotals?.mentorApplicationsLastMonth
+        : 1;
+
+    if (currentMonth > lastMonth) {
+      return `${((currentMonth / lastMonth) * 100).toFixed(2)}%`;
+    }
+    return `${((lastMonth / currentMonth) * 100).toFixed(2)}%`;
+  }, [adminMentorshipTotals]);
+
+  const menteeApplicationsTrendValue = useMemo(() => {
+    const currentMonth =
+      adminMentorshipTotals?.menteeApplicationsCurrentMonth > 0
+        ? adminMentorshipTotals?.menteeApplicationsCurrentMonth
+        : 1;
+    const lastMonth =
+      adminMentorshipTotals?.menteeApplicationsLastMonth > 0
+        ? adminMentorshipTotals?.menteeApplicationsLastMonth
+        : 1;
+
+    if (currentMonth > lastMonth) {
+      return `${((currentMonth / lastMonth) * 100).toFixed(2)}%`;
+    }
+    return `${((lastMonth / currentMonth) * 100).toFixed(2)}%`;
+  }, [adminMentorshipTotals]);
+
   return (
     <div className="container-wide flex w-full flex-col gap-6">
       <MentorshipSection>
@@ -59,23 +97,49 @@ export const MentorshipAdminPage = () => {
           <div className="flex gap-4">
             <MentorCard
               title="Mentors"
-              value="1893"
+              value={adminMentorshipTotals?.totalMentors.toString() || '0'}
               icon="minutesMentored"
-              trend="arrowTrendingUp"
-              trendValue="25%"
-              trendText="Up from last month"
-              trendUp={true}
+              trend={
+                adminMentorshipTotals?.mentorApplicationsCurrentMonth >
+                adminMentorshipTotals?.mentorApplicationsLastMonth
+                  ? 'arrowTrendingUp'
+                  : 'arrowTrendingDown'
+              }
+              trendValue={mentorApplicationsTrendValue}
+              trendText={
+                adminMentorshipTotals?.mentorApplicationsCurrentMonth >
+                adminMentorshipTotals?.mentorApplicationsLastMonth
+                  ? 'Up applications from last month'
+                  : 'Down applications from last month'
+              }
+              trendUp={
+                adminMentorshipTotals?.mentorApplicationsCurrentMonth >
+                adminMentorshipTotals?.mentorApplicationsLastMonth
+              }
               iconFrameClassName="bg-primary-300"
               iconClassName="stroke-white"
             />
             <MentorCard
               title="Mentees"
-              value="15"
+              value={adminMentorshipTotals?.totalMentees.toString() || '0'}
               icon="mentees"
-              trend="arrowTrendingDown"
-              trendValue="2.5%"
-              trendText="Down from last month"
-              trendUp={false}
+              trend={
+                adminMentorshipTotals?.menteeApplicationsCurrentMonth >
+                adminMentorshipTotals?.menteeApplicationsLastMonth
+                  ? 'arrowTrendingUp'
+                  : 'arrowTrendingDown'
+              }
+              trendValue={menteeApplicationsTrendValue}
+              trendText={
+                adminMentorshipTotals?.menteeApplicationsCurrentMonth >
+                adminMentorshipTotals?.menteeApplicationsLastMonth
+                  ? 'Up applications from last month'
+                  : 'Down applications from last month'
+              }
+              trendUp={
+                adminMentorshipTotals?.menteeApplicationsCurrentMonth >
+                adminMentorshipTotals?.menteeApplicationsLastMonth
+              }
               iconFrameClassName="bg-primary-300"
               iconClassName="stroke-white"
             />

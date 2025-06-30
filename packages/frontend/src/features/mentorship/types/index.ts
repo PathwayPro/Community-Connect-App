@@ -47,3 +47,12 @@ export interface PendingApplicationResponse {
   created_at: string;
   activityType: 'MENTOR' | 'MENTEE';
 }
+
+export interface AdminMentorshipDashboardTotals {
+  totalMentors: number;
+  totalMentees: number;
+  mentorApplicationsLastMonth: number;
+  menteeApplicationsLastMonth: number;
+  mentorApplicationsCurrentMonth: number;
+  menteeApplicationsCurrentMonth: number;
+}

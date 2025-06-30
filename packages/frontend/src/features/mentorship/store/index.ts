@@ -5,7 +5,8 @@ import {
   InterestsResponse,
   MentorResponse,
   MenteeResponse,
-  PendingApplicationResponse
+  PendingApplicationResponse,
+  AdminMentorshipDashboardTotals
 } from '../types';
 
 interface MentorshipState {
@@ -16,13 +17,14 @@ interface MentorshipState {
   error: string | null;
   mentor: MentorResponse | null;
   pendingApplications: PendingApplicationResponse | null;
-
+  adminMentorshipTotals: AdminMentorshipDashboardTotals;
   // Actions
   createMentor: (mentorData: FormData) => Promise<MentorResponse>;
   createMentee: (menteeData: FormData) => Promise<MenteeResponse>;
   fetchInterests: () => Promise<InterestsResponse[]>;
   getMentor: (mentorId: number) => Promise<MentorResponse>;
   getPendingApplications: () => Promise<PendingApplicationResponse>;
+  getAdminMentorshipTotals: () => Promise<AdminMentorshipDashboardTotals>;
 }
 
 export const useMentorshipStore = create<MentorshipState>()(
@@ -77,6 +79,12 @@ export const useMentorshipStore = create<MentorshipState>()(
       getPendingApplications: async () => {
         const response = await mentorshipApi.getPendingApplications();
         set({ pendingApplications: response.data });
+        return response;
+      },
+
+      getAdminMentorshipTotals: async () => {
+        const response = await mentorshipApi.getAdminMentorshipTotals();
+        set({ adminMentorshipTotals: response.data });
         return response;
       },
 

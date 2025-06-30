@@ -9,6 +9,7 @@ import { users_roles } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { AnalyticsPeriod } from './dto/analytics.dto';
 import { GetUsersQueryDto } from './dto/user-management.dto';
+import { AdminMentorshipDashboardTotals } from './entities/mentorship.entity';
 
 @Injectable()
 export class AdminService {
@@ -726,6 +727,62 @@ export class AdminService {
       console.log(`adminId: ${adminId}`);
       throw new InternalServerErrorException(
         `Error resetting password: ${error.message}`,
+      );
+    }
+  }
+
+  async getAdminMentorshipTotals() {
+    try {
+      const totalMentors = await this.prisma.users.count({
+        where: { deleted_at: false, role: 'MENTOR' },
+      });
+      const totalMentees = await this.prisma.users.count({
+        where: { deleted_at: false, role: 'MENTEE' },
+      });
+      const mentorApplicationsLastMonth = await this.prisma.mentors.count({
+        where: {
+          created_at: {
+            gte: new Date(new Date().setMonth(new Date().getMonth() - 2)),
+            lte: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+          },
+        },
+      });
+      const menteeApplicationsLastMonth = await this.prisma.mentees.count({
+        where: {
+          created_at: {
+            gte: new Date(new Date().setMonth(new Date().getMonth() - 2)),
+            lte: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+          },
+        },
+      });
+      const mentorApplicationsCurrentMonth = await this.prisma.mentors.count({
+        where: {
+          created_at: {
+            gte: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+          },
+        },
+      });
+      const menteeApplicationsCurrentMonth = await this.prisma.mentees.count({
+        where: {
+          created_at: {
+            gte: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+          },
+        },
+      });
+
+      const totals: AdminMentorshipDashboardTotals = {
+        totalMentors,
+        totalMentees,
+        mentorApplicationsLastMonth,
+        menteeApplicationsLastMonth,
+        mentorApplicationsCurrentMonth,
+        menteeApplicationsCurrentMonth,
+      };
+
+      return totals;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error getting admin mentorship totals: ${error.message}`,
       );
     }
   }
