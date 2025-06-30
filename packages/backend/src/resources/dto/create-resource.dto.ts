@@ -27,8 +27,9 @@ export class CreateResourceDto {
     example: 'https://example.com/resource',
   })
   @IsString()
+  @IsOptional()
   @IsUrl()
-  link: string;
+  link?: string;
 
   @ApiProperty({ description: 'File for the resource', required: false })
   @IsOptional()

@@ -310,7 +310,7 @@ model Resources {
   title      String
   details    String
   type       ResourceType
-  link       String
+  link       String?
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
   user       users    @relation(fields: [user_id], references: [id])
