@@ -39,7 +39,10 @@ import {
   PaginatedUsers,
   UserManagementItem,
 } from './entities/user-management.entity';
-import { AdminMentorshipDashboardTotals } from './entities/mentorship.entity';
+import {
+  AdminMentorshipDashboardTotals,
+  MentorshipAdmin,
+} from './entities/mentorship.entity';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Admin')
@@ -212,5 +215,19 @@ export class AdminController {
   @ApiBearerAuth('JWT')
   async getAdminMentorshipTotals() {
     return await this.adminService.getAdminMentorshipTotals();
+  }
+
+  @Roles('ADMIN')
+  @Get('mentorship/mentor-applications')
+  @ApiOkResponse({ type: [MentorshipAdmin] })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized access' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Mentor applications',
+    description: 'List of all the applications to become a mentor',
+  })
+  @ApiBearerAuth('JWT')
+  async getAdminMentorApplications() {
+    return await this.adminService.getAdminMentorApplications();
   }
 }

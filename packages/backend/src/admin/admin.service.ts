@@ -9,7 +9,10 @@ import { users_roles } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { AnalyticsPeriod } from './dto/analytics.dto';
 import { GetUsersQueryDto } from './dto/user-management.dto';
-import { AdminMentorshipDashboardTotals } from './entities/mentorship.entity';
+import {
+  AdminMentorshipDashboardTotals,
+  MentorshipAdmin,
+} from './entities/mentorship.entity';
 
 @Injectable()
 export class AdminService {
@@ -783,6 +786,56 @@ export class AdminService {
     } catch (error) {
       throw new InternalServerErrorException(
         `Error getting admin mentorship totals: ${error.message}`,
+      );
+    }
+  }
+
+  async getAdminMentorApplications(): Promise<MentorshipAdmin[]> {
+    try {
+      const mentorApplications = await this.prisma.mentors.findMany({
+        orderBy: { created_at: 'desc' },
+        select: {
+          id: true,
+          user: {
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+              picture_upload_link: true,
+              email: true,
+            },
+          },
+          availability: true,
+          max_mentees: true,
+          profession: true,
+          experience_years: true,
+          experience_details: true,
+          created_at: true,
+          status: true,
+        },
+      });
+
+      const mappedMentorApplications: MentorshipAdmin[] =
+        mentorApplications.map((mentor) => ({
+          id: mentor.user.id,
+          identity: {
+            avatar: mentor.user.picture_upload_link,
+            firstName: mentor.user.first_name,
+            lastName: mentor.user.last_name,
+          },
+          experience: mentor.experience_years + ' years',
+          experienceDescription: mentor.experience_details,
+          profession: mentor.profession,
+          email: mentor.user.email,
+          status: mentor.status,
+          capacity: mentor.max_mentees,
+          availability: mentor.availability,
+        }));
+
+      return mappedMentorApplications;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error getting mentor applications: ${error.message}`,
       );
     }
   }
