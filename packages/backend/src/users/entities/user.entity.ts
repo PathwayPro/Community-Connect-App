@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { mentees_status, mentors_status } from '@prisma/client';
 import {
   IsInt,
   IsOptional,
@@ -297,4 +298,18 @@ export class UserResponseMin {
   @ApiProperty({ description: 'User last name', example: 'Doe' })
   @IsString()
   last_name: string;
+}
+
+export class UserPendingApplication {
+  @ApiProperty()
+  @IsEnum(mentees_status || mentors_status)
+  status: mentees_status | mentors_status;
+
+  @ApiProperty()
+  @IsDate()
+  created_at: Date;
+
+  @ApiProperty()
+  @IsString()
+  activityType: string;
 }

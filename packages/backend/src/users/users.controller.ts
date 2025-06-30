@@ -26,6 +26,7 @@ import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiConsumes,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import {
@@ -46,6 +47,11 @@ import {
   ProfessionsResponseDto,
   UserUpdateResponseDto,
 } from './dto/user-response.dto';
+import { JwtPayload } from 'src/auth/util/JwtPayload.interface';
+import { Roles } from 'src/auth/decorators';
+import { UserPendingApplication } from './entities';
+import { MenteeService } from '../mentee/mentee.service';
+import { MentorService } from '../mentor/mentor.service';
 
 @ApiTags('Users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -53,7 +59,11 @@ import {
 export class UsersController {
   private readonly logger = new Logger(UsersController.name);
 
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly menteeService: MenteeService,
+    private readonly mentorService: MentorService,
+  ) {}
 
   @Public()
   @Post('register')
@@ -61,10 +71,7 @@ export class UsersController {
     summary: 'Register new user',
     description: 'Create a new user account with email and password',
   })
-  @ApiBody({
-    type: CreateUserDto,
-    description: 'User registration data',
-  })
+  @ApiBody({ type: CreateUserDto, description: 'User registration data' })
   @ApiCreatedResponse({
     description: 'User successfully registered',
     type: UserRegistrationResponseDto,
@@ -112,18 +119,12 @@ export class UsersController {
     description:
       'Retrieve public information for a specific user (no authentication required)',
   })
-  @ApiParam({
-    name: 'userId',
-    description: 'User ID',
-    example: '1',
-  })
+  @ApiParam({ name: 'userId', description: 'User ID', example: '1' })
   @ApiOkResponse({
     description: 'Public user data retrieved successfully',
     type: PublicReadUserDto,
   })
-  @ApiNotFoundResponse({
-    description: 'User not found',
-  })
+  @ApiNotFoundResponse({ description: 'User not found' })
   async getUserPublicDataById(@Param('userId') userId: string) {
     return await this.usersService.getUserPublicInfoById(userId);
   }
@@ -162,17 +163,13 @@ export class UsersController {
     return await this.usersService.getUserById(userId);
   }
 
-  @Get(':id')
+  @Get('id/:id')
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Get user by ID',
     description: 'Retrieve user information by user ID',
   })
-  @ApiParam({
-    name: 'id',
-    description: 'User ID',
-    example: '1',
-  })
+  @ApiParam({ name: 'id', description: 'User ID', example: '1' })
   @ApiOkResponse({
     description: 'User retrieved successfully',
     type: ReadUserDto,
@@ -180,9 +177,7 @@ export class UsersController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized - Invalid or missing JWT token',
   })
-  @ApiNotFoundResponse({
-    description: 'User not found',
-  })
+  @ApiNotFoundResponse({ description: 'User not found' })
   async getUserById(@Param('id') userId: string) {
     return await this.usersService.getUserById(userId);
   }
@@ -205,9 +200,7 @@ export class UsersController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized - Invalid or missing JWT token',
   })
-  @ApiNotFoundResponse({
-    description: 'User not found',
-  })
+  @ApiNotFoundResponse({ description: 'User not found' })
   async getUserByEmail(@Param('email') email: string) {
     return await this.usersService.getUserByEmail(email);
   }
@@ -219,11 +212,7 @@ export class UsersController {
     description:
       'Update user information including profile picture and resume uploads',
   })
-  @ApiParam({
-    name: 'id',
-    description: 'User ID to update',
-    example: '1',
-  })
+  @ApiParam({ name: 'id', description: 'User ID to update', example: '1' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     type: UpdateUserDto,
@@ -236,12 +225,8 @@ export class UsersController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized - Invalid or missing JWT token',
   })
-  @ApiBadRequestResponse({
-    description: 'Invalid input data or update failed',
-  })
-  @ApiNotFoundResponse({
-    description: 'User not found',
-  })
+  @ApiBadRequestResponse({ description: 'Invalid input data or update failed' })
+  @ApiNotFoundResponse({ description: 'User not found' })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'pictureUploadLink', maxCount: 1 },
@@ -379,11 +364,7 @@ export class UsersController {
     summary: 'Delete user',
     description: 'Delete a user account (requires appropriate permissions)',
   })
-  @ApiParam({
-    name: 'id',
-    description: 'User ID to delete',
-    example: '1',
-  })
+  @ApiParam({ name: 'id', description: 'User ID to delete', example: '1' })
   @ApiOkResponse({
     description: 'User deleted successfully',
     type: UserDeleteResponseDto,
@@ -391,9 +372,7 @@ export class UsersController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized - Invalid or missing JWT token',
   })
-  @ApiNotFoundResponse({
-    description: 'User not found',
-  })
+  @ApiNotFoundResponse({ description: 'User not found' })
   async deleteUser(
     @GetUser('sub') currentUserId: number,
     @Param('id', ParseIntPipe) targetUserId: number,
@@ -403,5 +382,45 @@ export class UsersController {
     );
 
     return await this.usersService.deleteUser(currentUserId, targetUserId);
+  }
+
+  @Get('my-applications')
+  @Roles('USER', 'MENTOR', 'ADMIN', 'MENTEE')
+  @ApiOkResponse({ type: UserPendingApplication })
+  @ApiInternalServerErrorResponse({ description: `[ERROR MESSAGE]` })
+  @ApiOperation({
+    summary: 'Fetch personal mentee/mentor applications',
+    description:
+      'Fetch mentee/mentor applications with status "PENDING" according to logged user ID. \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER | MENTEE**',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'There is no mentee/mentor application with status "PENDING" for this user (USER ID: #`:id` )',
+  })
+  @ApiBearerAuth('JWT')
+  async findMyApplications(@GetUser() user: JwtPayload) {
+    const menteeApplication = await this.menteeService.findOneByUserId(
+      user.sub,
+      false,
+    );
+    if (menteeApplication?.status === 'PENDING') {
+      return {
+        status: menteeApplication.status,
+        created_at: menteeApplication.created_at,
+        activityType: 'MENTEE',
+      };
+    }
+    const mentorApplication = await this.mentorService.findOneByUserId(
+      user.sub,
+      false,
+    );
+    if (mentorApplication?.status === 'PENDING') {
+      return {
+        status: mentorApplication.status,
+        created_at: mentorApplication.created_at,
+        activityType: 'MENTOR',
+      };
+    }
+    return null;
   }
 }

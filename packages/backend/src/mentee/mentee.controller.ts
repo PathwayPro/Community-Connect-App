@@ -109,7 +109,7 @@ export class MenteeController {
   @ApiBadRequestResponse({ description: 'Mentee already exists' })
   @ApiNotFoundResponse({ description: 'The associated user does not exists' })
   @ApiBearerAuth()
-  create(
+  async create(
     @GetUser() user: JwtPayload,
     @Body() createMenteeDto: CreateMenteeDto,
     @UploadedFile() file: Express.Multer.File,
@@ -118,7 +118,7 @@ export class MenteeController {
       reason: createMenteeDto.reason,
       interests: createMenteeDto.interests,
     };
-    return this.menteeService.create(user.sub, createMentee, file);
+    return await this.menteeService.create(user.sub, createMentee, file);
   }
 
   @Patch()

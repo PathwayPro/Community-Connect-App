@@ -11,6 +11,7 @@ enum EnumRole {
   USER
   ADMIN
   MENTOR
+  MENTEE
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -54,9 +55,9 @@ model users {
   provider             String?
   deleted_at           Boolean                     @default(false)
   // MENTOR RELATIONSHIP
-  mentor               mentors?
+  mentor               mentors[]
   // MENTEE RELATIONSHIP
-  mentee               mentees?
+  mentee               mentees[]
   // EVENTS MANAGERS RELATIONSHIP
   event_manager        EventsManagers[]
   // EVENTS SUBSCRIPTIONS RELATIONSHIP
@@ -94,6 +95,7 @@ enum users_roles {
   USER
   MENTOR
   ADMIN
+  MENTEE
 }
 
 model mentors {
@@ -104,6 +106,7 @@ model mentors {
   profession         String
   experience_years   Int
   experience_details String?
+  created_at         DateTime       @default(now())
   // STATUS ENUM
   status             mentors_status @default(PENDING)
   // USER RELATIONSHIP
@@ -116,17 +119,19 @@ enum mentors_status {
   APPROVED
   REJECTED
   SUSPENDED
+  ENDED
 }
 
 model mentees {
   id                 Int            @id @default(autoincrement())
   resume             String
   reason             String
+  created_at         DateTime       @default(now())
   // STATUS ENUM
   status             mentees_status @default(PENDING)
   // USER RELATIONSHIP
   user               users          @relation(fields: [user_id], references: [id])
-  user_id            Int            @unique
+  user_id            Int            
 }
 
 enum mentees_status {
