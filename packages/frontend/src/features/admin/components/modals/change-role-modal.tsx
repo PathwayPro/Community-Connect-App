@@ -71,6 +71,7 @@ export const ChangeRoleModal = ({
               <SelectContent>
                 <SelectItem value="USER">User</SelectItem>
                 <SelectItem value="MENTOR">Mentor</SelectItem>
+                <SelectItem value="MENTEE">Mentee</SelectItem>
                 <SelectItem value="ADMIN">Admin</SelectItem>
               </SelectContent>
             </Select>
