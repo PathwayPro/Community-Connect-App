@@ -56,3 +56,31 @@ export interface AdminMentorshipDashboardTotals {
   mentorApplicationsCurrentMonth: number;
   menteeApplicationsCurrentMonth: number;
 }
+
+export type RatingsGroup = {
+  motivational: number;
+  communication: number;
+  knowledge: number;
+  problemSolving: number;
+};
+
+export interface MentorshipAdmin {
+  id: string;
+  identity: {
+    avatar: string;
+    firstName: string;
+    lastName: string;
+  };
+  experience: string;
+  experienceDescription?: string;
+  profession: string;
+  email: string;
+  status?: 'Approved' | 'Pending' | 'Rejected';
+  capacity?: string;
+  availability?: string;
+  lastSession?: string;
+  sessionsBooked?: number;
+  ratings?: number;
+  review?: string;
+  ratingsGroup?: RatingsGroup;
+}

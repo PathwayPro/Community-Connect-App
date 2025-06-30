@@ -4,7 +4,8 @@ import {
   MentorResponse,
   MenteeResponse,
   PendingApplicationResponse,
-  AdminMentorshipDashboardTotals
+  AdminMentorshipDashboardTotals,
+  MentorshipAdmin
 } from '../types';
 
 export const mentorshipApi = {
@@ -25,5 +26,8 @@ export const mentorshipApi = {
   getAdminMentorshipTotals: () =>
     apiMethods.get<AdminMentorshipDashboardTotals>(
       `/admin/mentorship/total-applications`
-    )
+    ),
+
+  getAdminMentorApplications: () =>
+    apiMethods.get<MentorshipAdmin[]>(`/admin/mentorship/mentor-applications`)
 };

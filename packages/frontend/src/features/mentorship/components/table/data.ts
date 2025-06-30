@@ -1,3 +1,5 @@
+import { MentorshipAdmin, RatingsGroup } from '../../types';
+
 export type Mentee = {
   id: string;
   identity: {
@@ -21,34 +23,6 @@ export type Sessions = {
   date: string;
   profession: string;
 };
-
-export type RatingsGroup = {
-  motivational: number;
-  communication: number;
-  knowledge: number;
-  problemSolving: number;
-};
-
-export interface MentorshipAdmin {
-  id: string;
-  identity: {
-    avatar: string;
-    firstName: string;
-    lastName: string;
-  };
-  experience: string;
-  experienceDescription?: string;
-  profession: string;
-  email: string;
-  status?: 'Approved' | 'Pending' | 'Rejected';
-  capacity?: string;
-  availability?: string;
-  lastSession?: string;
-  sessionsBooked?: number;
-  ratings?: number;
-  review?: string;
-  ratingsGroup?: RatingsGroup;
-}
 
 export interface MentorRating {
   id: string;

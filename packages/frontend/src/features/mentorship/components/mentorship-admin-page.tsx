@@ -4,7 +4,7 @@ import { useUserStore } from '@/features/user-profile/store';
 import { MentorshipSection } from './common/mentorship-section';
 import { DataTable } from './table/data-table';
 import { mentorshipAdminColumns } from './table/mentoship-admin-columns';
-import { mentorshipAdminData } from './table/data';
+// import { mentorshipAdminData } from './table/data';
 import MentorCard from './common/mentor-card';
 import {
   Tabs,
@@ -30,23 +30,44 @@ export const MentorshipAdminPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedStatus, setSelectedStatus] = useState('All');
   const ITEMS_PER_PAGE = 10;
-  const { adminMentorshipTotals, getAdminMentorshipTotals } =
-    useMentorshipStore();
+  const {
+    adminMentorshipTotals,
+    getAdminMentorshipTotals,
+    adminMentorApplications,
+    getAdminMentorApplications
+  } = useMentorshipStore();
+
   useEffect(() => {
+    console.log('| - - - - - - > ENTRA USE EFFECT');
+    console.log(
+      '| - - - - - - > adminMentorApplications:',
+      adminMentorApplications
+    );
     getAdminMentorshipTotals();
+    getAdminMentorApplications();
+    console.log(
+      '| - - - - - - > adminMentorApplications:',
+      adminMentorApplications
+    );
   }, []);
 
   const filteredData = useMemo(() => {
-    if (selectedStatus === 'All') return mentorshipAdminData;
-    return mentorshipAdminData.filter((item) => item.status === selectedStatus);
-  }, [selectedStatus]);
+    if (selectedStatus === 'All') return adminMentorApplications;
+    return adminMentorApplications.filter(
+      (item) => item.status === selectedStatus
+    );
+  }, [selectedStatus, adminMentorApplications]);
 
   const paginatedData = useMemo(() => {
+    if (!filteredData) return [];
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [currentPage, filteredData]);
 
-  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const totalPages =
+    filteredData && filteredData.length > 0
+      ? Math.ceil(filteredData.length / ITEMS_PER_PAGE)
+      : 1;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

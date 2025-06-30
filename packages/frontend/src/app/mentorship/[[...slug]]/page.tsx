@@ -20,7 +20,6 @@ interface MentorshipPageProps {
 }
 
 export default function MentorshipPage({ params }: MentorshipPageProps) {
-  console.log('| - - - - - - - > PARAMS EN LAYOUT:', params);
   const { role, hasRole } = useRole();
   const [pendingApplication, setPendingApplication] =
     useState<PendingApplicationResponse | null>(null);
