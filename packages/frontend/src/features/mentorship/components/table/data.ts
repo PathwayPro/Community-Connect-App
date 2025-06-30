@@ -1,4 +1,9 @@
-import { Mentee, MentorshipAdmin, RatingsGroup } from '../../types';
+import {
+  Mentee,
+  MenteeStatus,
+  MentorshipAdmin,
+  RatingsGroup
+} from '../../types';
 
 export type Sessions = {
   id: string;
@@ -38,7 +43,10 @@ export const menteesData: Mentee[] = [
       email: 'john.doe@example.com'
     },
     date: '2024-01-01',
-    profession: 'Software Engineer'
+    profession: 'Software Engineer',
+    status: MenteeStatus.PENDING,
+    email: '',
+    reason: ''
   },
   {
     id: '489e1d42',
@@ -49,7 +57,10 @@ export const menteesData: Mentee[] = [
       email: 'jane.doe@example.com'
     },
     date: '2024-01-02',
-    profession: 'Product Manager'
+    profession: 'Product Manager',
+    status: MenteeStatus.PENDING,
+    email: '',
+    reason: ''
   },
   {
     id: '489e1d42',
@@ -60,7 +71,10 @@ export const menteesData: Mentee[] = [
       email: 'fran@example.com'
     },
     date: '2024-01-02',
-    profession: 'UX Designer'
+    profession: 'UX Designer',
+    status: MenteeStatus.PENDING,
+    email: '',
+    reason: ''
   },
   {
     id: '489e1d42',
@@ -71,7 +85,10 @@ export const menteesData: Mentee[] = [
       email: 'jones@example.com'
     },
     date: '2024-01-02',
-    profession: 'QA Engineer'
+    profession: 'QA Engineer',
+    status: MenteeStatus.PENDING,
+    email: '',
+    reason: ''
   },
   {
     id: '489e1d42',
@@ -82,7 +99,10 @@ export const menteesData: Mentee[] = [
       email: 'liberty@example.com'
     },
     date: '2024-01-02',
-    profession: 'Business Analyst'
+    profession: 'Business Analyst',
+    status: MenteeStatus.PENDING,
+    email: '',
+    reason: ''
   }
 ];
 

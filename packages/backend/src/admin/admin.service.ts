@@ -854,6 +854,7 @@ export class AdminService {
               picture_upload_link: true,
               email: true,
               profession: true,
+              experience: true,
             },
           },
           reason: true,
@@ -875,6 +876,7 @@ export class AdminService {
           profession: mentee.user.profession,
           email: mentee.user.email,
           status: mentee.status,
+          experience: mentee.user.experience,
         }),
       );
 

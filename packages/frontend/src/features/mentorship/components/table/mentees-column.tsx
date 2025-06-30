@@ -7,10 +7,12 @@ import {
   AvatarImage
 } from '@/shared/components/ui/avatar';
 import { Mentee } from '../../types';
+import { Badge } from '@/shared/components/ui/badge';
+import Link from 'next/link';
 
 export const menteesColumns: ColumnDef<Mentee>[] = [
   {
-    accessorKey: 'identity.name',
+    accessorKey: 'identity.firstName',
     header: () => (
       <div className="font-semibold text-neutral-dark-600">Mentee</div>
     ),
@@ -32,17 +34,65 @@ export const menteesColumns: ColumnDef<Mentee>[] = [
     )
   },
   {
-    accessorKey: 'date',
+    accessorKey: 'email',
     header: () => (
-      <div className="font-semibold text-neutral-dark-600">Last Met</div>
+      <div className="font-semibold text-neutral-dark-600">Email</div>
     ),
-    cell: ({ row }) => <div className="">{row.getValue('date')}</div>
+    cell: ({ row }) => <div>{row.getValue('email')}</div>
   },
   {
     accessorKey: 'profession',
     header: () => (
       <div className="font-semibold text-neutral-dark-600">Profession</div>
     ),
-    cell: ({ row }) => <div className="">{row.getValue('profession')}</div>
+    cell: ({ row }) => <div>{row.getValue('profession')}</div>
+  },
+  {
+    accessorKey: 'experience',
+    header: () => (
+      <div className="font-semibold text-neutral-dark-600">Experience</div>
+    ),
+    cell: ({ row }) => <div>{row.getValue('experience')}</div>
+  },
+  {
+    accessorKey: 'status',
+    header: () => (
+      <div className="font-semibold text-neutral-dark-600">Status</div>
+    ),
+    cell: ({ row }) => (
+      <Badge
+        variant={
+          row.getValue('status') === 'Approved'
+            ? 'success'
+            : row.getValue('status') === 'Pending'
+              ? 'warning'
+              : 'destructive'
+        }
+        className="h-8 w-[90px] justify-center rounded-full text-sm font-medium text-white"
+      >
+        {row.getValue('status')}
+      </Badge>
+    )
+  },
+  {
+    id: 'actions',
+    header: () => (
+      <div className="text-center font-semibold text-neutral-dark-600">
+        Actions
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div className="flex justify-center">
+        <Link
+          href={{
+            pathname: '/mentorship/admin/mentor-profile',
+            query: { data: JSON.stringify(row.original) }
+          }}
+          className="flex h-10 w-[90px] items-center justify-center rounded-xl border border-primary-400 text-base font-medium text-primary-400 hover:bg-primary-400 hover:text-white"
+        >
+          View
+        </Link>
+      </div>
+    )
   }
 ];

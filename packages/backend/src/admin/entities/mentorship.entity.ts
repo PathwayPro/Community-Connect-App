@@ -224,4 +224,12 @@ export class MenteeAdmin {
   })
   @IsString()
   reason: string;
+
+  @ApiProperty({
+    description: 'Mentee experience',
+    type: String,
+    example: '14 years',
+  })
+  @IsString()
+  experience: string;
 }

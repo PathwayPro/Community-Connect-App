@@ -24,6 +24,7 @@ import { PaginationComponent } from '@/shared/components/pagination/pagination';
 import { bestMatchesColumns } from './table/best-matches-column';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { useMentorshipStore } from '../store';
+import { menteesColumns } from './table/mentees-column';
 
 export const MentorshipAdminPage = () => {
   const { user } = useUserStore();
@@ -45,22 +46,40 @@ export const MentorshipAdminPage = () => {
     getAdminMenteeApplications();
   }, []);
 
-  const filteredData = useMemo(() => {
+  const filteredDataMentors = useMemo(() => {
     if (selectedStatus === 'All') return adminMentorApplications;
     return adminMentorApplications.filter(
-      (item) => item.status === selectedStatus
+      (item) => item.status === selectedStatus.toUpperCase()
     );
   }, [selectedStatus, adminMentorApplications]);
 
-  const paginatedData = useMemo(() => {
-    if (!filteredData) return [];
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [currentPage, filteredData]);
+  const filteredDataMentees = useMemo(() => {
+    if (selectedStatus === 'All') return adminMenteeApplications;
+    return adminMenteeApplications.filter(
+      (item) => item.status === selectedStatus.toUpperCase()
+    );
+  }, [selectedStatus, adminMenteeApplications]);
 
-  const totalPages =
-    filteredData && filteredData.length > 0
-      ? Math.ceil(filteredData.length / ITEMS_PER_PAGE)
+  const paginatedDataMentors = useMemo(() => {
+    if (!filteredDataMentors) return [];
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredDataMentors.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [currentPage, filteredDataMentors]);
+
+  const paginatedDataMentees = useMemo(() => {
+    if (!filteredDataMentees) return [];
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredDataMentees.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [currentPage, filteredDataMentees]);
+
+  const totalPagesMentors =
+    filteredDataMentors && filteredDataMentors.length > 0
+      ? Math.ceil(filteredDataMentors.length / ITEMS_PER_PAGE)
+      : 1;
+
+  const totalPagesMentees =
+    filteredDataMentees && filteredDataMentees.length > 0
+      ? Math.ceil(filteredDataMentees.length / ITEMS_PER_PAGE)
       : 1;
 
   const handlePageChange = (page: number) => {
@@ -68,7 +87,7 @@ export const MentorshipAdminPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  console.log('totalPages', totalPages);
+  console.log('totalPages', totalPagesMentees, totalPagesMentors);
 
   const mentorApplicationsTrendValue = useMemo(() => {
     const currentMonth =
@@ -205,25 +224,28 @@ export const MentorshipAdminPage = () => {
               <TabsContent value="mentors" className="mt-4">
                 <DataTable
                   columns={mentorshipAdminColumns}
-                  data={paginatedData}
+                  data={paginatedDataMentors}
                 />
-                {totalPages > 1 && (
+                {totalPagesMentors > 1 && (
                   <div className="mt-4 flex justify-center">
                     <PaginationComponent
                       currentPage={currentPage}
-                      totalPages={totalPages}
+                      totalPages={totalPagesMentors}
                       onPageChange={handlePageChange}
                     />
                   </div>
                 )}
               </TabsContent>
               <TabsContent value="mentees" className="mt-4">
-                <DataTable columns={bestMatchesColumns} data={paginatedData} />
-                {totalPages > 1 && (
+                <DataTable
+                  columns={menteesColumns}
+                  data={paginatedDataMentees}
+                />
+                {totalPagesMentees > 1 && (
                   <div className="mt-4 flex justify-center">
                     <PaginationComponent
                       currentPage={currentPage}
-                      totalPages={totalPages}
+                      totalPages={totalPagesMentees}
                       onPageChange={handlePageChange}
                     />
                   </div>

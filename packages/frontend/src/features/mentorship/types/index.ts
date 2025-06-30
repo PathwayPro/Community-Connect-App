@@ -71,7 +71,7 @@ export interface MentorshipAdmin {
     firstName: string;
     lastName: string;
   };
-  experience: string;
+  experience?: string;
   experienceDescription?: string;
   profession: string;
   email: string;
@@ -95,4 +95,8 @@ export type Mentee = {
   };
   date: string;
   profession: string;
+  status: MenteeStatus;
+  email: string;
+  reason: string;
+  experience?: string;
 };
