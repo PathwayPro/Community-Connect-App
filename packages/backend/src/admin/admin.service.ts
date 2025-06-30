@@ -11,6 +11,7 @@ import { AnalyticsPeriod } from './dto/analytics.dto';
 import { GetUsersQueryDto } from './dto/user-management.dto';
 import {
   AdminMentorshipDashboardTotals,
+  MenteeAdmin,
   MentorshipAdmin,
 } from './entities/mentorship.entity';
 
@@ -836,6 +837,51 @@ export class AdminService {
     } catch (error) {
       throw new InternalServerErrorException(
         `Error getting mentor applications: ${error.message}`,
+      );
+    }
+  }
+  async getAdminMenteeApplications(): Promise<MenteeAdmin[]> {
+    try {
+      const menteeApplications = await this.prisma.mentees.findMany({
+        orderBy: { created_at: 'desc' },
+        select: {
+          id: true,
+          user: {
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+              picture_upload_link: true,
+              email: true,
+              profession: true,
+            },
+          },
+          reason: true,
+          created_at: true,
+          status: true,
+        },
+      });
+
+      const mappedMenteeApplications: MenteeAdmin[] = menteeApplications.map(
+        (mentee) => ({
+          id: mentee.user.id,
+          identity: {
+            avatar: mentee.user.picture_upload_link,
+            firstName: mentee.user.first_name,
+            lastName: mentee.user.last_name,
+          },
+          date: mentee.created_at.toISOString(),
+          reason: mentee.reason,
+          profession: mentee.user.profession,
+          email: mentee.user.email,
+          status: mentee.status,
+        }),
+      );
+
+      return mappedMenteeApplications;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error getting mentee applications: ${error.message}`,
       );
     }
   }

@@ -172,3 +172,56 @@ export class MentorshipAdmin {
   @IsOptional()
   ratings?: number;
 }
+
+export class MenteeAdmin {
+  @ApiProperty({ description: 'Mentee ID', type: Number, example: 10 })
+  @IsNumber()
+  id: number;
+
+  @ApiProperty({
+    description: 'Mentee identity',
+    type: MentorshipAdminIdentity,
+  })
+  @IsObject()
+  identity: MentorshipAdminIdentity;
+
+  @ApiProperty({
+    description: 'Mentee date',
+    type: String,
+    example: '2024-01-15',
+  })
+  @IsString()
+  date: string;
+
+  @ApiProperty({
+    description: 'Mentee profession',
+    type: String,
+    example: 'Software Engineer',
+  })
+  @IsString()
+  profession: string;
+
+  @ApiProperty({
+    description: 'Mentee status',
+    type: String,
+    example: 'APPROVED',
+  })
+  @IsString()
+  status: string;
+
+  @ApiProperty({
+    description: 'Mentee email',
+    type: String,
+    example: 'john.smith@example.com',
+  })
+  @IsString()
+  email: string;
+
+  @ApiProperty({
+    description: 'Mentee reason',
+    type: String,
+    example: 'I want to learn how to code',
+  })
+  @IsString()
+  reason: string;
+}
