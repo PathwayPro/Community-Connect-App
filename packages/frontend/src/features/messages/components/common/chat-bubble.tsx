@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import Image from 'next/image';
 import { MessageBubble } from '../../types';
 import * as React from 'react';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 
 interface ChatBubbleProps {
   message: MessageBubble;
@@ -120,8 +121,19 @@ export function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) {
       )}
     >
       <Avatar className="h-8 w-8">
-        <AvatarImage src={sender.picture_upload_link} alt={fullName} />
-        <AvatarFallback>{sender.first_name.charAt(0)}</AvatarFallback>
+        {sender.picture_upload_link && (
+          <ImagePreview
+            imagePath={sender.picture_upload_link ?? ''}
+            alt={fullName}
+            className="h-full w-full object-cover"
+            width={32}
+            height={32}
+            priority={true}
+          />
+        )}
+        {!sender.picture_upload_link && (
+          <AvatarFallback>{sender.first_name.charAt(0)}</AvatarFallback>
+        )}
       </Avatar>
 
       <div

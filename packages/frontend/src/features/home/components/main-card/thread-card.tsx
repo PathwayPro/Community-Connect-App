@@ -29,6 +29,7 @@ interface ThreadCardProps {
   setSelectedThread?: (thread: Thread) => void | undefined;
   setShowCommentSection?: (show: boolean) => void;
   isOwner?: boolean;
+  onEditThread?: (thread: Thread) => void;
 }
 
 export const ThreadCard = ({
@@ -48,7 +49,8 @@ export const ThreadCard = ({
   liked_by_user,
   isCommented,
   saved_by_user,
-  isOwner
+  isOwner,
+  onEditThread
 }: ThreadCardProps) => {
   const [isLiked, setIsLiked] = useState(liked_by_user);
   const [isSaved, setIsSaved] = useState(saved_by_user);
@@ -100,6 +102,26 @@ export const ThreadCard = ({
     viewThreads();
   };
 
+  const handleEditThread = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onEditThread) {
+      onEditThread({
+        id,
+        authorName,
+        authorUsername: '',
+        authorEmail: '',
+        timeAgo,
+        content,
+        avatarUrl: avatarUrl || '',
+        imageUrl: imageUrl || '',
+        likes,
+        comments,
+        saved_by_user: isSaved,
+        liked_by_user: isLiked
+      });
+    }
+  };
+
   const handleCommentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     handleViewThread();
@@ -124,21 +146,21 @@ export const ThreadCard = ({
           <div className="flex items-center gap-2">
             <Button
               variant="secondary"
-              className="h-10 rounded-full"
+              className="h-10 rounded-xl"
               onClick={handleViewThread}
             >
               View thread
             </Button>
 
-            {isOwner && (
+            {/* {isOwner && (
               <Button
                 variant="outline"
-                className="h-10 rounded-full"
-                onClick={handleViewThread}
+                className="h-10 rounded-xl"
+                onClick={handleEditThread}
               >
                 Edit thread
               </Button>
-            )}
+            )} */}
           </div>
         </BaseThreadCard.Header>
 

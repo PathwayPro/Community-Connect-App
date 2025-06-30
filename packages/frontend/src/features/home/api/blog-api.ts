@@ -30,5 +30,13 @@ export const blogApi = {
     apiMethods.post<LikeThreadResponse>(`/blog/post/${post_id}/like`),
 
   toggleSave: async (post_id: number) =>
-    apiMethods.post<SaveThreadResponse>(`/blog/post/${post_id}/save`)
+    apiMethods.post<SaveThreadResponse>(`/blog/post/${post_id}/save`),
+
+  updateThread: async (post_id: number, content: string) =>
+    apiMethods.put<ThreadResponse>(`/blog/post/${post_id}`, {
+      message: content
+    }),
+
+  deleteThread: async (post_id: number) =>
+    apiMethods.delete<ThreadResponse>(`/blog/post/${post_id}`)
 };

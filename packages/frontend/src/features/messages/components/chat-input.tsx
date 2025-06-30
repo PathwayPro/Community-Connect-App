@@ -12,6 +12,7 @@ import {
 import { useMessageStore } from '../store';
 import { ConnectionRequestsStatus } from '../types';
 import Image from 'next/image';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 interface ImagePreview {
   url: string;
   file: File;
@@ -127,13 +128,13 @@ export const ChatInput = ({
           </DialogHeader>
           {imagePreview && (
             <div className="relative">
-              <Image
-                src={imagePreview.url}
+              <ImagePreview
+                imagePath={imagePreview.url}
                 alt="Preview"
-                className="w-full rounded-lg object-contain"
+                className="max-h-[400px] w-full rounded-lg object-contain"
                 width={400}
                 height={300}
-                style={{ maxHeight: '400px' }}
+                priority={true}
               />
             </div>
           )}

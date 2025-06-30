@@ -1,8 +1,9 @@
-import { Avatar } from '@/shared/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import Image from 'next/image';
 import { ChatPreview } from '@/features/messages/types';
 import { Badge } from '@/shared/components/ui/badge';
 import { cn } from '@/shared/lib/utils';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 
 interface ChatHeaderProps {
   selectedChat?: ChatPreview;
@@ -20,17 +21,23 @@ export const ChatHeader = ({ selectedChat }: ChatHeaderProps) => {
     .filter(Boolean)
     .join(' ');
 
-  console.log('selectedChat', selectedChat, approved);
-
   return (
     <div className="flex items-center gap-3 border-b p-4">
       <Avatar className="size-10 bg-warning-500">
-        <Image
-          src={selectedChat.picture_upload_link || '/profile/profile.png'}
-          alt={fullName}
-          width={40}
-          height={40}
-        />
+        {selectedChat.picture_upload_link && (
+          <ImagePreview
+            imagePath={selectedChat.picture_upload_link ?? ''}
+            alt={fullName}
+            className="h-full w-full object-cover"
+            width={40}
+            height={40}
+            priority={true}
+          />
+        )}
+
+        {!selectedChat.picture_upload_link && (
+          <AvatarFallback>{selectedChat.first_name.charAt(0)}</AvatarFallback>
+        )}
       </Avatar>
       <div>
         <p className="text-paragraph-sm font-normal">{fullName}</p>

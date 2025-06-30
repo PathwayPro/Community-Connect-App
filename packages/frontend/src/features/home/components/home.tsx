@@ -15,6 +15,7 @@ import {
 import { useBlogStore } from '../store';
 import { ThreadResponse, PostCommentResponse, NavItemProps } from '../types';
 import { useUserStore } from '@/features/user-profile/store';
+import { EditThreadModal } from './common/edit-thread-modal';
 
 const transformThreadResponseToThread = (response: ThreadResponse): Thread => ({
   id: response.id,
@@ -43,6 +44,10 @@ export const Home = () => {
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
   const [showCommentSection, setShowCommentSection] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editThreadContent, setEditThreadContent] = useState('');
+  const [editThreadLoading, setEditThreadLoading] = useState(false);
+  const [editThreadId, setEditThreadId] = useState<number | null>(null);
   const { user } = useUserStore();
 
   const {
@@ -50,7 +55,8 @@ export const Home = () => {
     fetchThreads,
     createThread,
     isLoading,
-    error
+    error,
+    updateThread
   } = useBlogStore(); // Get threads, loading, and error from store
   const threads: Thread[] = rawThreads.map(transformThreadResponseToThread); // Transform the API response
 
@@ -84,6 +90,8 @@ export const Home = () => {
     setViewThreads(true);
   };
 
+  console.log('all threads', threads);
+
   const filteredThreads = threads.filter((thread) => {
     // if (activeTab === 'Tags') {
     //   if (selectedTags.length === 0) return true;
@@ -97,6 +105,28 @@ export const Home = () => {
   const handleActiveTab = (tab: NavItemProps) => {
     setActiveFilterTab(tab.filter || 'THREADS');
     setActiveTab(tab.label);
+  };
+
+  const handleEditThread = (thread: Thread) => {
+    setEditThreadId(thread.id);
+    setEditThreadContent(thread.content);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateThread = async (content: string) => {
+    if (!editThreadId) return;
+    setEditThreadLoading(true);
+    try {
+      await updateThread(editThreadId, content);
+      await fetchThreads({ filter: activeFilterTab, order_by: sort });
+      setIsEditModalOpen(false);
+      setEditThreadLoading(false);
+      setEditThreadId(null);
+      setEditThreadContent('');
+    } catch (error) {
+      setEditThreadLoading(false);
+      // Optionally show error toast here
+    }
   };
 
   console.log('| - - - - - - - > FILTERED THREADS 1: ', filteredThreads);
@@ -174,9 +204,17 @@ export const Home = () => {
                     setSelectedThread={setSelectedThread}
                     setShowCommentSection={setShowCommentSection}
                     isOwner={thread.authorEmail === user?.email}
+                    onEditThread={handleEditThread}
                   />
                 ))}
               </div>
+              <EditThreadModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                onUpdate={handleUpdateThread}
+                initialContent={editThreadContent}
+                loading={editThreadLoading}
+              />
             </>
           )}
         </div>

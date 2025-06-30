@@ -56,8 +56,6 @@ BaseThreadCard.Author = function ThreadCardAuthor({
   avatarUrl: string;
   timeAgo: string;
 }) {
-  console.log('this is the timeAgo in the author', timeAgo);
-
   return (
     <div className="flex gap-3">
       <Avatar className="h-16 w-16 bg-warning-500">

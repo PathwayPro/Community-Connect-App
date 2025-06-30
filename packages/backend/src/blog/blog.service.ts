@@ -349,6 +349,8 @@ export class BlogService {
         throw new NotFoundException(`There is no post with ID #${post_id}`);
       }
 
+      console.log('currentPost to edit', currentPost);
+
       // VERIFY IS ALLOWED TO EDIT (ADMIN | AUTHOR)
       const canEdit =
         user.roles === 'ADMIN' || currentPost.user_id === user.sub;
@@ -367,6 +369,9 @@ export class BlogService {
         message: updatedPost.message,
         updated_at: new Date(),
       };
+
+      console.log('postData to edit', postData);
+
       const post = await this.prisma.posts.update({
         where: { id: post_id },
         data: postData,
@@ -377,6 +382,8 @@ export class BlogService {
           image: true,
         },
       });
+
+      console.log('post updated', post);
 
       return this.returnFormattedData(post);
     } catch (error) {

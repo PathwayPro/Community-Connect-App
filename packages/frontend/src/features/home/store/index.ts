@@ -22,6 +22,10 @@ interface BlogState {
   createComment: (post_id: number, content: string) => Promise<void>;
   toggleLike: (post_id: number) => Promise<LikeThreadResponse>;
   toggleSave: (post_id: number) => Promise<SaveThreadResponse>;
+  updateThread: (
+    post_id: number,
+    content: string
+  ) => Promise<string | undefined>;
 }
 
 export const useBlogStore = create<BlogState>()(
@@ -109,6 +113,24 @@ export const useBlogStore = create<BlogState>()(
               error instanceof Error
                 ? error.message
                 : 'An error occurred creating the comment',
+            isLoading: false
+          });
+        }
+      },
+
+      updateThread: async (post_id: number, content: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          console.log('UPDATING THREAD: ', post_id, content);
+
+          const response = await blogApi.updateThread(post_id, content);
+
+          console.log('| - - - - - - - > RESPONSE UPDATING THREAD:', response);
+
+          return response.data.content;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
             isLoading: false
           });
         }

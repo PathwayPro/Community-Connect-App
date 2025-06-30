@@ -25,6 +25,7 @@ import {
   DialogTitle
 } from '@/shared/components/ui/dialog';
 import { useRouter } from 'next/navigation';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 
 interface NetworkingCardProps {
   profile: ConnectionRequest;
@@ -179,14 +180,20 @@ export const NetworkingCard = ({ profile }: NetworkingCardProps) => {
         <div className="flex flex-1 flex-col items-center px-4">
           {/* Avatar - positioned to overlap with header */}
           <Avatar className="-mt-14 h-[110px] w-[110px] border-4 border-white bg-warning-500">
-            <AvatarImage
-              src={profile.picture_upload_link ?? ''}
-              alt={`${profile.first_name} ${profile.last_name}`}
-              className="h-full w-full object-cover"
-            />
-            <AvatarFallback>
-              <UserRoundIcon className="h-6 w-6" />
-            </AvatarFallback>
+            {profile.picture_upload_link && (
+              <ImagePreview
+                imagePath={profile.picture_upload_link ?? ''}
+                alt={`${profile.first_name} ${profile.last_name}`}
+                className="h-full w-full object-cover"
+                width={110}
+                height={110}
+              />
+            )}
+            {!profile.picture_upload_link && (
+              <AvatarFallback>
+                <UserRoundIcon className="h-6 w-6" />
+              </AvatarFallback>
+            )}
           </Avatar>
 
           {/* Profile Info */}
