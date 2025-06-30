@@ -162,10 +162,14 @@ export class MentorService {
     }
   }
 
-  async findOneByUserId(user_id: number, raiseError: boolean = true) {
+  async findOneByUserId(
+    user_id: number,
+    status: mentors_status = null,
+    raiseError: boolean = true,
+  ) {
     try {
       const mentor = await this.prisma.mentors.findFirst({
-        where: { user_id },
+        where: { user_id, status },
         include: {
           user: {
             select: {

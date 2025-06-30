@@ -136,10 +136,14 @@ export class MenteeService {
     }
   }
 
-  async findOneByUserId(user_id: number, raiseError: boolean = true) {
+  async findOneByUserId(
+    user_id: number,
+    status: mentees_status = null,
+    raiseError: boolean = true,
+  ) {
     try {
       const mentee = await this.prisma.mentees.findFirst({
-        where: { user_id },
+        where: { user_id, status },
         include: {
           user: {
             select: {

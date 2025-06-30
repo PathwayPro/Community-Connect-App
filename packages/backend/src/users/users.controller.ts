@@ -384,7 +384,7 @@ export class UsersController {
     return await this.usersService.deleteUser(currentUserId, targetUserId);
   }
 
-  @Get('my-applications')
+  @Get('pending-applications')
   @Roles('USER', 'MENTOR', 'ADMIN', 'MENTEE')
   @ApiOkResponse({ type: UserPendingApplication })
   @ApiInternalServerErrorResponse({ description: `[ERROR MESSAGE]` })
@@ -398,9 +398,10 @@ export class UsersController {
       'There is no mentee/mentor application with status "PENDING" for this user (USER ID: #`:id` )',
   })
   @ApiBearerAuth('JWT')
-  async findMyApplications(@GetUser() user: JwtPayload) {
+  async findMyApplicationsPending(@GetUser() user: JwtPayload) {
     const menteeApplication = await this.menteeService.findOneByUserId(
       user.sub,
+      'PENDING',
       false,
     );
     if (menteeApplication?.status === 'PENDING') {
@@ -412,6 +413,7 @@ export class UsersController {
     }
     const mentorApplication = await this.mentorService.findOneByUserId(
       user.sub,
+      'PENDING',
       false,
     );
     if (mentorApplication?.status === 'PENDING') {
