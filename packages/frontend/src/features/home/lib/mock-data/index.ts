@@ -9,6 +9,7 @@ export interface Thread {
   id: number;
   authorName: string;
   authorUsername: string;
+  authorEmail: string;
   timeAgo: string;
   content: string;
   avatarUrl: string;
@@ -32,6 +33,23 @@ export interface Comment {
   likes?: number;
   comments?: number;
   replies?: Comment[];
+  liked_by_user?: boolean;
+  saved_by_user?: boolean;
+  parent_id?: number;
+  post?: {
+    id: number;
+    message: string;
+    created_at: string;
+    published: boolean;
+    user: {
+      id: number;
+      first_name: string;
+      middle_name?: string;
+      last_name: string;
+      email: string;
+      picture_upload_link?: string;
+    };
+  };
 }
 
 export const mockThreads: Thread[] = [
@@ -39,6 +57,7 @@ export const mockThreads: Thread[] = [
     id: 1,
     authorName: 'Sarah Johnson',
     authorUsername: 'sarahj',
+    authorEmail: 'sarahj@gmail.com',
     timeAgo: '2h',
     content:
       "Just deployed my first Next.js application! The new App Router is amazing for building complex applications. What's your favorite feature? #webdev #nextjs",
@@ -53,6 +72,7 @@ export const mockThreads: Thread[] = [
     id: 2,
     authorName: 'Alex Chen',
     authorUsername: 'alexc_dev',
+    authorEmail: 'alexc_dev@gmail.com',
     timeAgo: '5h',
     content:
       "Exploring the power of Tailwind CSS and Shadcn UI. The developer experience is unmatched! Here's a sneak peek of my latest project built using the latest Next.js 14 App Router. Great for building complex applications and scalable websites. #webdev #tailwindcss #shadcn",
@@ -67,6 +87,7 @@ export const mockThreads: Thread[] = [
     id: 3,
     authorName: 'Maria Garcia',
     authorUsername: 'maria_codes',
+    authorEmail: 'maria_codes@gmail.com',
     timeAgo: '1d',
     content:
       "TypeScript tip of the day: Use discriminated unions for better type safety in your React components. It's a game changer! 🚀",
@@ -81,6 +102,7 @@ export const mockThreads: Thread[] = [
     id: 4,
     authorName: 'David Kim',
     authorUsername: 'davidk',
+    authorEmail: 'davidk@gmail.com',
     timeAgo: '2d',
     content:
       'Just released a new open-source library for React animations. Check it out and let me know what you think! Link in bio ⚡️',
@@ -95,6 +117,7 @@ export const mockThreads: Thread[] = [
     id: 5,
     authorName: 'Emma Wilson',
     authorUsername: 'emmaw_tech',
+    authorEmail: 'emmaw_tech@gmail.com',
     timeAgo: '3d',
     content:
       "Radix UI + Tailwind CSS is such a powerful combination for building accessible components. Here's my latest design system implementation.",
@@ -117,7 +140,9 @@ export const mockComments: Comment[] = [
     avatarUrl: '/profile/msnobody.png',
     likes: 10,
     comments: 0,
-    replies: []
+    replies: [],
+    liked_by_user: false,
+    saved_by_user: false
   },
   {
     id: 2,
@@ -128,7 +153,9 @@ export const mockComments: Comment[] = [
     avatarUrl: '/profile/mra.png',
     likes: 15,
     comments: 0,
-    replies: []
+    replies: [],
+    liked_by_user: false,
+    saved_by_user: false
   },
   {
     id: 3,
@@ -147,7 +174,9 @@ export const mockComments: Comment[] = [
         timeAgo: '2h',
         content: 'This is a reply',
         avatarUrl: '/profile/msnobody.png',
-        likes: 10
+        likes: 10,
+        liked_by_user: false,
+        saved_by_user: false
       },
       {
         id: 2,
@@ -156,8 +185,12 @@ export const mockComments: Comment[] = [
         timeAgo: '5h',
         content: 'This is a reply',
         avatarUrl: '/profile/mra.png',
-        likes: 15
+        likes: 15,
+        liked_by_user: false,
+        saved_by_user: false
       }
-    ]
+    ],
+    liked_by_user: false,
+    saved_by_user: true
   }
 ];

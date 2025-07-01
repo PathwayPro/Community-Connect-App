@@ -8,8 +8,8 @@ import { useState } from 'react';
 import { cn } from '@/shared/lib/utils';
 import { Badge } from '@/shared/components/ui/badge';
 import { useBlogStore } from '../../store';
-import { boolean } from 'zod';
-
+import { Checkbox } from '@/shared/components/ui/checkbox';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 interface ThreadCardProps {
   id: number;
   authorName: string;
@@ -29,6 +29,11 @@ interface ThreadCardProps {
   selectedThread?: Thread;
   setSelectedThread?: (thread: Thread) => void | undefined;
   setShowCommentSection?: (show: boolean) => void;
+  isOwner?: boolean;
+  onEditThread?: (thread: Thread) => void;
+  showCheckbox?: boolean;
+  selected?: boolean;
+  onSelect?: (checked: boolean) => void;
 }
 
 export const ThreadCard = ({
@@ -47,7 +52,11 @@ export const ThreadCard = ({
   setShowCommentSection,
   liked_by_user,
   isCommented,
-  saved_by_user
+  saved_by_user,
+  onEditThread,
+  showCheckbox = false,
+  selected = false,
+  onSelect
 }: ThreadCardProps) => {
   const [isLiked, setIsLiked] = useState(liked_by_user);
   const [isSaved, setIsSaved] = useState(saved_by_user);
@@ -81,14 +90,11 @@ export const ThreadCard = ({
         id,
         authorName,
         authorUsername: '',
+        authorEmail: '',
         timeAgo,
         content,
-        avatarUrl:
-          avatarUrl ||
-          'https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png',
-        imageUrl:
-          imageUrl ||
-          'https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png',
+        avatarUrl: avatarUrl || '',
+        imageUrl: imageUrl || '',
         likes,
         comments,
         saved_by_user: isSaved,
@@ -96,6 +102,26 @@ export const ThreadCard = ({
       });
     }
     viewThreads();
+  };
+
+  const handleEditThread = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onEditThread) {
+      onEditThread({
+        id,
+        authorName,
+        authorUsername: '',
+        authorEmail: '',
+        timeAgo,
+        content,
+        avatarUrl: avatarUrl || '',
+        imageUrl: imageUrl || '',
+        likes,
+        comments,
+        saved_by_user: isSaved,
+        liked_by_user: isLiked
+      });
+    }
   };
 
   const handleCommentClick = (e: React.MouseEvent) => {
@@ -114,18 +140,39 @@ export const ThreadCard = ({
     >
       <BaseThreadCard>
         <BaseThreadCard.Header>
-          <BaseThreadCard.Author
-            name={authorName}
-            avatarUrl={avatarUrl}
-            timeAgo={timeAgo}
-          />
-          <Button
-            variant="secondary"
-            className="h-12 rounded-full"
-            onClick={handleViewThread}
-          >
-            View thread
-          </Button>
+          <div className="flex items-center gap-2">
+            {showCheckbox && (
+              <Checkbox
+                checked={selected}
+                onCheckedChange={onSelect}
+                aria-label="Select thread"
+              />
+            )}
+            <BaseThreadCard.Author
+              name={authorName}
+              avatarUrl={avatarUrl}
+              timeAgo={timeAgo}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              className="h-10 rounded-xl"
+              onClick={handleViewThread}
+            >
+              View thread
+            </Button>
+
+            {/* {isOwner && (
+              <Button
+                variant="outline"
+                className="h-10 rounded-xl"
+                onClick={handleEditThread}
+              >
+                Edit thread
+              </Button>
+            )} */}
+          </div>
         </BaseThreadCard.Header>
 
         <BaseThreadCard.Content>
@@ -145,13 +192,13 @@ export const ThreadCard = ({
           )}
 
           {imageUrl && (
-            <Image
-              src={imageUrl}
+            <ImagePreview
+              imagePath={imageUrl}
               alt="Thread content"
               width={710}
               height={437}
-              className="w-full rounded-md object-cover"
-              priority
+              className="w-full rounded-md"
+              priority={true}
             />
           )}
         </BaseThreadCard.Content>

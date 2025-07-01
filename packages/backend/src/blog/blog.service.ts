@@ -90,6 +90,9 @@ export class BlogService {
     if (filters?.user_id) {
       formattedFilters.user_id = filters.user_id;
     }
+    if (filters?.parent_id !== undefined) {
+      formattedFilters.parent_id = filters.parent_id;
+    }
     if (typeof filters?.published === 'boolean') {
       formattedFilters.published = filters.published;
     }
@@ -135,6 +138,7 @@ export class BlogService {
       first_name: true,
       middle_name: true,
       last_name: true,
+      email: true,
       picture_upload_link: true,
     };
   }
@@ -204,16 +208,39 @@ export class BlogService {
 
   async createComment(user: JwtPayload, newComment: CreateCommentDto) {
     try {
+      // Validate parent comment if provided
+      if (newComment.parent_id) {
+        const parentComment = await this.prisma.postsComments.findFirst({
+          where: {
+            id: newComment.parent_id,
+            post_id: newComment.post_id,
+            deleted_at: null,
+          },
+        });
+
+        if (!parentComment) {
+          throw new BadRequestException(
+            'Parent comment not found or does not belong to the specified post',
+          );
+        }
+      }
+
       // CREATE COMMENT
       const commentData: Prisma.PostsCommentsCreateInput = {
         user: { connect: { id: user.sub } },
         post: { connect: { id: newComment.post_id } },
         message: newComment.message,
         published: true,
+        ...(newComment.parent_id && {
+          parent: { connect: { id: newComment.parent_id } },
+        }),
       };
+
       const comment = await this.prisma.postsComments.create({
         data: commentData,
         select: {
+          id: true,
+          parent_id: true,
           user: { select: this.getUserSelection() },
           post: {
             select: {
@@ -333,6 +360,114 @@ export class BlogService {
     }
   }
 
+  async createCommentLike(user: JwtPayload, comment_id: number) {
+    try {
+      // VERIFY COMMENT EXIST
+      const comment = await this.prisma.postsComments.findFirst({
+        where: { id: comment_id },
+      });
+      if (!comment) {
+        throw new NotFoundException(
+          `There is no comment with ID #${comment_id}`,
+        );
+      }
+
+      // VERIFY IF LIKE EXISTS
+      const likeExist = await this.prisma.postsCommentsLikes.findFirst({
+        where: {
+          user_id: user.sub,
+          comment_id,
+        },
+      });
+
+      if (likeExist) {
+        // REMOVE LIKE IF ALREADY EXIST
+        const deletedLike = await this.prisma.postsCommentsLikes.delete({
+          where: { id: likeExist.id },
+        });
+        if (!deletedLike) {
+          throw new InternalServerErrorException(
+            `There was an error deleting the like`,
+          );
+        }
+        return { likeStatus: 'REMOVED' };
+      } else {
+        // CREATE (ADD) LIKE IF DON'T EXIST
+        const likeData: Prisma.PostsCommentsLikesCreateInput = {
+          user: { connect: { id: user.sub } },
+          comment: { connect: { id: comment_id } },
+        };
+        const like = await this.prisma.postsCommentsLikes.create({
+          data: likeData,
+        });
+        if (!like) {
+          throw new InternalServerErrorException(
+            `There was an error adding the like`,
+          );
+        }
+        return { likeStatus: 'CREATED' };
+      }
+    } catch (error) {
+      throw new BadRequestException(
+        'Error creating comment like: ' + error.message,
+      );
+    }
+  }
+
+  async createCommentSave(user: JwtPayload, comment_id: number) {
+    try {
+      // VERIFY COMMENT EXIST
+      const comment = await this.prisma.postsComments.findFirst({
+        where: { id: comment_id },
+      });
+      if (!comment) {
+        throw new NotFoundException(
+          `There is no comment with ID #${comment_id}`,
+        );
+      }
+
+      // VERIFY IF SAVE EXISTS
+      const saveExist = await this.prisma.postsCommentsSaves.findFirst({
+        where: {
+          user_id: user.sub,
+          comment_id,
+        },
+      });
+
+      if (saveExist) {
+        // REMOVE SAVE IF ALREADY EXIST
+        const deletedSave = await this.prisma.postsCommentsSaves.delete({
+          where: { id: saveExist.id },
+        });
+        if (!deletedSave) {
+          throw new InternalServerErrorException(
+            `There was an error unsaving the comment`,
+          );
+        }
+        return { saveStatus: 'REMOVED' };
+      } else {
+        // CREATE (ADD) SAVE IF DON'T EXIST
+        const saveData: Prisma.PostsCommentsSavesCreateInput = {
+          user: { connect: { id: user.sub } },
+          comment: { connect: { id: comment_id } },
+        };
+        const save = await this.prisma.postsCommentsSaves.create({
+          data: saveData,
+        });
+        if (!save) {
+          throw new InternalServerErrorException(
+            `There was an error saving the comment`,
+          );
+        }
+        return { saveStatus: 'CREATED' };
+      }
+    } catch (error) {
+      throw new BadRequestException(
+        'Error creating comment save: ' + error.message,
+      );
+    }
+  }
+
   async updatePost(
     post_id: number,
     user: JwtPayload,
@@ -347,6 +482,8 @@ export class BlogService {
       if (!currentPost) {
         throw new NotFoundException(`There is no post with ID #${post_id}`);
       }
+
+      console.log('currentPost to edit', currentPost);
 
       // VERIFY IS ALLOWED TO EDIT (ADMIN | AUTHOR)
       const canEdit =
@@ -366,6 +503,9 @@ export class BlogService {
         message: updatedPost.message,
         updated_at: new Date(),
       };
+
+      console.log('postData to edit', postData);
+
       const post = await this.prisma.posts.update({
         where: { id: post_id },
         data: postData,
@@ -376,6 +516,8 @@ export class BlogService {
           image: true,
         },
       });
+
+      console.log('post updated', post);
 
       return this.returnFormattedData(post);
     } catch (error) {
@@ -510,7 +652,7 @@ export class BlogService {
     try {
       // VERIFY POST EXIST
       const currentPost = await this.prisma.posts.findFirst({
-        where: { id: post_id },
+        where: { id: post_id, deleted_at: null },
       });
       if (!currentPost) {
         throw new NotFoundException(`There is no post with ID #${post_id}`);
@@ -523,9 +665,10 @@ export class BlogService {
         );
       }
 
-      // DELETE POST
-      const deletedPost = await this.prisma.posts.delete({
+      // SOFT DELETE POST
+      const deletedPost = await this.prisma.posts.update({
         where: { id: post_id },
+        data: { deleted_at: new Date() },
       });
       return this.returnFormattedData(deletedPost);
     } catch (error) {
@@ -537,7 +680,7 @@ export class BlogService {
     try {
       // VERIFY COMMENT EXIST
       const currentComment = await this.prisma.postsComments.findFirst({
-        where: { id: comment_id },
+        where: { id: comment_id, deleted_at: null },
       });
       if (!currentComment) {
         throw new NotFoundException(
@@ -552,9 +695,10 @@ export class BlogService {
         );
       }
 
-      // DELETE COMMENT
-      const deletedComment = await this.prisma.postsComments.delete({
+      // SOFT DELETE COMMENT
+      const deletedComment = await this.prisma.postsComments.update({
         where: { id: comment_id },
+        data: { deleted_at: new Date() },
       });
       return this.returnFormattedData(deletedComment);
     } catch (error) {
@@ -619,13 +763,13 @@ export class BlogService {
   async findOnePost(user: JwtPayload, id: number) {
     // VERIFY POST EXIST
     const currentPost = await this.prisma.posts.findFirst({
-      where: { id },
+      where: { id, deleted_at: null },
       select: {
         ...this.getPostSelection(),
         published: true,
         _count: {
           select: {
-            comments: true,
+            comments: { where: { deleted_at: null } },
             likes: true,
           },
         },
@@ -662,7 +806,7 @@ export class BlogService {
   async findOneComment(user: JwtPayload, id: number) {
     // VERIFY COMMENT EXIST
     const currentComment = await this.prisma.postsComments.findFirst({
-      where: { id },
+      where: { id, deleted_at: null },
       select: {
         post: { select: this.getPostSelection() },
         user: { select: this.getUserSelection() },
@@ -704,6 +848,9 @@ export class BlogService {
       const appliedFilters: Prisma.PostsWhereInput =
         this.getPostFormattedFilters(filters, user_id);
 
+      // Add filter to exclude soft-deleted posts
+      appliedFilters.deleted_at = null;
+
       const posts = await this.prisma.posts.findMany({
         where: appliedFilters,
         select: {
@@ -712,7 +859,7 @@ export class BlogService {
           published: true,
           _count: {
             select: {
-              comments: { where: { published: true } },
+              comments: { where: { deleted_at: null } },
               likes: true, // This correctly counts ALL likes for the post
             },
           },
@@ -753,21 +900,109 @@ export class BlogService {
     }
   }
 
+  async findCommentsByPostId(postId: number) {
+    try {
+      // Get all comments for the post (including replies)
+      const allComments = await this.prisma.postsComments.findMany({
+        where: {
+          post_id: postId,
+          deleted_at: null,
+          published: true,
+        },
+        select: {
+          id: true,
+          parent_id: true,
+          message: true,
+          created_at: true,
+          updated_at: true,
+          published: true,
+          user: { select: this.getUserSelection() },
+          post: { select: this.getPostSelection() },
+          _count: {
+            select: {
+              likes: true,
+            },
+          },
+          likes: {
+            select: { id: true },
+            take: 1,
+          },
+          saves: {
+            select: { id: true },
+            take: 1,
+          },
+        },
+        orderBy: { created_at: 'asc' },
+      });
+
+      // Separate top-level comments and replies
+      const topLevelComments = allComments.filter(
+        (comment) => !comment.parent_id,
+      );
+      const replies = allComments.filter((comment) => comment.parent_id);
+
+      // Build hierarchical structure
+      const commentsWithReplies = topLevelComments.map((comment) => ({
+        ...comment,
+        likes_count: comment._count.likes,
+        liked_by_user: comment.likes.length > 0,
+        saved_by_user: comment.saves.length > 0,
+        replies: replies
+          .filter((reply) => reply.parent_id === comment.id)
+          .map((reply) => ({
+            ...reply,
+            likes_count: reply._count.likes,
+            liked_by_user: reply.likes.length > 0,
+            saved_by_user: reply.saves.length > 0,
+          }))
+          .sort(
+            (a, b) =>
+              new Date(a.created_at).getTime() -
+              new Date(b.created_at).getTime(),
+          ),
+      }));
+
+      return commentsWithReplies;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error fetching comments for post #${postId}: ${error.message}`,
+      );
+    }
+  }
+
   async findAllComments(filters: FilterCommentsDto) {
     try {
       const appliedFilters: Prisma.PostsCommentsWhereInput =
         this.getCommentsFormattedFilters(filters);
 
+      // Add filter to exclude soft-deleted comments
+      appliedFilters.deleted_at = null;
+
       const comments = await this.prisma.postsComments.findMany({
         where: appliedFilters,
         select: {
           id: true,
+          parent_id: true,
           message: true,
           updated_at: true,
           published: true,
           user: { select: this.getUserSelection() },
           post: { select: this.getPostSelection() },
+          replies: {
+            where: { deleted_at: null },
+            select: {
+              id: true,
+              parent_id: true,
+              message: true,
+              updated_at: true,
+              published: true,
+              user: { select: this.getUserSelection() },
+              post: { select: this.getPostSelection() },
+            },
+            orderBy: { created_at: 'asc' },
+          },
         },
+        orderBy: { created_at: 'asc' },
       });
 
       return comments;

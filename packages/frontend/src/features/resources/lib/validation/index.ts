@@ -71,38 +71,52 @@ const resourceTypeValues = Object.values(resourceTypes).map(
   (type) => type.value
 ) as [string, ...string[]];
 
-export const resourceFormSchema = z.object({
-  title: z
-    .string({
-      required_error: 'Title is required'
-    })
-    .min(3, 'Title must be at least 3 characters'),
-  details: z
-    .string({
-      required_error: 'Details are required'
-    })
-    .min(10, 'Details must be at least 10 characters'),
-  type: z.enum(resourceTypeValues, {
-    required_error: 'Resource type is required'
-  }),
-  link: z
-    .string({
-      required_error: 'Link is required'
-    })
-    .regex(urlPattern, 'Must be a valid URL'),
-  file: z
-    .any()
-    .optional()
-    .refine(
-      (file) => {
-        if (!file) return true;
-        return file instanceof File;
-      },
-      {
-        message: 'Invalid file format'
-      }
-    ),
-  removeFile: z.boolean().optional()
-});
+export const resourceFormSchema = z
+  .object({
+    title: z
+      .string({ required_error: 'Title is required' })
+      .min(3, 'Title must be at least 3 characters'),
+    details: z
+      .string({ required_error: 'Details are required' })
+      .min(10, 'Details must be at least 10 characters'),
+    type: z.enum(resourceTypeValues, {
+      required_error: 'Resource type is required'
+    }),
+    link: z.string().optional(),
+    file: z
+      .any()
+      .optional()
+      .refine(
+        (file) => {
+          if (!file) return true;
+          return file instanceof File;
+        },
+        {
+          message: 'Invalid file format'
+        }
+      ),
+    removeFile: z.boolean().optional()
+  })
+  .superRefine((data, ctx) => {
+    const hasLink = data.link && data.link.trim() !== '';
+    const hasFile = data.file && !data.removeFile;
+
+    if (!hasLink && !hasFile) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Either a link or file must be provided',
+        path: ['link']
+      });
+    }
+
+    // Only validate link format if link is present
+    if (hasLink && data.link && !urlPattern.test(data.link)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Must be a valid URL',
+        path: ['link']
+      });
+    }
+  });
 
 export type ResourceFormValues = z.infer<typeof resourceFormSchema>;

@@ -1,12 +1,10 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage
-} from '@/shared/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Card } from '@/shared/components/ui/card';
 import { ImageIcon, SmileIcon } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { cn } from '@/shared/lib/utils';
+import { ImagePreview } from '@/shared/components/image/image-preview';
+import { UserProfile } from '@/features/user-profile/types';
 
 interface ThreadSearchbarProps {
   onCreateThread?: () => void;
@@ -14,6 +12,7 @@ interface ThreadSearchbarProps {
   className?: string;
   inputClassName?: string;
   variant?: 'primary' | 'secondary';
+  user: UserProfile;
 }
 
 export const ThreadSearchbar = ({
@@ -21,7 +20,8 @@ export const ThreadSearchbar = ({
   title = 'Start a Thread',
   className,
   inputClassName,
-  variant = 'primary'
+  variant = 'primary',
+  user
 }: ThreadSearchbarProps) => {
   return (
     <Card
@@ -33,8 +33,27 @@ export const ThreadSearchbar = ({
     >
       <div className="flex items-center gap-6">
         <Avatar className="h-11 w-11 bg-warning-500">
-          <AvatarImage src="https://github.com/shadcn.png" alt="User avatar" />
-          <AvatarFallback>CN</AvatarFallback>
+          {user?.pictureUploadLink && (
+            <ImagePreview
+              imagePath={user?.pictureUploadLink}
+              alt={user?.firstName + ' ' + user?.lastName}
+              fill={true}
+              priority={true}
+              className="rounded-full object-cover"
+            />
+          )}
+          {!user?.pictureUploadLink && (
+            <AvatarFallback className="bg-warning-500">
+              {user?.firstName
+                ?.split(' ')
+                ?.map((n) => n[0])
+                ?.join('') || ''}
+              {user?.lastName
+                ?.split(' ')
+                ?.map((n) => n[0])
+                ?.join('') || ''}
+            </AvatarFallback>
+          )}
         </Avatar>
 
         <div className="relative h-12 flex-1 items-center">

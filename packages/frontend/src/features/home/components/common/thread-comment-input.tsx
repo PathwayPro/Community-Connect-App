@@ -9,19 +9,23 @@ import {
 } from '@/shared/components/ui/avatar';
 import { SharedIcons } from '@/shared/components/icons';
 import { cn } from '@/shared/lib/utils';
+import { UserProfile } from '@/features/user-profile/types';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 
 interface ThreadCommentInputProps {
   onSubmit: (comment: string) => void;
   onCancel: () => void;
   className?: string;
   variant?: 'primary' | 'secondary';
+  user: UserProfile;
 }
 
 export const ThreadCommentInput = ({
   onSubmit,
   onCancel,
   className,
-  variant = 'primary'
+  variant = 'primary',
+  user
 }: ThreadCommentInputProps) => {
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,8 +59,27 @@ export const ThreadCommentInput = ({
     >
       <div className="flex items-center gap-6">
         <Avatar className="mb-12 h-11 w-11 bg-warning-500">
-          <AvatarImage src="https://github.com/shadcn.png" alt="User avatar" />
-          <AvatarFallback>CN</AvatarFallback>
+          {user.pictureUploadLink && (
+            <ImagePreview
+              imagePath={user.pictureUploadLink}
+              alt={user.firstName + ' ' + user.lastName}
+              fill={true}
+              priority={true}
+              className="rounded-full object-cover"
+            />
+          )}
+          {!user.pictureUploadLink && (
+            <AvatarFallback className="bg-warning-500">
+              {user.firstName
+                ?.split(' ')
+                .map((n) => n[0])
+                .join('') || ''}
+              {user.lastName
+                ?.split(' ')
+                .map((n) => n[0])
+                .join('') || ''}
+            </AvatarFallback>
+          )}
         </Avatar>
         <div className="flex-1">
           <div className="relative flex flex-col">

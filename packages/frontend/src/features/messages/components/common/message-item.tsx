@@ -7,6 +7,7 @@ import {
 } from '@/shared/components/ui/avatar';
 import { ChatPreview } from '@/features/messages/types';
 import { MessageTimestamp } from './chat-bubble';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 
 interface MessageItemProps {
   chat: ChatPreview;
@@ -28,9 +29,20 @@ export const MessageItem = ({
       }`}
       onClick={onClick}
     >
-      <Avatar className="size-10">
-        <AvatarImage src={chat.picture_upload_link || '/profile/profile.png'} />
-        <AvatarFallback>{chat.first_name.charAt(0)}</AvatarFallback>
+      <Avatar className="size-10 bg-warning-500">
+        {chat.picture_upload_link && (
+          <ImagePreview
+            imagePath={chat.picture_upload_link ?? ''}
+            alt={fullName}
+            className="h-full w-full object-cover"
+            width={40}
+            height={40}
+            priority={true}
+          />
+        )}
+        {!chat.picture_upload_link && (
+          <AvatarFallback>{chat.first_name.charAt(0)}</AvatarFallback>
+        )}
       </Avatar>
       <div className="flex flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
