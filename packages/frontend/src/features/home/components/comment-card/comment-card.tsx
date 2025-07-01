@@ -148,17 +148,6 @@ export const CommentCard = ({
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleSave}
-              className="flex items-center gap-2 rounded-full p-1 text-gray-500 hover:bg-neutral-light-200"
-            >
-              <Bookmark
-                className={cn(
-                  'h-5 w-5',
-                  isSaved ? 'fill-primary-500 text-primary-500' : ''
-                )}
-              />
-            </button>
             {/* Only show expand/collapse for top-level comments with replies */}
             {hasReplies &&
               !isSubComment &&
@@ -176,6 +165,17 @@ export const CommentCard = ({
                   {showCommentSection ? 'Hide Comments' : 'View Comments'}
                 </button>
               )}
+            <button
+              onClick={handleSave}
+              className="flex items-center gap-2 rounded-full p-1 text-gray-500 hover:bg-neutral-light-200"
+            >
+              <Bookmark
+                className={cn(
+                  'h-5 w-5',
+                  isSaved ? 'fill-primary-500 text-primary-500' : ''
+                )}
+              />
+            </button>
           </div>
         </BaseThreadCard.Actions>
 

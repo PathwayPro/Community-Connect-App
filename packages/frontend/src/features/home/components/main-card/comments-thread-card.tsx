@@ -51,6 +51,7 @@ interface CommentCardProps {
   avatarUrl: string;
   timeAgo: string;
   likes: number;
+  comments: number;
   liked_by_user?: boolean;
   saved_by_user?: boolean;
   parent_id?: number;
@@ -81,6 +82,7 @@ const transformCommentResponseToCommentCardProps = (
   avatarUrl: response.user.picture_upload_link || '',
   timeAgo: response.updated_at,
   likes: response.likes_count || 0,
+  comments: response.comments_count || 0,
   liked_by_user: response.liked_by_user || false,
   saved_by_user: response.saved_by_user || false,
   parent_id: response.parent_id,
@@ -94,6 +96,7 @@ const transformCommentResponseToCommentCardProps = (
       avatarUrl: reply.user.picture_upload_link || '',
       timeAgo: reply.updated_at,
       likes: reply.likes_count || 0,
+      comments: reply.comments_count || 0,
       liked_by_user: reply.liked_by_user || false,
       saved_by_user: reply.saved_by_user || false,
       parent_id: reply.parent_id,

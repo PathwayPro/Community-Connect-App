@@ -51,7 +51,11 @@ export const useBlogStore = create<BlogState>()(
           const response = await blogApi.getThreads(params);
           const data = response.data;
 
-          // console.log('| - - - - - - - > DATA FROM BLOG STORE:', data, params);
+          console.log(
+            '| - - - - - - - > DATA FROM BLOG STORE FOR THREADS:',
+            data,
+            params
+          );
 
           set({ threads: data, isLoading: false });
         } catch (error) {
@@ -68,14 +72,19 @@ export const useBlogStore = create<BlogState>()(
           const response = await blogApi.getThreadComments(post_id);
           const data = response.data;
 
+          // filter out the comments that have a parent_id
+          const filteredData = data.filter(
+            (comment) => comment.parent_id === null
+          );
+
           console.log(
             '| - - - - - - - > DATA FROM BLOG STORE - MESSAGES:',
-            data
+            filteredData
           );
 
           // get user profile picture
 
-          set({ threadMessages: data, isLoading: false });
+          set({ threadMessages: filteredData, isLoading: false });
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'An error occurred',

@@ -451,11 +451,7 @@ export class BlogController {
       `,
   })
   findAllCommentsByPostId(@Param('post_id') post_id: string) {
-    const searchFilters: FilterCommentsDto = {
-      post_id: +post_id,
-      published: true,
-    };
-    return this.blogService.findAllComments(searchFilters);
+    return this.blogService.findCommentsByPostId(+post_id);
   }
 
   @Roles('ADMIN')

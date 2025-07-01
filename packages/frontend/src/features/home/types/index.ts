@@ -58,6 +58,7 @@ export interface PostCommentResponse {
   };
   parent_id?: number;
   likes_count?: number;
+  comments_count?: number;
   liked_by_user?: boolean;
   saved_by_user?: boolean;
   replies?: PostCommentResponse[];
