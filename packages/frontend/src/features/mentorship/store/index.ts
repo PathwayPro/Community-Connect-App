@@ -1,7 +1,15 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { mentorshipApi } from '../api/mentorship-api';
-import { InterestsResponse, MentorResponse, MenteeResponse } from '../types';
+import {
+  InterestsResponse,
+  MentorResponse,
+  MenteeResponse,
+  PendingApplicationResponse,
+  AdminMentorshipDashboardTotals,
+  MentorshipAdmin,
+  Mentee
+} from '../types';
 
 interface MentorshipState {
   mentors: MentorResponse[];
@@ -10,12 +18,19 @@ interface MentorshipState {
   isLoading: boolean;
   error: string | null;
   mentor: MentorResponse | null;
-
+  pendingApplications: PendingApplicationResponse | null;
+  adminMentorshipTotals: AdminMentorshipDashboardTotals;
+  adminMentorApplications: MentorshipAdmin[];
+  adminMenteeApplications: Mentee[];
   // Actions
   createMentor: (mentorData: FormData) => Promise<MentorResponse>;
   createMentee: (menteeData: FormData) => Promise<MenteeResponse>;
   fetchInterests: () => Promise<InterestsResponse[]>;
   getMentor: (mentorId: number) => Promise<MentorResponse>;
+  getPendingApplications: () => Promise<PendingApplicationResponse>;
+  getAdminMentorshipTotals: () => Promise<AdminMentorshipDashboardTotals>;
+  getAdminMentorApplications: () => Promise<MentorshipAdmin[]>;
+  getAdminMenteeApplications: () => Promise<Mentee[]>;
 }
 
 export const useMentorshipStore = create<MentorshipState>()(
@@ -64,6 +79,31 @@ export const useMentorshipStore = create<MentorshipState>()(
       getMentor: async (mentorId: number) => {
         const response = await mentorshipApi.getMentor(mentorId);
         set({ mentor: response.data });
+        return response;
+      },
+
+      getPendingApplications: async () => {
+        const response = await mentorshipApi.getPendingApplications();
+        set({ pendingApplications: response.data });
+        return response;
+      },
+
+      getAdminMentorshipTotals: async () => {
+        const response = await mentorshipApi.getAdminMentorshipTotals();
+        set({ adminMentorshipTotals: response.data });
+        return response;
+      },
+
+      getAdminMentorApplications: async () => {
+        const response = await mentorshipApi.getAdminMentorApplications();
+        console.log('| - - - - - - > response in store:', response.data);
+        set({ adminMentorApplications: response.data });
+        return response;
+      },
+
+      getAdminMenteeApplications: async () => {
+        const response = await mentorshipApi.getAdminMenteeApplications();
+        set({ adminMenteeApplications: response.data });
         return response;
       },
 

@@ -136,10 +136,14 @@ export class MenteeService {
     }
   }
 
-  async findOneByUserId(user_id: number) {
+  async findOneByUserId(
+    user_id: number,
+    status: mentees_status = null,
+    raiseError: boolean = true,
+  ) {
     try {
       const mentee = await this.prisma.mentees.findFirst({
-        where: { user_id },
+        where: { user_id, status },
         include: {
           user: {
             select: {
@@ -156,7 +160,7 @@ export class MenteeService {
         },
       });
 
-      if (!mentee) {
+      if (!mentee && raiseError) {
         throw new NotFoundException(
           `There is no mentee application for this user (USER ID: ${user_id}).`,
         );

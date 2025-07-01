@@ -6,7 +6,7 @@ import {
 } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { FileText, MessageSquare } from 'lucide-react';
-import { MentorshipAdmin } from '../../table/data';
+import { MentorshipAdmin } from '../../../types';
 import { UserRoundIcon } from 'lucide-react';
 import {
   Dialog,

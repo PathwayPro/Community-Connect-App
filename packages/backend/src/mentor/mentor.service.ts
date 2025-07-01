@@ -24,12 +24,24 @@ export class MentorService {
     interests: string | number[],
   ) {
     try {
+      console.log(
+        '| - - - - - - - > ADD USER INTERESTS FORMATTED < - - - - - - - |',
+      );
+      console.log('| - - - - - - - > INTERESTS:', interests);
       // TRANSFORM STRING OF INTEREST INTO ARRAY
       // const interestsToArray = typeof interests === 'string' ? JSON.parse(interests) : interests;
-      const interestsToArray =
-        typeof interests === 'string'
-          ? JSON.parse(interests).map((item: any) => parseInt(item, 10))
-          : interests.map((item: any) => parseInt(item, 10));
+      // const interestsToArray = typeof interests === 'string' ? JSON.parse(interests).map((item: any) => parseInt(item, 10)) : interests.map((item: any) => parseInt(item, 10));
+
+      // Handle interests[] format
+      const interestsToArray = Array.isArray(interests)
+        ? interests.map((item: any) => parseInt(item, 10))
+        : typeof interests === 'string'
+          ? interests.split(',').map((item: any) => parseInt(item, 10))
+          : typeof interests === 'number'
+            ? [parseInt(String(interests), 10)]
+            : [];
+
+      console.log('| - - - - - - - > INTERESTS TO ARRAY:', interestsToArray);
 
       // VALIDATE ONLY THE EXISTING ONES AND RETURN FORMATTED VALUES
       const validInterestsIds = await this.prisma.interests
@@ -150,10 +162,14 @@ export class MentorService {
     }
   }
 
-  async findOneByUserId(user_id: number) {
+  async findOneByUserId(
+    user_id: number,
+    status: mentors_status = null,
+    raiseError: boolean = true,
+  ) {
     try {
       const mentor = await this.prisma.mentors.findFirst({
-        where: { user_id },
+        where: { user_id, status },
         include: {
           user: {
             select: {
@@ -170,7 +186,7 @@ export class MentorService {
         },
       });
 
-      if (!mentor) {
+      if (!mentor && raiseError) {
         throw new NotFoundException(
           `There is no mentor application for this user (USER ID: ${user_id}).`,
         );
@@ -191,6 +207,11 @@ export class MentorService {
     createMentorDto: CreateMentorDto,
     file: Express.Multer.File,
   ) {
+    console.log('| - - - - - - - > SERVICE CREATE MENTOR < - - - - - - - |');
+    console.log('| - - - - - - - > USER ID:', user_id);
+    console.log('| - - - - - - - > CREATE MENTOR DTO:', createMentorDto);
+    console.log('| - - - - - - - > FILE:', file);
+
     try {
       // UPLOAD RESUME TO GET THE LINK
       const resumeLink = await this.filesService.upload(
@@ -244,6 +265,7 @@ export class MentorService {
 
       return { ...mentor, interests: mentorInterests };
     } catch (error) {
+      console.log('| - - - - - - - > ERROR:', error);
       if (error.code === 'P2002') {
         throw new BadRequestException('Mentor already exists');
       }

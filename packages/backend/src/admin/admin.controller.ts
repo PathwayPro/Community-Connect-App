@@ -17,6 +17,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
   ApiParam,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard, RolesGuard } from 'src/auth/guards';
 import { Roles, GetUser } from 'src/auth/decorators';
@@ -38,6 +39,11 @@ import {
   PaginatedUsers,
   UserManagementItem,
 } from './entities/user-management.entity';
+import {
+  AdminMentorshipDashboardTotals,
+  MenteeAdmin,
+  MentorshipAdmin,
+} from './entities/mentorship.entity';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Admin')
@@ -195,5 +201,48 @@ export class AdminController {
       resetUserPasswordDto.password,
       adminId,
     );
+  }
+
+  @Roles('ADMIN')
+  @Get('mentorship/total-applications')
+  @ApiOkResponse({ type: AdminMentorshipDashboardTotals })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized access' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Total mentors, mentees, and applications',
+    description:
+      'Get totals for current mentors and mentees, and applications from the last month and current month',
+  })
+  @ApiBearerAuth('JWT')
+  async getAdminMentorshipTotals() {
+    return await this.adminService.getAdminMentorshipTotals();
+  }
+
+  @Roles('ADMIN')
+  @Get('mentorship/mentor-applications')
+  @ApiOkResponse({ type: [MentorshipAdmin] })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized access' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Mentor applications',
+    description: 'List of all the applications to become a mentor',
+  })
+  @ApiBearerAuth('JWT')
+  async getAdminMentorApplications() {
+    return await this.adminService.getAdminMentorApplications();
+  }
+
+  @Roles('ADMIN')
+  @Get('mentorship/mentee-applications')
+  @ApiOkResponse({ type: [MenteeAdmin] })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized access' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Mentee applications',
+    description: 'List of all the applications to become a mentee',
+  })
+  @ApiBearerAuth('JWT')
+  async getAdminMenteeApplications() {
+    return await this.adminService.getAdminMenteeApplications();
   }
 }

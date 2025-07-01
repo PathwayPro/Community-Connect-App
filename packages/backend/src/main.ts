@@ -16,7 +16,9 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Community Connect API')
-    .setDescription('Community Connect API description')
+    .setDescription(
+      'Community Connect API - A comprehensive platform for community building, networking, and professional development. This API provides endpoints for user authentication, profile management, events, networking, mentorship, and more.',
+    )
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -29,12 +31,15 @@ async function bootstrap() {
       },
       'JWT',
     )
-    .addTag('Authentication', 'Authentication related endpoints')
+    .addTag(
+      'Authentication',
+      'Authentication related endpoints including login, logout, password reset, email verification, and OAuth',
+    )
+    .addTag(
+      'Users',
+      'User management endpoints including registration, profile management, and user data retrieval',
+    )
     .build();
-
-  // const document = SwaggerModule.createDocument(app, config);
-
-  // SwaggerModule.setup('api/docs', app, document);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -53,8 +58,18 @@ async function bootstrap() {
 
   SwaggerModule.setup('api/docs', app, document, {
     swaggerOptions: {
-      url: '/api/v1/api-json', // Update the Swagger UI to fetch the prefixed JSON
+      url: '/api/v1/api-json',
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      filter: true,
+      showExtensions: true,
+      showCommonExtensions: true,
+      docExpansion: 'list',
+      defaultModelsExpandDepth: 2,
+      defaultModelExpandDepth: 2,
     },
+    customSiteTitle: 'Community Connect API Documentation',
+    customCss: '.swagger-ui .topbar { display: none }',
   });
 
   await app.listen(process.env.PORT ?? 3001);

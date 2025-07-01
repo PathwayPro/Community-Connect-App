@@ -6,7 +6,8 @@ import {
 } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { FileTextIcon } from 'lucide-react';
-import { MentorshipAdmin } from '../table/data';
+// import { MentorshipAdmin } from '../table/data';
+import { MentorshipAdmin } from '../../types';
 import { cn } from '@/shared/lib/utils';
 import { SharedIcons } from '@/shared/components/icons';
 import { DropdownMenuComponent } from '@/shared/components/modal/dropdown-menu';
