@@ -58,7 +58,7 @@ export type ResetPasswordCredentials = {
 };
 
 export type UpdatePasswordCredentials = {
-  password: string;
+  currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 };

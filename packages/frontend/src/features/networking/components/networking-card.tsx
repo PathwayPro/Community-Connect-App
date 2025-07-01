@@ -185,8 +185,8 @@ export const NetworkingCard = ({ profile }: NetworkingCardProps) => {
                 imagePath={profile.picture_upload_link ?? ''}
                 alt={`${profile.first_name} ${profile.last_name}`}
                 className="h-full w-full object-cover"
-                width={110}
-                height={110}
+                fill={true}
+                priority={true}
               />
             )}
             {!profile.picture_upload_link && (

@@ -18,6 +18,7 @@ import { cn } from '@/shared/lib/utils';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { z } from 'zod';
+import { ChangePasswordCredentials } from '@/features/auth/types';
 
 const changePasswordSchema = z
   .object({
@@ -50,7 +51,7 @@ const passwordRequirements = [
 ];
 
 export function ChangePasswordForm() {
-  const { resetPassword, isLoading } = useAuth();
+  const { changePassword, isLoading } = useAuth();
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -69,7 +70,7 @@ export function ChangePasswordForm() {
     console.log('data from form to reset password', data);
 
     try {
-      await resetPassword(data);
+      await changePassword(data as ChangePasswordCredentials);
 
       form.reset();
 
