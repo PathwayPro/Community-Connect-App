@@ -30,7 +30,11 @@ interface BlogState {
   // Comment actions
   toggleCommentLike: (comment_id: number) => Promise<LikeThreadResponse>;
   toggleCommentSave: (comment_id: number) => Promise<SaveThreadResponse>;
-  createSubComment: (comment_id: number, content: string) => Promise<void>;
+  createSubComment: (
+    comment_id: number,
+    content: string,
+    post_id: number
+  ) => Promise<void>;
   fetchSubComments: (comment_id: number) => Promise<void>;
 }
 
@@ -178,7 +182,7 @@ export const useBlogStore = create<BlogState>()(
         try {
           const response = await blogApi.toggleCommentLike(comment_id);
 
-          return response.data.likeStatus === 'CREATED';
+          return response.data;
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'An error occurred',
@@ -192,7 +196,7 @@ export const useBlogStore = create<BlogState>()(
         try {
           const response = await blogApi.toggleCommentSave(comment_id);
 
-          return response.data.saveStatus === 'CREATED';
+          return response.data;
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'An error occurred',
@@ -201,11 +205,19 @@ export const useBlogStore = create<BlogState>()(
         }
       },
 
-      createSubComment: async (comment_id: number, content: string) => {
+      createSubComment: async (
+        comment_id: number,
+        content: string,
+        post_id: number
+      ) => {
         set({ isLoading: true, error: null });
         try {
-          console.log('CREANDO SUBCOMMENT: ', comment_id, content);
-          const data = { comment_id: comment_id, message: content };
+          console.log('CREANDO SUBCOMMENT: ', comment_id, content, post_id);
+          const data = {
+            comment_id: comment_id,
+            message: content,
+            post_id: post_id
+          };
           const response = await blogApi.createSubComment(data);
 
           console.log(
@@ -213,7 +225,7 @@ export const useBlogStore = create<BlogState>()(
             response
           );
 
-          const message = response.data.message;
+          const message = response.data;
 
           //set({ threadMessages: data, isLoading: false });
         } catch (error) {

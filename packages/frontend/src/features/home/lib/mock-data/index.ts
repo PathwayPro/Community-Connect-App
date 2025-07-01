@@ -35,6 +35,21 @@ export interface Comment {
   replies?: Comment[];
   liked_by_user?: boolean;
   saved_by_user?: boolean;
+  parent_id?: number;
+  post?: {
+    id: number;
+    message: string;
+    created_at: string;
+    published: boolean;
+    user: {
+      id: number;
+      first_name: string;
+      middle_name?: string;
+      last_name: string;
+      email: string;
+      picture_upload_link?: string;
+    };
+  };
 }
 
 export const mockThreads: Thread[] = [

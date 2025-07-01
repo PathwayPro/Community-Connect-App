@@ -51,8 +51,16 @@ export const blogApi = {
     apiMethods.post<SaveThreadResponse>(`/blog/comment/${comment_id}/save`),
 
   // Sub-comments (replies to comments)
-  createSubComment: (data: { comment_id: number; message: string }) =>
-    apiMethods.post<PostCommentResponse>('/blog/comment/reply', data),
+  createSubComment: (data: {
+    comment_id: number;
+    message: string;
+    post_id: number;
+  }) =>
+    apiMethods.post<PostCommentResponse>('/blog/comment/reply', {
+      post_id: data.post_id,
+      parent_id: data.comment_id,
+      message: data.message
+    }),
 
   getSubComments: (comment_id: number) =>
     apiMethods.get<PostCommentResponse[]>(`/blog/comment/${comment_id}/replies`)

@@ -53,6 +53,22 @@ interface CommentCardProps {
   likes: number;
   liked_by_user?: boolean;
   saved_by_user?: boolean;
+  parent_id?: number;
+  post?: {
+    id: number;
+    message: string;
+    created_at: string;
+    published: boolean;
+    user: {
+      id: number;
+      first_name: string;
+      middle_name?: string;
+      last_name: string;
+      email: string;
+      picture_upload_link?: string;
+    };
+  };
+  replies?: CommentCardProps[];
 }
 
 const transformCommentResponseToCommentCardProps = (
@@ -66,7 +82,23 @@ const transformCommentResponseToCommentCardProps = (
   timeAgo: response.updated_at,
   likes: response.likes_count || 0,
   liked_by_user: response.liked_by_user || false,
-  saved_by_user: response.saved_by_user || false
+  saved_by_user: response.saved_by_user || false,
+  parent_id: response.parent_id,
+  post: response.post,
+  replies:
+    response.replies?.map((reply) => ({
+      id: reply.id,
+      authorUsername: `${reply.user.first_name} ${reply.user.last_name}`,
+      authorName: `${reply.user.first_name} ${reply.user.last_name}`,
+      content: reply.message,
+      avatarUrl: reply.user.picture_upload_link || '',
+      timeAgo: reply.updated_at,
+      likes: reply.likes_count || 0,
+      liked_by_user: reply.liked_by_user || false,
+      saved_by_user: reply.saved_by_user || false,
+      parent_id: reply.parent_id,
+      post: reply.post
+    })) || []
 });
 
 export const CommentsThreadCard = ({
@@ -422,6 +454,12 @@ export const CommentsThreadCard = ({
                   <CommentCard
                     comment={comment}
                     user={user || ({} as UserProfile)}
+                    postId={selectedThread?.id}
+                    onRefresh={() => {
+                      if (selectedThread?.id) {
+                        fetchThreadComments(selectedThread.id);
+                      }
+                    }}
                   />
                 </div>
               ))

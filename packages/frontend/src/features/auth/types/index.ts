@@ -52,7 +52,7 @@ export type ForgotPasswordCredentials = {
 };
 
 export type ResetPasswordCredentials = {
-  currentPassword: string;
+  token: string;
   newPassword: string;
   confirmPassword: string;
 };

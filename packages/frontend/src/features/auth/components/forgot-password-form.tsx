@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/shared/components/ui/button';
@@ -30,10 +30,12 @@ type RetrievePasswordFormValues = ForgotPasswordFormValues &
 
 export function ForgotPasswordForm() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { forgotPassword, resetPassword, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const isForgotPasswordPage = pathname === '/auth/forgot-password';
+  const token = searchParams.get('token') || '';
 
   const form = useForm<RetrievePasswordFormValues>({
     resolver: zodResolver(
@@ -41,15 +43,26 @@ export function ForgotPasswordForm() {
     ),
     defaultValues: {
       email: '',
-      ...(isForgotPasswordPage && { newPassword: '', confirmPassword: '' })
+      token: token,
+      newPassword: '',
+      confirmPassword: ''
     }
   });
 
   const onSubmit = async (data: RetrievePasswordFormValues) => {
+    console.log('rest password button clicked');
+
     if (isForgotPasswordPage) {
       await forgotPassword(data as ForgotPasswordFormValues);
     } else {
-      await resetPassword(data as ResetPasswordFormValues);
+      const resetPasswordData = {
+        ...data,
+        token: token
+      };
+
+      console.log('reset password data', resetPasswordData);
+
+      await resetPassword(resetPasswordData as ResetPasswordFormValues);
     }
   };
 
@@ -72,6 +85,13 @@ export function ForgotPasswordForm() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {!isForgotPasswordPage && (
+            <FormField
+              control={form.control}
+              name="token"
+              render={({ field }) => <input type="hidden" {...field} />}
+            />
+          )}
           {isForgotPasswordPage && (
             <FormField
               control={form.control}

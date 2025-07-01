@@ -22,6 +22,8 @@ interface CommentCardProps {
   hasComments?: boolean;
   variant?: 'primary' | 'secondary';
   user: UserProfile;
+  postId?: number;
+  onRefresh?: () => void;
 }
 
 export const CommentCard = ({
@@ -31,7 +33,9 @@ export const CommentCard = ({
   iconClassName,
   hasComments = true,
   variant = 'primary',
-  user
+  user,
+  postId,
+  onRefresh
 }: CommentCardProps) => {
   const [showCommentSection, setShowCommentSection] = useState(false);
   const [showCommentInput, setShowCommentInput] = useState(false);
@@ -49,8 +53,9 @@ export const CommentCard = ({
   const handleLike = async () => {
     try {
       const liked = await toggleCommentLike(comment.id);
-      setIsLiked(liked.likeStatus === 'liked');
+      setIsLiked(liked.likeStatus === 'CREATED');
       setLikes((prev) => (liked ? prev + 1 : prev - 1));
+      onRefresh?.();
     } catch (error) {
       console.error('Error toggling comment like:', error);
     }
@@ -60,7 +65,8 @@ export const CommentCard = ({
   const handleSave = async () => {
     try {
       const saved = await toggleCommentSave(comment.id);
-      setIsSaved(saved.saveStatus === 'saved');
+      setIsSaved(saved.saveStatus === 'CREATED');
+      onRefresh?.();
     } catch (error) {
       console.error('Error toggling comment save:', error);
     }
@@ -76,13 +82,23 @@ export const CommentCard = ({
   // handle comment submit
   const handleCommentSubmit = async (content: string) => {
     try {
-      await createSubComment(comment.id, content);
+      // Use the postId prop passed from parent component
+      if (!postId) {
+        console.error('Post ID is required for creating subcomments');
+        return;
+      }
+      await createSubComment(comment.id, content, postId);
       setShowCommentSection(false);
       // Optionally refresh the comment list
+      onRefresh?.();
     } catch (error) {
       console.error('Error creating sub-comment:', error);
     }
   };
+
+  // Check if this is a subcomment (has parent_id)
+  const isSubComment =
+    comment.parent_id !== undefined && comment.parent_id !== null;
 
   return (
     <ThreadCardProvider
@@ -117,7 +133,8 @@ export const CommentCard = ({
               />
               <span>{likes}</span>
             </button>
-            {hasComments && (
+            {/* Only show comment icon for top-level comments, not subcomments */}
+            {hasComments && !isSubComment && (
               <button
                 className={cn(
                   'flex items-center gap-2 rounded-full p-1 px-2 text-gray-500 hover:bg-neutral-light-200',
@@ -142,23 +159,28 @@ export const CommentCard = ({
                 )}
               />
             </button>
-            {hasReplies && comment.replies && comment.replies.length > 0 && (
-              <button
-                onClick={() => setShowCommentSection(!showCommentSection)}
-                className="flex items-center gap-2 rounded-full p-1 text-primary-500 hover:bg-neutral-light-200"
-              >
-                {showCommentSection ? (
-                  <ChevronUp className="h-5 w-5" />
-                ) : (
-                  <ChevronDown className="h-5 w-5" />
-                )}
-                {showCommentSection ? 'Hide Comments' : 'View Comments'}
-              </button>
-            )}
+            {/* Only show expand/collapse for top-level comments with replies */}
+            {hasReplies &&
+              !isSubComment &&
+              comment.replies &&
+              comment.replies.length > 0 && (
+                <button
+                  onClick={() => setShowCommentSection(!showCommentSection)}
+                  className="flex items-center gap-2 rounded-full p-1 text-primary-500 hover:bg-neutral-light-200"
+                >
+                  {showCommentSection ? (
+                    <ChevronUp className="h-5 w-5" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5" />
+                  )}
+                  {showCommentSection ? 'Hide Comments' : 'View Comments'}
+                </button>
+              )}
           </div>
         </BaseThreadCard.Actions>
 
-        {showCommentSection && (
+        {/* Only show subcomments section for top-level comments */}
+        {showCommentSection && !isSubComment && (
           <BaseThreadCard.Comment>
             {comment.replies?.map((reply) => (
               <CommentCard
@@ -170,12 +192,15 @@ export const CommentCard = ({
                 hasComments={false}
                 variant={variant}
                 user={user}
+                postId={postId}
+                onRefresh={onRefresh}
               />
             ))}
           </BaseThreadCard.Comment>
         )}
 
-        {showCommentSection && showCommentSearchbar && (
+        {/* Only show comment input for top-level comments */}
+        {showCommentSection && showCommentSearchbar && !isSubComment && (
           <ThreadSearchbar
             title="Post a comment"
             onCreateThread={() => {
@@ -186,7 +211,7 @@ export const CommentCard = ({
             user={user}
           />
         )}
-        {showCommentSection && showCommentInput && (
+        {showCommentSection && showCommentInput && !isSubComment && (
           <ThreadCommentInput
             onSubmit={handleCommentSubmit}
             onCancel={() => {

@@ -192,12 +192,22 @@ export function useAuth() {
       const response = await authApi.resetPassword(credentials);
 
       if (response.success) {
+        showAlert({
+          title: 'Password updated successfully!',
+          description: 'You can now login with your new password.',
+          type: 'success',
+          redirect: '/auth/login'
+        });
         return response;
       }
     } catch (error) {
       const apiError = error as ApiError;
-      console.log('error in reset password', apiError);
 
+      showAlert({
+        title: 'Failed to reset password',
+        description: apiError.response?.data?.message || 'Please try again.',
+        type: 'error'
+      });
       throw error;
     } finally {
       setIsLoading(false);

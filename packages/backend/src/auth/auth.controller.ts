@@ -16,6 +16,7 @@ import { EmailService } from './services/email.service';
 import { Public } from './decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import {
+  ChangePasswordDto,
   GenerateResetTokenDto,
   LoginUserDto,
   ResendVerificationEmailDto,
@@ -73,13 +74,22 @@ export class AuthController {
     return this.authService.forgotPassword(generateResetTokenDto);
   }
 
+  @Public()
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   resetPassword(
-    @GetUser('sub') userId: number,
     @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<{ message: string }> {
-    return this.authService.resetPassword(userId, resetPasswordDto);
+    return this.authService.resetPassword(resetPasswordDto);
+  }
+
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  changePassword(
+    @GetUser('sub') userId: number,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    return this.authService.changePassword(userId, changePasswordDto);
   }
 
   @Public()
