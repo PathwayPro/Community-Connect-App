@@ -9,7 +9,7 @@ import { cn } from '@/shared/lib/utils';
 import { Badge } from '@/shared/components/ui/badge';
 import { useBlogStore } from '../../store';
 import { Checkbox } from '@/shared/components/ui/checkbox';
-
+import { ImagePreview } from '@/shared/components/image/image-preview';
 interface ThreadCardProps {
   id: number;
   authorName: string;
@@ -93,12 +93,8 @@ export const ThreadCard = ({
         authorEmail: '',
         timeAgo,
         content,
-        avatarUrl:
-          avatarUrl ||
-          'https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png',
-        imageUrl:
-          imageUrl ||
-          'https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png',
+        avatarUrl: avatarUrl || '',
+        imageUrl: imageUrl || '',
         likes,
         comments,
         saved_by_user: isSaved,
@@ -196,13 +192,13 @@ export const ThreadCard = ({
           )}
 
           {imageUrl && (
-            <Image
-              src={imageUrl}
+            <ImagePreview
+              imagePath={imageUrl}
               alt="Thread content"
               width={710}
               height={437}
-              className="w-full rounded-md object-cover"
-              priority
+              className="w-full rounded-md"
+              priority={true}
             />
           )}
         </BaseThreadCard.Content>

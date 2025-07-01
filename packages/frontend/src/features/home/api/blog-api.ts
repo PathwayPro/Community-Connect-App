@@ -38,5 +38,8 @@ export const blogApi = {
     }),
 
   deleteThread: async (post_id: number) =>
-    apiMethods.delete<ThreadResponse>(`/blog/post/${post_id}`)
+    apiMethods.delete<ThreadResponse>(`/blog/post/${post_id}`),
+
+  deleteComment: async (comment_id: number) =>
+    apiMethods.delete(`/blog/comment/${comment_id}`)
 };

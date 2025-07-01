@@ -6,6 +6,7 @@ import {
 import { cn } from '@/shared/lib/utils';
 import { ComponentPropsWithoutRef, createContext, useContext } from 'react';
 import { transformDateTimeToTimeAgo } from '../../lib/utils';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 
 interface BaseThreadCardProps extends ComponentPropsWithoutRef<'div'> {
   children: React.ReactNode;
@@ -59,8 +60,23 @@ BaseThreadCard.Author = function ThreadCardAuthor({
   return (
     <div className="flex gap-3">
       <Avatar className="h-16 w-16 bg-warning-500">
-        <AvatarImage src={avatarUrl} alt={name} />
-        <AvatarFallback>{name[0]}</AvatarFallback>
+        {avatarUrl && (
+          <ImagePreview
+            imagePath={avatarUrl}
+            alt={name}
+            fill={true}
+            priority={true}
+            className="rounded-full"
+          />
+        )}
+        {!avatarUrl && (
+          <AvatarFallback className="bg-warning-500">
+            {name
+              ?.split(' ')
+              .map((n) => n[0])
+              .join('') || ''}
+          </AvatarFallback>
+        )}
       </Avatar>
       <div className="flex flex-col">
         <span className="font-semibold">{name}</span>

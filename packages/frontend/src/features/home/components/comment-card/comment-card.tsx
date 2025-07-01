@@ -5,6 +5,7 @@ import { Comment } from '../../lib/mock-data';
 import { Heart, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/shared/lib/utils';
+import { UserProfile } from '@/features/user-profile/types';
 interface CommentCardProps {
   comment: Comment;
   className?: string;
@@ -12,6 +13,7 @@ interface CommentCardProps {
   iconClassName?: string;
   hasComments?: boolean;
   variant?: 'primary' | 'secondary';
+  user: UserProfile;
 }
 
 export const CommentCard = ({
@@ -20,7 +22,8 @@ export const CommentCard = ({
   hasReplies = true,
   iconClassName,
   hasComments = true,
-  variant = 'primary'
+  variant = 'primary',
+  user
 }: CommentCardProps) => {
   const [showCommentSection, setShowCommentSection] = useState(false);
   const [showCommentInput, setShowCommentInput] = useState(false);
@@ -53,11 +56,11 @@ export const CommentCard = ({
     <ThreadCardProvider
       value={{ isExpanded: !!comment, onExpandClick: () => {} }}
     >
-      <BaseThreadCard className={cn('border-none bg-muted', className)}>
+      <BaseThreadCard className={cn('w-full border-none bg-muted', className)}>
         <BaseThreadCard.Header>
           <BaseThreadCard.Author
             name={comment.authorName}
-            avatarUrl={comment.avatarUrl}
+            avatarUrl={user.pictureUploadLink || ''}
             timeAgo={comment.timeAgo}
           />
         </BaseThreadCard.Header>
@@ -121,6 +124,7 @@ export const CommentCard = ({
                 iconClassName="hover:bg-muted"
                 hasComments={false}
                 variant={variant}
+                user={user}
               />
             ))}
           </BaseThreadCard.Comment>
@@ -134,6 +138,7 @@ export const CommentCard = ({
               setShowCommentInput(true);
             }}
             variant={variant}
+            user={user}
           />
         )}
         {showCommentSection && showCommentInput && (
@@ -144,6 +149,7 @@ export const CommentCard = ({
               setShowCommentSearchbar(true);
             }}
             variant={variant}
+            user={user}
           />
         )}
       </BaseThreadCard>

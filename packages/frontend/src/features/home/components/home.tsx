@@ -28,6 +28,8 @@ import {
   DialogFooter
 } from '@/shared/components/ui/dialog';
 import { EmptyStateCard } from '@/shared/components/empty-state/empty-state-card';
+import { blogApi } from '../api/blog-api';
+import { UserProfile } from '@/features/user-profile/types';
 
 const transformThreadResponseToThread = (response: ThreadResponse): Thread => ({
   id: response.id,
@@ -65,10 +67,13 @@ export const Home = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [threadsToDelete, setThreadsToDelete] = useState<number[]>([]);
   const { showAlert } = useAlertDialog();
-  const { user } = useUserStore();
+  const { user: currentUser } = useUserStore();
   const { hasRole } = useRole();
   const isAdmin = hasRole('ADMIN');
-  const userId = user?.id;
+  const [deleteModalCommentCount, setDeleteModalCommentCount] = useState<
+    number | null
+  >(null);
+  const [isFetchingCommentCount, setIsFetchingCommentCount] = useState(false);
 
   const {
     threads: rawThreads,
@@ -152,7 +157,8 @@ export const Home = () => {
   console.log('| - - - - - - - > FILTERED THREADS 1: ', filteredThreads);
 
   // Ownership logic
-  const isThreadOwner = (thread: Thread) => thread.authorEmail === user?.email;
+  const isThreadOwner = (thread: Thread) =>
+    thread.authorEmail === currentUser?.email;
   const canSelectThread = (thread: Thread) => isAdmin || isThreadOwner(thread);
   const allOwnedByUser =
     filteredThreads.length > 0 && filteredThreads.every(isThreadOwner);
@@ -181,16 +187,31 @@ export const Home = () => {
   };
 
   // Bulk actions (UI only)
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     setThreadsToDelete(selectedThreadIds);
+    setIsFetchingCommentCount(true);
+    // Fetch comment counts for all selected threads
+    let totalComments = 0;
+    try {
+      const commentCountPromises = selectedThreadIds.map((threadId) =>
+        blogApi.getThreadComments(threadId).then((res) => res.data.length)
+      );
+      const counts = await Promise.all(commentCountPromises);
+      totalComments = counts.reduce((acc, count) => acc + count, 0);
+    } catch {
+      totalComments = 0;
+    }
+    setDeleteModalCommentCount(totalComments);
+    setIsFetchingCommentCount(false);
     setShowDeleteModal(true);
   };
-  const handleBulkFlag = () => {
-    setSelectedThreadIds([]);
-  };
-  const handleBulkBlock = () => {
-    setSelectedThreadIds([]);
-  };
+
+  // const handleBulkFlag = () => {
+  //   setSelectedThreadIds([]);
+  // };
+  // const handleBulkBlock = () => {
+  //   setSelectedThreadIds([]);
+  // };
 
   // Determine if all selected threads are owned by the user
   const allSelectedOwnedByUser =
@@ -291,11 +312,13 @@ export const Home = () => {
                     onSubmit={handleThreadSubmit}
                     initialContent={draftContent}
                     onCancel={() => setIsCreatingThread(false)}
+                    user={currentUser || ({} as UserProfile)}
                   />
                 </div>
               ) : (
                 <ThreadSearchbar
                   onCreateThread={() => setIsCreatingThread(true)}
+                  user={currentUser || ({} as UserProfile)}
                 />
               )}
 
@@ -370,7 +393,9 @@ export const Home = () => {
                   <DialogHeader>
                     <DialogTitle>Confirm Delete</DialogTitle>
                   </DialogHeader>
-                  {threadsToDelete.length === 1 ? (
+                  {isFetchingCommentCount ? (
+                    <div className="mb-4 text-sm">Loading comment count...</div>
+                  ) : threadsToDelete.length === 1 ? (
                     <div className="mb-4">
                       <div className="font-semibold">Thread Preview:</div>
                       <div className="mt-2 rounded bg-neutral-100 p-3 text-sm">
@@ -384,6 +409,10 @@ export const Home = () => {
                             : thread.content;
                         })()}
                       </div>
+                      <div className="mt-2 text-xs text-gray-500">
+                        {deleteModalCommentCount !== null &&
+                          `This will also delete ${deleteModalCommentCount} comment${deleteModalCommentCount === 1 ? '' : 's'}.`}
+                      </div>
                     </div>
                   ) : (
                     <div className="mb-4 text-sm">
@@ -391,7 +420,18 @@ export const Home = () => {
                       <span className="font-semibold">
                         {threadsToDelete.length}
                       </span>{' '}
-                      threads?
+                      threads
+                      {deleteModalCommentCount !== null && (
+                        <>
+                          {' '}
+                          and{' '}
+                          <span className="font-semibold">
+                            {deleteModalCommentCount}
+                          </span>{' '}
+                          comment{deleteModalCommentCount === 1 ? '' : 's'}
+                        </>
+                      )}
+                      ?
                     </div>
                   )}
                   <DialogFooter className="flex flex-row justify-end gap-2">
@@ -406,7 +446,7 @@ export const Home = () => {
                     <Button
                       variant="destructive"
                       onClick={handleConfirmDelete}
-                      disabled={isDeleting}
+                      disabled={isDeleting || isFetchingCommentCount}
                       className="h-10"
                     >
                       {isDeleting ? 'Deleting...' : 'Delete'}
@@ -423,7 +463,7 @@ export const Home = () => {
                     title="No Threads Yet"
                     description="There are no threads to display. Create the first thread to get started!"
                     action={
-                      user
+                      currentUser
                         ? {
                             label: 'Create Thread',
                             onClick: () => setIsCreatingThread(true)

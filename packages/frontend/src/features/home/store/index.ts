@@ -63,6 +63,8 @@ export const useBlogStore = create<BlogState>()(
             data
           );
 
+          // get user profile picture
+
           set({ threadMessages: data, isLoading: false });
         } catch (error) {
           set({
