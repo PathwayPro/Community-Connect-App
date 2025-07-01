@@ -15,7 +15,7 @@ import { SharedIcons } from '@/shared/components/icons';
 import { useUserStore } from '@/features/user-profile/store/index';
 
 export const getImageUrl = (path: string | undefined) => {
-  console.log('image path: ', path);
+  // console.log('image path: ', path);
   if (!path || path.includes('undefined')) return '/profile/profile.png';
   return `${process.env.NEXT_PUBLIC_API_URL}/files/${path}`;
 };

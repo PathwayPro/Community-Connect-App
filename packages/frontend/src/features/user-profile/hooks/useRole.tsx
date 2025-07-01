@@ -2,7 +2,7 @@ import { useUserStore } from '../store';
 import { useEffect, useMemo, useCallback } from 'react';
 
 // Define possible roles for type safety
-export type UserRole = 'ADMIN' | 'MENTOR' | 'USER' | undefined;
+export type UserRole = 'ADMIN' | 'MENTOR' | 'USER' | 'MENTEE' | undefined;
 
 // Define possible permissions
 export type Permission =
@@ -80,7 +80,8 @@ const rolePermissions: Record<Exclude<UserRole, undefined>, Permission[]> = {
     'edit:event',
     'delete:event'
   ],
-  USER: ['edit:profile', 'create:thread', 'edit:thread', 'delete:thread']
+  USER: ['edit:profile', 'create:thread', 'edit:thread', 'delete:thread'],
+  MENTEE: ['edit:profile', 'create:thread', 'edit:thread', 'delete:thread']
 };
 
 export const useRole = () => {

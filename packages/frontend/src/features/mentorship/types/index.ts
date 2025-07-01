@@ -41,3 +41,62 @@ export interface MenteeResponse {
   status: MenteeStatus;
   user_id: number;
 }
+
+export interface PendingApplicationResponse {
+  status: MenteeStatus | MentorStatus;
+  created_at: string;
+  activityType: 'MENTOR' | 'MENTEE';
+}
+
+export interface AdminMentorshipDashboardTotals {
+  totalMentors: number;
+  totalMentees: number;
+  mentorApplicationsLastMonth: number;
+  menteeApplicationsLastMonth: number;
+  mentorApplicationsCurrentMonth: number;
+  menteeApplicationsCurrentMonth: number;
+}
+
+export type RatingsGroup = {
+  motivational: number;
+  communication: number;
+  knowledge: number;
+  problemSolving: number;
+};
+
+export interface MentorshipAdmin {
+  id: string;
+  identity: {
+    avatar: string;
+    firstName: string;
+    lastName: string;
+  };
+  experience?: string;
+  experienceDescription?: string;
+  profession: string;
+  email: string;
+  status?: 'Approved' | 'Pending' | 'Rejected';
+  capacity?: string;
+  availability?: string;
+  lastSession?: string;
+  sessionsBooked?: number;
+  ratings?: number;
+  review?: string;
+  ratingsGroup?: RatingsGroup;
+}
+
+export type Mentee = {
+  id: string;
+  identity: {
+    avatar: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  date: string;
+  profession: string;
+  status: MenteeStatus;
+  email: string;
+  reason: string;
+  experience?: string;
+};

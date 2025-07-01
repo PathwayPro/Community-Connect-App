@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MentorService } from './mentor.service';
-import { CreateMentorDto } from './dto/create-mentor.dto';
+import { CreateMentorDto, CreateMentorFormDto } from './dto/create-mentor.dto';
 import {
   UpdateMentorDto,
   UpdateMentorStatusDto,
@@ -32,6 +32,7 @@ import {
   ApiNotFoundResponse,
   ApiParam,
   ApiBadRequestResponse,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { Mentors } from './entities/mentor.entity';
 
@@ -96,7 +97,8 @@ export class MentorController {
   @Post()
   @Roles('USER')
   @UseInterceptors(FileInterceptor('file'))
-  @ApiBody({ type: CreateMentorDto })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateMentorFormDto })
   @ApiOkResponse({ type: Mentors })
   @ApiInternalServerErrorResponse({
     description: 'Error creating mentor: `[ERROR MESSAGE]`',
@@ -104,25 +106,39 @@ export class MentorController {
   @ApiOperation({
     summary: 'Create new mentor application',
     description:
-      'Create new mentor application for the logged user. Requires "form-data" request with an aditional field type "file" and name "file" with the resume (.doc, .pdf, .txt, up to 10MB) \n\n REQUIRED ROLES: **USER**',
+      'Create new mentor application for the logged user. Requires "form-data" request with an additional field type "file" and name "file" with the resume (.doc, .pdf, .txt, up to 10MB) \n\n REQUIRED ROLES: **USER**',
   })
   @ApiBadRequestResponse({ description: 'Mentor already exists' })
   @ApiNotFoundResponse({ description: 'The associated user does not exists' })
-  @ApiBearerAuth()
-  create(
+  @ApiBearerAuth('JWT')
+  async create(
     @GetUser() user: JwtPayload,
-    @Body() createMentorDto: CreateMentorDto,
+    @Body() formData: any,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    console.log('| - - - - - - - > FORM DATA:', formData);
+    console.log('| - - - - - - - > FILE:', file);
+
+    // Extract interests from the interests[] format
+    // const interests = [];
+    // for (const key in formData) {
+    //   if (key.startsWith('interests[') && key.endsWith(']')) {
+    //     interests.push(parseInt(formData[key], 10));
+    //   }
+    // }
+
     const createMentor: CreateMentorDto = {
-      profession: createMentorDto.profession,
-      experience_years: +createMentorDto.experience_years,
-      max_mentees: +createMentorDto.max_mentees,
-      availability: createMentorDto.availability,
-      experience_details: createMentorDto.experience_details,
-      interests: createMentorDto.interests,
+      profession: formData.profession,
+      experience_years: +formData.experience_years,
+      max_mentees: +formData.max_mentees,
+      availability: formData.availability,
+      experience_details: formData.experience_details,
+      has_experience:
+        formData.has_experience === 'true' || formData.has_experience === true,
+      interests: formData.interests,
     };
-    return this.mentorService.create(user.sub, createMentor, file);
+
+    return await this.mentorService.create(user.sub, createMentor, file);
   }
 
   @Patch()
