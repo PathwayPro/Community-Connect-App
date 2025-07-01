@@ -64,9 +64,9 @@ const transformCommentResponseToCommentCardProps = (
   content: response.message,
   avatarUrl: response.user.picture_upload_link || '',
   timeAgo: response.updated_at,
-  likes: 0,
-  liked_by_user: false,
-  saved_by_user: false
+  likes: response.likes_count || 0,
+  liked_by_user: response.liked_by_user || false,
+  saved_by_user: response.saved_by_user || false
 });
 
 export const CommentsThreadCard = ({

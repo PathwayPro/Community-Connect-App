@@ -56,6 +56,9 @@ export interface PostCommentResponse {
     published: boolean;
     user: UserPosts;
   };
+  likes_count?: number;
+  liked_by_user?: boolean;
+  saved_by_user?: boolean;
 }
 
 // id: number;

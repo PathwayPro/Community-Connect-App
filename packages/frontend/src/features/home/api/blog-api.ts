@@ -41,5 +41,19 @@ export const blogApi = {
     apiMethods.delete<ThreadResponse>(`/blog/post/${post_id}`),
 
   deleteComment: async (comment_id: number) =>
-    apiMethods.delete(`/blog/comment/${comment_id}`)
+    apiMethods.delete(`/blog/comment/${comment_id}`),
+
+  // Comment likes and saves (these would need backend implementation)
+  toggleCommentLike: async (comment_id: number) =>
+    apiMethods.post<LikeThreadResponse>(`/blog/comment/${comment_id}/like`),
+
+  toggleCommentSave: async (comment_id: number) =>
+    apiMethods.post<SaveThreadResponse>(`/blog/comment/${comment_id}/save`),
+
+  // Sub-comments (replies to comments)
+  createSubComment: (data: { comment_id: number; message: string }) =>
+    apiMethods.post<PostCommentResponse>('/blog/comment/reply', data),
+
+  getSubComments: (comment_id: number) =>
+    apiMethods.get<PostCommentResponse[]>(`/blog/comment/${comment_id}/replies`)
 };

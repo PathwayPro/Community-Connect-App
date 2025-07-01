@@ -2,10 +2,18 @@ import { BaseThreadCard } from '../main-card';
 import { ThreadCardProvider } from '../main-card/base-thread-card';
 import { ThreadSearchbar, ThreadCommentInput } from '../common';
 import { Comment } from '../../lib/mock-data';
-import { Heart, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Heart,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
+  Bookmark
+} from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/shared/lib/utils';
+import { useBlogStore } from '../../store';
 import { UserProfile } from '@/features/user-profile/types';
+
 interface CommentCardProps {
   comment: Comment;
   className?: string;
@@ -28,13 +36,34 @@ export const CommentCard = ({
   const [showCommentSection, setShowCommentSection] = useState(false);
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [showCommentSearchbar, setShowCommentSearchbar] = useState(true);
-  const [isLiked, setIsLiked] = useState(false);
-  const [likes, setLikes] = useState(comment.likes);
+  const [isLiked, setIsLiked] = useState(comment.liked_by_user || false);
+  const [isSaved, setIsSaved] = useState(comment.saved_by_user || false);
+  const [likes, setLikes] = useState(comment.likes || 0);
+
+  const { toggleCommentLike, toggleCommentSave, createSubComment } =
+    useBlogStore();
+
+  console.log('| - - - - - - - > COMMENT:', comment);
 
   // handle like
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikes((prev) => (isLiked ? prev! - 1 : prev! + 1));
+  const handleLike = async () => {
+    try {
+      const liked = await toggleCommentLike(comment.id);
+      setIsLiked(liked.likeStatus === 'liked');
+      setLikes((prev) => (liked ? prev + 1 : prev - 1));
+    } catch (error) {
+      console.error('Error toggling comment like:', error);
+    }
+  };
+
+  // handle save
+  const handleSave = async () => {
+    try {
+      const saved = await toggleCommentSave(comment.id);
+      setIsSaved(saved.saveStatus === 'saved');
+    } catch (error) {
+      console.error('Error toggling comment save:', error);
+    }
   };
 
   // handle comment click
@@ -45,10 +74,13 @@ export const CommentCard = ({
   };
 
   // handle comment submit
-  const handleCommentSubmit = (comment: string) => {
-    console.log('New comment:', comment);
-    if (setShowCommentSection) {
+  const handleCommentSubmit = async (content: string) => {
+    try {
+      await createSubComment(comment.id, content);
       setShowCommentSection(false);
+      // Optionally refresh the comment list
+    } catch (error) {
+      console.error('Error creating sub-comment:', error);
     }
   };
 
@@ -60,7 +92,7 @@ export const CommentCard = ({
         <BaseThreadCard.Header>
           <BaseThreadCard.Author
             name={comment.authorName}
-            avatarUrl={user.pictureUploadLink || ''}
+            avatarUrl={comment.avatarUrl}
             timeAgo={comment.timeAgo}
           />
         </BaseThreadCard.Header>
@@ -94,23 +126,36 @@ export const CommentCard = ({
                 onClick={handleCommentClick}
               >
                 <MessageSquare className="h-5 w-5" />
-                <span>{comment.comments}</span>
+                <span>{comment.comments || 0}</span>
               </button>
             )}
           </div>
-          {hasReplies && comment.replies && comment.replies.length > 0 && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowCommentSection(!showCommentSection)}
-              className="flex items-center gap-2 rounded-full p-1 text-primary-500 hover:bg-neutral-light-200"
+              onClick={handleSave}
+              className="flex items-center gap-2 rounded-full p-1 text-gray-500 hover:bg-neutral-light-200"
             >
-              {showCommentSection ? (
-                <ChevronUp className="h-5 w-5" />
-              ) : (
-                <ChevronDown className="h-5 w-5" />
-              )}
-              {showCommentSection ? 'Hide Comments' : 'View Comments'}
+              <Bookmark
+                className={cn(
+                  'h-5 w-5',
+                  isSaved ? 'fill-primary-500 text-primary-500' : ''
+                )}
+              />
             </button>
-          )}
+            {hasReplies && comment.replies && comment.replies.length > 0 && (
+              <button
+                onClick={() => setShowCommentSection(!showCommentSection)}
+                className="flex items-center gap-2 rounded-full p-1 text-primary-500 hover:bg-neutral-light-200"
+              >
+                {showCommentSection ? (
+                  <ChevronUp className="h-5 w-5" />
+                ) : (
+                  <ChevronDown className="h-5 w-5" />
+                )}
+                {showCommentSection ? 'Hide Comments' : 'View Comments'}
+              </button>
+            )}
+          </div>
         </BaseThreadCard.Actions>
 
         {showCommentSection && (

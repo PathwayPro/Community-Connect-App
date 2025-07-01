@@ -33,6 +33,8 @@ export interface Comment {
   likes?: number;
   comments?: number;
   replies?: Comment[];
+  liked_by_user?: boolean;
+  saved_by_user?: boolean;
 }
 
 export const mockThreads: Thread[] = [
@@ -123,7 +125,9 @@ export const mockComments: Comment[] = [
     avatarUrl: '/profile/msnobody.png',
     likes: 10,
     comments: 0,
-    replies: []
+    replies: [],
+    liked_by_user: false,
+    saved_by_user: false
   },
   {
     id: 2,
@@ -134,7 +138,9 @@ export const mockComments: Comment[] = [
     avatarUrl: '/profile/mra.png',
     likes: 15,
     comments: 0,
-    replies: []
+    replies: [],
+    liked_by_user: false,
+    saved_by_user: false
   },
   {
     id: 3,
@@ -153,7 +159,9 @@ export const mockComments: Comment[] = [
         timeAgo: '2h',
         content: 'This is a reply',
         avatarUrl: '/profile/msnobody.png',
-        likes: 10
+        likes: 10,
+        liked_by_user: false,
+        saved_by_user: false
       },
       {
         id: 2,
@@ -162,8 +170,12 @@ export const mockComments: Comment[] = [
         timeAgo: '5h',
         content: 'This is a reply',
         avatarUrl: '/profile/mra.png',
-        likes: 15
+        likes: 15,
+        liked_by_user: false,
+        saved_by_user: false
       }
-    ]
+    ],
+    liked_by_user: false,
+    saved_by_user: true
   }
 ];

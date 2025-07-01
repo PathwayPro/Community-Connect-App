@@ -518,7 +518,7 @@ export class BlogService {
     try {
       // VERIFY POST EXIST
       const currentPost = await this.prisma.posts.findFirst({
-        where: { id: post_id },
+        where: { id: post_id, deleted_at: null },
       });
       if (!currentPost) {
         throw new NotFoundException(`There is no post with ID #${post_id}`);
@@ -531,9 +531,10 @@ export class BlogService {
         );
       }
 
-      // DELETE POST
-      const deletedPost = await this.prisma.posts.delete({
+      // SOFT DELETE POST
+      const deletedPost = await this.prisma.posts.update({
         where: { id: post_id },
+        data: { deleted_at: new Date() },
       });
       return this.returnFormattedData(deletedPost);
     } catch (error) {
@@ -545,7 +546,7 @@ export class BlogService {
     try {
       // VERIFY COMMENT EXIST
       const currentComment = await this.prisma.postsComments.findFirst({
-        where: { id: comment_id },
+        where: { id: comment_id, deleted_at: null },
       });
       if (!currentComment) {
         throw new NotFoundException(
@@ -560,9 +561,10 @@ export class BlogService {
         );
       }
 
-      // DELETE COMMENT
-      const deletedComment = await this.prisma.postsComments.delete({
+      // SOFT DELETE COMMENT
+      const deletedComment = await this.prisma.postsComments.update({
         where: { id: comment_id },
+        data: { deleted_at: new Date() },
       });
       return this.returnFormattedData(deletedComment);
     } catch (error) {
@@ -627,13 +629,13 @@ export class BlogService {
   async findOnePost(user: JwtPayload, id: number) {
     // VERIFY POST EXIST
     const currentPost = await this.prisma.posts.findFirst({
-      where: { id },
+      where: { id, deleted_at: null },
       select: {
         ...this.getPostSelection(),
         published: true,
         _count: {
           select: {
-            comments: true,
+            comments: { where: { deleted_at: null } },
             likes: true,
           },
         },
@@ -670,7 +672,7 @@ export class BlogService {
   async findOneComment(user: JwtPayload, id: number) {
     // VERIFY COMMENT EXIST
     const currentComment = await this.prisma.postsComments.findFirst({
-      where: { id },
+      where: { id, deleted_at: null },
       select: {
         post: { select: this.getPostSelection() },
         user: { select: this.getUserSelection() },
@@ -712,6 +714,9 @@ export class BlogService {
       const appliedFilters: Prisma.PostsWhereInput =
         this.getPostFormattedFilters(filters, user_id);
 
+      // Add filter to exclude soft-deleted posts
+      appliedFilters.deleted_at = null;
+
       const posts = await this.prisma.posts.findMany({
         where: appliedFilters,
         select: {
@@ -720,7 +725,7 @@ export class BlogService {
           published: true,
           _count: {
             select: {
-              comments: { where: { published: true } },
+              comments: { where: { deleted_at: null } },
               likes: true, // This correctly counts ALL likes for the post
             },
           },
@@ -765,6 +770,9 @@ export class BlogService {
     try {
       const appliedFilters: Prisma.PostsCommentsWhereInput =
         this.getCommentsFormattedFilters(filters);
+
+      // Add filter to exclude soft-deleted comments
+      appliedFilters.deleted_at = null;
 
       const comments = await this.prisma.postsComments.findMany({
         where: appliedFilters,

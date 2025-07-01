@@ -398,6 +398,7 @@ model Posts {
   image            String?
   created_at       DateTime                  @default(now())
   updated_at       DateTime                  @default(now())
+  deleted_at       DateTime?
   published        Boolean                   @default(false)
   comments         PostsComments[]
   likes            PostsLikes[]
@@ -412,6 +413,7 @@ model PostsComments {
   message          String
   created_at       DateTime                  @default(now())
   updated_at       DateTime                  @default(now())
+  deleted_at       DateTime?
   published        Boolean                   @default(false)
 }
 model PostsLikes {
