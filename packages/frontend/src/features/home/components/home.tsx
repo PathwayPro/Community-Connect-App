@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { HomeInfobar } from './infobar/home-infobar';
 import { HomeSidebar } from './sidebar/home-sidebar';
 import { sortOptions, Thread } from '../lib/mock-data';
 import { IconButton } from '@/shared/components/ui/icon-button';
@@ -13,13 +12,22 @@ import {
   TagComponent
 } from './main-card';
 import { useBlogStore } from '../store';
-import { ThreadResponse, PostCommentResponse, NavItemProps } from '../types';
+import { ThreadResponse, NavItemProps } from '../types';
 import { useUserStore } from '@/features/user-profile/store';
 import { EditThreadModal } from './common/edit-thread-modal';
 import { Checkbox } from '@/shared/components/ui/checkbox';
 import { useRole } from '@/features/user-profile/hooks/useRole';
-import { CircleOff, Trash2, FlagIcon } from 'lucide-react';
+import { Trash2, MessageSquare } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/shared/components/ui/dialog';
+import { EmptyStateCard } from '@/shared/components/empty-state/empty-state-card';
 
 const transformThreadResponseToThread = (response: ThreadResponse): Thread => ({
   id: response.id,
@@ -53,6 +61,10 @@ export const Home = () => {
   const [editThreadLoading, setEditThreadLoading] = useState(false);
   const [editThreadId, setEditThreadId] = useState<number | null>(null);
   const [selectedThreadIds, setSelectedThreadIds] = useState<number[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [threadsToDelete, setThreadsToDelete] = useState<number[]>([]);
+  const { showAlert } = useAlertDialog();
   const { user } = useUserStore();
   const { hasRole } = useRole();
   const isAdmin = hasRole('ADMIN');
@@ -170,7 +182,8 @@ export const Home = () => {
 
   // Bulk actions (UI only)
   const handleBulkDelete = () => {
-    setSelectedThreadIds([]);
+    setThreadsToDelete(selectedThreadIds);
+    setShowDeleteModal(true);
   };
   const handleBulkFlag = () => {
     setSelectedThreadIds([]);
@@ -192,6 +205,48 @@ export const Home = () => {
 
   // Show bulk bar if admin or (thread creator and all selected are theirs)
   const showBulkBar = someSelected && (isAdmin || allSelectedOwnedByUser);
+
+  // Delete confirmation modal logic
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    const deletePromises = threadsToDelete.map((id) =>
+      import('../api/blog-api').then((mod) =>
+        mod.blogApi
+          .deleteThread(id)
+          .then((res) => ({ id, success: true }))
+          .catch(() => ({ id, success: false }))
+      )
+    );
+    // Wait for all deletions in parallel
+    const results = await Promise.all(deletePromises);
+    setIsDeleting(false);
+    setShowDeleteModal(false);
+    setSelectedThreadIds([]);
+    fetchThreads({ filter: activeFilterTab, order_by: sort });
+    // Count results
+    const deleted = results.filter((r) => r.success).length;
+    const failed = results.length - deleted;
+    if (deleted > 0 && failed === 0) {
+      showAlert({
+        title: 'Thread(s) Deleted',
+        description: `Successfully deleted ${deleted} thread${deleted > 1 ? 's' : ''}.`,
+        type: 'success'
+      });
+    } else if (deleted > 0 && failed > 0) {
+      showAlert({
+        title: 'Partial Success',
+        description: `Deleted ${deleted} thread${deleted > 1 ? 's' : ''}, but failed to delete ${failed}.`,
+        type: 'warning'
+      });
+    } else {
+      showAlert({
+        title: 'Delete Failed',
+        description:
+          'Failed to delete the selected thread(s). Please try again.',
+        type: 'error'
+      });
+    }
+  };
 
   return (
     <div className="container-wide px-0" onClick={handleOutsideClick}>
@@ -250,23 +305,27 @@ export const Home = () => {
                   setSelectedTags={setSelectedTags}
                 />
               )}
-              <div className="mb-10 mt-6 flex items-center justify-end">
-                <SortComponent
-                  sort={sort}
-                  setSort={setSort}
-                  options={sortOptions}
-                />
-              </div>
+              {threads.length > 0 && (
+                <div className="mb-10 mt-6 flex items-center justify-end">
+                  <SortComponent
+                    sort={sort}
+                    setSort={setSort}
+                    options={sortOptions}
+                  />
+                </div>
+              )}
               {showSelectAll && (
                 <div className="mb-8 flex items-center justify-between gap-4 pl-4">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      checked={allSelected}
-                      onCheckedChange={handleSelectAll}
-                      aria-label="Select all threads"
-                    />
-                    <span className="text-sm font-medium">Select All</span>
-                  </div>
+                  {threads.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        checked={allSelected}
+                        onCheckedChange={handleSelectAll}
+                        aria-label="Select all threads"
+                      />
+                      <span className="text-sm font-medium">Select All</span>
+                    </div>
+                  )}
                   {showBulkBar && (
                     <div className="flex items-center gap-4 rounded-lg bg-white p-2 shadow">
                       <span className="pl-2 text-center font-semibold">
@@ -276,11 +335,12 @@ export const Home = () => {
                         variant="outline"
                         className="h-10 min-w-24 text-sm"
                         onClick={handleBulkDelete}
+                        disabled={isDeleting}
                       >
                         <Trash2 className="h-4 w-4" />
                         Delete
                       </Button>
-                      {isAdmin && (
+                      {/* {isAdmin && (
                         <Button
                           variant="outline"
                           className="h-10 min-w-24 text-sm"
@@ -299,30 +359,100 @@ export const Home = () => {
                           <CircleOff className="h-4 w-4 text-red-600" />
                           Block User/s
                         </Button>
-                      )}
+                      )} */}
                     </div>
                   )}
                 </div>
               )}
-              <div className="flex flex-col gap-8">
-                {filteredThreads.map((thread) => (
-                  <ThreadCard
-                    key={thread.id}
-                    {...thread}
-                    viewThreads={handleViewThreads}
-                    setSelectedThread={setSelectedThread}
-                    setShowCommentSection={setShowCommentSection}
-                    isOwner={isThreadOwner(thread)}
-                    onEditThread={handleEditThread}
-                    showCheckbox={canSelectThread(thread)}
-                    selected={selectedThreadIds.includes(thread.id)}
-                    onSelect={(checked: boolean) =>
-                      canSelectThread(thread) &&
-                      handleSelectThread(thread.id, checked)
+              {/* Delete Confirmation Modal */}
+              <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Confirm Delete</DialogTitle>
+                  </DialogHeader>
+                  {threadsToDelete.length === 1 ? (
+                    <div className="mb-4">
+                      <div className="font-semibold">Thread Preview:</div>
+                      <div className="mt-2 rounded bg-neutral-100 p-3 text-sm">
+                        {(() => {
+                          const thread = filteredThreads.find(
+                            (t) => t.id === threadsToDelete[0]
+                          );
+                          if (!thread) return 'Thread not found.';
+                          return thread.content.length > 50
+                            ? thread.content.slice(0, 50) + '...'
+                            : thread.content;
+                        })()}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mb-4 text-sm">
+                      Are you sure you want to delete{' '}
+                      <span className="font-semibold">
+                        {threadsToDelete.length}
+                      </span>{' '}
+                      threads?
+                    </div>
+                  )}
+                  <DialogFooter className="flex flex-row justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowDeleteModal(false)}
+                      disabled={isDeleting}
+                      className="h-10"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleConfirmDelete}
+                      disabled={isDeleting}
+                      className="h-10"
+                    >
+                      {isDeleting ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              {/* Empty State for No Threads */}
+              {filteredThreads.length === 0 ? (
+                <div className="mt-[200px] flex w-full items-center justify-center">
+                  <EmptyStateCard
+                    icon={MessageSquare}
+                    className="min-h-[400px]"
+                    title="No Threads Yet"
+                    description="There are no threads to display. Create the first thread to get started!"
+                    action={
+                      user
+                        ? {
+                            label: 'Create Thread',
+                            onClick: () => setIsCreatingThread(true)
+                          }
+                        : undefined
                     }
                   />
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-8">
+                  {filteredThreads.map((thread) => (
+                    <ThreadCard
+                      key={thread.id}
+                      {...thread}
+                      viewThreads={handleViewThreads}
+                      setSelectedThread={setSelectedThread}
+                      setShowCommentSection={setShowCommentSection}
+                      isOwner={isThreadOwner(thread)}
+                      onEditThread={handleEditThread}
+                      showCheckbox={canSelectThread(thread)}
+                      selected={selectedThreadIds.includes(thread.id)}
+                      onSelect={(checked: boolean) =>
+                        canSelectThread(thread) &&
+                        handleSelectThread(thread.id, checked)
+                      }
+                    />
+                  ))}
+                </div>
+              )}
               <EditThreadModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}

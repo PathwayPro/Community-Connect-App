@@ -53,7 +53,6 @@ export const ThreadCard = ({
   liked_by_user,
   isCommented,
   saved_by_user,
-  isOwner,
   onEditThread,
   showCheckbox = false,
   selected = false,
