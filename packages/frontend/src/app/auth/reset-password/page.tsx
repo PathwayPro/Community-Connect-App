@@ -3,11 +3,11 @@
 import { AuthCarousel } from '@/features/auth/components';
 import { Separator } from '@/shared/components/ui/separator';
 import { ForgotPasswordForm } from '@/features/auth/components';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from '@/shared/hooks/use-toast';
 
-const ResetPasswordPage = () => {
+const ResetPasswordContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -35,6 +35,14 @@ const ResetPasswordPage = () => {
         <AuthCarousel />
       </div>
     </div>
+  );
+};
+
+const ResetPasswordPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 };
 

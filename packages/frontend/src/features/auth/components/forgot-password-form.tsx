@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,7 +28,7 @@ import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 type RetrievePasswordFormValues = ForgotPasswordFormValues &
   ResetPasswordFormValues;
 
-export function ForgotPasswordForm() {
+const ForgotPasswordFormContent = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { forgotPassword, resetPassword, isLoading } = useAuth();
@@ -245,5 +245,13 @@ export function ForgotPasswordForm() {
         </Link>
       </p>
     </div>
+  );
+};
+
+export function ForgotPasswordForm() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ForgotPasswordFormContent />
+    </Suspense>
   );
 }
