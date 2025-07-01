@@ -1,7 +1,7 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { MentorshipAdmin } from './data';
+import { MentorshipAdmin } from '../../types';
 import {
   Avatar,
   AvatarFallback,
