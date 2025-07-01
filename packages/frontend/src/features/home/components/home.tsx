@@ -115,8 +115,6 @@ export const Home = () => {
     setViewThreads(true);
   };
 
-  console.log('all threads', threads);
-
   const filteredThreads = threads.filter((thread) => {
     // if (activeTab === 'Tags') {
     //   if (selectedTags.length === 0) return true;
@@ -155,6 +153,7 @@ export const Home = () => {
   };
 
   console.log('| - - - - - - - > FILTERED THREADS 1: ', filteredThreads);
+  console.log('all threads', threads);
 
   // Ownership logic
   const isThreadOwner = (thread: Thread) =>

@@ -921,6 +921,7 @@ export class BlogService {
           _count: {
             select: {
               likes: true,
+              replies: { where: { deleted_at: null } },
             },
           },
           likes: {
@@ -945,6 +946,7 @@ export class BlogService {
       const commentsWithReplies = topLevelComments.map((comment) => ({
         ...comment,
         likes_count: comment._count.likes,
+        comments_count: comment._count.replies,
         liked_by_user: comment.likes.length > 0,
         saved_by_user: comment.saves.length > 0,
         replies: replies
@@ -952,6 +954,7 @@ export class BlogService {
           .map((reply) => ({
             ...reply,
             likes_count: reply._count.likes,
+            comments_count: 0, // Replies cannot have sub-replies
             liked_by_user: reply.likes.length > 0,
             saved_by_user: reply.saves.length > 0,
           }))
