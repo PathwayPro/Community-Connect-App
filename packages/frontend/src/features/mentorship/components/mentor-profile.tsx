@@ -1,11 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import {
-  mentorRatingData,
-  MentorshipAdmin,
-  mentorshipAdminData
-} from './table/data';
+import { mentorRatingData, mentorshipAdminData } from './table/data';
 import { useRouter } from 'next/navigation';
 import { MentorApproval } from './common/mentor-approval';
 import { Button } from '@/shared/components/ui/button';
@@ -24,6 +20,7 @@ import {
 import { AssignMenteesColumns } from './table/assigned-mentees-column';
 import { RegisteredSessionsColumns } from './table/registered-sessions-column';
 import { bestMatchesColumns } from './table/best-matches-column';
+import { MentorshipAdmin } from '../types';
 
 export const MentorProfile = () => {
   const searchParams = useSearchParams();
