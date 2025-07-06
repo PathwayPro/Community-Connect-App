@@ -8,9 +8,15 @@ import {
 } from '@/shared/components/ui/avatar';
 import { Mentee } from '../../types';
 import { Badge } from '@/shared/components/ui/badge';
-import Link from 'next/link';
+import { AdminMenteeModalCard } from '../common/modals/admin-mentee-modal';
 
-export const menteesColumns: ColumnDef<Mentee>[] = [
+interface MenteeColumnsProps {
+  onStatusUpdate?: () => void;
+}
+
+export const createMenteeColumns = (
+  onStatusUpdate?: () => void
+): ColumnDef<Mentee>[] => [
   {
     accessorKey: 'identity.firstName',
     header: () => (
@@ -62,9 +68,9 @@ export const menteesColumns: ColumnDef<Mentee>[] = [
     cell: ({ row }) => (
       <Badge
         variant={
-          row.getValue('status') === 'Approved'
+          row.getValue('status').toString().toLowerCase() === 'approved'
             ? 'success'
-            : row.getValue('status') === 'Pending'
+            : row.getValue('status').toString().toLowerCase() === 'pending'
               ? 'warning'
               : 'destructive'
         }
@@ -83,16 +89,14 @@ export const menteesColumns: ColumnDef<Mentee>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex justify-center">
-        <Link
-          href={{
-            pathname: '/mentorship/admin/mentor-profile',
-            query: { data: JSON.stringify(row.original) }
-          }}
-          className="flex h-10 w-[90px] items-center justify-center rounded-xl border border-primary-400 text-base font-medium text-primary-400 hover:bg-primary-400 hover:text-white"
-        >
-          View
-        </Link>
+        <AdminMenteeModalCard
+          data={row.original}
+          onStatusUpdate={onStatusUpdate}
+        />
       </div>
     )
   }
 ];
+
+// Keep the original export for backward compatibility
+export const menteesColumns = createMenteeColumns();

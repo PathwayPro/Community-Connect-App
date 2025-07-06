@@ -89,6 +89,7 @@ export interface MentorshipAdmin {
 
 export type Mentee = {
   id: string;
+  menteeApplicationId?: number; // Add this field
   identity: {
     avatar: string;
     firstName: string;
@@ -101,4 +102,5 @@ export type Mentee = {
   email: string;
   reason: string;
   experience?: string;
+  resume?: string; // Add this field
 };

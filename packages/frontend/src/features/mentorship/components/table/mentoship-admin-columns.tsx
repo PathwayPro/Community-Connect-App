@@ -20,7 +20,7 @@ export const createMentorshipAdminColumns = (
   {
     accessorKey: 'identity.firstName',
     header: () => (
-      <div className="font-semibold text-neutral-dark-600">Mentor Name</div>
+      <div className="font-semibold text-neutral-dark-600">Mentor</div>
     ),
     cell: ({ row }) => (
       <div className="flex items-center gap-3">

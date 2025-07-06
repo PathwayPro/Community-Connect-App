@@ -35,7 +35,10 @@ export const mentorshipApi = {
   getAdminMenteeApplications: () =>
     apiMethods.get<Mentee[]>(`/admin/mentorship/mentee-applications`),
 
-  // Add this new method
   updateMentorStatus: (mentorId: number, status: string) =>
-    apiMethods.put<MentorResponse>(`/mentors/${mentorId}`, { status })
+    apiMethods.put<MentorResponse>(`/mentors/${mentorId}`, { status }),
+
+  // Add mentee status update method
+  updateMenteeStatus: (menteeId: number, status: string) =>
+    apiMethods.put<MenteeResponse>(`/mentees/${menteeId}`, { status })
 };

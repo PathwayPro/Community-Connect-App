@@ -8,7 +8,7 @@ import { CreateMenteeDto } from './dto/create-mentee.dto';
 import { UpdateMenteeDto } from './dto/update-mentee.dto';
 import { PrismaService } from 'src/database';
 import { FilterMenteeDto } from './dto/filter-mentee.dto';
-import { Prisma, mentees_status } from '@prisma/client';
+import { Prisma, mentees_status, users_roles } from '@prisma/client';
 import { FilesService } from 'src/files/files.service';
 import { FileValidationEnum } from 'src/files/util/files-validation.enum';
 
@@ -317,7 +317,28 @@ export class MenteeService {
           //const userId = updatedMentee.user_id;
           //const userRole: users_roles = updatedMentee.status === 'APPROVED' ? 'MENTEE' : 'USER';
 
-          return updatedMentee;
+          const userId = updatedMentee.user_id;
+          const userRole: users_roles =
+            updatedMentee.status === 'APPROVED' ? 'MENTEE' : 'USER';
+
+          const updatedMenteeUser = await this.prisma.users.update({
+            where: { id: userId },
+            data: { role: userRole },
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+              middle_name: true,
+              mentor: true,
+              interests: {
+                select: {
+                  interest: true,
+                },
+              },
+            },
+          });
+
+          return updatedMenteeUser;
         } else {
           throw new InternalServerErrorException(
             `There was an error updating the mentee application with ID: ${menteeApplicationId}`,

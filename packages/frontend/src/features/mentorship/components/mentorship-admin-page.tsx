@@ -25,6 +25,7 @@ import { bestMatchesColumns } from './table/best-matches-column';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { useMentorshipStore } from '../store';
 import { menteesColumns } from './table/mentees-column';
+import { createMenteeColumns } from './table/mentees-column';
 
 export const MentorshipAdminPage = () => {
   const { user } = useUserStore();
@@ -130,6 +131,7 @@ export const MentorshipAdminPage = () => {
   // Create columns with callback
   const mentorshipAdminColumns =
     createMentorshipAdminColumns(handleRefreshData);
+  const menteeColumns = createMenteeColumns(handleRefreshData);
 
   return (
     <div className="container-wide flex w-full flex-col gap-6">
@@ -248,7 +250,7 @@ export const MentorshipAdminPage = () => {
               </TabsContent>
               <TabsContent value="mentees" className="mt-4">
                 <DataTable
-                  columns={menteesColumns}
+                  columns={menteeColumns}
                   data={paginatedDataMentees}
                 />
                 {totalPagesMentees > 1 && (
