@@ -88,7 +88,13 @@ model users {
   posts_comments                       PostsComments[]
   posts_likes                 PostsLikes[]
   post_saves                  PostsSaves[]
-  userSettings          UserSettings?               
+  userSettings          UserSettings?     
+  // MENTORSHIP SESSIONS
+  mentorshipSessionsAsMentor    MentorshipSessions[]
+  mentorshipSessionsAsMentee    MentorshipSessionsMentees[]
+  sessionDateNotes              MentorshipSessionsDatesNotes[]
+  sessionRatingsGiven           MentorshipSessionsRating[] @relation("RatingUser")
+  sessionRatingsReceived        MentorshipSessionsRating[] @relation("RatedUser")          
 }
 
 enum users_roles {
@@ -521,4 +527,60 @@ model NewsletterSubscriptions {
 }
 
 
+// MENTORSHIP SESSIONS
+model MentorshipSessions {
+  id                Int               @id @default(autoincrement())
+  mentor_id         Int               // Fixed naming
+  mentor            users             @relation(fields: [mentor_id], references: [id])
+  description       String?
+  created_at        DateTime          @default(now())
 
+  // Relations
+  mentees           MentorshipSessionsMentees[]
+  dates             MentorshipSessionsDates[]
+  ratings           MentorshipSessionsRating[]
+}
+model MentorshipSessionsMentees {
+  id                Int               @id @default(autoincrement())
+  mentee_id         Int               // Fixed naming
+  mentee            users             @relation(fields: [mentee_id], references: [id])
+  session_id        Int               // Fixed naming
+  mentorshipSession MentorshipSessions @relation(fields: [session_id], references: [id])
+  created_at        DateTime          @default(now())
+}
+model MentorshipSessionsDates {
+  id                Int               @id @default(autoincrement())
+  session_id        Int               // Fixed naming
+  mentorshipSession MentorshipSessions @relation(fields: [session_id], references: [id])
+  date              DateTime          
+  link              String?
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @default(now())
+
+  // Relations
+  notes             MentorshipSessionsDatesNotes[]
+}
+model MentorshipSessionsDatesNotes {
+  id                Int               @id @default(autoincrement())
+  session_date_id   Int               // Fixed naming
+  sessionDate       MentorshipSessionsDates @relation(fields: [session_date_id], references: [id])
+  user_id           Int               // Fixed naming
+  user              users             @relation(fields: [user_id], references: [id])
+  notes             String?
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @default(now())
+}
+model MentorshipSessionsRating {
+  id                Int               @id @default(autoincrement())
+  session_id        Int               // Fixed naming
+  session           MentorshipSessions @relation(fields: [session_id], references: [id])
+  rating_user_id    Int               // Fixed naming
+  ratingUser        users             @relation("RatingUser", fields: [rating_user_id], references: [id])
+  rating_user_role  users_roles
+  rated_user_id     Int               // Fixed naming
+  ratedUser         users             @relation("RatedUser", fields: [rated_user_id], references: [id])
+  rated_user_role   users_roles
+  comments          String?
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @default(now())
+}
