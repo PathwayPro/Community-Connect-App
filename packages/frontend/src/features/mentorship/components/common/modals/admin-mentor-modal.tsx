@@ -19,15 +19,26 @@ import {
 import { useState } from 'react';
 import { Rating } from '@/shared/components/ui/rating';
 import { PdfPreviewModal } from '@/shared/components/pdf/pdf-preview-modal';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/shared/components/ui/select';
+import { mentorshipApi } from '../../../api/mentorship-api';
+import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 
 interface AdminMentorModalCardProps {
   data: MentorshipAdmin;
   isRating?: boolean;
+  onStatusUpdate?: () => void; // Add callback to refresh data
 }
 
 export const AdminMentorModalCard = ({
   data,
-  isRating = false
+  isRating = false,
+  onStatusUpdate
 }: AdminMentorModalCardProps) => {
   const {
     identity,
@@ -37,14 +48,49 @@ export const AdminMentorModalCard = ({
     experienceDescription,
     review,
     ratingsGroup,
-    resume
+    resume,
+    status,
+    mentorApplicationId // Add this
   } = data;
   const [isOpen, setIsModalOpen] = useState(false);
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(status || 'PENDING');
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const { showAlert } = useAlertDialog();
 
   const handleViewResume = () => {
     if (resume) {
       setIsResumeModalOpen(true);
+    }
+  };
+
+  const handleStatusUpdate = async () => {
+    if (selectedStatus === status || !mentorApplicationId) return;
+
+    setIsUpdatingStatus(true);
+    try {
+      await mentorshipApi.updateMentorStatus(
+        mentorApplicationId,
+        selectedStatus
+      );
+
+      showAlert({
+        type: 'success',
+        title: 'Status Updated',
+        description: `Mentor status has been updated to ${selectedStatus}.`
+      });
+
+      // Refresh the data
+      onStatusUpdate?.();
+      setIsModalOpen(false);
+    } catch (error) {
+      showAlert({
+        type: 'error',
+        title: 'Update Failed',
+        description: 'Failed to update mentor status. Please try again.'
+      });
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -68,6 +114,8 @@ export const AdminMentorModalCard = ({
         ]
       : [])
   ];
+
+  const isApproved = status?.toString().toLowerCase() === 'approved';
 
   return (
     <>
@@ -186,16 +234,55 @@ export const AdminMentorModalCard = ({
               )}
             </div>
           </div>
-          <div className="flex gap-4">
-            <Button
-              className="mx-auto h-10 w-full"
-              onClick={() =>
-                isRating ? setIsModalOpen(false) : console.log('match mentor')
-              }
-            >
-              {isRating ? 'Go Back' : 'Match Mentor'}
-            </Button>
-          </div>
+
+          {/* Status Management Section */}
+          {!isRating && (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium">Status:</span>
+                  <Select
+                    value={selectedStatus}
+                    onValueChange={setSelectedStatus}
+                  >
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PENDING">Pending</SelectItem>
+                      <SelectItem value="APPROVED">Approved</SelectItem>
+                      <SelectItem value="REJECTED">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setIsModalOpen(false)}
+                    disabled={isUpdatingStatus}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    onClick={handleStatusUpdate}
+                    disabled={isUpdatingStatus || selectedStatus === status}
+                  >
+                    {isUpdatingStatus ? 'Updating...' : 'Update Status'}
+                  </Button>
+                </div>
+              </div>
+              {isApproved ? (
+                <Button
+                  className="mx-auto h-10 w-full"
+                  onClick={() => console.log('match mentor')}
+                >
+                  Match Mentor
+                </Button>
+              ) : null}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

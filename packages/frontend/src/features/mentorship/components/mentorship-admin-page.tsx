@@ -3,7 +3,7 @@
 import { useUserStore } from '@/features/user-profile/store';
 import { MentorshipSection } from './common/mentorship-section';
 import { DataTable } from './table/data-table';
-import { mentorshipAdminColumns } from './table/mentoship-admin-columns';
+import { createMentorshipAdminColumns } from './table/mentoship-admin-columns';
 // import { mentorshipAdminData } from './table/data';
 import MentorCard from './common/mentor-card';
 import {
@@ -45,6 +45,12 @@ export const MentorshipAdminPage = () => {
     getAdminMentorApplications();
     getAdminMenteeApplications();
   }, []);
+
+  // Add refresh function
+  const handleRefreshData = () => {
+    getAdminMentorApplications();
+    getAdminMenteeApplications();
+  };
 
   const filteredDataMentors = useMemo(() => {
     if (selectedStatus === 'All') return adminMentorApplications;
@@ -120,6 +126,10 @@ export const MentorshipAdminPage = () => {
     }
     return `${((lastMonth / currentMonth) * 100).toFixed(2)}%`;
   }, [adminMentorshipTotals]);
+
+  // Create columns with callback
+  const mentorshipAdminColumns =
+    createMentorshipAdminColumns(handleRefreshData);
 
   return (
     <div className="container-wide flex w-full flex-col gap-6">

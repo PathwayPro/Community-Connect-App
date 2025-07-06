@@ -796,8 +796,8 @@ export class AdminService {
       const mentorApplications = await this.prisma.mentors.findMany({
         orderBy: { created_at: 'desc' },
         select: {
-          id: true,
-          resume: true, // Add this line
+          id: true, // This is the mentor application ID
+          resume: true,
           user: {
             select: {
               id: true,
@@ -819,7 +819,8 @@ export class AdminService {
 
       const mappedMentorApplications: MentorshipAdmin[] =
         mentorApplications.map((mentor) => ({
-          id: mentor.user.id,
+          id: mentor.user.id, // Keep user ID for backward compatibility
+          mentorApplicationId: mentor.id, // Add mentor application ID
           identity: {
             avatar: mentor.user.picture_upload_link,
             firstName: mentor.user.first_name,
@@ -832,7 +833,7 @@ export class AdminService {
           status: mentor.status,
           capacity: mentor.max_mentees,
           availability: mentor.availability,
-          resume: mentor.resume, // Add this line
+          resume: mentor.resume,
         }));
 
       return mappedMentorApplications;

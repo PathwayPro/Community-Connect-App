@@ -10,7 +10,13 @@ import {
 import { Badge } from '@/shared/components/ui/badge';
 import { AdminMentorModalCard } from '../common/modals/admin-mentor-modal';
 
-export const mentorshipAdminColumns: ColumnDef<MentorshipAdmin>[] = [
+interface MentorshipAdminColumnsProps {
+  onStatusUpdate?: () => void;
+}
+
+export const createMentorshipAdminColumns = (
+  onStatusUpdate?: () => void
+): ColumnDef<MentorshipAdmin>[] => [
   {
     accessorKey: 'identity.firstName',
     header: () => (
@@ -83,8 +89,14 @@ export const mentorshipAdminColumns: ColumnDef<MentorshipAdmin>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex justify-center">
-        <AdminMentorModalCard data={row.original} />
+        <AdminMentorModalCard
+          data={row.original}
+          onStatusUpdate={onStatusUpdate}
+        />
       </div>
     )
   }
 ];
+
+// Keep the original export for backward compatibility
+export const mentorshipAdminColumns = createMentorshipAdminColumns();
