@@ -797,6 +797,7 @@ export class AdminService {
         orderBy: { created_at: 'desc' },
         select: {
           id: true,
+          resume: true, // Add this line
           user: {
             select: {
               id: true,
@@ -831,6 +832,7 @@ export class AdminService {
           status: mentor.status,
           capacity: mentor.max_mentees,
           availability: mentor.availability,
+          resume: mentor.resume, // Add this line
         }));
 
       return mappedMentorApplications;

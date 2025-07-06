@@ -83,6 +83,7 @@ export interface MentorshipAdmin {
   ratings?: number;
   review?: string;
   ratingsGroup?: RatingsGroup;
+  resume?: string; // Add this line
 }
 
 export type Mentee = {
