@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/shared/components/ui/button';
@@ -29,14 +29,14 @@ import { useSearchParams } from 'next/navigation';
 type RetrievePasswordFormValues = ForgotPasswordFormValues &
   ResetPasswordWithTokenFormValues;
 
-export function ForgotPasswordForm() {
+const ForgotPasswordFormContent = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
   const { forgotPassword, resetPassword, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const isForgotPasswordPage = pathname === '/auth/forgot-password';
+  const token = searchParams.get('token') || '';
 
   // Move useForm hook before any conditional returns
   const form = useForm<RetrievePasswordFormValues>({
@@ -45,7 +45,9 @@ export function ForgotPasswordForm() {
     ),
     defaultValues: {
       email: '',
-      ...(isForgotPasswordPage ? {} : { newPassword: '', confirmPassword: '' })
+      token: token,
+      newPassword: '',
+      confirmPassword: ''
     }
   });
 
@@ -105,6 +107,13 @@ export function ForgotPasswordForm() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {!isForgotPasswordPage && (
+            <FormField
+              control={form.control}
+              name="token"
+              render={({ field }) => <input type="hidden" {...field} />}
+            />
+          )}
           {isForgotPasswordPage && (
             <FormField
               control={form.control}
@@ -258,5 +267,13 @@ export function ForgotPasswordForm() {
         </Link>
       </p>
     </div>
+  );
+};
+
+export function ForgotPasswordForm() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ForgotPasswordFormContent />
+    </Suspense>
   );
 }

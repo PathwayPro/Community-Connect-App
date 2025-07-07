@@ -109,6 +109,15 @@ export class FilterCommentsDto {
   post_id?: number;
 
   @ApiPropertyOptional({
+    description: 'Comments that are replies to a specific comment (parent_id)',
+    example: 15,
+  })
+  @IsInt()
+  @IsOptional()
+  @Type(() => Number)
+  parent_id?: number;
+
+  @ApiPropertyOptional({
     description:
       '`created_at` greater than inserted date, ignoring time. `Y-m-d 00:00:00.000`',
     example: '2025-01-02',

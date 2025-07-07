@@ -26,12 +26,12 @@ export class LoginUserDto {
 
 export class ResetPasswordDto {
   @ApiProperty({
-    description: 'Current password',
-    example: 'OldPassword123!',
+    description: 'Reset token from email link',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
   @IsString()
   @IsNotEmpty()
-  currentPassword: string;
+  token: string;
 
   @ApiProperty({
     description:
@@ -133,5 +133,31 @@ export class ResetPasswordWithTokenDto {
     example: 'NewPassword123!',
   })
   @IsString()
+  confirmPassword: string;
+}
+
+export class ChangePasswordDto {
+  @ApiProperty({
+    description: 'Current password',
+    example: 'OldPassword123!',
+  })
+  @IsString()
+  @IsNotEmpty()
+  currentPassword: string;
+
+  @ApiProperty({
+    description: 'New password',
+    example: 'NewPassword123!',
+  })
+  @IsString()
+  @IsNotEmpty()
+  newPassword: string;
+
+  @ApiProperty({
+    description: 'Confirm new password',
+    example: 'NewPassword123!',
+  })
+  @IsString()
+  @IsNotEmpty()
   confirmPassword: string;
 }

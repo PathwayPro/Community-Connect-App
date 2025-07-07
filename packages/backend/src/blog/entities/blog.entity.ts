@@ -114,6 +114,15 @@ export class Comment {
   @IsInt()
   id: number;
 
+  @ApiPropertyOptional({
+    description:
+      'ID of the parent comment (for replies). Null for top-level comments',
+    example: '5',
+  })
+  @IsOptional()
+  @IsInt()
+  parent_id?: number;
+
   @ApiProperty({
     description: 'Content of the comment',
     example: 'Content of the comment...',
@@ -143,6 +152,13 @@ export class Comment {
   @ApiProperty({ description: 'Post' })
   @IsObject()
   post: PostResponseMin;
+
+  @ApiPropertyOptional({
+    description: 'Replies to this comment',
+    type: [Comment],
+  })
+  @IsOptional()
+  replies?: Comment[];
 }
 
 export class Like {

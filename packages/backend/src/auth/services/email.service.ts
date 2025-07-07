@@ -554,11 +554,22 @@ export class EmailService {
       const decoded = jwt.verify(token, this.config.jwtSecret) as {
         userId: number;
       };
+      console.log('Token verified successfully, userId:', decoded.userId);
       return { message: 'Token verified', userId: decoded.userId };
     } catch (error) {
       this.logger.error('Token verification failed:', error);
-      // throw new Error('Invalid or expired token');
-      return { message: 'Token verification failed', userId: null };
+
+      // Provide more specific error information
+      if (error instanceof jwt.TokenExpiredError) {
+        console.log('Token has expired');
+        return { message: 'Token has expired', userId: null };
+      } else if (error instanceof jwt.JsonWebTokenError) {
+        console.log('Invalid token format or signature');
+        return { message: 'Invalid token format or signature', userId: null };
+      } else {
+        console.log('Unknown token verification error:', error.message);
+        return { message: 'Token verification failed', userId: null };
+      }
     }
   }
 }

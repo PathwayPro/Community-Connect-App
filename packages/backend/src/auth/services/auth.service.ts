@@ -10,6 +10,7 @@ import {
   VerifyPasswordDto,
   ResendVerificationEmailDto,
   ResetPasswordWithTokenDto,
+  ChangePasswordDto,
 } from '../dto/auth.dto';
 import { AuthResponse, GoogleUser, LoginResponse, Tokens } from '../types';
 import * as crypto from 'crypto';
@@ -185,14 +186,80 @@ export class AuthService {
   }
 
   async resetPassword(
-    userId: number,
     resetPasswordDto: ResetPasswordDto,
   ): Promise<{ message: string }> {
-    console.log('resetPasswordDto', resetPasswordDto, userId);
+    console.log('resetPasswordDto', resetPasswordDto);
+
+    try {
+      const { token, newPassword, confirmPassword } = resetPasswordDto;
+
+      if (newPassword !== confirmPassword) {
+        throw new UnauthorizedException(
+          'New password and confirm password do not match',
+        );
+      }
+
+      // Verify the reset token and get user ID
+      const decodedMessage = this.emailService.verifyToken(token);
+      console.log('decodedMessage from verifyToken:', decodedMessage);
+
+      if (!decodedMessage.userId) {
+        console.log('No userId found in decoded message');
+        throw new UnauthorizedException('Invalid or expired reset token');
+      }
+
+      const user = await this.prisma.users.findUnique({
+        where: { id: decodedMessage.userId },
+      });
+
+      console.log('User found:', user ? 'Yes' : 'No');
+      console.log('User verification_token:', user?.verification_token);
+      console.log('Token from request:', token);
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      // Verify the token matches the one stored in the database
+      if (user.verification_token !== token) {
+        console.log('Token mismatch!');
+        console.log('DB token:', user.verification_token);
+        console.log('Request token:', token);
+        throw new UnauthorizedException('Invalid reset token');
+      }
+
+      const hashedNewPassword = await this.hashPassword(newPassword);
+
+      const updatedUser = await this.prisma.users.update({
+        where: { id: user.id },
+        data: {
+          password_hash: hashedNewPassword,
+          verification_token: null, // Clear the token after use
+        },
+      });
+
+      console.log('updatedUser', updatedUser);
+
+      if (!updatedUser) {
+        throw new UnauthorizedException('Failed to update password');
+      }
+
+      return { message: 'Password updated successfully' };
+    } catch (error) {
+      this.logger.error(`Error resetting password: ${error}`);
+      throw new UnauthorizedException('Failed to reset password');
+    }
+  }
+
+  async changePassword(
+    userId: number,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    console.log('changePasswordDto', changePasswordDto, userId);
 
     try {
       const { currentPassword, newPassword, confirmPassword } =
-        resetPasswordDto;
+        changePasswordDto;
 
       const user = await this.prisma.users.findUnique({
         where: { id: userId },
@@ -236,8 +303,8 @@ export class AuthService {
 
       return { message: 'Password updated successfully' };
     } catch (error) {
-      this.logger.error(`Error resetting password: ${error}`);
-      throw new UnauthorizedException('Failed to reset password');
+      this.logger.error(`Error changing password: ${error}`);
+      throw new UnauthorizedException('Failed to change password');
     }
   }
 

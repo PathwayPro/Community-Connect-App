@@ -5,6 +5,8 @@ import {
 } from '@/shared/components/ui/avatar';
 import { cn } from '@/shared/lib/utils';
 import { ComponentPropsWithoutRef, createContext, useContext } from 'react';
+import { transformDateTimeToTimeAgo } from '../../lib/utils';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 
 interface BaseThreadCardProps extends ComponentPropsWithoutRef<'div'> {
   children: React.ReactNode;
@@ -25,7 +27,7 @@ export const BaseThreadCard = ({
   return (
     <div
       className={cn(
-        'h-fit max-w-[710px] space-y-3 rounded-xl border border-neutral-light-200 bg-white p-4 shadow-sm',
+        'h-fit max-w-full space-y-3 rounded-xl border border-neutral-light-200 bg-white p-4 shadow-sm',
         className
       )}
       {...props}
@@ -58,12 +60,29 @@ BaseThreadCard.Author = function ThreadCardAuthor({
   return (
     <div className="flex gap-3">
       <Avatar className="h-16 w-16 bg-warning-500">
-        <AvatarImage src={avatarUrl} alt={name} />
-        <AvatarFallback>{name[0]}</AvatarFallback>
+        {avatarUrl && (
+          <ImagePreview
+            imagePath={avatarUrl}
+            alt={name}
+            fill={true}
+            priority={true}
+            className="rounded-full"
+          />
+        )}
+        {!avatarUrl && (
+          <AvatarFallback className="bg-warning-500">
+            {name
+              ?.split(' ')
+              .map((n) => n[0])
+              .join('') || ''}
+          </AvatarFallback>
+        )}
       </Avatar>
       <div className="flex flex-col">
         <span className="font-semibold">{name}</span>
-        <span className="text-gray-500">{timeAgo}</span>
+        <span className="text-gray-500">
+          {transformDateTimeToTimeAgo(timeAgo)}
+        </span>
       </div>
     </div>
   );

@@ -20,6 +20,16 @@ export class CreateCommentDto {
   })
   @IsInt()
   post_id: number;
+
+  @ApiPropertyOptional({
+    description:
+      'ID of the parent comment (for replies). Leave null for top-level comments',
+    example: '5',
+  })
+  @IsOptional()
+  @IsInt()
+  parent_id?: number;
+
   @ApiProperty({
     description: 'Comment text',
     example: 'This is a comment for a post...',

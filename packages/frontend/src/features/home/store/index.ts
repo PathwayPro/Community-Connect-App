@@ -22,6 +22,20 @@ interface BlogState {
   createComment: (post_id: number, content: string) => Promise<void>;
   toggleLike: (post_id: number) => Promise<LikeThreadResponse>;
   toggleSave: (post_id: number) => Promise<SaveThreadResponse>;
+  updateThread: (
+    post_id: number,
+    content: string
+  ) => Promise<string | undefined>;
+
+  // Comment actions
+  toggleCommentLike: (comment_id: number) => Promise<LikeThreadResponse>;
+  toggleCommentSave: (comment_id: number) => Promise<SaveThreadResponse>;
+  createSubComment: (
+    comment_id: number,
+    content: string,
+    post_id: number
+  ) => Promise<void>;
+  fetchSubComments: (comment_id: number) => Promise<void>;
 }
 
 export const useBlogStore = create<BlogState>()(
@@ -37,7 +51,11 @@ export const useBlogStore = create<BlogState>()(
           const response = await blogApi.getThreads(params);
           const data = response.data;
 
-          // console.log('| - - - - - - - > DATA FROM BLOG STORE:', data, params);
+          console.log(
+            '| - - - - - - - > DATA FROM BLOG STORE FOR THREADS:',
+            data,
+            params
+          );
 
           set({ threads: data, isLoading: false });
         } catch (error) {
@@ -54,12 +72,19 @@ export const useBlogStore = create<BlogState>()(
           const response = await blogApi.getThreadComments(post_id);
           const data = response.data;
 
-          console.log(
-            '| - - - - - - - > DATA FROM BLOG STORE - MESSAGES:',
-            data
+          // filter out the comments that have a parent_id
+          const filteredData = data.filter(
+            (comment) => comment.parent_id === null
           );
 
-          set({ threadMessages: data, isLoading: false });
+          console.log(
+            '| - - - - - - - > DATA FROM BLOG STORE - MESSAGES:',
+            filteredData
+          );
+
+          // get user profile picture
+
+          set({ threadMessages: filteredData, isLoading: false });
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'An error occurred',
@@ -114,6 +139,24 @@ export const useBlogStore = create<BlogState>()(
         }
       },
 
+      updateThread: async (post_id: number, content: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          console.log('UPDATING THREAD: ', post_id, content);
+
+          const response = await blogApi.updateThread(post_id, content);
+
+          console.log('| - - - - - - - > RESPONSE UPDATING THREAD:', response);
+
+          return response.data.content;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+        }
+      },
+
       toggleLike: async (post_id: number) => {
         set({ isLoading: true, error: null });
         try {
@@ -134,6 +177,91 @@ export const useBlogStore = create<BlogState>()(
           const response = await blogApi.toggleSave(post_id);
 
           return response.data.saveStatus === 'CREATED';
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+        }
+      },
+
+      // Comment actions
+      toggleCommentLike: async (comment_id: number) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await blogApi.toggleCommentLike(comment_id);
+
+          return response.data;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+        }
+      },
+
+      toggleCommentSave: async (comment_id: number) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await blogApi.toggleCommentSave(comment_id);
+
+          return response.data;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+        }
+      },
+
+      createSubComment: async (
+        comment_id: number,
+        content: string,
+        post_id: number
+      ) => {
+        set({ isLoading: true, error: null });
+        try {
+          console.log('CREANDO SUBCOMMENT: ', comment_id, content, post_id);
+          const data = {
+            comment_id: comment_id,
+            message: content,
+            post_id: post_id
+          };
+          const response = await blogApi.createSubComment(data);
+
+          console.log(
+            '| - - - - - - - > RESPONSE CREANDO SUBCOMMENT:',
+            response
+          );
+
+          const message = response.data;
+
+          //set({ threadMessages: data, isLoading: false });
+        } catch (error) {
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'An error occurred creating the subcomment',
+            isLoading: false
+          });
+        }
+      },
+
+      fetchSubComments: async (comment_id: number) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await blogApi.getSubComments(comment_id);
+          const data = response.data;
+
+          console.log(
+            '| - - - - - - - > DATA FROM BLOG STORE - SUBCOMMENTS:',
+            data
+          );
+
+          // get user profile picture
+
+          set({ threadMessages: data, isLoading: false });
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'An error occurred',

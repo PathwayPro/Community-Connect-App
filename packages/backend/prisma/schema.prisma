@@ -98,7 +98,9 @@ model users {
   posts_comments                       PostsComments[]
   posts_likes                 PostsLikes[]
   post_saves                  PostsSaves[]
-  userSettings          UserSettings?     
+  comment_likes               PostsCommentsLikes[]
+  comment_saves               PostsCommentsSaves[]
+  userSettings          UserSettings?
 }
 
 enum users_roles {
@@ -325,7 +327,7 @@ model Resources {
   title      String
   details    String
   type       ResourceType
-  link       String
+  link       String?
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
   user       users    @relation(fields: [user_id], references: [id])
@@ -413,6 +415,7 @@ model Posts {
   image            String?
   created_at       DateTime                  @default(now())
   updated_at       DateTime                  @default(now())
+  deleted_at       DateTime?
   published        Boolean                   @default(false)
   comments         PostsComments[]
   likes            PostsLikes[]
@@ -424,10 +427,34 @@ model PostsComments {
   user             users                     @relation(fields: [user_id], references: [id])
   post_id          Int
   post             Posts                     @relation(fields: [post_id], references: [id])
+  parent_id        Int?                      // Self-reference for nested comments
+  parent           PostsComments?            @relation("CommentToComment", fields: [parent_id], references: [id])
+  replies          PostsComments[]           @relation("CommentToComment")
   message          String
   created_at       DateTime                  @default(now())
   updated_at       DateTime                  @default(now())
+  deleted_at       DateTime?
   published        Boolean                   @default(false)
+  likes            PostsCommentsLikes[]
+  saves            PostsCommentsSaves[]
+}
+model PostsCommentsLikes {
+  id               Int                       @id @default(autoincrement())
+  user_id          Int
+  comment_id       Int
+  comment          PostsComments             @relation(fields: [comment_id], references: [id])
+  user             users                     @relation(fields: [user_id], references: [id])
+  created_at       DateTime                  @default(now())
+  @@unique([user_id, comment_id])
+}
+model PostsCommentsSaves {
+  id               Int                       @id @default(autoincrement())
+  user_id          Int
+  comment_id       Int
+  comment          PostsComments             @relation(fields: [comment_id], references: [id])
+  user             users                     @relation(fields: [user_id], references: [id])
+  created_at       DateTime                  @default(now())
+  @@unique([user_id, comment_id])
 }
 model PostsLikes {
   id               Int                       @id @default(autoincrement())

@@ -18,6 +18,7 @@ interface UserPosts {
   first_name: string;
   middle_name: string;
   last_name: string;
+  email: string;
   picture_upload_link?: string;
 }
 
@@ -45,7 +46,7 @@ export interface SaveThreadResponse {
 export interface PostCommentResponse {
   id: number;
   message: string;
-  created_at: string;
+  updated_at: string;
   published: false;
   user: UserPosts;
   post: {
@@ -55,6 +56,12 @@ export interface PostCommentResponse {
     published: boolean;
     user: UserPosts;
   };
+  parent_id?: number;
+  likes_count?: number;
+  comments_count?: number;
+  liked_by_user?: boolean;
+  saved_by_user?: boolean;
+  replies?: PostCommentResponse[];
 }
 
 // id: number;

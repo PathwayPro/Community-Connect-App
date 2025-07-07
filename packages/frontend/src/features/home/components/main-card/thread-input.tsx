@@ -2,26 +2,26 @@ import { Button } from '@/shared/components/ui/button';
 import { Textarea } from '@/shared/components/ui/textarea';
 import { ImageIcon, SmileIcon } from 'lucide-react';
 import { useState } from 'react';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage
-} from '@/shared/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { SharedIcons } from '@/shared/components/icons';
 import { cn } from '@/shared/lib/utils';
+import { ImagePreview } from '@/shared/components/image/image-preview';
+import { UserProfile } from '@/features/user-profile/types';
 
 interface ThreadInputProps {
   onSubmit?: (content: string, attachments: File[]) => void;
   initialContent?: string;
   className?: string;
   onCancel?: () => void;
+  user: UserProfile;
 }
 
 export const ThreadInput = ({
   onSubmit,
   initialContent = '',
   className,
-  onCancel
+  onCancel,
+  user
 }: ThreadInputProps) => {
   const [content, setContent] = useState(initialContent);
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -61,8 +61,27 @@ export const ThreadInput = ({
     >
       <div className="flex gap-6">
         <Avatar className="h-11 w-11 bg-warning-500">
-          <AvatarImage src="https://github.com/shadcn.png" alt="User avatar" />
-          <AvatarFallback>CN</AvatarFallback>
+          {user?.pictureUploadLink && (
+            <ImagePreview
+              imagePath={user?.pictureUploadLink}
+              alt={user?.firstName + ' ' + user?.lastName}
+              fill={true}
+              priority={true}
+              className="rounded-full object-cover"
+            />
+          )}
+          {!user?.pictureUploadLink && (
+            <AvatarFallback className="bg-warning-500">
+              {user?.firstName
+                ?.split(' ')
+                ?.map((n) => n[0])
+                ?.join('') || ''}
+              {user?.lastName
+                ?.split(' ')
+                ?.map((n) => n[0])
+                ?.join('') || ''}
+            </AvatarFallback>
+          )}
         </Avatar>
         <div className="flex-1">
           <div className="relative flex flex-col">

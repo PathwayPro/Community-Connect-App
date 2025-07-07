@@ -97,6 +97,79 @@ export class BlogController {
   }
 
   @Roles('ADMIN', 'MENTOR', 'USER')
+  @Post('/comment/reply')
+  @ApiBody({ type: CreateCommentDto })
+  @ApiCreatedResponse({ type: Comment })
+  @ApiInternalServerErrorResponse({
+    description: 'Error creating the reply: [ERROR MESSAGE]',
+  })
+  @ApiOperation({
+    summary: 'Create new reply to a comment',
+    description:
+      'Creates a new reply to a specific comment or throws Internal Server Error Exception. \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**',
+  })
+  @ApiBearerAuth()
+  createReply(
+    @GetUser() user: JwtPayload,
+    @Body() createCommentDto: CreateCommentDto,
+  ) {
+    const newReply: CreateCommentDto = {
+      post_id: createCommentDto.post_id,
+      parent_id: createCommentDto.parent_id,
+      message: createCommentDto.message,
+    };
+    return this.blogService.createComment(user, newReply);
+  }
+
+  @Roles('ADMIN', 'MENTOR', 'USER')
+  @Post('/comment/:comment_id/like')
+  @ApiParam({ name: 'comment_id' })
+  @ApiCreatedResponse({ type: LikeThreadResponse })
+  @ApiInternalServerErrorResponse({
+    description: 'Error adding your like to this comment: [ERROR MESSAGE]',
+  })
+  @ApiBadRequestResponse({ description: 'You have already liked this comment' })
+  @ApiNotFoundResponse({
+    description: 'There is no comment with ID #`comment_id`',
+  })
+  @ApiOperation({
+    summary: 'Adds a like to a comment',
+    description:
+      'Creates a new like for a specific comment or throws exception [Bad Request | Not Found | Internal Server Error]. \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**',
+  })
+  @ApiBearerAuth('JWT')
+  createCommentLike(
+    @GetUser() user: JwtPayload,
+    @Param('comment_id') comment_id: string,
+  ) {
+    return this.blogService.createCommentLike(user, +comment_id);
+  }
+
+  @Roles('ADMIN', 'MENTOR', 'USER')
+  @Post('/comment/:comment_id/save')
+  @ApiParam({ name: 'comment_id' })
+  @ApiCreatedResponse({ type: SaveThreadResponse })
+  @ApiInternalServerErrorResponse({
+    description: 'Error saving comment: [ERROR MESSAGE]',
+  })
+  @ApiBadRequestResponse({ description: 'You have already saved this comment' })
+  @ApiNotFoundResponse({
+    description: 'There is no comment with ID #`comment_id`',
+  })
+  @ApiOperation({
+    summary: 'Saves a comment for the logged user',
+    description:
+      'Saves a specific comment for the logged user or throws exception [Bad Request | Not Found | Internal Server Error]. \n\n REQUIRED ROLES: **ADMIN | MENTOR | USER**',
+  })
+  @ApiBearerAuth('JWT')
+  createCommentSave(
+    @GetUser() user: JwtPayload,
+    @Param('comment_id') comment_id: string,
+  ) {
+    return this.blogService.createCommentSave(user, +comment_id);
+  }
+
+  @Roles('ADMIN', 'MENTOR', 'USER')
   @Post('/post/:post_id/like')
   @ApiParam({ name: 'post_id' })
   @ApiCreatedResponse({ type: LikeThreadResponse })
@@ -378,11 +451,7 @@ export class BlogController {
       `,
   })
   findAllCommentsByPostId(@Param('post_id') post_id: string) {
-    const searchFilters: FilterCommentsDto = {
-      post_id: +post_id,
-      published: true,
-    };
-    return this.blogService.findAllComments(searchFilters);
+    return this.blogService.findCommentsByPostId(+post_id);
   }
 
   @Roles('ADMIN')
