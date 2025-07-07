@@ -16,18 +16,22 @@ import { Icons } from '@/features/auth/components/icons';
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import {
   forgotPasswordSchema,
-  resetPasswordWithTokenSchema, // Change this import
+  resetPasswordWithTokenSchema,
   ForgotPasswordFormValues,
-  ResetPasswordWithTokenFormValues // Change this import
+  ResetPasswordWithTokenFormValues
 } from '@/features/auth/validations/auth.schema';
 import Link from 'next/link';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { cn } from '@/shared/lib/utils';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
-import { useSearchParams } from 'next/navigation';
 
-type RetrievePasswordFormValues = ForgotPasswordFormValues &
-  ResetPasswordWithTokenFormValues;
+// Create a union type that includes all possible fields
+type FormValues = {
+  email?: string;
+  token?: string;
+  newPassword?: string;
+  confirmPassword?: string;
+};
 
 const ForgotPasswordFormContent = () => {
   const pathname = usePathname();
@@ -38,14 +42,15 @@ const ForgotPasswordFormContent = () => {
   const isForgotPasswordPage = pathname === '/auth/forgot-password';
   const token = searchParams.get('token') || '';
 
-  // Move useForm hook before any conditional returns
-  const form = useForm<RetrievePasswordFormValues>({
-    resolver: zodResolver(
-      isForgotPasswordPage ? forgotPasswordSchema : resetPasswordWithTokenSchema
-    ),
+  // Use the appropriate schema based on the page
+  const schema = isForgotPasswordPage
+    ? forgotPasswordSchema
+    : resetPasswordWithTokenSchema;
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
     defaultValues: {
       email: '',
-      token: token,
       newPassword: '',
       confirmPassword: ''
     }
@@ -68,22 +73,19 @@ const ForgotPasswordFormContent = () => {
     );
   }
 
-  // Add this after the form definition to debug validation errors
-  console.log('Form errors:', form.formState.errors);
-  console.log('Form is valid:', form.formState.isValid);
-
-  const onSubmit = async (data: RetrievePasswordFormValues) => {
+  const onSubmit = async (data: FormValues) => {
     console.log('Form submitted with data:', data);
     console.log('isForgotPasswordPage:', isForgotPasswordPage);
     console.log('token:', token);
 
     if (isForgotPasswordPage) {
-      await forgotPassword(data as ForgotPasswordFormValues);
+      await forgotPassword({ email: data.email! });
     } else {
       // Include token in reset password call
       await resetPassword({
-        ...(data as ResetPasswordWithTokenFormValues),
-        token: token || ''
+        newPassword: data.newPassword!,
+        confirmPassword: data.confirmPassword!,
+        token: token
       });
     }
   };
@@ -107,13 +109,6 @@ const ForgotPasswordFormContent = () => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {!isForgotPasswordPage && (
-            <FormField
-              control={form.control}
-              name="token"
-              render={({ field }) => <input type="hidden" {...field} />}
-            />
-          )}
           {isForgotPasswordPage && (
             <FormField
               control={form.control}
@@ -229,7 +224,7 @@ const ForgotPasswordFormContent = () => {
                       state={showConfirmPassword}
                       className={cn(
                         'w-full',
-                        form.formState.errors.newPassword &&
+                        form.formState.errors.confirmPassword &&
                           'border-red-500 focus-visible:ring-red-100'
                       )}
                       {...field}
