@@ -66,6 +66,7 @@ export type RatingsGroup = {
 
 export interface MentorshipAdmin {
   id: string;
+  mentorApplicationId?: number; // Add this field
   identity: {
     avatar: string;
     firstName: string;
@@ -83,10 +84,12 @@ export interface MentorshipAdmin {
   ratings?: number;
   review?: string;
   ratingsGroup?: RatingsGroup;
+  resume?: string;
 }
 
 export type Mentee = {
   id: string;
+  menteeApplicationId?: number; // Add this field
   identity: {
     avatar: string;
     firstName: string;
@@ -99,4 +102,5 @@ export type Mentee = {
   email: string;
   reason: string;
   experience?: string;
+  resume?: string; // Add this field
 };

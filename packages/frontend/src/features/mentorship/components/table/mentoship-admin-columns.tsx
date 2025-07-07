@@ -8,13 +8,19 @@ import {
   AvatarImage
 } from '@/shared/components/ui/avatar';
 import { Badge } from '@/shared/components/ui/badge';
-import Link from 'next/link';
+import { AdminMentorModalCard } from '../common/modals/admin-mentor-modal';
 
-export const mentorshipAdminColumns: ColumnDef<MentorshipAdmin>[] = [
+interface MentorshipAdminColumnsProps {
+  onStatusUpdate?: () => void;
+}
+
+export const createMentorshipAdminColumns = (
+  onStatusUpdate?: () => void
+): ColumnDef<MentorshipAdmin>[] => [
   {
     accessorKey: 'identity.firstName',
     header: () => (
-      <div className="font-semibold text-neutral-dark-600">Mentee</div>
+      <div className="font-semibold text-neutral-dark-600">Mentor</div>
     ),
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
@@ -62,9 +68,11 @@ export const mentorshipAdminColumns: ColumnDef<MentorshipAdmin>[] = [
     cell: ({ row }) => (
       <Badge
         variant={
-          row.getValue('status') === 'Approved'
+          (row.getValue('status') as string).toString().toLowerCase() ===
+          'approved'
             ? 'success'
-            : row.getValue('status') === 'Pending'
+            : (row.getValue('status') as string).toString().toLowerCase() ===
+                'pending'
               ? 'warning'
               : 'destructive'
         }
@@ -83,16 +91,14 @@ export const mentorshipAdminColumns: ColumnDef<MentorshipAdmin>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex justify-center">
-        <Link
-          href={{
-            pathname: '/mentorship/admin/mentor-profile',
-            query: { data: JSON.stringify(row.original) }
-          }}
-          className="flex h-10 w-[90px] items-center justify-center rounded-xl border border-primary-400 text-base font-medium text-primary-400 hover:bg-primary-400 hover:text-white"
-        >
-          View
-        </Link>
+        <AdminMentorModalCard
+          data={row.original}
+          onStatusUpdate={onStatusUpdate}
+        />
       </div>
     )
   }
 ];
+
+// Keep the original export for backward compatibility
+export const mentorshipAdminColumns = createMentorshipAdminColumns();

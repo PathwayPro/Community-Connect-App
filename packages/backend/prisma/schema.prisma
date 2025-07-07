@@ -54,10 +54,20 @@ model users {
   created_at           DateTime?
   provider             String?
   deleted_at           Boolean                     @default(false)
-  // MENTOR RELATIONSHIP
+   
+   // MENTOR RELATIONSHIP
   mentor               mentors[]
   // MENTEE RELATIONSHIP
   mentee               mentees[]
+  
+  // MENTORSHIP SESSIONS - Updated relations
+  mentorSessions    MentorshipSessions[] @relation("MentorSessions")
+  menteeSessions    MentorshipSessions[] @relation("MenteeSessions")
+  
+  // MATCHING RELATIONS
+  matchedAsMentor   MatchedMentorMentee[] @relation("MatchedMentor")
+  matchedAsMentee   MatchedMentorMentee[] @relation("MatchedMentee")
+  
   // EVENTS MANAGERS RELATIONSHIP
   event_manager        EventsManagers[]
   // EVENTS SUBSCRIPTIONS RELATIONSHIP
@@ -548,4 +558,73 @@ model NewsletterSubscriptions {
 }
 
 
+// MENTORSHIP SESSIONS
+model MentorshipSessions {
+  id                Int               @id @default(autoincrement())
+  mentorId          Int               
+  mentor            users             @relation("MentorSessions", fields: [mentorId], references: [id])
+  menteeId          Int               
+  mentee            users             @relation("MenteeSessions", fields: [menteeId], references: [id])
+  link              String?
+  dateStart         DateTime          
+  dateEnd           DateTime          
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
+  // Relations
+  descriptions      MentorshipSessionsDescriptions[]
+  menteeNotes       MentorshipSessionsMenteeNotes[]
+  mentorRating      MentorshipSessionsMentorRating?
+  menteeRating      MentorshipSessionsMenteeRating?
+}
+
+model MentorshipSessionsDescriptions {
+  id                Int               @id @default(autoincrement())
+  sessionId         Int               
+  session           MentorshipSessions @relation(fields: [sessionId], references: [id])
+  description       String
+}
+
+model MentorshipSessionsMenteeNotes {
+  id                Int               @id @default(autoincrement())
+  sessionId         Int               
+  session           MentorshipSessions @relation(fields: [sessionId], references: [id])
+  notes             String
+}
+
+model MentorshipSessionsMentorRating {
+  id                Int               @id @default(autoincrement())
+  sessionId         Int               @unique
+  session           MentorshipSessions @relation(fields: [sessionId], references: [id])
+  rate              Int               
+  comment           String?
+  createdAt         DateTime          @default(now())
+}
+
+model MentorshipSessionsMenteeRating {
+  id                Int               @id @default(autoincrement())
+  sessionId         Int               @unique
+  session           MentorshipSessions @relation(fields: [sessionId], references: [id])
+  rate              Int               
+  comment           String?
+  createdAt         DateTime          @default(now())
+}
+
+enum matching_status {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+model MatchedMentorMentee {
+  id                Int               @id @default(autoincrement())
+  mentorId          Int               
+  mentor            users             @relation("MatchedMentor", fields: [mentorId], references: [id])
+  menteeId          Int               
+  mentee            users             @relation("MatchedMentee", fields: [menteeId], references: [id])
+  status            matching_status   @default(PENDING)
+  createdAt         DateTime          @default(now())
+
+  @@unique([mentorId, menteeId])
+}

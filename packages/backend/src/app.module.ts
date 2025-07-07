@@ -30,6 +30,7 @@ import { SettingsModule } from './settings/settings.module';
 import { ContactUsModule } from './contact_us/contact_us.module';
 import { SkillsModule } from './skills/skills.module';
 import { AdminModule } from './admin/admin.module';
+import { MentorshipSessionsModule } from './mentorship_sessions/mentorship_sessions.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -67,6 +68,7 @@ import { AdminModule } from './admin/admin.module';
     ContactUsModule,
     SkillsModule,
     AdminModule,
+    MentorshipSessionsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -3,13 +3,14 @@ import {
   LoginCredentials,
   AuthResponse,
   RegisterCredentials,
-  ResetPasswordCredentials,
+  // ResetPasswordCredentials,
   ForgotPasswordCredentials,
   UpdatePasswordCredentials,
   AccessToken,
   RefreshToken,
   ChangePasswordCredentials
 } from '@/features/auth/types';
+import { ResetPasswordWithTokenFormValues } from '@/features/auth/validations/auth.schema';
 
 export const authApi = {
   login: (credentials: LoginCredentials) =>
@@ -27,8 +28,13 @@ export const authApi = {
   forgotPassword: (credentials: ForgotPasswordCredentials) =>
     apiMethods.post<AuthResponse>('/auth/forgot-password', credentials),
 
-  resetPassword: (credentials: ResetPasswordCredentials) =>
-    apiMethods.post<AuthResponse>('/auth/reset-password', credentials),
+  resetPassword: (
+    credentials: ResetPasswordWithTokenFormValues & { token?: string }
+  ) =>
+    apiMethods.post<AuthResponse>(
+      '/auth/reset-password-with-token',
+      credentials
+    ),
 
   changePassword: (credentials: ChangePasswordCredentials) =>
     apiMethods.post<AuthResponse>('/auth/change-password', credentials),

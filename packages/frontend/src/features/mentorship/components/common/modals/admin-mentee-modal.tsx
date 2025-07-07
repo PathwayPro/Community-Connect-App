@@ -6,7 +6,7 @@ import {
 } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { FileText, MessageSquare, Download } from 'lucide-react';
-import { MentorshipAdmin } from '../../../types';
+import { Mentee } from '../../../types';
 import { UserRoundIcon } from 'lucide-react';
 import {
   Dialog,
@@ -17,7 +17,6 @@ import {
   DialogTrigger
 } from '@/shared/components/ui/dialog';
 import { useState } from 'react';
-import { Rating } from '@/shared/components/ui/rating';
 import { PdfPreviewModal } from '@/shared/components/pdf/pdf-preview-modal';
 import {
   Select,
@@ -29,32 +28,30 @@ import {
 import { mentorshipApi } from '../../../api/mentorship-api';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 
-interface AdminMentorModalCardProps {
-  data: MentorshipAdmin;
-  isRating?: boolean;
+interface AdminMenteeModalCardProps {
+  data: Mentee;
   onStatusUpdate?: () => void; // Add callback to refresh data
 }
 
-export const AdminMentorModalCard = ({
+export const AdminMenteeModalCard = ({
   data,
-  isRating = false,
   onStatusUpdate
-}: AdminMentorModalCardProps) => {
+}: AdminMenteeModalCardProps) => {
   const {
     identity,
     profession,
     experience,
     email,
-    experienceDescription,
-    review,
-    ratingsGroup,
+    reason,
     resume,
     status,
-    mentorApplicationId // Add this
+    menteeApplicationId // Add this
   } = data;
   const [isOpen, setIsModalOpen] = useState(false);
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState(status || 'PENDING');
+  const [selectedStatus, setSelectedStatus] = useState<string>(
+    status || 'PENDING'
+  );
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const { showAlert } = useAlertDialog();
 
@@ -65,19 +62,19 @@ export const AdminMentorModalCard = ({
   };
 
   const handleStatusUpdate = async () => {
-    if (selectedStatus === status || !mentorApplicationId) return;
+    if (selectedStatus === status || !menteeApplicationId) return;
 
     setIsUpdatingStatus(true);
     try {
-      await mentorshipApi.updateMentorStatus(
-        mentorApplicationId,
+      await mentorshipApi.updateMenteeStatus(
+        menteeApplicationId,
         selectedStatus
       );
 
       showAlert({
         type: 'success',
         title: 'Status Updated',
-        description: `Mentor status has been updated to ${selectedStatus}.`
+        description: `Mentee status has been updated to ${selectedStatus}.`
       });
 
       // Refresh the data
@@ -87,7 +84,7 @@ export const AdminMentorModalCard = ({
       showAlert({
         type: 'error',
         title: 'Update Failed',
-        description: 'Failed to update mentor status. Please try again.'
+        description: 'Failed to update mentee status. Please try again.'
       });
     } finally {
       setIsUpdatingStatus(false);
@@ -131,10 +128,10 @@ export const AdminMentorModalCard = ({
         <DialogContent className="w-[552px] max-w-[552px] rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-center text-2xl font-semibold">
-              {isRating ? 'Session Review' : 'Mentor Profile'}
+              Mentee Profile
             </DialogTitle>
             <DialogDescription className="sr-only">
-              View the mentees profile.
+              View the mentee profile.
             </DialogDescription>
           </DialogHeader>
 
@@ -149,7 +146,7 @@ export const AdminMentorModalCard = ({
               <Avatar className="h-20 w-20 border-4 border-white bg-warning-500">
                 <AvatarImage
                   src={identity.avatar}
-                  alt="Mentor avatar"
+                  alt="Mentee avatar"
                   className="h-full w-full"
                 />
 
@@ -171,118 +168,83 @@ export const AdminMentorModalCard = ({
                 </p>
 
                 <p className="text-sm text-neutral-dark-100">
-                  Years of Experience:{' '}
-                  <span className="text-neutral-dark-600"> {experience}</span>
+                  Experience:{' '}
+                  <span className="text-neutral-dark-600">
+                    {' '}
+                    {experience || 'Not specified'}
+                  </span>
                 </p>
 
                 <p className="flex flex-col space-x-2 text-sm text-neutral-dark-100">
-                  <span>
-                    {isRating ? 'Review' : 'Why do you want to be a mentor?'}
-                  </span>
-                  <span className="text-neutral-dark-600">
-                    {isRating ? review : experienceDescription}
-                  </span>
+                  <span>Why do you want to be mentored?</span>
+                  <span className="text-neutral-dark-600">{reason}</span>
                 </p>
               </div>
 
-              {isRating && (
-                <div className="flex w-full flex-col items-center gap-2 px-12">
-                  <span>Ratings</span>
-                  <div className="flex w-full items-center justify-between">
-                    <span className="text-sm text-neutral-dark-600">
-                      Motivational
-                    </span>
-                    <Rating rating={ratingsGroup?.motivational || 0} />
-                  </div>
-                  <div className="flex w-full items-center justify-between">
-                    <span className="text-sm text-neutral-dark-600">
-                      Communication
-                    </span>
-                    <Rating rating={ratingsGroup?.communication || 0} />
-                  </div>
-                  <div className="flex w-full items-center justify-between">
-                    <span className="text-sm text-neutral-dark-600">
-                      Knowledge
-                    </span>
-                    <Rating rating={ratingsGroup?.knowledge || 0} />
-                  </div>
-                  <div className="flex w-full items-center justify-between">
-                    <span className="text-sm text-neutral-dark-600">
-                      Problem Solving
-                    </span>
-                    <Rating rating={ratingsGroup?.problemSolving || 0} />
-                  </div>
-                </div>
-              )}
-
-              {!isRating && (
-                <div className="flex w-full gap-2">
-                  <Button variant="outline" className="h-10 flex-1 gap-2 px-0">
-                    <MessageSquare className="h-5 w-5" />
-                    Message
-                  </Button>
-                  <Button
-                    className="h-10 flex-1 gap-2 px-0"
-                    onClick={handleViewResume}
-                    variant="outline"
-                    disabled={!resume}
-                  >
-                    <FileText className="h-5 w-5" />
-                    View Resume
-                  </Button>
-                </div>
-              )}
+              <div className="flex w-full gap-2">
+                <Button variant="outline" className="h-10 flex-1 gap-2 px-0">
+                  <MessageSquare className="h-5 w-5" />
+                  Message
+                </Button>
+                <Button
+                  className="h-10 flex-1 gap-2 px-0"
+                  onClick={handleViewResume}
+                  variant="outline"
+                  disabled={!resume}
+                >
+                  <FileText className="h-5 w-5" />
+                  View Resume
+                </Button>
+              </div>
             </div>
           </div>
 
           {/* Status Management Section */}
-          {!isRating && (
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium">Status:</span>
-                  <Select
-                    value={selectedStatus}
-                    onValueChange={setSelectedStatus}
-                  >
-                    <SelectTrigger className="w-[140px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="PENDING">Pending</SelectItem>
-                      <SelectItem value="APPROVED">Approved</SelectItem>
-                      <SelectItem value="REJECTED">Rejected</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => setIsModalOpen(false)}
-                    disabled={isUpdatingStatus}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    className="flex-1"
-                    onClick={handleStatusUpdate}
-                    disabled={isUpdatingStatus || selectedStatus === status}
-                  >
-                    {isUpdatingStatus ? 'Updating...' : 'Update Status'}
-                  </Button>
-                </div>
-              </div>
-              {isApproved ? (
-                <Button
-                  className="mx-auto h-10 w-full"
-                  onClick={() => console.log('match mentor')}
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium">Status:</span>
+                <Select
+                  value={selectedStatus}
+                  onValueChange={setSelectedStatus}
                 >
-                  Match Mentor
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PENDING">Pending</SelectItem>
+                    <SelectItem value="APPROVED">Approved</SelectItem>
+                    <SelectItem value="REJECTED">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setIsModalOpen(false)}
+                  disabled={isUpdatingStatus}
+                >
+                  Cancel
                 </Button>
-              ) : null}
+                <Button
+                  className="flex-1"
+                  onClick={handleStatusUpdate}
+                  disabled={isUpdatingStatus || selectedStatus === status}
+                >
+                  {isUpdatingStatus ? 'Updating...' : 'Update Status'}
+                </Button>
+              </div>
             </div>
-          )}
+            {isApproved ? (
+              <Button
+                className="mx-auto h-10 w-full"
+                onClick={() => console.log('match with mentor')}
+              >
+                Match with a Mentor
+              </Button>
+            ) : null}
+          </div>
         </DialogContent>
       </Dialog>
 

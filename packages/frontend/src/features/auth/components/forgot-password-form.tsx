@@ -16,17 +16,22 @@ import { Icons } from '@/features/auth/components/icons';
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import {
   forgotPasswordSchema,
-  resetPasswordSchema,
+  resetPasswordWithTokenSchema,
   ForgotPasswordFormValues,
-  ResetPasswordFormValues
+  ResetPasswordWithTokenFormValues
 } from '@/features/auth/validations/auth.schema';
 import Link from 'next/link';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { cn } from '@/shared/lib/utils';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 
-type RetrievePasswordFormValues = ForgotPasswordFormValues &
-  ResetPasswordFormValues;
+// Create a union type that includes all possible fields
+type FormValues = {
+  email?: string;
+  token?: string;
+  newPassword?: string;
+  confirmPassword?: string;
+};
 
 const ForgotPasswordFormContent = () => {
   const pathname = usePathname();
@@ -37,32 +42,51 @@ const ForgotPasswordFormContent = () => {
   const isForgotPasswordPage = pathname === '/auth/forgot-password';
   const token = searchParams.get('token') || '';
 
-  const form = useForm<RetrievePasswordFormValues>({
-    resolver: zodResolver(
-      isForgotPasswordPage ? forgotPasswordSchema : resetPasswordSchema
-    ),
+  // Use the appropriate schema based on the page
+  const schema = isForgotPasswordPage
+    ? forgotPasswordSchema
+    : resetPasswordWithTokenSchema;
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
     defaultValues: {
       email: '',
-      token: token,
       newPassword: '',
       confirmPassword: ''
     }
   });
 
-  const onSubmit = async (data: RetrievePasswordFormValues) => {
-    console.log('rest password button clicked');
+  // Add token validation AFTER the hook
+  if (!isForgotPasswordPage && !token) {
+    return (
+      <div className="w-full max-w-md space-y-6 bg-white dark:bg-slate-900">
+        <div className="space-y-2 text-center">
+          <h2>Invalid Reset Link</h2>
+          <p className="text-sm text-muted-foreground">
+            This password reset link is invalid or has expired.
+          </p>
+          <Link href="/auth/forgot-password" className="text-primary">
+            Request a new reset link
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const onSubmit = async (data: FormValues) => {
+    console.log('Form submitted with data:', data);
+    console.log('isForgotPasswordPage:', isForgotPasswordPage);
+    console.log('token:', token);
 
     if (isForgotPasswordPage) {
-      await forgotPassword(data as ForgotPasswordFormValues);
+      await forgotPassword({ email: data.email! });
     } else {
-      const resetPasswordData = {
-        ...data,
+      // Include token in reset password call
+      await resetPassword({
+        newPassword: data.newPassword!,
+        confirmPassword: data.confirmPassword!,
         token: token
-      };
-
-      console.log('reset password data', resetPasswordData);
-
-      await resetPassword(resetPasswordData as ResetPasswordFormValues);
+      });
     }
   };
 
@@ -85,13 +109,6 @@ const ForgotPasswordFormContent = () => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {!isForgotPasswordPage && (
-            <FormField
-              control={form.control}
-              name="token"
-              render={({ field }) => <input type="hidden" {...field} />}
-            />
-          )}
           {isForgotPasswordPage && (
             <FormField
               control={form.control}
@@ -207,7 +224,7 @@ const ForgotPasswordFormContent = () => {
                       state={showConfirmPassword}
                       className={cn(
                         'w-full',
-                        form.formState.errors.newPassword &&
+                        form.formState.errors.confirmPassword &&
                           'border-red-500 focus-visible:ring-red-100'
                       )}
                       {...field}

@@ -31,6 +31,7 @@ import {
   LoginUserDto,
   ResendVerificationEmailDto,
   ResetPasswordDto,
+  ResetPasswordWithTokenDto,
 } from './dto';
 import { GetUser } from './decorators';
 import { GoogleUser, LoginResponse } from './types';
@@ -214,6 +215,15 @@ export class AuthController {
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<{ message: string }> {
     return this.authService.changePassword(userId, changePasswordDto);
+  }
+
+  @Post('reset-password-with-token')
+  @Public()
+  @ApiOperation({ summary: 'Reset password using token from email' })
+  async resetPasswordWithToken(
+    @Body() resetPasswordWithTokenDto: ResetPasswordWithTokenDto,
+  ) {
+    return this.authService.resetPasswordWithToken(resetPasswordWithTokenDto);
   }
 
   @Public()

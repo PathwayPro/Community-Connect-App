@@ -283,7 +283,8 @@ export class EmailService {
             <p>${content}</p>
             
             <div class="button-container">
-              <a href="${buttonUrl}" class="cta-button">${buttonText}</a>
+              <a href="${buttonUrl}" class="cta-button">${buttonText}</a><br /><br />
+              Or copy and paste the following link into your browser: ${buttonUrl}
             </div>
             
             ${footerText ? `<div class="security-note"><p>${footerText}</p></div>` : ''}

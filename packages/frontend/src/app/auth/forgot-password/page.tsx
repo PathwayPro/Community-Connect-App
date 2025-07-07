@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import { AuthCarousel } from '@/features/auth/components';
 import { Separator } from '@/shared/components/ui/separator';
 import { ForgotPasswordForm } from '@/features/auth/components';
@@ -12,7 +13,9 @@ const ForgotPasswordPage = () => {
   return (
     <div className="container-wide relative flex h-[100vh] items-center justify-between">
       <div className="w-1/4 min-w-[420px]">
-        <ForgotPasswordForm />
+        <Suspense fallback={<div>Loading...</div>}>
+          <ForgotPasswordForm />
+        </Suspense>
       </div>
       <Separator orientation="vertical" className="h-full" />
       <div className="w-2/4">

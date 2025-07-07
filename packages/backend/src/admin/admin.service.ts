@@ -796,7 +796,8 @@ export class AdminService {
       const mentorApplications = await this.prisma.mentors.findMany({
         orderBy: { created_at: 'desc' },
         select: {
-          id: true,
+          id: true, // This is the mentor application ID
+          resume: true,
           user: {
             select: {
               id: true,
@@ -818,7 +819,8 @@ export class AdminService {
 
       const mappedMentorApplications: MentorshipAdmin[] =
         mentorApplications.map((mentor) => ({
-          id: mentor.user.id,
+          id: mentor.user.id, // Keep user ID for backward compatibility
+          mentorApplicationId: mentor.id, // Add mentor application ID
           identity: {
             avatar: mentor.user.picture_upload_link,
             firstName: mentor.user.first_name,
@@ -831,6 +833,7 @@ export class AdminService {
           status: mentor.status,
           capacity: mentor.max_mentees,
           availability: mentor.availability,
+          resume: mentor.resume,
         }));
 
       return mappedMentorApplications;
@@ -845,7 +848,8 @@ export class AdminService {
       const menteeApplications = await this.prisma.mentees.findMany({
         orderBy: { created_at: 'desc' },
         select: {
-          id: true,
+          id: true, // This is the mentee application ID
+          resume: true, // Add resume field
           user: {
             select: {
               id: true,
@@ -865,7 +869,8 @@ export class AdminService {
 
       const mappedMenteeApplications: MenteeAdmin[] = menteeApplications.map(
         (mentee) => ({
-          id: mentee.user.id,
+          id: mentee.user.id, // Keep user ID for backward compatibility
+          menteeApplicationId: mentee.id, // Add mentee application ID
           identity: {
             avatar: mentee.user.picture_upload_link,
             firstName: mentee.user.first_name,
@@ -877,6 +882,7 @@ export class AdminService {
           email: mentee.user.email,
           status: mentee.status,
           experience: mentee.user.experience,
+          resume: mentee.resume, // Add resume field
         }),
       );
 

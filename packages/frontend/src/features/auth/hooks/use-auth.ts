@@ -8,13 +8,15 @@ import {
   LoginCredentials,
   RefreshToken,
   RegisterCredentials,
-  ResetPasswordCredentials,
+  // ResetPasswordCredentials,
   UpdatePasswordCredentials
 } from '@/features/auth/types';
 import { userApi } from '@/features/user-profile/api/user-api';
 import Cookies from 'js-cookie';
 import { useAlertDialog } from '@/shared/hooks/use-alert-dialog';
 import { ApiError } from '@/shared/types';
+// import { useSearchParams } from 'next/navigation';
+import { ResetPasswordWithTokenFormValues } from '../validations/auth.schema';
 
 const USER_STORAGE_KEY = 'user_data';
 
@@ -186,23 +188,24 @@ export function useAuth() {
     }
   };
 
-  const resetPassword = async (credentials: ResetPasswordCredentials) => {
+  const resetPassword = async (
+    credentials: ResetPasswordWithTokenFormValues & { token?: string }
+  ) => {
     try {
       setIsLoading(true);
       const response = await authApi.resetPassword(credentials);
 
       if (response.success) {
         showAlert({
-          title: 'Password updated successfully!',
-          description: 'You can now login with your new password.',
+          title: 'Password reset successfully!',
+          description:
+            'Your password has been reset. You can now login with your new password.',
           type: 'success',
           redirect: '/auth/login'
         });
-        return response;
       }
     } catch (error) {
       const apiError = error as ApiError;
-
       showAlert({
         title: 'Failed to reset password',
         description: apiError.response?.data?.message || 'Please try again.',

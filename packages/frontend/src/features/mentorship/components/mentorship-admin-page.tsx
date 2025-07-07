@@ -3,7 +3,7 @@
 import { useUserStore } from '@/features/user-profile/store';
 import { MentorshipSection } from './common/mentorship-section';
 import { DataTable } from './table/data-table';
-import { mentorshipAdminColumns } from './table/mentoship-admin-columns';
+import { createMentorshipAdminColumns } from './table/mentoship-admin-columns';
 // import { mentorshipAdminData } from './table/data';
 import MentorCard from './common/mentor-card';
 import {
@@ -25,6 +25,7 @@ import { bestMatchesColumns } from './table/best-matches-column';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { useMentorshipStore } from '../store';
 import { menteesColumns } from './table/mentees-column';
+import { createMenteeColumns } from './table/mentees-column';
 
 export const MentorshipAdminPage = () => {
   const { user } = useUserStore();
@@ -45,6 +46,12 @@ export const MentorshipAdminPage = () => {
     getAdminMentorApplications();
     getAdminMenteeApplications();
   }, []);
+
+  // Add refresh function
+  const handleRefreshData = () => {
+    getAdminMentorApplications();
+    getAdminMenteeApplications();
+  };
 
   const filteredDataMentors = useMemo(() => {
     if (selectedStatus === 'All') return adminMentorApplications;
@@ -120,6 +127,11 @@ export const MentorshipAdminPage = () => {
     }
     return `${((lastMonth / currentMonth) * 100).toFixed(2)}%`;
   }, [adminMentorshipTotals]);
+
+  // Create columns with callback
+  const mentorshipAdminColumns =
+    createMentorshipAdminColumns(handleRefreshData);
+  const menteeColumns = createMenteeColumns(handleRefreshData);
 
   return (
     <div className="container-wide flex w-full flex-col gap-6">
@@ -238,7 +250,7 @@ export const MentorshipAdminPage = () => {
               </TabsContent>
               <TabsContent value="mentees" className="mt-4">
                 <DataTable
-                  columns={menteesColumns}
+                  columns={menteeColumns}
                   data={paginatedDataMentees}
                 />
                 {totalPagesMentees > 1 && (
