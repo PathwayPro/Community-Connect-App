@@ -110,3 +110,28 @@ export class ResendVerificationEmailDto {
   @IsEmail()
   email: string;
 }
+
+export class ResetPasswordWithTokenDto {
+  @ApiProperty({
+    description: 'Reset token from email',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+  })
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+
+  @ApiProperty({
+    description: 'New password',
+    example: 'NewPassword123!',
+  })
+  @IsString()
+  @MinLength(9)
+  newPassword: string;
+
+  @ApiProperty({
+    description: 'Confirm new password',
+    example: 'NewPassword123!',
+  })
+  @IsString()
+  confirmPassword: string;
+}

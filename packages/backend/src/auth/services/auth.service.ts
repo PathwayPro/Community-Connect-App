@@ -9,6 +9,7 @@ import {
   GenerateResetTokenDto,
   VerifyPasswordDto,
   ResendVerificationEmailDto,
+  ResetPasswordWithTokenDto,
 } from '../dto/auth.dto';
 import { AuthResponse, GoogleUser, LoginResponse, Tokens } from '../types';
 import * as crypto from 'crypto';
@@ -457,5 +458,29 @@ export class AuthService {
       this.logger.error(`Google authentication error: ${error.message}`);
       throw new UnauthorizedException('Failed to authenticate with Google');
     }
+  }
+
+  async resetPasswordWithToken(
+    resetPasswordWithTokenDto: ResetPasswordWithTokenDto,
+  ) {
+    const { token, newPassword, confirmPassword } = resetPasswordWithTokenDto;
+
+    // Verify token
+    const decoded = this.jwtService.verify(token) as any;
+    const userId = decoded.userId;
+
+    // Validate password
+    if (newPassword !== confirmPassword) {
+      throw new UnauthorizedException('Passwords do not match');
+    }
+
+    // Update password
+    const hashedPassword = await this.hashPassword(newPassword);
+    await this.prisma.users.update({
+      where: { id: userId },
+      data: { password_hash: hashedPassword },
+    });
+
+    return { message: 'Password reset successfully' };
   }
 }

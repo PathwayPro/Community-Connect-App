@@ -41,7 +41,23 @@ export const resetPasswordSchema = z
     path: ['confirmPassword']
   });
 
+export const resetPasswordWithTokenSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(passwordPattern, 'Password must meet minimum requirements'),
+    confirmPassword: z.string()
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword']
+  });
+
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+export type ResetPasswordWithTokenFormValues = z.infer<
+  typeof resetPasswordWithTokenSchema
+>;

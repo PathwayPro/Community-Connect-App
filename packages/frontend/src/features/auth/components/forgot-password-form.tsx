@@ -16,40 +16,73 @@ import { Icons } from '@/features/auth/components/icons';
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import {
   forgotPasswordSchema,
-  resetPasswordSchema,
+  resetPasswordWithTokenSchema, // Change this import
   ForgotPasswordFormValues,
-  ResetPasswordFormValues
+  ResetPasswordWithTokenFormValues // Change this import
 } from '@/features/auth/validations/auth.schema';
 import Link from 'next/link';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import { cn } from '@/shared/lib/utils';
 import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
+import { useSearchParams } from 'next/navigation';
 
 type RetrievePasswordFormValues = ForgotPasswordFormValues &
-  ResetPasswordFormValues;
+  ResetPasswordWithTokenFormValues;
 
 export function ForgotPasswordForm() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
   const { forgotPassword, resetPassword, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const isForgotPasswordPage = pathname === '/auth/forgot-password';
 
+  // Move useForm hook before any conditional returns
   const form = useForm<RetrievePasswordFormValues>({
     resolver: zodResolver(
-      isForgotPasswordPage ? forgotPasswordSchema : resetPasswordSchema
+      isForgotPasswordPage ? forgotPasswordSchema : resetPasswordWithTokenSchema
     ),
     defaultValues: {
       email: '',
-      ...(isForgotPasswordPage && { newPassword: '', confirmPassword: '' })
+      ...(isForgotPasswordPage ? {} : { newPassword: '', confirmPassword: '' })
     }
   });
 
+  // Add token validation AFTER the hook
+  if (!isForgotPasswordPage && !token) {
+    return (
+      <div className="w-full max-w-md space-y-6 bg-white dark:bg-slate-900">
+        <div className="space-y-2 text-center">
+          <h2>Invalid Reset Link</h2>
+          <p className="text-sm text-muted-foreground">
+            This password reset link is invalid or has expired.
+          </p>
+          <Link href="/auth/forgot-password" className="text-primary">
+            Request a new reset link
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Add this after the form definition to debug validation errors
+  console.log('Form errors:', form.formState.errors);
+  console.log('Form is valid:', form.formState.isValid);
+
   const onSubmit = async (data: RetrievePasswordFormValues) => {
+    console.log('Form submitted with data:', data);
+    console.log('isForgotPasswordPage:', isForgotPasswordPage);
+    console.log('token:', token);
+
     if (isForgotPasswordPage) {
       await forgotPassword(data as ForgotPasswordFormValues);
     } else {
-      await resetPassword(data as ResetPasswordFormValues);
+      // Include token in reset password call
+      await resetPassword({
+        ...(data as ResetPasswordWithTokenFormValues),
+        token: token || ''
+      });
     }
   };
 
