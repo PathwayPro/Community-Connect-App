@@ -49,7 +49,9 @@ export const AdminMenteeModalCard = ({
   } = data;
   const [isOpen, setIsModalOpen] = useState(false);
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState(status || 'PENDING');
+  const [selectedStatus, setSelectedStatus] = useState<string>(
+    status || 'PENDING'
+  );
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const { showAlert } = useAlertDialog();
 

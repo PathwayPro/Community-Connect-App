@@ -68,9 +68,9 @@ export const createMenteeColumns = (
     cell: ({ row }) => (
       <Badge
         variant={
-          row.getValue('status').toString().toLowerCase() === 'approved'
+          (row.getValue('status') as string).toLowerCase() === 'approved'
             ? 'success'
-            : row.getValue('status').toString().toLowerCase() === 'pending'
+            : (row.getValue('status') as string).toLowerCase() === 'pending'
               ? 'warning'
               : 'destructive'
         }
