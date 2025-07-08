@@ -186,7 +186,14 @@ const EventForm = () => {
     setActiveStep(activeStep - 1);
   };
 
-  const onSubmit = async (data: EventFormValues) => {
+  const handleStepNavigation = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (activeStep === 1) {
+      handleNext();
+    }
+  };
+
+  const handleFormSubmit = async (data: EventFormValues) => {
     try {
       const formData = new FormData();
 
@@ -300,6 +307,8 @@ const EventForm = () => {
     }
   };
 
+  const handleFinalSubmit = methods.handleSubmit(handleFormSubmit);
+
   // Show loading state while fetching event data
   if (isLoadingEvent) {
     return (
@@ -349,7 +358,12 @@ const EventForm = () => {
       </CardHeader>
       <CardContent className="flex flex-col justify-center gap-4">
         <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={
+              activeStep === 1 ? handleStepNavigation : handleFinalSubmit
+            }
+            className="space-y-6"
+          >
             {activeStep === 1 ? (
               <BaseForm
                 onFileSelect={handleFileSelect}
@@ -372,7 +386,7 @@ const EventForm = () => {
               )}
               <IconButton
                 className="w-full"
-                type={activeStep === 2 ? 'submit' : 'button'}
+                type="submit"
                 disabled={
                   methods.formState.isSubmitting ||
                   !checkStepValidity(
@@ -383,7 +397,6 @@ const EventForm = () => {
                 }
                 rightIcon="arrowRight"
                 label={activeStep === 1 ? 'Next' : eventButtonText}
-                onClick={activeStep === 1 ? handleNext : undefined}
               />
             </div>
           </form>

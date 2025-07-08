@@ -357,34 +357,35 @@ export const CommentsThreadCard = ({
         </BaseThreadCard.Actions>
 
         {/* Comment Selection Bulk Bar */}
-        {threadComments.length > 0 && (
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                checked={allSelected}
-                onCheckedChange={handleSelectAll}
-                aria-label="Select all comments"
-              />
-              <span className="text-sm font-medium">Select All</span>
-            </div>
-            {someSelected && (
-              <div className="right-0 ml-8 flex items-center gap-2 rounded-lg bg-white p-2 shadow">
-                <span className="font-semibold">
-                  {selectedCommentIds.length} selected
-                </span>
-                <Button
-                  variant="outline"
-                  className="h-10 min-w-24 text-sm hover:text-primary-500"
-                  onClick={handleBulkDelete}
-                  disabled={isDeleting}
-                >
-                  <Trash2Icon className="h-4 w-4" />
-                  Delete
-                </Button>
+        {threadComments.length > 0 &&
+          (isAdmin || threadComments.some(isCommentOwner)) && (
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={handleSelectAll}
+                  aria-label="Select all comments"
+                />
+                <span className="text-sm font-medium">Select All</span>
               </div>
-            )}
-          </div>
-        )}
+              {someSelected && (
+                <div className="right-0 ml-8 flex items-center gap-2 rounded-lg bg-white p-2 shadow">
+                  <span className="font-semibold">
+                    {selectedCommentIds.length} selected
+                  </span>
+                  <Button
+                    variant="outline"
+                    className="h-10 min-w-24 text-sm hover:text-primary-500"
+                    onClick={handleBulkDelete}
+                    disabled={isDeleting}
+                  >
+                    <Trash2Icon className="h-4 w-4" />
+                    Delete
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
 
         {/* Delete Confirmation Modal */}
         <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>

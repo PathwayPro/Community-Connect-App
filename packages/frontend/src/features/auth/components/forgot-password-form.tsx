@@ -16,9 +16,7 @@ import { Icons } from '@/features/auth/components/icons';
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import {
   forgotPasswordSchema,
-  resetPasswordWithTokenSchema,
-  ForgotPasswordFormValues,
-  ResetPasswordWithTokenFormValues
+  resetPasswordWithTokenSchema
 } from '@/features/auth/validations/auth.schema';
 import Link from 'next/link';
 import { IconInput } from '@/shared/components/ui/icon-input';
@@ -59,7 +57,7 @@ const ForgotPasswordFormContent = () => {
   // Add token validation AFTER the hook
   if (!isForgotPasswordPage && !token) {
     return (
-      <div className="w-full max-w-md space-y-6 bg-white dark:bg-slate-900">
+      <div className="w-full max-w-md space-y-6 bg-white">
         <div className="space-y-2 text-center">
           <h2>Invalid Reset Link</h2>
           <p className="text-sm text-muted-foreground">
@@ -91,7 +89,7 @@ const ForgotPasswordFormContent = () => {
   };
 
   return (
-    <div className="w-full max-w-md space-y-6 bg-white dark:bg-slate-900">
+    <div className="w-full max-w-md space-y-6 bg-white">
       <AlertDialogUI />
       <Icons.logo className="mx-auto h-[84px] w-[84px]" />
       <div className="space-y-2 text-center">

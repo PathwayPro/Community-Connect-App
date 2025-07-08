@@ -11,7 +11,7 @@ export const userApi = {
   getUserPublicData: (id: number) =>
     apiMethods.get<UserProfile>(`/users/public-data/${id}`),
 
-  getUserById: (id: number) => apiMethods.get<UserProfile>(`/users/${id}`),
+  getUserById: (id: number) => apiMethods.get<UserProfile>(`/users/id/${id}`),
 
   getUserByEmail: (email: string) =>
     apiMethods.get<UserProfile>(`/users/email/${email}`),
