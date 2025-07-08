@@ -74,7 +74,7 @@ export function AuthForm() {
   };
 
   return (
-    <div className="w-full max-w-md space-y-6 bg-white dark:bg-slate-900">
+    <div className="w-full max-w-md space-y-6 bg-white">
       <AlertDialogUI />
       <Icons.logo className="mx-auto h-[84px] w-[84px]" />
       <div className="space-y-2 text-center">
