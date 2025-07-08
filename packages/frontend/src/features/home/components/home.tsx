@@ -221,7 +221,7 @@ export const Home = () => {
     });
 
   // Show Select All if admin or all visible threads are owned by user
-  const showSelectAll = isAdmin || allOwnedByUser;
+  const showSelectAll = isAdmin || allSelectedOwnedByUser;
 
   // Show bulk bar if admin or (thread creator and all selected are theirs)
   const showBulkBar = someSelected && (isAdmin || allSelectedOwnedByUser);

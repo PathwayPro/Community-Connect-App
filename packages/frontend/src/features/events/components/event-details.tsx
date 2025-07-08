@@ -3,7 +3,7 @@
 import { Button } from '@/shared/components/ui/button';
 import { Card } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
-import { Avatar } from '@/shared/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import {
   Calendar,
   MapPin,
@@ -16,7 +16,6 @@ import {
   DollarSign,
   UserIcon
 } from 'lucide-react';
-import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { EventSubscriptionStatus, EventWithHost } from '../types';
 import { EventsTypes } from '../lib/validation';
@@ -385,16 +384,24 @@ export const EventDetails = () => {
       <Card className="p-6">
         <h2 className="mb-4 text-xl font-semibold">Hosted by</h2>
         <div className="flex gap-6">
-          <Avatar className="h-[100px] w-[100px] bg-warning-500">
-            <ImagePreview
-              imagePath={host_image}
-              fallbackImage={'/profile/profile.png'}
-              alt={host_name}
-              width={100}
-              height={100}
-              className="h-full w-full object-cover"
-              priority
-            />
+          <Avatar className="h-16 w-16 bg-warning-500">
+            {host_image && (
+              <ImagePreview
+                imagePath={host_image}
+                alt={host_name}
+                fill={true}
+                priority={true}
+                className="rounded-full"
+              />
+            )}
+            {!host_image && (
+              <AvatarFallback className="bg-warning-500">
+                {host_name
+                  ?.split(' ')
+                  .map((n) => n[0])
+                  .join('') || ''}
+              </AvatarFallback>
+            )}
           </Avatar>
           <div className="flex flex-col gap-4">
             <h6 className="font-medium">{host_name}</h6>

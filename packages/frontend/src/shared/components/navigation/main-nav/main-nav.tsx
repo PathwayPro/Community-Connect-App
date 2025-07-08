@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { IconInput } from '@/shared/components/ui/icon-input';
 import BreadcrumbNav from './breadcrumb-nav';
 import {
@@ -13,6 +12,8 @@ import { useAuth } from '@/features/auth/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { SharedIcons } from '@/shared/components/icons';
 import { useUserStore } from '@/features/user-profile/store/index';
+import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
+import { ImagePreview } from '@/shared/components/image/image-preview';
 
 export const getImageUrl = (path: string | undefined) => {
   if (!path || path.includes('undefined')) return '/profile/profile.png';
@@ -50,14 +51,29 @@ export const MainNav = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="focus:outline-none">
-                <Image
-                  src={getImageUrl(user?.pictureUploadLink)}
-                  alt="user profile"
-                  width={48}
-                  height={48}
-                  className="aspect-square cursor-pointer rounded-full bg-warning-500 object-cover transition-opacity hover:opacity-80"
-                  priority
-                />
+                <Avatar className="h-10 w-10 bg-warning-500">
+                  {user?.pictureUploadLink && (
+                    <ImagePreview
+                      imagePath={user?.pictureUploadLink}
+                      alt={user?.firstName}
+                      fill={true}
+                      priority={true}
+                      className="rounded-full"
+                    />
+                  )}
+                  {!user?.pictureUploadLink && (
+                    <AvatarFallback className="bg-warning-500">
+                      {user?.firstName
+                        ?.split(' ')
+                        .map((n) => n[0])
+                        .join('') || ''}
+                      {user?.lastName
+                        ?.split(' ')
+                        .map((n) => n[0])
+                        .join('') || ''}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end">
