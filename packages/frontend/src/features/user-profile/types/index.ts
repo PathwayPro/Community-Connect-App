@@ -39,6 +39,9 @@ export interface UserProfile {
   emailVerified?: boolean;
   provider?: string;
   lastLogin?: string;
+  menteesTutored?: number;
+  groupSessions?: number;
+  personalSessions?: number;
 }
 
 export interface UserResponse<T> {

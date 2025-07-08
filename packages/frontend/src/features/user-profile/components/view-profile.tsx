@@ -106,9 +106,9 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
     name: `${displayedUser?.firstName} ${displayedUser?.lastName}`,
     avatar: displayedUser?.pictureUploadLink,
     stats: {
-      menteesTutored: 24,
-      groupSessions: 15,
-      personalSessions: 42
+      menteesTutored: displayedUser?.menteesTutored || 0,
+      groupSessions: displayedUser?.groupSessions || 0,
+      personalSessions: displayedUser?.personalSessions || 0
     },
     bio: {
       label: 'Bio',
