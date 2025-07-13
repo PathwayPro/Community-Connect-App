@@ -19,7 +19,7 @@ export const mentorshipApi = {
     apiMethods.post<MenteeResponse>('/mentees', data),
 
   getMentor: (mentorId: number) =>
-    apiMethods.get<MentorResponse>(`/mentors/${mentorId}`),
+    apiMethods.get<MentorResponse>(`/mentors/application-id/${mentorId}`),
 
   getPendingApplications: () =>
     apiMethods.get<PendingApplicationResponse>(`/users/pending-applications`),
@@ -36,7 +36,9 @@ export const mentorshipApi = {
     apiMethods.get<Mentee[]>(`/admin/mentorship/mentee-applications`),
 
   updateMentorStatus: (mentorId: number, status: string) =>
-    apiMethods.put<MentorResponse>(`/mentors/${mentorId}`, { status }),
+    apiMethods.put<MentorResponse>(`/mentors/application-id/${mentorId}`, {
+      status
+    }),
 
   // Add mentee status update method
   updateMenteeStatus: (menteeId: number, status: string) =>
