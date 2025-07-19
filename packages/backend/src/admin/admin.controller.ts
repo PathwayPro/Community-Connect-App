@@ -173,6 +173,8 @@ export class AdminController {
     @Body() updateUserStatusDto: UpdateUserStatusDto,
     @GetUser('sub') adminId: number,
   ) {
+    console.log(updateUserStatusDto, id, adminId);
+
     return this.adminService.updateUserStatus(
       id,
       updateUserStatusDto.isActive,

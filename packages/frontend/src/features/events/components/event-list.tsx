@@ -57,8 +57,6 @@ export const EventList = () => {
     fetchSubscribers();
   }, [fetchEvents, fetchEventSubscriptions, user?.id]);
 
-  console.log('eventSubscriptions', eventSubscriptions);
-
   // Pagination helpers
   const getPageEvents = (eventsList: Event[]) => {
     const startIndex = (currentPage - 1) * eventsPerPage;
@@ -106,8 +104,6 @@ export const EventList = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-
-  console.log('events', events);
 
   if (isLoading || eventsLoading) {
     return (

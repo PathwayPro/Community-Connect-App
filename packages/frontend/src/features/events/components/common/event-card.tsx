@@ -135,9 +135,9 @@ export const EventCard = ({
                   <DollarSign className="mr-1 h-5 w-5 text-secondary-500" />
                 )}
                 {type === EventType.PRIVATE ? (
-                  <LockIcon className="h-5 w-5 text-primary-500" />
+                  <LockIcon className="h-5 w-5 text-white" />
                 ) : (
-                  <UnlockIcon className="h-5 w-5 text-primary-500" />
+                  <UnlockIcon className="h-5 w-5 text-white" />
                 )}
               </span>
             </div>
