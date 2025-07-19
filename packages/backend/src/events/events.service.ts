@@ -294,7 +294,7 @@ export class EventsService {
     user: JwtPayload,
     updateEventDto: UpdateEventDto,
     file: Express.Multer.File | null,
-    removeEventImage: boolean = false,
+    // removeEventImage: boolean = false,
   ) {
     try {
       // VALIDATE EVENT EXIST OR THROW EXCEPTION
@@ -322,7 +322,7 @@ export class EventsService {
       // Handle image updates
       let imagePath: string | undefined;
 
-      if (removeEventImage && eventToUpdate.image) {
+      if (file && eventToUpdate.image) {
         // Delete existing image file
         try {
           await this.filesService.deleteFile(eventToUpdate.image);
@@ -390,7 +390,33 @@ export class EventsService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} event`;
+  async remove(user: JwtPayload, event_id: number) {
+    try {
+      // VALIDATE EVENT EXIST OR THROW EXCEPTION
+      const eventToUpdate = await this.findOne(event_id);
+      if (!eventToUpdate) {
+        throw new NotFoundException(`Event with ID: ${event_id} not found.`);
+      }
+
+      // VALIDATE IF THE USER IS ADMIN OR MANAGER
+      const allowedToUpdate =
+        user.roles === 'ADMIN'
+          ? true
+          : await this.eventsManagersService.isEventManager(user.sub, event_id);
+      if (!allowedToUpdate) {
+        throw new UnauthorizedException(
+          'You are not authorized to edit this event.',
+        );
+      }
+
+      // DELETE EVENT
+      const deletedEvent = await this.prisma.events.delete({
+        where: { id: event_id },
+      });
+
+      return deletedEvent;
+    } catch (error) {
+      throw new BadRequestException('Error deleting event: ' + error.message);
+    }
   }
 }

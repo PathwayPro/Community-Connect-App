@@ -8,7 +8,11 @@ import {
   PendingApplicationResponse,
   AdminMentorshipDashboardTotals,
   MentorshipAdmin,
-  Mentee
+  Mentee,
+  MyMentorDashboard,
+  MentorStatistics,
+  MentorUpcomingSessions,
+  MyMentees
 } from '../types';
 
 interface MentorshipState {
@@ -22,6 +26,11 @@ interface MentorshipState {
   adminMentorshipTotals: AdminMentorshipDashboardTotals;
   adminMentorApplications: MentorshipAdmin[];
   adminMenteeApplications: Mentee[];
+  // New mentor dashboard state
+  mentorDashboard: MyMentorDashboard | null;
+  mentorStatistics: MentorStatistics | null;
+  mentorUpcomingSessions: MentorUpcomingSessions[];
+  mentorMentees: MyMentees[];
   // Actions
   createMentor: (mentorData: FormData) => Promise<MentorResponse>;
   createMentee: (menteeData: FormData) => Promise<MenteeResponse>;
@@ -31,6 +40,11 @@ interface MentorshipState {
   getAdminMentorshipTotals: () => Promise<AdminMentorshipDashboardTotals>;
   getAdminMentorApplications: () => Promise<MentorshipAdmin[]>;
   getAdminMenteeApplications: () => Promise<Mentee[]>;
+  // New mentor dashboard actions
+  getMyDashboard: () => Promise<MyMentorDashboard>;
+  getMyStatistics: () => Promise<MentorStatistics>;
+  getMyUpcomingSessions: () => Promise<MentorUpcomingSessions[]>;
+  getMyMentees: () => Promise<MyMentees[]>;
 }
 
 export const useMentorshipStore = create<MentorshipState>()(
@@ -41,6 +55,10 @@ export const useMentorshipStore = create<MentorshipState>()(
       isLoading: false,
       error: null,
       mentor: null,
+      mentorDashboard: null,
+      mentorStatistics: null,
+      mentorUpcomingSessions: [],
+      mentorMentees: [],
 
       createMentor: async (mentorData) => {
         set({ isLoading: true, error: null });
@@ -96,7 +114,6 @@ export const useMentorshipStore = create<MentorshipState>()(
 
       getAdminMentorApplications: async () => {
         const response = await mentorshipApi.getAdminMentorApplications();
-        console.log('| - - - - - - > response in store:', response.data);
         set({ adminMentorApplications: response.data });
         return response;
       },
@@ -107,21 +124,91 @@ export const useMentorshipStore = create<MentorshipState>()(
         return response;
       },
 
-      fetchInterests: async () => {
+      // New mentor dashboard actions
+      getMyDashboard: async () => {
         set({ isLoading: true, error: null });
         try {
-          const response = await mentorshipApi.getInterests();
-
-          const data = response.data;
-
-          console.log('data in store:', data);
-
-          set({ interests: data, isLoading: false });
+          const response = await mentorshipApi.getMyDashboard();
+          set({
+            mentorDashboard: response.data,
+            isLoading: false
+          });
+          return response;
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'An error occurred',
             isLoading: false
           });
+          throw error;
+        }
+      },
+
+      getMyStatistics: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await mentorshipApi.getMyStatistics();
+          set({
+            mentorStatistics: response.data,
+            isLoading: false
+          });
+          return response;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+          throw error;
+        }
+      },
+
+      getMyUpcomingSessions: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await mentorshipApi.getMyUpcomingSessions();
+          set({
+            mentorUpcomingSessions: response.data,
+            isLoading: false
+          });
+          return response;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+          throw error;
+        }
+      },
+
+      getMyMentees: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await mentorshipApi.getMyMentees();
+          set({
+            mentorMentees: response.data,
+            isLoading: false
+          });
+          return response;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+          throw error;
+        }
+      },
+
+      fetchInterests: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await mentorshipApi.getInterests();
+          set({ interests: response.data, isLoading: false });
+          return response.data;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+          throw error;
         }
       }
     }),
