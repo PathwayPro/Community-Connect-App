@@ -226,14 +226,14 @@ export class EventsController {
     };
 
     // Check for file removal flag
-    const removeEventImage = updateEventDto.removeEventImage === 'true';
+    // const removeEventImage = updateEventDto.removeEventImage === 'true';
 
     return this.eventsService.update(
       +id,
       user,
       updatedEvent,
       file,
-      removeEventImage,
+      // removeEventImage,
     );
   }
 
@@ -277,7 +277,7 @@ export class EventsController {
       'Delete event with ID. \n\n REQUIRED ROLES: **ADMIN | MENTOR**',
   })
   @ApiBearerAuth()
-  remove(@Param('id') id: string) {
-    return this.eventsService.remove(+id);
+  remove(@GetUser() user: JwtPayload, @Param('id') id: string) {
+    return this.eventsService.remove(user, +id);
   }
 }
