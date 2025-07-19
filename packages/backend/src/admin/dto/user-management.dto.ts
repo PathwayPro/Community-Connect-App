@@ -1,6 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import {
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Min,
+  IsBoolean,
+} from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 import { users_roles } from '@prisma/client';
 
 export class UpdateUserRoleDto {
@@ -16,6 +23,13 @@ export class UpdateUserStatusDto {
   @ApiPropertyOptional({
     type: Boolean,
     description: 'User account status (true = active, false = inactive)',
+  })
+  @IsBoolean()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value === 'true';
+    }
+    return value;
   })
   isActive: boolean;
 }

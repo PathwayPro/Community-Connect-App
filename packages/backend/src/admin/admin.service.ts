@@ -653,7 +653,7 @@ export class AdminService {
         throw new BadRequestException('Cannot change your own status');
       }
 
-      // Check if user exists
+      // Check if user exists (including deleted users)
       const user = await this.prisma.users.findUnique({
         where: { id },
       });

@@ -202,16 +202,19 @@ export const useAdminStore = create<AdminState>()(
     deleteUser: async (id) => {
       try {
         set({ isLoading: true, error: null });
-        const response = await adminApi.deleteUser(id);
+        const response = await adminApi.updateUserStatus(id, false);
 
         if (!response.success) {
           throw new Error('Failed to delete user');
         }
 
+        const updatedUser = response.data;
         set((state) => ({
-          users: state.users.filter((user) => user.id !== id),
+          users: state.users.map((user) =>
+            user.id === id ? updatedUser : user
+          ),
           selectedUser:
-            state.selectedUser?.id === id ? null : state.selectedUser,
+            state.selectedUser?.id === id ? updatedUser : state.selectedUser,
           isLoading: false
         }));
         return response.data;
