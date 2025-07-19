@@ -601,9 +601,8 @@ export class MentorService {
           });
 
           return {
-            avatar:
-              session.mentee.picture_upload_link ||
-              '/profile/default-avatar.png',
+            id: session.id,
+            avatar: session.mentee.picture_upload_link,
             mentee: `${session.mentee.first_name} ${session.mentee.last_name}`,
             lastMet: lastSession ? lastSession.dateEnd.toISOString() : null,
             profession: session.mentee.profession || 'Not specified',
@@ -647,6 +646,7 @@ export class MentorService {
 
       // Transform the data to match the MyMentees entity
       const transformedMentees = mentees.map((matching) => ({
+        id: matching.id,
         mentee: `${matching.mentee.first_name} ${matching.mentee.last_name}`,
         email: matching.mentee.email,
         profession: matching.mentee.profession || 'Not specified',

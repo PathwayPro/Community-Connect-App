@@ -90,6 +90,10 @@ export class MentorStatistics {
 }
 
 export class MentorUpcomingSessions {
+  @ApiProperty({ description: 'ID of the upcoming session', example: '10' })
+  @IsNumber()
+  id?: number;
+
   @ApiProperty({
     description: 'Profile picture of the mentee',
     example: 'https://example.com/avatar.jpg',
@@ -128,6 +132,10 @@ export class MentorUpcomingSessions {
 }
 
 export class MyMentees {
+  @ApiProperty({ description: 'ID of the mentee', example: '10' })
+  @IsNumber()
+  id?: number;
+
   @ApiProperty({
     description: 'Full name of the mentee',
     example: 'Jane Smith',

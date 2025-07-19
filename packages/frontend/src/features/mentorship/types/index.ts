@@ -65,7 +65,7 @@ export type RatingsGroup = {
 };
 
 export interface MentorshipAdmin {
-  id: string;
+  id: number;
   mentorApplicationId?: number; // Add this field
   identity: {
     avatar: string;
@@ -88,7 +88,7 @@ export interface MentorshipAdmin {
 }
 
 export type Mentee = {
-  id: string;
+  id: number;
   menteeApplicationId?: number; // Add this field
   identity: {
     avatar: string;
@@ -104,3 +104,37 @@ export type Mentee = {
   experience?: string;
   resume?: string; // Add this field
 };
+
+// New types for mentor dashboard
+export interface MentorStatistics {
+  minutesMentored: number;
+  minutesMentoredDiff: number;
+  mentees: number;
+  menteesDiff: number;
+  liveSessions: number;
+  liveSessionsDiff: number;
+}
+
+export interface MentorUpcomingSessions {
+  id: number;
+  avatar?: string;
+  mentee: string;
+  lastMet?: string;
+  profession?: string;
+  link: string;
+}
+
+export interface MyMentees {
+  id: number;
+  avatar?: string;
+  mentee: string;
+  email: string;
+  profession?: string;
+  status: string;
+}
+
+export interface MyMentorDashboard {
+  statistics: MentorStatistics;
+  upcomingSessions: MentorUpcomingSessions[];
+  mentees: MyMentees[];
+}

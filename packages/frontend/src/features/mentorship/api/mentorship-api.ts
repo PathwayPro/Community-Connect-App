@@ -6,7 +6,11 @@ import {
   PendingApplicationResponse,
   AdminMentorshipDashboardTotals,
   MentorshipAdmin,
-  Mentee
+  Mentee,
+  MyMentorDashboard,
+  MentorStatistics,
+  MentorUpcomingSessions,
+  MyMentees
 } from '../types';
 
 export const mentorshipApi = {
@@ -42,5 +46,17 @@ export const mentorshipApi = {
 
   // Add mentee status update method
   updateMenteeStatus: (menteeId: number, status: string) =>
-    apiMethods.put<MenteeResponse>(`/mentees/${menteeId}`, { status })
+    apiMethods.put<MenteeResponse>(`/mentees/${menteeId}`, { status }),
+
+  // New mentor dashboard endpoints
+  getMyDashboard: () =>
+    apiMethods.get<MyMentorDashboard>('/mentors/my-dashboard'),
+
+  getMyStatistics: () =>
+    apiMethods.get<MentorStatistics>('/mentors/my-statistics'),
+
+  getMyUpcomingSessions: () =>
+    apiMethods.get<MentorUpcomingSessions[]>('/mentors/my-upcoming-sessions'),
+
+  getMyMentees: () => apiMethods.get<MyMentees[]>('/mentors/my-mentees')
 };

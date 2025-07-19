@@ -7,12 +7,12 @@ import { MentorshipSection } from './common/mentorship-section';
 import { MentorshipIcons } from './icons';
 import { DataTable } from './table/data-table';
 import { sessionsColumns } from './table/sessions-columns';
-import { menteesData } from './table/data';
 import { menteesColumns } from './table/mentees-column';
 import MentorCard from './common/mentor-card';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MentorModal } from './common/modals/mentor-modal';
-// import { useMentorshipStore } from '@/features/mentorship/store';
+import { useMentorshipStore } from '../store';
+import { MenteeStatus } from '../types';
 
 interface ProfileData {
   firstName: string;
@@ -27,11 +27,41 @@ interface ProfileData {
 
 const MentorDashboard = () => {
   const { user } = useUserStore();
-  // const { mentor } = useMentorshipStore();
+  const {
+    // mentorDashboard,
+    mentorStatistics,
+    mentorUpcomingSessions,
+    mentorMentees,
+    getMyDashboard,
+    getMyStatistics,
+    getMyUpcomingSessions,
+    getMyMentees,
+    isLoading,
+    error
+  } = useMentorshipStore();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<ProfileData | null>(
     null
   );
+
+  useEffect(() => {
+    // Fetch all dashboard data when component mounts
+    const fetchDashboardData = async () => {
+      try {
+        await Promise.all([
+          getMyDashboard(),
+          getMyStatistics(),
+          getMyUpcomingSessions(),
+          getMyMentees()
+        ]);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      }
+    };
+
+    fetchDashboardData();
+  }, [getMyDashboard, getMyStatistics, getMyUpcomingSessions, getMyMentees]);
 
   const mentorData: ProfileData = {
     firstName: user?.firstName || '',
@@ -48,6 +78,61 @@ const MentorDashboard = () => {
     setSelectedProfile(mentorData);
     setIsModalOpen(true);
   };
+
+  // Transform upcoming sessions data for the table
+  const upcomingSessionsData = mentorUpcomingSessions.map((session) => ({
+    id: session.id,
+    date: session.lastMet || new Date().toISOString(), // Add date
+    identity: {
+      firstName: session.mentee.split(' ')[0] || '',
+      lastName: session.mentee.split(' ').slice(1).join(' ') || '',
+      email: '',
+      avatar: session.avatar || '/profile/default-avatar.png'
+    },
+    link: session.link,
+    profession: session.profession || 'Not specified',
+    lastSession: session.lastMet
+      ? new Date(session.lastMet).toLocaleDateString()
+      : 'Never',
+    nextSession: session.link ? 'Scheduled' : 'Not scheduled'
+  }));
+
+  // Transform mentees data for the table
+  const menteesTableData = mentorMentees.map((mentee, index) => ({
+    id: mentee.id,
+    menteeApplicationId: index,
+    identity: {
+      avatar: mentee.avatar || '/profile/default-avatar.png',
+      firstName: mentee.mentee.split(' ')[0] || '',
+      lastName: mentee.mentee.split(' ').slice(1).join(' ') || '',
+      email: mentee.email
+    },
+    date: new Date().toISOString(),
+    profession: mentee.profession || 'Not specified',
+    status: mentee.status as MenteeStatus, // Cast to match MenteeStatus enum
+    email: mentee.email,
+    reason: '',
+    experience: '',
+    resume: ''
+  }));
+
+  if (isLoading) {
+    return (
+      <div className="container-wide flex min-h-[400px] items-center justify-center">
+        <div className="text-lg">Loading dashboard...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container-wide flex min-h-[400px] items-center justify-center">
+        <div className="text-lg text-red-600">
+          Error loading dashboard: {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container-wide flex flex-col gap-6">
@@ -73,55 +158,71 @@ const MentorDashboard = () => {
             />
           </div>
         </MentorshipSection.Header>
+
         <MentorshipSection.Content>
           <div className="flex gap-4">
             <MentorCard
               title="Minutes Mentored"
-              value="1893"
+              value={mentorStatistics?.minutesMentored?.toString() || '0'}
               icon="minutesMentored"
               trend="arrowTrendingUp"
-              trendValue="25%"
-              trendText="Up from last month"
-              trendUp={true}
+              trendValue={`${mentorStatistics?.minutesMentoredDiff?.toFixed(1)}%`}
+              trendText={
+                (mentorStatistics?.minutesMentoredDiff || 0) >= 0
+                  ? 'Up from last month'
+                  : 'Down from last month'
+              }
+              trendUp={(mentorStatistics?.minutesMentoredDiff || 0) >= 0}
             />
             <MentorCard
               title="Mentees"
-              value="15"
+              value={mentorStatistics?.mentees?.toString() || '0'}
               icon="mentees"
               trend="arrowTrendingDown"
-              trendValue="2.5%"
-              trendText="Down from last month"
-              trendUp={false}
+              trendValue={`${mentorStatistics?.menteesDiff?.toFixed(1)}%`}
+              trendText={
+                (mentorStatistics?.menteesDiff || 0) >= 0
+                  ? 'Up from last month'
+                  : 'Down from last month'
+              }
+              trendUp={(mentorStatistics?.menteesDiff || 0) >= 0}
             />
             <MentorCard
               title="Live Sessions"
-              value="64"
+              value={mentorStatistics?.liveSessions?.toString() || '0'}
               icon="liveSessions"
               trend="arrowTrendingDown"
-              trendValue="10%"
-              trendText="Down from last month"
-              trendUp={false}
+              trendValue={`${mentorStatistics?.liveSessionsDiff?.toFixed(1)}%`}
+              trendText={
+                (mentorStatistics?.liveSessionsDiff || 0) >= 0
+                  ? 'Up from last month'
+                  : 'Down from last month'
+              }
+              trendUp={(mentorStatistics?.liveSessionsDiff || 0) >= 0}
             />
           </div>
         </MentorshipSection.Content>
       </MentorshipSection>
-      <div className="flex h-full w-full gap-4">
+
+      <div className="flex gap-4">
         <MentorshipSection className="h-[444px]">
           <MentorshipSection.Header>
             <h6 className="font-semibold">Upcoming Sessions</h6>
             <Button className="h-10">View All</Button>
           </MentorshipSection.Header>
           <MentorshipSection.Content>
-            <DataTable columns={sessionsColumns} data={menteesData} />
+            <DataTable columns={sessionsColumns} data={upcomingSessionsData} />
           </MentorshipSection.Content>
         </MentorshipSection>
         <MentorshipSection className="h-[444px]">
           <MentorshipSection.Header>
             <div className="flex items-center gap-4">
-              <h6 className="font-semibold">My Meentees</h6>
+              <h6 className="font-semibold">My Mentees</h6>
               <div className="flex items-center gap-1">
                 <MentorshipIcons.mentees className="h-9 w-9" />
-                <h6 className="font-medium">12</h6>
+                <h6 className="font-medium">
+                  {mentorStatistics?.mentees || 0}
+                </h6>
               </div>
             </div>
             <Button className="h-10">View All</Button>
@@ -129,7 +230,7 @@ const MentorDashboard = () => {
           <MentorshipSection.Content>
             <DataTable
               columns={menteesColumns}
-              data={menteesData}
+              data={menteesTableData}
               onRowClick={(rowData) => {
                 setSelectedProfile({
                   firstName: rowData.identity.firstName,
