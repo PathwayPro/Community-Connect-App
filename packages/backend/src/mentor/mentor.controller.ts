@@ -34,13 +34,22 @@ import {
   ApiBadRequestResponse,
   ApiConsumes,
 } from '@nestjs/swagger';
-import { Mentors } from './entities/mentor.entity';
+import {
+  Mentors,
+  MentorStatistics,
+  MentorUpcomingSessions,
+  MyMentees,
+  MyMentorDashboard,
+} from './entities/mentor.entity';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Mentors')
 @Controller('mentors')
 export class MentorController {
   constructor(private readonly mentorService: MentorService) {}
+  // ------------------------------
+  // MENTOR APPLICATIONS
+  // ------------------------------
 
   @Get()
   @Roles('ADMIN')
@@ -52,7 +61,7 @@ export class MentorController {
     description:
       'Fetch any mentor applications. \n\n REQUIRED ROLES: **ADMIN**',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   findAll(@Body() filters: FilterMentorDto) {
     return this.mentorService.findAll(filters);
   }
@@ -70,12 +79,12 @@ export class MentorController {
     description:
       'There is no mentor application for this user (USER ID: #`:id` )',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   findMyApplication(@GetUser() user: JwtPayload) {
     return this.mentorService.findOneByUserId(user.sub);
   }
 
-  @Get(':mentorApplicationId')
+  @Get('application-id/:mentorApplicationId')
   @Roles('ADMIN')
   @ApiParam({ name: 'mentorApplicationId' })
   @ApiOkResponse({ type: Mentors })
@@ -89,7 +98,7 @@ export class MentorController {
     description:
       'There is no mentor application with ID: `:mentorApplicationId`. Make sure you are not using a user ID',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   findOne(@Param('mentorApplicationId') mentorApplicationId: string) {
     return this.mentorService.findOneById(+mentorApplicationId);
   }
@@ -156,7 +165,7 @@ export class MentorController {
   @ApiNotFoundResponse({
     description: 'Mentor application for user with ID: `user_id` not found',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   update(
     @GetUser() user: JwtPayload,
     @Body() updateMentorDto: UpdateMentorDto,
@@ -172,7 +181,7 @@ export class MentorController {
     return this.mentorService.update(+user.sub, updatedMentor);
   }
 
-  @Put(':mentorApplicationId')
+  @Put('application-id/:mentorApplicationId')
   @Roles('ADMIN')
   @ApiParam({ name: 'mentorApplicationId' })
   @ApiBody({ type: UpdateMentorStatusDto })
@@ -193,7 +202,7 @@ export class MentorController {
   @ApiBadRequestResponse({
     description: 'Error updating mentor application status: `[ERROR MESSAGE]`',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   updateStatus(
     @Param('mentorApplicationId') mentorApplicationId: string,
     @Body() updateMentorStatusDto: UpdateMentorStatusDto,
@@ -205,7 +214,6 @@ export class MentorController {
   }
 
   // TO-DO: REMOVE MENTOR INFORMATION? OR CHANGE STATUS TO "REJECTED" OR "DELETED" TO KEEP THE INFORMATION?
-
   @Delete(':id')
   @Roles('ADMIN')
   @ApiOkResponse({ type: String })
@@ -218,5 +226,65 @@ export class MentorController {
   })
   remove(@Param('id') id: string) {
     return this.mentorService.remove(+id);
+  }
+
+  // ------------------------------
+  // MENTOR DASHBOARD
+  // ------------------------------
+
+  @Get('my-dashboard')
+  @Roles('MENTOR')
+  @ApiOkResponse({ type: MyMentorDashboard })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Get mentor dashboard',
+    description:
+      'Get complete mentor dashboard with statistics, upcoming sessions, and mentees. \n\n REQUIRED ROLES: **MENTOR**',
+  })
+  @ApiBearerAuth('JWT')
+  async getMyDashboard(@GetUser() user: JwtPayload) {
+    return await this.mentorService.getMyDashboard(user.sub);
+  }
+
+  @Get('my-statistics')
+  @Roles('MENTOR')
+  @ApiOkResponse({ type: MentorStatistics })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Get mentor statistics',
+    description:
+      'Get mentor statistics including minutes mentored, mentees count, and live sessions with percentage differences. \n\n REQUIRED ROLES: **MENTOR**',
+  })
+  @ApiBearerAuth('JWT')
+  async getMyStatistics(@GetUser() user: JwtPayload) {
+    return await this.mentorService.getMyStatistics(user.sub);
+  }
+
+  @Get('my-upcoming-sessions')
+  @Roles('MENTOR')
+  @ApiOkResponse({ type: [MentorUpcomingSessions] })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Get mentor upcoming sessions',
+    description:
+      'Get list of upcoming sessions with mentee details. \n\n REQUIRED ROLES: **MENTOR**',
+  })
+  @ApiBearerAuth('JWT')
+  async getMyUpcomingSessions(@GetUser() user: JwtPayload) {
+    return await this.mentorService.getMyUpcomingSessions(user.sub);
+  }
+
+  @Get('my-mentees')
+  @Roles('MENTOR')
+  @ApiOkResponse({ type: [MyMentees] })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Get mentor mentees',
+    description:
+      'Get list of mentees assigned to the mentor. \n\n REQUIRED ROLES: **MENTOR**',
+  })
+  @ApiBearerAuth('JWT')
+  async getMyMentees(@GetUser() user: JwtPayload) {
+    return await this.mentorService.getMyMentees(user.sub);
   }
 }

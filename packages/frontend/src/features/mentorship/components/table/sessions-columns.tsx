@@ -7,7 +7,8 @@ import {
   AvatarFallback,
   AvatarImage
 } from '@/shared/components/ui/avatar';
-import { Button } from '@/shared/components/ui/button';
+// import { Button } from '@/shared/components/ui/button';
+import Link from 'next/link';
 
 export const sessionsColumns: ColumnDef<Sessions>[] = [
   {
@@ -54,21 +55,23 @@ export const sessionsColumns: ColumnDef<Sessions>[] = [
       </div>
     ),
     cell: ({ row }) => (
-      <div className="flex justify-center">
-        <Button
-          variant="outline"
-          className="h-10 w-[90px] rounded-xl border border-primary-400 text-base font-medium text-primary-400"
-          onClick={() => {
-            // TODO: Implement call joining logic
-            console.log(
-              'Joining call with:',
-              row.original.identity.firstName,
-              row.original.identity.lastName
-            );
-          }}
+      <div className="flex items-center justify-center">
+        <Link
+          href={row.original.link}
+          // variant="outline"
+          target="_blank"
+          className="flex h-10 w-[90px] items-center justify-center rounded-xl border border-primary-400 text-base font-medium text-primary-400"
+          // onClick={() => {
+          //   // TODO: Implement call joining logic
+          //   console.log(
+          //     'Joining call with:',
+          //     row.original.identity.firstName,
+          //     row.original.identity.lastName
+          //   );
+          // }}
         >
           Join
-        </Button>
+        </Link>
       </div>
     )
   }
