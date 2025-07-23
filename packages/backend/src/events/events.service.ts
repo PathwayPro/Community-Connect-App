@@ -409,12 +409,65 @@ export class EventsService {
         );
       }
 
-      // DELETE EVENT
-      const deletedEvent = await this.prisma.events.delete({
-        where: { id: event_id },
-      });
+      // DELETE ASSOCIATED IMAGE FILE IF IT EXISTS
+      if (eventToUpdate.image) {
+        try {
+          await this.filesService.deleteFile(eventToUpdate.image);
+          console.log(`Deleted event image: ${eventToUpdate.image}`);
+        } catch (error) {
+          console.error('Error deleting event image:', error);
+          // Continue with event deletion even if file deletion fails
+        }
+      }
 
-      return deletedEvent;
+      // DELETE ALL RELATED RECORDS FIRST (CASCADE DELETE)
+      await this.prisma.$transaction([
+        // Delete event subscription updates (must be deleted before subscriptions)
+        this.prisma.eventsSubscriptionsUpdates.deleteMany({
+          where: {
+            subscription: {
+              event_id: event_id,
+            },
+          },
+        }),
+        // Delete event date updates (must be deleted before dates)
+        this.prisma.eventsDatesUpdates.deleteMany({
+          where: {
+            event_date: {
+              event_id: event_id,
+            },
+          },
+        }),
+        // Delete event subscriptions
+        this.prisma.eventsSubscriptions.deleteMany({
+          where: { event_id: event_id },
+        }),
+        // Delete event invitations
+        this.prisma.eventsInvitations.deleteMany({
+          where: { event_id: event_id },
+        }),
+        // Delete event managers
+        this.prisma.eventsManagers.deleteMany({
+          where: { event_id: event_id },
+        }),
+        // Delete event speakers
+        this.prisma.eventsSpeakers.deleteMany({
+          where: { event_id: event_id },
+        }),
+        // Delete event dates
+        this.prisma.eventsDates.deleteMany({
+          where: { event_id: event_id },
+        }),
+        // Finally delete the event itself
+        this.prisma.events.delete({
+          where: { id: event_id },
+        }),
+      ]);
+
+      return {
+        success: true,
+        message: 'Event and all related records deleted successfully',
+      };
     } catch (error) {
       throw new BadRequestException('Error deleting event: ' + error.message);
     }
