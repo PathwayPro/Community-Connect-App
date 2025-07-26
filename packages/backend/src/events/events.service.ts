@@ -295,8 +295,14 @@ export class EventsService {
     updateEventDto: UpdateEventDto,
     file: Express.Multer.File | null,
   ) {
-    // removeEventImage: boolean = false,
     try {
+      // Remove DTO-only fields that are not part of the Prisma model
+      const {
+        removeEventImage, // not a DB field
+        category_id, // handled via relation
+        ...rest
+      } = updateEventDto;
+
       // VALIDATE EVENT EXIST OR THROW EXCEPTION
       const eventToUpdate = await this.findOne(event_id);
       if (!eventToUpdate) {
@@ -315,14 +321,15 @@ export class EventsService {
       }
 
       // VALIDATE CATGORY OR LEAVE IT NULL
-      const category = updateEventDto.category_id
-        ? await this.validateEventCategory(updateEventDto.category_id)
+      const category = category_id
+        ? await this.validateEventCategory(category_id)
         : null;
 
       // Handle image updates
-      let imagePath: string | undefined;
-
-      if (file && eventToUpdate.image) {
+      let imagePath: string | undefined | null;
+      console.log('FLAG TO REMOVE IMAGE:', removeEventImage);
+      console.log('imagePat definition:', imagePath);
+      if ((file && eventToUpdate.image) || removeEventImage) {
         // If the event already has an image and a new one is sent: Delete previous image
         try {
           await this.filesService.deleteFile(eventToUpdate.image);
@@ -331,24 +338,27 @@ export class EventsService {
           console.error('Error deleting existing event image:', error);
           // Continue with update even if file deletion fails
         }
-        imagePath = undefined;
+        imagePath = null;
+        console.log('imagePat file & img stored || remove falg:', imagePath);
       }
       if (file) {
         // Upload new image (even if there was an error removing the stored one)
         const uploadedImage = await this.uploadImage(file);
         imagePath = uploadedImage.path + '/' + uploadedImage.fileName;
-      } else {
-        // If no image is sent: keep existing image
-        imagePath = eventToUpdate.image;
+        console.log('imagePat if file:', imagePath);
       }
 
       // UPDATE EVENT INFORMATION
-      const eventData = {
-        ...updateEventDto,
+      const eventData: any = {
+        ...rest,
         image: imagePath,
-        category_id: category ? category.id : undefined,
       };
+      // Only update category if provided
+      if (category) {
+        eventData.category = { connect: { id: category.id } };
+      }
 
+      console.log('EVENT DATA TO UPDATE FINAL: ', eventData);
       const updatedEvent = await this.prisma.events.update({
         where: { id: event_id },
         data: eventData,
