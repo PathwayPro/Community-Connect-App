@@ -294,8 +294,8 @@ export class EventsService {
     user: JwtPayload,
     updateEventDto: UpdateEventDto,
     file: Express.Multer.File | null,
-    // removeEventImage: boolean = false,
   ) {
+    // removeEventImage: boolean = false,
     try {
       // VALIDATE EVENT EXIST OR THROW EXCEPTION
       const eventToUpdate = await this.findOne(event_id);
@@ -323,7 +323,7 @@ export class EventsService {
       let imagePath: string | undefined;
 
       if (file && eventToUpdate.image) {
-        // Delete existing image file
+        // If the event already has an image and a new one is sent: Delete previous image
         try {
           await this.filesService.deleteFile(eventToUpdate.image);
           console.log(`Deleted existing event image: ${eventToUpdate.image}`);
@@ -332,12 +332,13 @@ export class EventsService {
           // Continue with update even if file deletion fails
         }
         imagePath = undefined;
-      } else if (file) {
-        // Upload new image
+      }
+      if (file) {
+        // Upload new image (even if there was an error removing the stored one)
         const uploadedImage = await this.uploadImage(file);
         imagePath = uploadedImage.path + '/' + uploadedImage.fileName;
       } else {
-        // Keep existing image
+        // If no image is sent: keep existing image
         imagePath = eventToUpdate.image;
       }
 

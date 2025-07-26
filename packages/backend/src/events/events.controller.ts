@@ -228,13 +228,7 @@ export class EventsController {
     // Check for file removal flag
     // const removeEventImage = updateEventDto.removeEventImage === 'true';
 
-    return this.eventsService.update(
-      +id,
-      user,
-      updatedEvent,
-      file,
-      // removeEventImage,
-    );
+    return this.eventsService.update(+id, user, updatedEvent, file); // removeEventImage,
   }
 
   @Roles('ADMIN', 'MENTOR')
