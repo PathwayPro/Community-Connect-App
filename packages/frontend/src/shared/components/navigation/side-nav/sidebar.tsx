@@ -19,9 +19,14 @@ import { AlertDialogUI } from '@/shared/components/notification/alert-dialog';
 interface SidebarProps {
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
+  hideToggle?: boolean;
 }
 
-export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
+export const Sidebar = ({
+  isOpen,
+  onToggle,
+  hideToggle = false
+}: SidebarProps) => {
   const pathname = usePathname();
   const { logout } = useAuth();
   const router = useRouter();
@@ -63,26 +68,28 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
   return (
     <div
       className={cn(
-        'fixed left-0 top-0 z-40 flex h-screen flex-col overflow-visible bg-primary p-6 transition-all duration-300',
+        'fixed left-0 top-0 z-50 flex h-screen flex-col overflow-visible bg-primary p-6 transition-all duration-300',
         isOpen ? 'w-[260px]' : 'w-[92px]'
       )}
     >
       <div className="flex h-full flex-col overflow-visible">
         <AlertDialogUI />
-        <Button
-          onClick={toggleSidebar}
-          className={cn(
-            'group absolute z-10 h-7 w-7 rounded-full bg-neutral-light-400 p-0 hover:bg-neutral-light-600',
-            isOpen ? 'left-[246px]' : 'left-[78px]'
-          )}
-        >
-          <SharedIcons.chevronLeft
+        {!hideToggle && (
+          <Button
+            onClick={toggleSidebar}
             className={cn(
-              'h-6 w-6 stroke-primary transition-transform duration-300 group-hover:stroke-black',
-              !isOpen && 'rotate-180'
+              'group absolute z-10 h-7 w-7 rounded-full bg-neutral-light-400 p-0 hover:bg-neutral-light-600',
+              isOpen ? 'left-[246px]' : 'left-[78px]'
             )}
-          />
-        </Button>
+          >
+            <SharedIcons.chevronLeft
+              className={cn(
+                'h-6 w-6 stroke-primary transition-transform duration-300 group-hover:stroke-black',
+                !isOpen && 'rotate-180'
+              )}
+            />
+          </Button>
+        )}
         <div
           className="mb-6 flex flex-shrink-0 cursor-pointer flex-row items-center gap-2"
           onClick={() => router.push('/')}
