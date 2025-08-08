@@ -43,8 +43,8 @@ const FooterLink = ({ href, children }: FooterLinkProps) => {
 
 export function FooterSection() {
   return (
-    <footer className="border-t bg-[#E9EEFF]">
-      <div className="flex flex-col justify-between gap-8 px-4 py-8 sm:px-6 md:flex-row md:px-10 lg:px-16">
+    <footer className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 border-t bg-[#E9EEFF]">
+      <div className="mx-auto flex w-full max-w-screen-xl flex-col justify-between gap-8 px-4 py-8 sm:px-6 md:flex-row md:px-10 lg:px-16">
         {/* Logo and Social Links */}
         <div className="space-y-4">
           <Link href="#home" className="flex items-center gap-2">
@@ -105,10 +105,10 @@ export function FooterSection() {
         </div>
       </div>
 
-      <Separator className="my-2 border-[0.5px] border-[#C3D0FF]" />
+      <Separator className="mx-auto my-2 w-full max-w-screen-xl border-[0.5px] border-[#C3D0FF]" />
 
       {/* Copyright */}
-      <div className="px-4 py-4 sm:px-6 lg:px-16">
+      <div className="mx-auto w-full max-w-screen-xl px-4 py-4 sm:px-6 lg:px-16">
         <p className="text-sm text-gray-600">
           © {new Date().getFullYear()} CommuNet. All rights reserved.
         </p>
