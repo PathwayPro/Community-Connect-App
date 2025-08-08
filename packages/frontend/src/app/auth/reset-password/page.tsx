@@ -26,14 +26,16 @@ const ResetPasswordContent = () => {
   }, [router, searchParams]);
 
   return (
-    <div className="container-wide relative flex h-[100vh] items-center justify-between">
-      <div className="w-1/4 min-w-[420px]">
+    <div className="relative mx-auto flex min-h-screen w-full max-w-screen-xl items-center justify-between px-4">
+      <div className="w-full sm:w-[420px]">
         <Suspense fallback={<div>Loading...</div>}>
           <ForgotPasswordForm />
         </Suspense>
       </div>
-      <Separator orientation="vertical" className="h-full" />
-      <div className="w-2/4">
+      <div className="hidden h-full sm:block">
+        <Separator orientation="vertical" className="h-[70vh]" />
+      </div>
+      <div className="hidden flex-1 sm:block">
         <AuthCarousel />
       </div>
     </div>
