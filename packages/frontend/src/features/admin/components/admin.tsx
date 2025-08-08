@@ -17,7 +17,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('analytics');
 
   return (
-    <div className="container mx-auto space-y-6 py-6">
+    <div className="container mx-auto space-y-6 px-4 py-6 md:px-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
         <p className="text-muted-foreground">

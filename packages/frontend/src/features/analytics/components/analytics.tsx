@@ -56,7 +56,7 @@ export const Analytics = () => {
 
   if (analyticsError) {
     return (
-      <div className="container-wide p-6">
+      <div className="w-full p-4 sm:p-6">
         <div className="flex h-64 items-center justify-center rounded-lg border border-red-200 bg-red-50">
           <p className="text-red-600">
             Error loading analytics: {analyticsError}
@@ -68,10 +68,10 @@ export const Analytics = () => {
 
   return (
     <>
-      <div className="container-wide space-y-6 p-6" id="analytics-dashboard">
+      <div className="w-full space-y-6 p-4 sm:p-6" id="analytics-dashboard">
         {/* Header Section */}
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
             <h1 className="text-3xl font-bold text-gray-900">
               Analytics Dashboard
             </h1>
@@ -79,7 +79,7 @@ export const Analytics = () => {
               Monitor your platform&apos;s performance and user engagement
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
             <AnalyticsSelect
               options={selectOptions}
               placeholder="Select period"
@@ -99,7 +99,7 @@ export const Analytics = () => {
         </div>
 
         {/* Key Metrics Row */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
             <MetricCard
               title="Total Users"
@@ -161,7 +161,7 @@ export const Analytics = () => {
         </div>
 
         {/* New Users Chart */}
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:p-6">
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
               New Users Growth
@@ -179,7 +179,7 @@ export const Analytics = () => {
         </div>
 
         {/* Charts Row */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
           {/* User Status Distribution */}
           <div className="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
             <div className="mb-4 flex items-center justify-between">
@@ -214,7 +214,7 @@ export const Analytics = () => {
 
           {/* User Activity */}
           <div className="lg:col-span-2">
-            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:p-6">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">
                   User Activity
