@@ -68,7 +68,7 @@ export const Sidebar = ({
   return (
     <div
       className={cn(
-        'fixed left-0 top-0 z-50 flex h-screen flex-col overflow-visible bg-primary p-6 transition-all duration-300',
+        'fixed left-0 top-0 z-50 flex h-screen flex-col overflow-visible bg-primary p-6 pt-4 transition-all duration-300',
         isOpen ? 'w-[260px]' : 'w-[92px]'
       )}
     >

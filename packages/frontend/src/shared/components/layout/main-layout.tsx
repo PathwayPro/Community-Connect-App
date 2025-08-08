@@ -28,7 +28,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <main
         className={`flex flex-1 flex-col ${isSidebarOpen ? 'md:ml-[260px]' : 'md:ml-[92px]'}`}
       >
-        <div className="sticky top-0 z-30 flex h-full items-center justify-between border-b bg-background px-4 md:px-6">
+        {/* Keep a fixed 56px top bar to avoid stretching when content is short */}
+        <div className="sticky top-0 z-30 flex min-h-16 items-center justify-between border-b bg-background px-4 md:px-6">
           <button
             aria-label="Open menu"
             onClick={open}

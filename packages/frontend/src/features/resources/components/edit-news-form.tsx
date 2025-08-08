@@ -402,8 +402,8 @@ const EditNewsForm = ({ id }: { id: string }) => {
 
   if (isLoading) {
     return (
-      <Card className="flex h-full w-[840px] flex-col rounded-[24px]">
-        <CardContent className="flex items-center justify-center p-8">
+      <Card className="flex h-full w-full max-w-3xl flex-col rounded-[24px]">
+        <CardContent className="flex items-center justify-center p-6 sm:p-8">
           Loading {titles[mode]} form...
         </CardContent>
       </Card>
@@ -411,10 +411,10 @@ const EditNewsForm = ({ id }: { id: string }) => {
   }
 
   return (
-    <Card className="flex h-full w-[840px] flex-col rounded-[24px]">
+    <Card className="flex h-full w-full max-w-3xl flex-col rounded-[24px]">
       <AlertDialogUI />
-      <CardHeader className="justify-center p-8">
-        <CardTitle className="flex flex-col space-y-6 text-center">
+      <CardHeader className="justify-center p-6 sm:p-8">
+        <CardTitle className="flex flex-col space-y-4 text-center sm:space-y-6">
           <div className="relative flex items-center justify-center gap-2">
             <IconButton
               leftIcon="arrowLeft"
@@ -422,11 +422,13 @@ const EditNewsForm = ({ id }: { id: string }) => {
               className="absolute left-0 h-10 w-10"
               onClick={() => router.back()}
             />
-            <h2 className="font-semibold">{titles[mode]}</h2>
+            <h2 className="break-words text-xl font-semibold leading-tight sm:text-2xl md:text-3xl">
+              {titles[mode]}
+            </h2>
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col justify-center gap-4">
+      <CardContent className="flex flex-col justify-center gap-4 p-4 sm:p-6">
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
             {formComponents[mode]}

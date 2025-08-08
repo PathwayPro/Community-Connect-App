@@ -69,7 +69,7 @@ export function CustomSwitch<T>({
             key={index}
             onClick={() => onChange?.(option.value)}
             className={cn(
-              'z-10 min-w-[120px] flex-1 px-2 text-center text-sm font-medium transition-colors duration-200',
+              'z-10 min-w-0 flex-1 px-2 text-center text-xs font-medium transition-colors duration-200 sm:text-sm',
               activeIndex === index
                 ? 'text-primary-foreground'
                 : 'text-muted-foreground'
