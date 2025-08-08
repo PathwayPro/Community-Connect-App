@@ -32,14 +32,14 @@ export const Settings = () => {
 
   return (
     <div
-      className={`container-wide grid min-h-full w-full gap-6 ${
+      className={`container-wide grid min-h-full w-full gap-6 px-4 md:px-0 ${
         isLocalAuth
-          ? 'grid-cols-1 items-center justify-center md:grid-cols-2'
+          ? 'grid-cols-1 items-start md:grid-cols-2'
           : 'grid-cols-1 place-items-center'
       }`}
     >
       {isLocalAuth && (
-        <div className="h-full rounded-[24px] border bg-card p-6">
+        <div className="h-full rounded-[24px] border bg-card p-4 sm:p-6">
           <h4 className="mb-8 font-semibold">Security and Account</h4>
 
           <div className="space-y-4">
@@ -49,7 +49,7 @@ export const Settings = () => {
       )}
 
       <div
-        className={`min-h-full rounded-[24px] border bg-card p-6 ${
+        className={`min-h-full rounded-[24px] border bg-card p-4 sm:p-6 ${
           !isLocalAuth ? 'w-full max-w-lg' : ''
         }`}
       >
@@ -62,7 +62,7 @@ export const Settings = () => {
         <div>
           <h6 className="text-paragraph-lg font-semibold">Account Control</h6>
 
-          <div className="flex flex-row justify-start gap-4">
+          <div className="flex flex-row flex-wrap justify-start gap-4">
             <Button
               variant="link"
               className="h-10 w-fit p-0 text-base hover:text-destructive"
