@@ -27,35 +27,32 @@ export function ForumSection() {
             </Button>
           </div>
 
-          {/* Forum Preview */}
-          <div className="h-[360px] sm:h-[480px] md:h-[560px] lg:h-[700px]">
-            {/* Floating avatars */}
-            <div className="relative flex h-full w-full items-center justify-center pr-0 sm:pr-4 md:pr-8">
-              <Image
-                src="/landing/forum/3.png"
-                alt=""
-                height={520}
-                width={520}
-                className="absolute h-auto w-auto max-w-[70%] sm:max-w-[80%] md:max-w-none"
-                priority
-              />
-              <Image
-                src="/landing/forum/2.png"
-                alt=""
-                height={440}
-                width={440}
-                className="absolute h-auto w-auto max-w-[65%] sm:max-w-[75%] md:max-w-none"
-                priority
-              />
-              <Image
-                src="/landing/forum/1.png"
-                alt=""
-                height={460}
-                width={600}
-                className="absolute h-auto w-auto max-w-[75%] sm:max-w-[85%] md:max-w-none"
-                priority
-              />
-            </div>
+          {/* Forum illustration */}
+          <div className="relative h-[360px] sm:h-[480px] md:h-[560px] lg:h-[700px] xl:h-[800px]">
+            <Image
+              src="/landing/forum/2.png"
+              alt=""
+              fill
+              sizes="(max-width: 640px) 90vw, (max-width: 1024px) 50vw, (max-width: 1536px) 40vw, 480px"
+              className="object-contain"
+              priority
+            />
+            <Image
+              src="/landing/forum/3.png"
+              alt="Forum illustration"
+              fill
+              sizes="(max-width: 640px) 90vw, (max-width: 1024px) 50vw, (max-width: 1536px) 40vw, 640px"
+              className="object-contain"
+              priority
+            />
+            <Image
+              src="/landing/forum/1.png"
+              alt=""
+              fill
+              sizes="(max-width: 640px) 90vw, (max-width: 1024px) 50vw, (max-width: 1536px) 40vw, 480px"
+              className="object-contain"
+              priority
+            />
           </div>
         </div>
       </div>

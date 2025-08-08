@@ -26,19 +26,16 @@ export function AboutSection() {
             </div>
           </div>
 
-          {/* Forum Preview */}
-          <div className="h-[320px] sm:h-[420px] md:h-[560px] lg:h-[700px]">
-            {/* Floating avatars */}
-            <div className="flex h-full w-full items-center justify-center pr-0 sm:pr-6 lg:pr-8">
-              <Image
-                src="/landing/about/image.png"
-                alt=""
-                height={560}
-                width={560}
-                className="absolute h-auto w-auto max-w-[80%] sm:max-w-[85%] md:max-w-none"
-                priority
-              />
-            </div>
+          {/* About illustration */}
+          <div className="relative h-[320px] sm:h-[420px] md:h-[560px] lg:h-[700px] xl:h-[800px]">
+            <Image
+              src="/landing/about/image.png"
+              alt="About illustration"
+              fill
+              sizes="(max-width: 640px) 90vw, (max-width: 1024px) 50vw, (max-width: 1536px) 40vw, 640px"
+              className="object-contain"
+              priority
+            />
           </div>
         </div>
       </div>
