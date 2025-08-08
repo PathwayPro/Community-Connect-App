@@ -288,8 +288,8 @@ export const EditProfile = () => {
 
   if (isLoading) {
     return (
-      <Card className="flex w-[840px] flex-col rounded-[24px]">
-        <CardContent className="flex items-center justify-center p-8">
+      <Card className="mx-auto flex w-full max-w-3xl flex-col rounded-[24px]">
+        <CardContent className="flex items-center justify-center p-6 sm:p-8">
           Loading profile...
         </CardContent>
       </Card>
@@ -298,8 +298,8 @@ export const EditProfile = () => {
 
   if (error) {
     return (
-      <Card className="flex w-[840px] flex-col rounded-[24px]">
-        <CardContent className="flex items-center justify-center p-8">
+      <Card className="mx-auto flex w-full max-w-3xl flex-col rounded-[24px]">
+        <CardContent className="flex items-center justify-center p-6 sm:p-8">
           Error loading profile: {error.message}
         </CardContent>
       </Card>
@@ -307,10 +307,10 @@ export const EditProfile = () => {
   }
 
   return (
-    <Card className="flex w-[840px] flex-col rounded-[24px]">
+    <Card className="mx-auto flex w-full max-w-3xl flex-col rounded-[24px]">
       <AlertDialogUI />
-      <CardHeader className="justify-center p-8">
-        <CardTitle className="flex flex-col space-y-6 text-center">
+      <CardHeader className="justify-center p-6 sm:p-8">
+        <CardTitle className="flex flex-col space-y-4 text-center sm:space-y-6">
           <div className="relative flex items-center justify-center gap-2">
             <IconButton
               leftIcon="arrowLeft"
@@ -318,9 +318,11 @@ export const EditProfile = () => {
               className="absolute left-0 h-10 w-10"
               onClick={() => router.back()}
             />
-            <h2 className="font-semibold">Update Profile</h2>
+            <h2 className="break-words text-xl font-semibold leading-tight sm:text-2xl md:text-3xl">
+              Update Profile
+            </h2>
           </div>
-          <h4 className="font-normal text-neutral-dark-600">
+          <h4 className="text-sm font-normal text-neutral-dark-600 sm:text-base">
             {activeStep === 1 && 'Personal Information'}
             {activeStep === 2 && 'Social Links'}
             {activeStep === 3 && 'Professional Information'}
@@ -329,7 +331,7 @@ export const EditProfile = () => {
           <Stepper activeStep={activeStep} totalSteps={4} />
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col justify-center gap-4">
+      <CardContent className="flex flex-col justify-center gap-4 p-4 sm:p-6">
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {getStepContent(
@@ -340,9 +342,9 @@ export const EditProfile = () => {
               user?.pictureUploadLink,
               user?.resumeUploadLink
             )}
-            <div className="flex w-full justify-between pt-5">
+            <div className="flex w-full flex-col gap-3 pt-5 sm:flex-row sm:justify-between">
               <IconButton
-                className="w-[180px]"
+                className="w-full sm:w-[180px]"
                 type="button"
                 leftIcon="arrowLeft"
                 onClick={handleBack}
@@ -351,7 +353,7 @@ export const EditProfile = () => {
                 label="Previous"
               />
               <IconButton
-                className="w-[180px]"
+                className="w-full sm:w-[180px]"
                 type="submit"
                 disabled={isSubmitting}
                 rightIcon={activeStep === 4 ? undefined : 'arrowRight'}

@@ -76,7 +76,7 @@ export const BaseForm = ({
         onUpload={handleFileUpload}
       />
 
-      <div className="flex w-full gap-4">
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
         <FormInput
           name="firstName"
           label="First Name"
@@ -96,7 +96,7 @@ export const BaseForm = ({
       </div>
       {isMentor && (
         <>
-          <div className="flex w-full gap-4">
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
             <FormInput
               name="profession"
               label="Profession"
@@ -118,7 +118,7 @@ export const BaseForm = ({
               }}
             />
           </div>
-          <div className="flex w-full gap-4">
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
             <FormInput
               name="max_mentees"
               label="No. of mentees you can accomodate"

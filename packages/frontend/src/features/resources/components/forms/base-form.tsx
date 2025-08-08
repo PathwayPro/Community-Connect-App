@@ -96,7 +96,7 @@ export const BaseForm = ({
         required
       />
 
-      <div className="flex w-full gap-4">
+      <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
         <FormRadio
           name="type"
           label="News Type"

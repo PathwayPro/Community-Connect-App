@@ -253,7 +253,7 @@ export const FileUpload = ({
                   </div>
                 </>
               ) : (
-                <div className="w-full space-y-4">
+                <div className="w-full space-y-4 overflow-hidden">
                   {allFiles.map((file) => (
                     <div
                       key={file.name}
@@ -276,8 +276,8 @@ export const FileUpload = ({
                       )}
 
                       <div className="flex w-full flex-col gap-2">
-                        <div className="flex w-full items-center justify-between">
-                          <p className="flex-1 truncate text-sm font-medium">
+                        <div className="flex w-full min-w-0 items-center justify-between gap-2">
+                          <p className="min-w-0 max-w-40 flex-1 truncate text-sm font-medium sm:max-w-full">
                             {file.name}
                             {file.isExisting && (
                               <span className="ml-2 text-xs text-neutral-500">
@@ -311,7 +311,7 @@ export const FileUpload = ({
                         </div>
 
                         {uploadStatus[file.name] && (
-                          <div className="flex w-full flex-col gap-1">
+                          <div className="flex w-full flex-col gap-1 overflow-hidden">
                             <Progress
                               value={uploadStatus[file.name].progress}
                               className={cn(
@@ -324,14 +324,14 @@ export const FileUpload = ({
                             />
                             {!uploadStatus[file.name].error &&
                               !uploadStatus[file.name].success && (
-                                <p className="text-base">
+                                <p className="w-full truncate text-ellipsis text-sm">
                                   {(file.size / (1024 * 1024)).toFixed(2)} MB
                                 </p>
                               )}
 
                             {uploadStatus[file.name].error && (
-                              <div className="flex items-center gap-2">
-                                <p className="text-base text-red-500">
+                              <div className="flex items-center gap-2 overflow-hidden">
+                                <p className="w-full truncate text-ellipsis text-sm text-red-500">
                                   {uploadStatus[file.name].error}
                                 </p>
                                 <Button
@@ -348,7 +348,9 @@ export const FileUpload = ({
                               </div>
                             )}
                             {uploadStatus[file.name].success && (
-                              <p className="mt-2 text-sm">Upload Successful!</p>
+                              <p className="mt-2 truncate text-sm">
+                                Upload Successful!
+                              </p>
                             )}
                           </div>
                         )}

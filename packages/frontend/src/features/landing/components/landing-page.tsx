@@ -28,7 +28,7 @@ export const LandingPage = () => {
   }, []);
 
   return (
-    <main className="container-wide relative min-h-screen px-0">
+    <main className="relative min-h-screen w-full px-0">
       <div className={hash === '#about' ? 'block' : 'hidden'}>
         <AboutSection />
         <MissionSection />

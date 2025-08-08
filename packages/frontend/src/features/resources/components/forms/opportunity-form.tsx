@@ -45,7 +45,6 @@ export const OpportunityForm = ({
     formState: { errors }
   } = useFormContext<OpportunityFormValues>();
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [removeCompanyLogo, setRemoveCompanyLogo] = useState(false);
 
   // Ensure salary range options are properly formatted
@@ -58,12 +57,10 @@ export const OpportunityForm = ({
   const handleCompanyLogoUpload = async (files: File[]) => {
     try {
       if (files && files.length > 0) {
-        setSelectedFile(files[0]);
         await onFileUpload(files);
         setRemoveCompanyLogo(false); // Reset removal flag when new file is uploaded
         toast.success('Company logo uploaded successfully');
       } else {
-        setSelectedFile(null);
         toast.error('No file selected');
       }
     } catch (error) {
@@ -122,8 +119,8 @@ export const OpportunityForm = ({
         existingFiles={displayFiles}
         onRemove={handleFileRemove}
       />
-      <Label className="mt-2">Location</Label>
-      <div className="flex w-full gap-4">
+      <Label className="mt-2 text-sm sm:text-base">Location</Label>
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
         <FormInput
           name="province"
           label="Province"
@@ -146,7 +143,7 @@ export const OpportunityForm = ({
         placeholder="Select salary range"
         options={formattedSalaryRanges}
       />
-      <div className="flex w-full gap-4">
+      <div className="flex w-full flex-wrap gap-3 sm:gap-4">
         <CustomSwitch
           name="settings"
           label="Work Mode"

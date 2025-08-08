@@ -164,9 +164,16 @@ export const EventList = () => {
 
     return (
       <>
-        {eventsList.map((event) => (
-          <EventCard key={event.id} {...event} />
-        ))}
+        <div className="flex w-full flex-col gap-4">
+          {eventsList.map((event) => (
+            <div
+              key={event.id}
+              className="mx-auto w-full max-w-md sm:max-w-lg md:max-w-none"
+            >
+              <EventCard {...event} />
+            </div>
+          ))}
+        </div>
         {totalEvents.length > eventsPerPage && (
           <div className="mt-6">
             <PaginationComponent
@@ -181,23 +188,34 @@ export const EventList = () => {
   };
 
   return (
-    <Tabs defaultValue="all" className="container h-full w-full">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center justify-start gap-4">
+    <Tabs defaultValue="all" className="container h-full w-full px-4 md:px-0">
+      <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center justify-start gap-3 md:gap-4">
           <span className="text-sm text-neutral-dark-300">Sort Events By:</span>
-          <TabsList>
-            <TabsTrigger value="all">All Events</TabsTrigger>
-            <TabsTrigger value="upcoming">Upcoming Events</TabsTrigger>
-            <TabsTrigger value="my-events">My Events</TabsTrigger>
+          <TabsList className="max-w-full">
+            <TabsTrigger value="all">
+              <span className="sm:hidden">All</span>
+              <span className="hidden sm:inline">All Events</span>
+            </TabsTrigger>
+            <TabsTrigger value="upcoming">
+              <span className="sm:hidden">Upcoming</span>
+              <span className="hidden sm:inline">Upcoming Events</span>
+            </TabsTrigger>
+            <TabsTrigger value="my-events">
+              <span className="sm:hidden">My Events</span>
+              <span className="hidden sm:inline">My Events</span>
+            </TabsTrigger>
           </TabsList>
         </div>
         {canCreateEvent && (
-          <IconButton
-            leftIcon="plusCircle"
-            label="Create New Event"
-            className="w-[236px] bg-secondary-500"
-            onClick={() => router.push('/events/create')}
-          />
+          <div className="w-full md:w-auto">
+            <IconButton
+              leftIcon="plusCircle"
+              label="Create New Event"
+              className="w-full bg-secondary-500 md:w-[236px]"
+              onClick={() => router.push('/events/create')}
+            />
+          </div>
         )}
       </div>
 

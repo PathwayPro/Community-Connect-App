@@ -9,12 +9,17 @@ export const metadata: Metadata = {
 
 const LoginPage = () => {
   return (
-    <div className="container-wide relative flex h-[100vh] items-center justify-between">
-      <div className="w-1/4 min-w-[420px]">
+    <div className="relative mx-auto flex min-h-screen w-full max-w-screen-xl items-center justify-center px-4 sm:gap-8 md:gap-12 lg:gap-16">
+      <div className="w-full sm:w-[420px]">
         <AuthForm />
       </div>
-      <Separator orientation="vertical" className="h-full" />
-      <div className="w-2/4">
+      <div className="hidden sm:block">
+        <Separator
+          orientation="vertical"
+          className="mx-6 h-[70vh] md:mx-8 lg:mx-10"
+        />
+      </div>
+      <div className="hidden flex-1 sm:block">
         <AuthCarousel />
       </div>
     </div>

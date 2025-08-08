@@ -178,12 +178,12 @@ export const UserManagement = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <h2 className="text-2xl font-semibold">User Management</h2>
-        <div className="flex gap-2">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
           <IconInput
             leftIcon="search"
-            className="h-10 w-[250px] rounded-full bg-neutral-light-100"
+            className="h-10 w-full rounded-full bg-neutral-light-100 sm:w-[250px]"
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -274,7 +274,7 @@ export const UserManagement = () => {
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
         <div className="text-sm text-gray-600">
           Showing {filteredUsers.length} of {users.length} users
         </div>
@@ -284,11 +284,13 @@ export const UserManagement = () => {
         />
       </div>
 
-      <UsersTable
-        users={paginatedUsers}
-        columnVisibility={columnVisibility}
-        setColumnVisibility={setColumnVisibility}
-      />
+      <div className="overflow-x-auto">
+        <UsersTable
+          users={paginatedUsers}
+          columnVisibility={columnVisibility}
+          setColumnVisibility={setColumnVisibility}
+        />
+      </div>
 
       <div className="flex justify-center">
         <PaginationComponent

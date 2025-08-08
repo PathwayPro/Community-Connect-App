@@ -241,8 +241,8 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
 
   if (isLoading) {
     return (
-      <Card className="flex min-w-[840px] flex-col rounded-[24px]">
-        <CardContent className="flex items-center justify-center p-8">
+      <Card className="mx-auto flex w-full max-w-3xl flex-col rounded-[24px]">
+        <CardContent className="flex items-center justify-center p-6 sm:p-8">
           Loading profile...
         </CardContent>
       </Card>
@@ -251,8 +251,8 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
 
   if (error) {
     return (
-      <Card className="flex w-[840px] flex-col rounded-[24px]">
-        <CardContent className="flex items-center justify-center p-8">
+      <Card className="mx-auto flex w-full max-w-3xl flex-col rounded-[24px]">
+        <CardContent className="flex items-center justify-center p-6 sm:p-8">
           Error loading profile: {error.message}
         </CardContent>
       </Card>
@@ -260,8 +260,8 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
   }
 
   return (
-    <div className="container-default mx-auto min-w-[1024px] max-w-4xl">
-      <Card className="space-y-8 p-6">
+    <div className="container-default mx-auto w-full px-4 md:px-0">
+      <Card className="mx-auto w-full max-w-3xl space-y-8 p-4 sm:p-6">
         {/* Edit Profile Button - Only show for own profile */}
         <div className="flex justify-between gap-4">
           <IconButton
@@ -328,17 +328,19 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
         </div>
 
         {/* Stats Section */}
-        <div className="flex items-center justify-center gap-8">
+        <div className="flex flex-col items-center justify-center gap-6 sm:flex-row sm:gap-8">
           <StatItem
             label="Mentees Tutored"
             value={profileDataBuilder.stats.menteesTutored}
           />
-          <Separator orientation="vertical" className="h-12" />
+          <Separator orientation="horizontal" className="w-40 sm:hidden" />
+          <Separator orientation="vertical" className="hidden h-12 sm:block" />
           <StatItem
             label="Group Sessions"
             value={profileDataBuilder.stats.groupSessions}
           />
-          <Separator orientation="vertical" className="h-12" />
+          <Separator orientation="horizontal" className="w-40 sm:hidden" />
+          <Separator orientation="vertical" className="hidden h-12 sm:block" />
           <StatItem
             label="Personal Sessions"
             value={profileDataBuilder.stats.personalSessions}
@@ -363,7 +365,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
         <div className="space-y-6">
           {/* Personal Information */}
           {profileDataBuilder.personalInfo.length > 0 && (
-            <Card className="bg-neutral-light-200 p-6">
+            <Card className="bg-neutral-light-200 p-4 sm:p-6">
               <InfoGroup
                 title="Personal Information"
                 items={profileDataBuilder.personalInfo}
@@ -374,7 +376,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
           {/* Contact Details */}
           {profileDataBuilder.contactDetails.length > 0 &&
             settings?.shareContactDetails && (
-              <Card className="bg-neutral-light-200 p-6">
+              <Card className="bg-neutral-light-200 p-4 sm:p-6">
                 <InfoGroup
                   title="Contact Details"
                   items={profileDataBuilder.contactDetails}
@@ -384,7 +386,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
 
           {/* Professional Information */}
           {profileDataBuilder.professionalInfo.length > 0 && (
-            <Card className="bg-neutral-light-200 p-6">
+            <Card className="bg-neutral-light-200 p-4 sm:p-6">
               <InfoGroup
                 title="Professional Information"
                 items={profileDataBuilder.professionalInfo}
@@ -395,7 +397,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
           {/* Links */}
           {profileDataBuilder.links.length > 0 &&
             settings?.shareSocialLinks && (
-              <Card className="bg-neutral-light-200 p-6">
+              <Card className="bg-neutral-light-200 p-4 sm:p-6">
                 <InfoGroup title="Links" items={profileDataBuilder.links} />
               </Card>
             )}
@@ -417,7 +419,7 @@ export const ViewProfile = ({ slug }: ViewProfileProps) => {
         onClose={() => setIsResumeModalOpen(false)}
         title={`${profileDataBuilder.name}'s Resume`}
         description="Preview and download the resume"
-        height="h-full"
+        height="h-[80vh] sm:h-full"
         filePath={
           displayedUser?.resumeUploadLink?.startsWith('http')
             ? displayedUser.resumeUploadLink

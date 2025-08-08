@@ -20,7 +20,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
       // Handle /news - Show all news
       return (
         <Suspense fallback={<NewsLoadingSkeleton />}>
-          <div className="flex w-full justify-center">
+          <div className="flex w-full justify-center px-4 md:px-0">
             <NewsList />
           </div>
         </Suspense>
@@ -30,7 +30,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
       // Handle /news/create
       return (
         <Suspense fallback={<NewsFormSkeleton />}>
-          <div className="flex w-full justify-center">
+          <div className="flex w-full justify-center px-4 md:px-0">
             <NewsFormWrapper />
           </div>
         </Suspense>
@@ -41,7 +41,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
       if (!id) return notFound();
       return (
         <Suspense fallback={<NewsFormSkeleton />}>
-          <div className="flex w-full justify-center">
+          <div className="flex w-full justify-center px-4 md:px-0">
             <EditNewsFormWrapper id={id} />
           </div>
         </Suspense>

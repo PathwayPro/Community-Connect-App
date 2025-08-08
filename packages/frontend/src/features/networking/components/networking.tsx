@@ -128,16 +128,16 @@ export const Networking = () => {
   // Loading
   if (isLoading) {
     return (
-      <div className="container h-full w-full space-y-4">
+      <div className="container h-full w-full space-y-4 px-4 md:px-0">
         <Card>
-          <CardHeader className="flex animate-pulse flex-row items-center justify-between space-y-0 pb-4">
+          <CardHeader className="flex animate-pulse flex-col items-start justify-between gap-3 space-y-0 pb-4 md:flex-row md:items-center">
             <div className="h-8 w-32 rounded-md bg-muted" />
             <div className="h-10 w-64 rounded-md bg-muted" />
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
               <div className="h-10 w-full rounded-md bg-muted" />
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                 <div className="h-10 rounded-md bg-muted" />
                 <div className="h-10 rounded-md bg-muted" />
                 <div className="h-10 rounded-md bg-muted" />
@@ -147,7 +147,7 @@ export const Networking = () => {
         </Card>
         <Card className="mt-6">
           <CardContent>
-            <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {[...Array(8)].map((_, index) => (
                 <div
                   key={index}
@@ -170,14 +170,14 @@ export const Networking = () => {
   }
 
   return (
-    <div className="container h-full w-full space-y-4">
+    <div className="container h-full w-full space-y-4 px-4 md:px-0">
       <Tabs defaultValue="network" onValueChange={setActiveTab}>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <CardHeader className="flex flex-col items-start justify-between gap-3 space-y-0 pb-4 md:flex-row md:items-center">
             <CardTitle>
               <h4 className="font-semibold">Search Networks</h4>
             </CardTitle>
-            <TabsList className="grid grid-cols-3">
+            <TabsList className="flex w-full max-w-full gap-2 overflow-x-auto md:grid md:grid-cols-3 md:gap-0">
               <TabsTrigger value="network">Network</TabsTrigger>
               <TabsTrigger value="mentor">Mentors</TabsTrigger>
               <TabsTrigger value="connection">Connections</TabsTrigger>
@@ -199,7 +199,7 @@ export const Networking = () => {
                   />
                 ) : (
                   <>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                       {paginatedData.map((request) => (
                         <NetworkingCard key={request.id} profile={request} />
                       ))}

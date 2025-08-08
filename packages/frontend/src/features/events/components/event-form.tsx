@@ -312,9 +312,9 @@ const EventForm = () => {
   // Show loading state while fetching event data
   if (isLoadingEvent) {
     return (
-      <Card className="flex w-[840px] flex-col rounded-[24px]">
-        <CardHeader className="justify-center p-8">
-          <CardTitle className="flex flex-col space-y-6 text-center">
+      <Card className="mx-auto flex w-full max-w-3xl flex-col rounded-[24px]">
+        <CardHeader className="justify-center p-6 sm:p-8">
+          <CardTitle className="flex flex-col space-y-4 text-center sm:space-y-6">
             <div className="relative flex items-center justify-center gap-2">
               <IconButton
                 leftIcon="arrowLeft"
@@ -322,12 +322,14 @@ const EventForm = () => {
                 className="absolute left-0 h-10 w-10"
                 onClick={() => router.back()}
               />
-              <h2 className="font-semibold">Loading Event...</h2>
+              <h2 className="break-words text-xl font-semibold leading-tight sm:text-2xl md:text-3xl">
+                Loading Event...
+              </h2>
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col justify-center gap-4">
-          <div className="flex items-center justify-center p-8">
+        <CardContent className="flex flex-col justify-center gap-4 p-4 sm:p-6">
+          <div className="flex items-center justify-center p-6 sm:p-8">
             <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary-500"></div>
           </div>
         </CardContent>
@@ -336,10 +338,10 @@ const EventForm = () => {
   }
 
   return (
-    <Card className="flex w-[840px] flex-col rounded-[24px]">
+    <Card className="mx-auto flex w-full max-w-3xl flex-col rounded-[24px]">
       <AlertDialogUI />
-      <CardHeader className="justify-center p-8">
-        <CardTitle className="flex flex-col space-y-6 text-center">
+      <CardHeader className="justify-center p-6 sm:p-8">
+        <CardTitle className="flex flex-col space-y-4 text-center sm:space-y-6">
           <div className="relative flex items-center justify-center gap-2">
             <IconButton
               leftIcon="arrowLeft"
@@ -347,16 +349,16 @@ const EventForm = () => {
               className="absolute left-0 h-10 w-10"
               onClick={() => router.back()}
             />
-            <h2 className="font-semibold">
+            <h2 className="break-words text-xl font-semibold leading-tight sm:text-2xl md:text-3xl">
               {isEdit ? 'Edit Event' : 'Create New Event'}
             </h2>
           </div>
-          <h4>
+          <h4 className="text-sm leading-snug text-muted-foreground sm:text-base md:text-lg">
             {activeStep === 1 ? 'Event Information' : 'Event Time & Location'}
           </h4>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col justify-center gap-4">
+      <CardContent className="flex flex-col justify-center gap-4 p-4 sm:p-6">
         <FormProvider {...methods}>
           <form
             onSubmit={
@@ -372,7 +374,7 @@ const EventForm = () => {
             ) : (
               <TimeLocationForm existingEventData={eventForEdit} />
             )}
-            <div className="flex w-full gap-4 pt-5">
+            <div className="flex w-full flex-col gap-3 pt-5 sm:flex-row sm:gap-4">
               {activeStep === 2 && (
                 <IconButton
                   className="w-full"

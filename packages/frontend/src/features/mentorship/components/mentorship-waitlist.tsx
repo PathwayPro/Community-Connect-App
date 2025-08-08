@@ -45,8 +45,8 @@ export function MentorshipWaitlist({
     : null;
 
   return (
-    <div className="flex h-full w-full items-center justify-center">
-      <Card className="mx-auto my-8 w-full max-w-4xl">
+    <div className="flex h-full w-full items-center justify-center px-4 md:px-0">
+      <Card className="mx-auto my-8 w-full max-w-3xl sm:max-w-4xl">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-semibold">
             Application In Progress
