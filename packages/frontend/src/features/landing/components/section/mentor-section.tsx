@@ -36,15 +36,18 @@ const steps: ItemCardProps[] = [
 
 export function MentorSection() {
   return (
-    <section id="mentorship" className="mx-auto pt-[160px]">
-      <div className="mb-[120px] text-center">
+    <section
+      id="mentorship"
+      className="mx-auto px-4 pt-16 sm:px-6 md:px-8 lg:pt-24"
+    >
+      <div className="mb-10 text-center sm:mb-16 lg:mb-24">
         <h6 className="mb-2 font-semibold text-neutral-dark-100">
           HOW IT WORKS
         </h6>
-        <h2 className="mb-6 text-5xl font-semibold text-primary-500">
+        <h2 className="mb-6 text-3xl font-semibold text-primary-500 sm:text-4xl md:text-5xl">
           Find a Mentor & Grow Your Career
         </h2>
-        <p className="mx-auto max-w-2xl text-center text-xl font-normal">
+        <p className="mx-auto max-w-2xl text-center text-base font-normal sm:text-lg md:text-xl">
           Gain support from experienced mentors who have navigated the
           challenges of immigrating and building a career. Whether you need
           career advice, skill development, or industry insights, our mentors
@@ -52,8 +55,8 @@ export function MentorSection() {
         </p>
       </div>
 
-      <div className="mb-12 grid grid-cols-1 gap-24 rounded-3xl bg-[#E9EEFF] p-16">
-        <div className="flex items-start gap-8">
+      <div className="mb-12 grid grid-cols-1 gap-10 rounded-3xl bg-[#E9EEFF] p-6 sm:gap-12 sm:p-10 md:p-12 lg:gap-16 lg:p-16">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, index) => (
             <ItemCard
               key={index}
@@ -61,19 +64,21 @@ export function MentorSection() {
               icon={step.icon}
               title={step.title}
               description={step.description}
-              iconClassName="h-[64px] w-[61px]"
+              iconClassName="h-12 w-12 sm:h-[48px] sm:w-[48px] md:h-[56px] md:w-[56px] lg:h-[64px] lg:w-[61px]"
             />
           ))}
         </div>
 
-        <div className="flex justify-center gap-4">
-          <Link href="/mentorship" className="h-[60px] w-fit">
-            <Button className="px-12" variant="outline">
+        <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
+          <Link href="/mentorship" className="h-12 w-full sm:h-[60px] sm:w-fit">
+            <Button className="w-full px-8 sm:px-12" variant="outline">
               Become a Mentor
             </Button>
           </Link>
-          <Link href="/mentorship" className="h-[60px] w-fit">
-            <Button className="px-12">Apply for Mentorship</Button>
+          <Link href="/mentorship" className="h-12 w-full sm:h-[60px] sm:w-fit">
+            <Button className="w-full px-8 sm:px-12">
+              Apply for Mentorship
+            </Button>
           </Link>
         </div>
       </div>

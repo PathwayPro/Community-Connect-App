@@ -65,19 +65,22 @@ export function ContactSection() {
   }
 
   return (
-    <section id="contact" className="container-wide w-full px-16 py-[160px]">
+    <section
+      id="contact"
+      className="container-wide w-full px-4 py-12 sm:px-6 sm:py-16 lg:px-16 lg:py-24"
+    >
       <div className="mb-16 text-center">
         <h6 className="mb-2 font-semibold text-neutral-dark-100">
           Have Questions? We&apos;re Here to Help
         </h6>
-        <h1 className="text-5xl font-semibold text-primary-500">
+        <h1 className="text-3xl font-semibold text-primary-500 sm:text-4xl md:text-5xl">
           Get In Touch
         </h1>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
             <FormField
               control={form.control}
               name="first_name"
@@ -87,7 +90,7 @@ export function ContactSection() {
                     <Input
                       {...field}
                       placeholder="First Name"
-                      className={`h-[60px] w-full rounded-xl border-[0.5px] border-[#C3D0FF] shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)] ring-8 focus-visible:ring-offset-0 ${
+                      className={`h-12 w-full rounded-xl border-[0.5px] border-[#C3D0FF] shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)] ring-8 focus-visible:ring-offset-0 sm:h-[60px] ${
                         isFieldValid('first_name')
                           ? 'bg-[#E9EEFF] ring-[#E9EEFF]'
                           : 'bg-neutral-light-200 ring-neutral-light-200'
@@ -107,7 +110,7 @@ export function ContactSection() {
                     <Input
                       {...field}
                       placeholder="Last Name"
-                      className={`h-[60px] w-full rounded-xl border-[#C3D0FF] shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)] ring-8 focus-visible:ring-offset-0 ${
+                      className={`h-12 w-full rounded-xl border-[#C3D0FF] shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)] ring-8 focus-visible:ring-offset-0 sm:h-[60px] ${
                         isFieldValid('last_name')
                           ? 'bg-[#E9EEFF] ring-[#E9EEFF]'
                           : 'bg-neutral-light-200 ring-neutral-light-200'
@@ -128,7 +131,7 @@ export function ContactSection() {
                   <Input
                     {...field}
                     placeholder="Email"
-                    className={`h-[60px] w-full rounded-xl border-[#C3D0FF] shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)] ring-8 focus-visible:ring-offset-0 ${
+                    className={`h-12 w-full rounded-xl border-[#C3D0FF] shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)] ring-8 focus-visible:ring-offset-0 sm:h-[60px] ${
                       isFieldValid('email')
                         ? 'bg-[#E9EEFF] ring-[#E9EEFF]'
                         : 'bg-neutral-light-200 ring-neutral-light-200'
@@ -148,7 +151,7 @@ export function ContactSection() {
                   <Textarea
                     {...field}
                     placeholder="Write your questions and messages here..."
-                    className={`h-[204px] w-full rounded-xl border-[#C3D0FF] text-xl shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)] ring-8 focus-visible:ring-offset-0 ${
+                    className={`h-40 w-full rounded-xl border-[#C3D0FF] text-base shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)] ring-8 focus-visible:ring-offset-0 sm:h-[204px] sm:text-xl ${
                       isFieldValid('contact_message')
                         ? 'bg-[#E9EEFF] ring-[#E9EEFF]'
                         : 'bg-neutral-light-200 ring-neutral-light-200'
@@ -162,7 +165,7 @@ export function ContactSection() {
           <Button
             type="submit"
             className={cn(
-              'h-[60px] w-full',
+              'h-12 w-full sm:h-[60px]',
               isSubmitted && 'bg-success-500 text-white'
             )}
             disabled={

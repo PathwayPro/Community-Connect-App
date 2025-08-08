@@ -18,7 +18,10 @@ const PARTNER_LOGOS = [
 export function PartnersSection({ className }: PartnersProps) {
   return (
     <div
-      className={cn('w-full overflow-hidden bg-background py-12', className)}
+      className={cn(
+        'w-full overflow-hidden bg-background py-8 sm:py-10 lg:py-12',
+        className
+      )}
     >
       <h6 className="mb-8 text-center font-semibold text-neutral-dark-100">
         OUR TRUSTED PARTNERS
@@ -30,7 +33,7 @@ export function PartnersSection({ className }: PartnersProps) {
           {PARTNER_LOGOS.map((logo) => (
             <div
               key={logo.name}
-              className="mx-8 flex h-[120px] w-[120px] items-center justify-center"
+              className="mx-4 flex h-16 w-16 items-center justify-center sm:mx-6 sm:h-20 sm:w-20 md:h-24 md:w-24 lg:mx-8 lg:h-[120px] lg:w-[120px]"
             >
               <Image
                 src={logo.src}
@@ -48,7 +51,7 @@ export function PartnersSection({ className }: PartnersProps) {
           {PARTNER_LOGOS.map((logo) => (
             <div
               key={`${logo.name}-duplicate`}
-              className="mx-8 flex h-[120px] w-[120px] items-center justify-center"
+              className="mx-4 flex h-16 w-16 items-center justify-center sm:mx-6 sm:h-20 sm:w-20 md:h-24 md:w-24 lg:mx-8 lg:h-[120px] lg:w-[120px]"
             >
               <Image
                 src={logo.src}

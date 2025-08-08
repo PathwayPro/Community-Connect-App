@@ -4,13 +4,12 @@ import Link from 'next/link';
 
 export function HeroSection() {
   return (
-    <section id="home" className="">
-      <div className="relative mx-auto max-w-7xl pt-[160px]"></div>
-      <div className="relative mx-auto max-w-7xl rounded-2xl bg-[#E8EDFF] px-[64px] py-16">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
+    <section id="home" className="pt-24 sm:pt-28 md:pt-36">
+      <div className="relative mx-auto max-w-7xl rounded-2xl bg-[#E8EDFF] px-4 py-10 sm:px-6 sm:py-14 md:px-10 md:py-16 lg:px-16 lg:py-20">
+        <div className="grid items-center gap-8 sm:gap-10 md:gap-12 lg:grid-cols-2">
           {/* Left content column */}
           <div className="text-left">
-            <h1 className="text-[64px] font-semibold tracking-tight text-gray-900 md:text-5xl lg:text-6xl">
+            <h1 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
               Your <span className="text-primary">Pathway to Growth</span>,
               Support and Community
             </h1>
@@ -26,7 +25,7 @@ export function HeroSection() {
           </div>
 
           {/* Right image column */}
-          <div className="relative h-full w-full">
+          <div className="relative order-first h-full w-full lg:order-none">
             <HeroImageSVG.hero className="h-auto w-full object-contain" />
           </div>
         </div>

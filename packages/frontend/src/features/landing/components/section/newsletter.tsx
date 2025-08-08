@@ -63,12 +63,12 @@ export function NewsletterSection() {
   };
 
   return (
-    <section className="mx-auto w-full max-w-3xl px-4 py-16">
+    <section className="mx-auto w-full max-w-3xl px-4 py-12 sm:py-16">
       <div className="space-y-4 text-center">
         <h6 className="mb-2 font-semibold text-neutral-dark-100">
           BE IN THE KNOW
         </h6>
-        <h1 className="text-5xl font-semibold text-primary-500">
+        <h1 className="text-3xl font-semibold text-primary-500 sm:text-4xl md:text-5xl">
           Subscribe to our Newsletter
         </h1>
         <p className="paragraph-lg text-neutral-dark-100">
@@ -77,11 +77,8 @@ export function NewsletterSection() {
       </div>
 
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="mt-8 flex gap-2"
-        >
-          <div className="relative flex w-full">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8">
+          <div className="relative flex w-full flex-col gap-3 sm:flex-row sm:gap-2">
             <FormField
               control={form.control}
               name="email"
@@ -92,7 +89,7 @@ export function NewsletterSection() {
                       <Input
                         placeholder="johndoe@email.com"
                         className={cn(
-                          'h-[60px] w-full rounded-xl border-[#C3D0FF] shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)]',
+                          'h-12 w-full rounded-xl border-[#C3D0FF] shadow-[0_4px_20px_0px_rgba(0,0,0,0.08)] sm:h-[60px]',
                           isSubmitted && 'pl-10',
                           form.formState.isValid
                             ? 'bg-[#E9EEFF] ring-8 ring-[#E9EEFF]'
@@ -111,12 +108,12 @@ export function NewsletterSection() {
                 </FormItem>
               )}
             />
-            <div className="absolute right-0 flex">
+            <div className="flex sm:absolute sm:right-0">
               <Button
                 type="submit"
                 disabled={form.formState.isSubmitting || isSubmitted}
                 className={cn(
-                  'h-[60px] w-fit rounded-xl bg-primary-500 px-12 text-white'
+                  'h-12 w-full rounded-xl bg-primary-500 px-8 text-white sm:h-[60px] sm:w-fit sm:px-12'
                 )}
               >
                 {isSubmitted ? 'Subscribed!' : 'Subscribe'}
