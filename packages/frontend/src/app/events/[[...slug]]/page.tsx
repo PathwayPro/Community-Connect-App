@@ -20,7 +20,7 @@ export default async function EventPage({ params }: EventPageProps) {
       // Handle /events - Show all events
       return (
         <Suspense fallback={<EventsLoadingSkeleton />}>
-          <div className="flex w-full justify-center">
+          <div className="flex w-full justify-center px-4 md:px-0">
             <EventList />
           </div>
         </Suspense>
@@ -30,7 +30,7 @@ export default async function EventPage({ params }: EventPageProps) {
       // Handle /events/create
       return (
         <Suspense fallback={<EventFormSkeleton />}>
-          <div className="flex w-full justify-center">
+          <div className="flex w-full justify-center px-4 md:px-0">
             <EventFormWrapper />
           </div>
         </Suspense>
@@ -41,7 +41,7 @@ export default async function EventPage({ params }: EventPageProps) {
       if (!id) return notFound();
       return (
         <Suspense fallback={<EventFormSkeleton />}>
-          <div className="flex w-full justify-center">
+          <div className="flex w-full justify-center px-4 md:px-0">
             <EventFormWrapper />
           </div>
         </Suspense>
@@ -53,7 +53,7 @@ export default async function EventPage({ params }: EventPageProps) {
         // Handle /events/:id/subscribers
         return (
           <Suspense fallback={<EventDetailsSkeleton />}>
-            <div className="flex w-full justify-center">
+            <div className="flex w-full justify-center px-4 md:px-0">
               <EventSubscribers eventId={action} />
             </div>
           </Suspense>
@@ -64,7 +64,7 @@ export default async function EventPage({ params }: EventPageProps) {
       if (action && !id) {
         return (
           <Suspense fallback={<EventDetailsSkeleton />}>
-            <div className="flex w-full justify-center">
+            <div className="flex w-full justify-center px-4 md:px-0">
               <EventDetails />
             </div>
           </Suspense>

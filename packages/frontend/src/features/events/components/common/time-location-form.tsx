@@ -151,7 +151,7 @@ export const TimeLocationForm = ({
           required
         />
       </div>
-      <div className="flex w-full gap-4">
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
         <FormSelect
           name="start_time"
           label="Event Start Time"
@@ -192,7 +192,7 @@ export const TimeLocationForm = ({
         />
       </div>
 
-      <div className="flex w-full justify-start gap-4 pt-4">
+      <div className="flex w-full justify-start gap-3 pt-4 sm:gap-4">
         <CustomSwitch
           name="type"
           label="Event Type"

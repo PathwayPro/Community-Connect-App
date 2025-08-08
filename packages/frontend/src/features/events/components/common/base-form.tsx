@@ -161,7 +161,7 @@ export const BaseForm = ({
         required
       />
 
-      <div className="flex w-full gap-4">
+      <div className="flex w-full flex-wrap gap-3 sm:gap-4">
         <CustomSwitch
           name="is_free"
           label="Free or Paid Event"
@@ -174,7 +174,7 @@ export const BaseForm = ({
         />
       </div>
 
-      <div className="flex w-full gap-4">
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
         <FormInput
           name="link"
           label="Registration Link"
