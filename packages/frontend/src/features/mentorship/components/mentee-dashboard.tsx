@@ -147,29 +147,29 @@ const MenteeDashboard = () => {
   };
 
   return (
-    <div className="container-wide flex w-full flex-col gap-6">
+    <div className="container-wide flex w-full flex-col gap-6 px-4 md:px-0">
       <MentorshipSection className="h-auto w-full">
         <MentorshipSection.Header>
           <h6 className="font-semibold">Hey, {user?.firstName}!👋</h6>
         </MentorshipSection.Header>
 
         <MentorshipSection.Content className="w-full">
-          <div className="flex w-full gap-4">
-            <div className="flex min-h-[370px] w-full flex-col justify-between rounded-2xl border-2 border-gray-200 bg-neutral-light-200 p-6">
-              <div className="flex items-center justify-between">
+          <div className="flex w-full flex-col gap-4 lg:flex-row">
+            <div className="flex min-h-[370px] w-full flex-col justify-between rounded-2xl border-2 border-gray-200 bg-neutral-light-200 p-4 sm:p-6">
+              <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                 <h5 className="font-normal">Current Mentor</h5>
 
                 <Button
-                  className="w-fit"
+                  className="w-full sm:w-fit"
                   onClick={() => setIsPastMentorsOpen(true)}
                 >
                   View Past Mentors
                 </Button>
               </div>
 
-              <div className="flex justify-between gap-6">
-                <div className="ml-10 flex flex-col items-center gap-3">
-                  <Avatar className="h-[120px] w-[120px]">
+              <div className="flex flex-col justify-between gap-6 sm:flex-row">
+                <div className="flex flex-col items-center gap-3 sm:ml-10">
+                  <Avatar className="h-[96px] w-[96px] sm:h-[120px] sm:w-[120px]">
                     <AvatarImage src={mentor?.avatarUrl} alt="Mentor avatar" />
                     <AvatarFallback>MC</AvatarFallback>
                   </Avatar>
@@ -209,7 +209,7 @@ const MenteeDashboard = () => {
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <Button
                   className="flex h-10 w-full items-center gap-2"
                   variant="outline"
@@ -224,7 +224,7 @@ const MenteeDashboard = () => {
                 </Button>
               </div>
             </div>
-            <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4">
               <MenteeCard
                 title="Mentrorship Started"
                 value="09/01/2025"
@@ -245,14 +245,14 @@ const MenteeDashboard = () => {
         </MentorshipSection.Content>
       </MentorshipSection>
       <MentorshipSection className="h-auto w-full">
-        <div className="flex w-full gap-4">
-          <div className="flex w-1/4 flex-col gap-4">
+        <div className="flex w-full flex-col gap-4 lg:flex-row">
+          <div className="flex w-full flex-col gap-4 lg:w-1/3">
             <MentorshipSection.Header>
               <h6 className="font-semibold">Session Notes</h6>
             </MentorshipSection.Header>
 
             <MentorshipSection.Content>
-              <ScrollArea className="h-[400px] pr-4">
+              <ScrollArea className="h-[300px] pr-2 sm:h-[400px] sm:pr-4">
                 <div className="flex flex-col gap-4">
                   {notes.map((note) => (
                     <NotesCard
@@ -268,7 +268,7 @@ const MenteeDashboard = () => {
             </MentorshipSection.Content>
           </div>
 
-          <div className="flex w-3/4 flex-col gap-4">
+          <div className="flex w-full flex-col gap-4 lg:w-2/3">
             <MentorshipSection.Header>
               <h6 className="font-semibold">Take Notes</h6>
             </MentorshipSection.Header>

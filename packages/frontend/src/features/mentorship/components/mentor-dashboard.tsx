@@ -135,17 +135,17 @@ const MentorDashboard = () => {
   }
 
   return (
-    <div className="container-wide flex flex-col gap-6">
+    <div className="container-wide flex flex-col gap-6 px-4 md:px-0">
       <MentorshipSection>
         <MentorshipSection.Header>
           <h6 className="font-semibold">Hey, {user?.firstName}!👋</h6>
-          <div className="flex items-center gap-4">
-            <Button className="h-10">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <Button className="h-10 w-full sm:w-auto">
               <PlusCircleIcon className="h-4 w-4" /> Create a Session
             </Button>
             <Button
               variant="outline"
-              className="h-10 w-fit"
+              className="h-10 w-full sm:w-fit"
               onClick={handleViewProfile}
             >
               <UserRoundPlus className="h-4 w-4" /> View Profile
@@ -160,7 +160,7 @@ const MentorDashboard = () => {
         </MentorshipSection.Header>
 
         <MentorshipSection.Content>
-          <div className="flex gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <MentorCard
               title="Minutes Mentored"
               value={mentorStatistics?.minutesMentored?.toString() || '0'}
@@ -204,11 +204,11 @@ const MentorDashboard = () => {
         </MentorshipSection.Content>
       </MentorshipSection>
 
-      <div className="flex gap-4">
+      <div className="flex flex-col gap-4 lg:flex-row">
         <MentorshipSection className="h-[444px]">
           <MentorshipSection.Header>
             <h6 className="font-semibold">Upcoming Sessions</h6>
-            <Button className="h-10">View All</Button>
+            <Button className="h-10 w-full sm:w-auto">View All</Button>
           </MentorshipSection.Header>
           <MentorshipSection.Content>
             <DataTable columns={sessionsColumns} data={upcomingSessionsData} />
@@ -225,7 +225,7 @@ const MentorDashboard = () => {
                 </h6>
               </div>
             </div>
-            <Button className="h-10">View All</Button>
+            <Button className="h-10 w-full sm:w-auto">View All</Button>
           </MentorshipSection.Header>
           <MentorshipSection.Content>
             <DataTable

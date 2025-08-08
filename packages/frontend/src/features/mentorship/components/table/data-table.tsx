@@ -34,8 +34,8 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="border-0">
-      <Table>
+    <div className="w-full overflow-x-auto">
+      <Table className="min-w-[720px] sm:min-w-0">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="bg-neutral-light-300">
