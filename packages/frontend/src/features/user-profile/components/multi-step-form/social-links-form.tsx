@@ -63,7 +63,7 @@ export const SocialLinksForm = () => {
       <Button
         variant="ghost"
         type="button"
-        className="flex w-[152px] items-center justify-start gap-2 p-0 text-lg font-medium text-primary hover:bg-white"
+        className="flex w-full items-center justify-center gap-2 p-0 text-lg font-medium text-primary hover:bg-white sm:w-[152px] sm:justify-start"
         onClick={handleAddLink}
       >
         <SharedIcons.plusCircle className="h-6 w-6" />
