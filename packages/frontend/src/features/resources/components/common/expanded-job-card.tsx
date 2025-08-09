@@ -91,7 +91,7 @@ export function ExpandedJobCard({
   };
 
   return (
-    <Card className="relative w-full min-w-full bg-neutral-light-100 p-4">
+    <Card className="relative w-full max-w-full bg-neutral-light-100 p-4">
       <AlertDialogUI />
       <DeleteModal
         isOpen={showDeleteDialog}
@@ -146,22 +146,24 @@ export function ExpandedJobCard({
         </span>
 
         {/* Job Details */}
-        <div className="flex items-center justify-start gap-6 py-4 text-sm text-muted-foreground">
-          <div className="flex flex-col gap-1">
+        <div className="grid w-full grid-cols-1 gap-4 py-4 text-sm text-muted-foreground sm:flex sm:items-center sm:justify-start sm:gap-6">
+          <div className="flex min-w-0 flex-col gap-1">
             <span>Experience</span>
             <p className="paragraph-lg">
               {opportunity.experience || 'Not specified'}
             </p>
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex min-w-0 flex-col gap-1">
             <span>Location</span>
-            <p className="paragraph-lg">{location}</p>
+            <p className="paragraph-lg whitespace-normal break-words">
+              {location}
+            </p>
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex min-w-0 flex-col gap-1">
             <span>Salary</span>
             <p className="paragraph-lg">{salaryRange}</p>
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex min-w-0 flex-col gap-1">
             <span>Job Type</span>
             <p className="paragraph-lg">
               {opportunity.settings?.toString() || 'Not specified'}
@@ -180,7 +182,7 @@ export function ExpandedJobCard({
         </div>
 
         {/* Apply Button */}
-        <Button onClick={handleApply} className="h-12 w-[300px]">
+        <Button onClick={handleApply} className="h-12 w-full sm:w-[300px]">
           <Link className="h-6 w-6" />
           Apply Now
         </Button>

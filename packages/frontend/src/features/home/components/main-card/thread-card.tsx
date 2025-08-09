@@ -1,5 +1,5 @@
 import { Button } from '@/shared/components/ui/button';
-import { MessageSquare, Heart, Bookmark } from 'lucide-react';
+import { MessageSquare, Heart, Bookmark, Eye } from 'lucide-react';
 import Image from 'next/image';
 import { Thread } from '../../lib/mock-data';
 import { ThreadCardProvider } from './base-thread-card';
@@ -157,10 +157,12 @@ export const ThreadCard = ({
           <div className="flex items-center gap-2">
             <Button
               variant="secondary"
-              className="h-10 rounded-xl"
+              className="h-9 rounded-xl px-2 sm:h-10 sm:px-3"
               onClick={handleViewThread}
+              aria-label="View thread"
             >
-              View thread
+              <Eye className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">View thread</span>
             </Button>
 
             {/* {isOwner && (

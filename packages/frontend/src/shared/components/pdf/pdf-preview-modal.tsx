@@ -9,6 +9,7 @@ import {
 } from '@/shared/components/ui/dialog';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { ReactNode } from 'react';
+import { cn } from '@/shared/lib/utils';
 
 interface PdfPreviewModalAction {
   label: string;
@@ -46,9 +47,9 @@ export function PdfPreviewModal({
   filePath,
   children,
   actions = [],
-  maxWidth = 'min-w-[1000px]',
-  height = 'min-h-[800px]',
-  scrollAreaHeight = 'min-h-[600px]'
+  maxWidth = 'sm:min-w-[1000px]',
+  height = 'sm:min-h-[800px]',
+  scrollAreaHeight = 'sm:min-h-[600px]'
 }: PdfPreviewModalProps) {
   const defaultActions: PdfPreviewModalAction[] = [
     {
@@ -62,18 +63,27 @@ export function PdfPreviewModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={maxWidth}>
+      <DialogContent
+        className={cn('flex h-[85dvh] flex-col p-4 sm:h-auto sm:p-6', maxWidth)}
+      >
         <DialogHeader>
-          <DialogTitle className="self-center text-2xl font-semibold">
+          <DialogTitle className="self-center text-lg font-semibold sm:text-2xl">
             {title}
           </DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
+          {description && (
+            <DialogDescription className="text-center text-sm sm:text-base">
+              {description}
+            </DialogDescription>
+          )}
         </DialogHeader>
 
         <div
-          className={`flex ${height} flex-col gap-4 rounded-2xl bg-neutral-light-300 p-4`}
+          className={cn(
+            'flex min-h-0 flex-1 flex-col gap-4 rounded-2xl bg-neutral-light-300 p-3 sm:p-4',
+            height
+          )}
         >
-          <ScrollArea className={scrollAreaHeight}>
+          <ScrollArea className={cn('min-h-0 flex-1', scrollAreaHeight)}>
             <PdfPreview filePath={filePath} />
           </ScrollArea>
 
@@ -81,14 +91,14 @@ export function PdfPreviewModal({
         </div>
 
         {modalActions.length > 0 && (
-          <div className="mt-4 flex items-center justify-between gap-4">
+          <div className="mt-4 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             {modalActions.map((action, index) => (
               <Button
                 key={index}
                 variant={action.variant || 'default'}
                 onClick={action.onClick}
                 asChild={!!action.href}
-                className="h-12 w-full"
+                className="h-11 w-full sm:h-12 sm:w-auto"
               >
                 {action.href ? (
                   <a

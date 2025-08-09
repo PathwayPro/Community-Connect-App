@@ -60,19 +60,21 @@ export const MentorshipAgreementDialog = ({
 }: MentorshipAgreementDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="h-[700px] min-w-[740px]">
+      <DialogContent className="flex h-[85dvh] w-[92vw] max-w-[95vw] flex-col p-4 sm:h-[700px] sm:min-w-[740px] sm:p-6">
         <DialogHeader>
-          <DialogTitle>Mentorship Program Agreement - {title}</DialogTitle>
+          <DialogTitle className="text-base sm:text-lg">
+            Mentorship Program Agreement - {title}
+          </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
           Please read the following terms and conditions carefully before
           agreeing to participate in our mentorship program.
         </DialogDescription>
-        <ScrollArea className="h-[480px] w-full rounded-md border p-4">
+        <ScrollArea className="min-h-0 w-full flex-1 rounded-md border p-3 sm:p-4">
           <div className="whitespace-pre-line">{agreementContent}</div>
         </ScrollArea>
-        <div className="mb-6 flex flex-col gap-6 pt-4">
-          <div className="flex items-center space-x-2">
+        <div className="mb-2 mt-4 flex flex-col gap-4 sm:mb-6 sm:gap-6">
+          <div className="flex items-center gap-2">
             <Checkbox
               id="agreement"
               checked={hasAgreed}
@@ -82,12 +84,17 @@ export const MentorshipAgreementDialog = ({
             />
             <label
               htmlFor="agreement"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              className="text-sm font-medium leading-snug peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               I agree to the terms and conditions
             </label>
           </div>
-          <Button onClick={() => onOpenChange(false)}>Close</Button>
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => onOpenChange(false)}
+          >
+            Close
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

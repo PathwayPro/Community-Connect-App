@@ -156,13 +156,18 @@ export const CommentCard = ({
                 <button
                   onClick={() => setShowCommentSection(!showCommentSection)}
                   className="flex items-center gap-2 rounded-full p-1 text-primary-500 hover:bg-neutral-light-200"
+                  aria-label={
+                    showCommentSection ? 'Hide comments' : 'View comments'
+                  }
                 >
                   {showCommentSection ? (
                     <ChevronUp className="h-5 w-5" />
                   ) : (
                     <ChevronDown className="h-5 w-5" />
                   )}
-                  {showCommentSection ? 'Hide Comments' : 'View Comments'}
+                  <span className="hidden sm:inline">
+                    {showCommentSection ? 'Hide Comments' : 'View Comments'}
+                  </span>
                 </button>
               )}
             <button

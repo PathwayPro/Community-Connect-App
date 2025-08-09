@@ -208,8 +208,16 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
                 variant="link"
                 onClick={() => setIsModalOpen(true)}
                 type="button"
+                className="w-full whitespace-normal break-words text-left sm:w-auto sm:whitespace-nowrap sm:text-center"
               >
-                View Mentorship Program Agreement to Proceed
+                <span className="sm:hidden">
+                  View Mentorship Program
+                  <br />
+                  Agreement to Proceed
+                </span>
+                <span className="hidden sm:inline">
+                  View Mentorship Program Agreement to Proceed
+                </span>
               </Button>
               <IconButton
                 className="w-full"

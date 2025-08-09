@@ -1,6 +1,6 @@
 import { Button } from '@/shared/components/ui/button';
 import { Textarea } from '@/shared/components/ui/textarea';
-import { ImageIcon, SmileIcon } from 'lucide-react';
+import { ImageIcon, SmileIcon, X, Send } from 'lucide-react';
 import { useState } from 'react';
 import {
   Avatar,
@@ -57,8 +57,8 @@ export const ThreadCommentInput = ({
       )}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="flex items-center gap-6">
-        <Avatar className="mb-12 h-11 w-11 bg-warning-500">
+      <div className="flex items-start gap-4 sm:gap-6">
+        <Avatar className="mb-12 h-10 w-10 bg-warning-500 sm:h-11 sm:w-11">
           {user.pictureUploadLink && (
             <ImagePreview
               imagePath={user.pictureUploadLink}
@@ -69,7 +69,7 @@ export const ThreadCommentInput = ({
             />
           )}
           {!user.pictureUploadLink && (
-            <AvatarFallback className="bg-warning-500">
+            <AvatarFallback className="bg-warning-500 text-sm sm:text-base">
               {user.firstName
                 ?.split(' ')
                 .map((n) => n[0])
@@ -88,11 +88,11 @@ export const ThreadCommentInput = ({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               className={cn(
-                'min-h-[150px] resize-none rounded-lg bg-white text-base'
+                'min-h-[120px] resize-none rounded-lg bg-white text-base sm:min-h-[150px]'
               )}
               maxLength={characterLimit}
             />
-            <div className="absolute bottom-14 right-4 flex items-center gap-1 text-sm text-muted-foreground">
+            <div className="absolute bottom-14 right-3 flex items-center gap-1 text-xs text-muted-foreground sm:right-4 sm:text-sm">
               <SharedIcons.info className="h-4 w-4" />
               <span className={isOverLimit ? 'text-destructive' : ''}>
                 {remainingCharacters} / {characterLimit} characters
@@ -103,34 +103,44 @@ export const ThreadCommentInput = ({
               <div className="flex gap-1">
                 <button
                   type="button"
-                  className="rounded-md p-1 hover:bg-muted-foreground/10 focus:outline-none focus:ring-2 focus:ring-muted-foreground/20"
+                  className="cursor-not-allowed rounded-md p-1 opacity-50"
                   aria-label="Add image"
+                  disabled
+                  aria-disabled="true"
+                  title="Disabled"
                 >
                   <ImageIcon className="h-6 w-6 text-muted-foreground" />
                 </button>
                 <button
                   type="button"
-                  className="rounded-md p-1 hover:bg-muted-foreground/10 focus:outline-none focus:ring-2 focus:ring-muted-foreground/20"
+                  className="cursor-not-allowed rounded-md p-1 opacity-50"
                   aria-label="Add emoji"
+                  disabled
+                  aria-disabled="true"
+                  title="Disabled"
                 >
                   <SmileIcon className="h-6 w-6 text-muted-foreground" />
                 </button>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   onClick={onCancel}
-                  className="h-10 w-fit rounded-xl"
+                  className="h-9 w-9 rounded-full p-0 sm:h-10 sm:w-fit sm:rounded-xl sm:px-4"
+                  aria-label="Cancel"
                 >
-                  Cancel
+                  <X className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Cancel</span>
                 </Button>
                 <Button
                   onClick={handleSubmit}
-                  className="h-10 w-fit rounded-xl"
+                  className="h-9 w-9 rounded-full p-0 sm:h-10 sm:w-fit sm:rounded-xl sm:px-4"
                   disabled={isSubmitting || !comment.trim() || isOverLimit}
+                  aria-label="Post comment"
                 >
-                  Post Comment
+                  <Send className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Post Comment</span>
                 </Button>
               </div>
             </div>

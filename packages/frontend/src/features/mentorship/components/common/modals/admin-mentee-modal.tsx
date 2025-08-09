@@ -125,9 +125,9 @@ export const AdminMenteeModalCard = ({
             View
           </Button>
         </DialogTrigger>
-        <DialogContent className="w-[552px] max-w-[552px] rounded-3xl">
+        <DialogContent className="flex h-[85dvh] w-[92vw] max-w-[95vw] flex-col rounded-3xl p-4 sm:h-auto sm:w-[552px] sm:max-w-[552px] sm:p-6">
           <DialogHeader>
-            <DialogTitle className="text-center text-2xl font-semibold">
+            <DialogTitle className="text-center text-xl font-semibold sm:text-2xl">
               Mentee Profile
             </DialogTitle>
             <DialogDescription className="sr-only">
@@ -135,7 +135,7 @@ export const AdminMenteeModalCard = ({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex flex-col gap-4 rounded-3xl bg-neutral-light-300 p-4">
+          <div className="flex flex-col gap-4 rounded-3xl bg-neutral-light-300 p-3 sm:p-4">
             <div className="relative flex flex-col items-center gap-4 rounded-2xl border border-neutral-light-500 bg-white p-6">
               <div
                 className={cn(

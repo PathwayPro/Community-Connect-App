@@ -205,7 +205,7 @@ const MentorDashboard = () => {
       </MentorshipSection>
 
       <div className="flex flex-col gap-4 lg:flex-row">
-        <MentorshipSection className="h-[444px]">
+        <MentorshipSection className="h-auto overflow-hidden lg:h-[444px]">
           <MentorshipSection.Header>
             <h6 className="font-semibold">Upcoming Sessions</h6>
             <Button className="h-10 w-full sm:w-auto">View All</Button>
@@ -214,7 +214,7 @@ const MentorDashboard = () => {
             <DataTable columns={sessionsColumns} data={upcomingSessionsData} />
           </MentorshipSection.Content>
         </MentorshipSection>
-        <MentorshipSection className="h-[444px]">
+        <MentorshipSection className="h-auto overflow-hidden lg:h-[444px]">
           <MentorshipSection.Header>
             <div className="flex items-center gap-4">
               <h6 className="font-semibold">My Mentees</h6>

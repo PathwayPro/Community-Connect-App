@@ -42,14 +42,10 @@ export function PastMentorsModal({
   };
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={setIsPastMentorsOpen}
-      // className="w-[600px] max-w-[800px] rounded-3xl"
-    >
-      <DialogContent className="w-[552px] max-w-[552px] rounded-3xl">
+    <Dialog open={isOpen} onOpenChange={setIsPastMentorsOpen}>
+      <DialogContent className="flex h-[85dvh] w-[92vw] max-w-[95vw] flex-col rounded-3xl p-4 sm:h-auto sm:w-[552px] sm:max-w-[552px] sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-semibold">
+          <DialogTitle className="text-center text-xl font-semibold sm:text-2xl">
             Past Mentors
           </DialogTitle>
           <DialogDescription className="sr-only">
@@ -59,7 +55,7 @@ export function PastMentorsModal({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="h-[450px] rounded-2xl bg-neutral-light-300 p-4">
+        <ScrollArea className="h-[60dvh] rounded-2xl bg-neutral-light-300 p-3 sm:h-[450px] sm:p-4">
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-1 gap-4">
               {mentors.map((mentor) => (
