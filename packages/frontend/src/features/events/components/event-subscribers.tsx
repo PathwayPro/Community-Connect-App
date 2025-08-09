@@ -2,7 +2,14 @@
 
 import { Button } from '@/shared/components/ui/button';
 import { Card } from '@/shared/components/ui/card';
-import { ArrowLeft, UserIcon, UsersIcon } from 'lucide-react';
+import {
+  ArrowLeft,
+  UserIcon,
+  UsersIcon,
+  Clock,
+  CheckCircle,
+  XCircle
+} from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Input } from '@/shared/components/ui/input';
@@ -140,16 +147,44 @@ export const EventSubscribers = ({ eventId }: { eventId: string }) => {
         />
 
         <Tabs defaultValue="all" onValueChange={setActiveTab} className="mb-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="all">All ({tabCounts.all})</TabsTrigger>
-            <TabsTrigger value="pending">
-              Pending ({tabCounts.pending})
+          <TabsList className="flex w-full max-w-full gap-2 sm:grid sm:grid-cols-4 sm:gap-0">
+            <TabsTrigger
+              value="all"
+              aria-label={`All (${tabCounts.all})`}
+              className="h-10 flex-none sm:flex-auto"
+            >
+              <UsersIcon className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">All ({tabCounts.all})</span>
             </TabsTrigger>
-            <TabsTrigger value="approved">
-              Approved ({tabCounts.approved})
+            <TabsTrigger
+              value="pending"
+              aria-label={`Pending (${tabCounts.pending})`}
+              className="h-10 flex-none sm:flex-auto"
+            >
+              <Clock className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">
+                Pending ({tabCounts.pending})
+              </span>
             </TabsTrigger>
-            <TabsTrigger value="rejected">
-              Rejected ({tabCounts.rejected})
+            <TabsTrigger
+              value="approved"
+              aria-label={`Approved (${tabCounts.approved})`}
+              className="h-10 flex-none sm:flex-auto"
+            >
+              <CheckCircle className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">
+                Approved ({tabCounts.approved})
+              </span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="rejected"
+              aria-label={`Rejected (${tabCounts.rejected})`}
+              className="h-10 flex-none sm:flex-auto"
+            >
+              <XCircle className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">
+                Rejected ({tabCounts.rejected})
+              </span>
             </TabsTrigger>
           </TabsList>
 
