@@ -109,7 +109,7 @@ export const FeaturedNewsCard = ({
   };
 
   return (
-    <Card className="mx-auto w-full bg-primary-300 p-6 text-white">
+    <Card className="mx-auto w-full bg-primary-300 p-4 text-white sm:p-6">
       <AlertDialogUI />
       <DeleteModal
         isOpen={showDeleteDialog}
@@ -145,9 +145,9 @@ export const FeaturedNewsCard = ({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
         {/* Left Column - Image */}
-        <div className="relative h-[280px] w-full">
+        <div className="relative h-[200px] w-full sm:h-[280px]">
           <ImagePreview
             imagePath={image}
             alt={title}
@@ -159,10 +159,12 @@ export const FeaturedNewsCard = ({
         </div>
 
         {/* Right Column - Content */}
-        <div className="flex flex-1 flex-col gap-4">
-          <h1 className="text-3xl font-semibold text-white">{title}</h1>
+        <div className="flex flex-1 flex-col gap-3 sm:gap-4">
+          <h1 className="text-xl font-semibold text-white sm:text-3xl">
+            {title}
+          </h1>
 
-          <p className="font-regular line-clamp-3 text-justify text-base text-white">
+          <p className="font-regular line-clamp-4 text-justify text-sm text-white sm:line-clamp-3 sm:text-base">
             {details}
           </p>
 
@@ -171,7 +173,7 @@ export const FeaturedNewsCard = ({
             <Badge variant="secondary">{type}</Badge>
           </div>
 
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex flex-col items-start justify-between gap-2 text-xs sm:flex-row sm:items-center sm:text-sm">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
               <span>{format(new Date(created_at), 'MMM d, yyyy')}</span>
