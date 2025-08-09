@@ -34,7 +34,7 @@ export const ProfileDialog = ({ mentor, user }: ProfileDialogProps) => {
           View your profile and update your information
         </DialogDescription>
       </DialogHeader>
-      <DialogContent className="min-w-[1000px] p-12">
+      <DialogContent className="flex h-[85dvh] w-[92vw] max-w-[95vw] flex-col p-4 sm:h-auto sm:min-w-[1000px] sm:p-12">
         <div className="flex flex-col gap-6 py-4">
           {/* <div className="flex flex-col gap-2"> */}
           <h5 className="font-semibold">
@@ -64,17 +64,17 @@ export const ProfileDialog = ({ mentor, user }: ProfileDialogProps) => {
             <p className="font-normal">{mentor?.experience_details}</p>
           </div>
         </div>
-        <div className="flex justify-start gap-4 pt-4">
-          <Button className="w-[180px]">
+        <div className="flex flex-col justify-start gap-3 pt-4 sm:flex-row sm:gap-4">
+          <Button className="w-full sm:w-[180px]">
             <MessageSquare className="mr-1 h-5 w-5" />
             Message
           </Button>
-          <Button className="w-[180px]" variant="outline">
+          <Button className="w-full sm:w-[180px]" variant="outline">
             <FileText className="mr-1 h-5 w-5" />
             View Resume
           </Button>
           <Button
-            className="w-[180px]"
+            className="w-full sm:w-[180px]"
             variant="outline"
             onClick={() => router.push(`/profile`)}
           >

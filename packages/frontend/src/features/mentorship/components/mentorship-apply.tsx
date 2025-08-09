@@ -6,7 +6,7 @@ import { MentorshipIcons } from './icons';
 
 export const MentorshipApply = () => {
   return (
-    <Card className="mx-auto h-auto w-full max-w-5xl px-4 py-8 sm:px-8 sm:py-12">
+    <Card className="mx-auto h-auto w-full max-w-5xl overflow-hidden px-4 py-8 sm:px-8 sm:py-12">
       <div className="flex w-full flex-col items-center space-y-8">
         <h3 className="text-center font-semibold">Apply for Mentorship</h3>
 

@@ -134,13 +134,13 @@ export const MentorshipAdminPage = () => {
   const menteeColumns = createMenteeColumns(handleRefreshData);
 
   return (
-    <div className="container-wide flex w-full flex-col gap-6">
+    <div className="container-wide flex w-full flex-col gap-6 px-4 md:px-0">
       <MentorshipSection>
         <MentorshipSection.Header>
           <h6 className="font-semibold">Hey, {user?.firstName}!👋</h6>
         </MentorshipSection.Header>
         <MentorshipSection.Content>
-          <div className="flex gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <MentorCard
               title="Mentors"
               value={adminMentorshipTotals?.totalMentors.toString() || '0'}
@@ -192,8 +192,8 @@ export const MentorshipAdminPage = () => {
           </div>
         </MentorshipSection.Content>
       </MentorshipSection>
-      <div className="flex h-full w-full gap-4">
-        <MentorshipSection className="h-[fullpx]">
+      <div className="flex h-full w-full flex-col gap-4 md:flex-col lg:flex-row">
+        <MentorshipSection className="h-auto overflow-hidden">
           <MentorshipSection.Header>
             <div className="flex w-full items-center justify-between">
               <h6 className="font-semibold">Mentors and Mentees</h6>
@@ -218,8 +218,8 @@ export const MentorshipAdminPage = () => {
           </MentorshipSection.Header>
           <MentorshipSection.Content>
             <Tabs defaultValue="mentors">
-              <div className="flex items-start justify-between gap-4 rounded-xl bg-neutral-light-200 p-2">
-                <TabsList>
+              <div className="flex flex-col items-stretch justify-between gap-3 rounded-xl bg-neutral-light-200 p-2 sm:flex-row sm:items-start sm:gap-4">
+                <TabsList className="max-w-full">
                   <TabsTrigger value="mentors" className="w-fit px-4">
                     Mentors
                   </TabsTrigger>
@@ -229,7 +229,7 @@ export const MentorshipAdminPage = () => {
                 </TabsList>
                 <IconInput
                   leftIcon="search"
-                  className="h-12 rounded-full bg-white"
+                  className="h-12 w-full rounded-full bg-white sm:w-auto"
                   placeholder="Search"
                 />
               </div>

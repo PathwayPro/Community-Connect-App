@@ -36,9 +36,9 @@ export function MentorModal({
 }: MentorModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsModalOpen}>
-      <DialogContent className="w-[552px] max-w-[552px] rounded-3xl">
+      <DialogContent className="flex h-[85dvh] w-[92vw] max-w-[95vw] flex-col rounded-3xl p-4 sm:h-auto sm:w-[552px] sm:max-w-[552px] sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-semibold">
+          <DialogTitle className="text-center text-xl font-semibold sm:text-2xl">
             {profileData?.isMentor ? 'Mentor Profile' : 'Mentee Profile'}
           </DialogTitle>
           <DialogDescription className="sr-only">
@@ -48,8 +48,8 @@ export function MentorModal({
 
         <ScrollArea
           className={cn(
-            'rounded-2xl bg-neutral-light-300 p-4',
-            profileData?.isMentor ? 'h-[450px]' : ''
+            'min-h-0 flex-1 rounded-2xl bg-neutral-light-300 p-3 sm:p-4',
+            profileData?.isMentor ? 'h-[60dvh] sm:h-[450px]' : ''
           )}
         >
           <div className="flex flex-col gap-4">
@@ -57,7 +57,7 @@ export function MentorModal({
           </div>
         </ScrollArea>
 
-        <div className="flex gap-4">
+        <div className="mt-4 flex gap-4">
           <Button
             variant="outline"
             className="mx-auto h-10 w-full"
