@@ -148,7 +148,7 @@ const MenteeDashboard = () => {
 
   return (
     <div className="container-wide flex w-full flex-col gap-6 px-4 md:px-0">
-      <MentorshipSection className="h-auto w-full">
+      <MentorshipSection className="h-auto w-full overflow-hidden">
         <MentorshipSection.Header>
           <h6 className="font-semibold">Hey, {user?.firstName}!👋</h6>
         </MentorshipSection.Header>
@@ -252,7 +252,7 @@ const MenteeDashboard = () => {
             </MentorshipSection.Header>
 
             <MentorshipSection.Content>
-              <ScrollArea className="h-[300px] pr-2 sm:h-[400px] sm:pr-4">
+              <ScrollArea className="h-[260px] pr-2 sm:h-[400px] sm:pr-4">
                 <div className="flex flex-col gap-4">
                   {notes.map((note) => (
                     <NotesCard
