@@ -7,7 +7,7 @@ import { MentorshipSection } from './common/mentorship-section';
 import { MentorshipIcons } from './icons';
 import { DataTable } from './table/data-table';
 import { sessionsColumns } from './table/sessions-columns';
-import { menteesColumns } from './table/mentees-column';
+import { createMenteeColumns } from './table/mentees-column';
 import MentorCard from './common/mentor-card';
 import { useState, useEffect } from 'react';
 import { MentorModal } from './common/modals/mentor-modal';
@@ -102,7 +102,8 @@ const MentorDashboard = () => {
   // Transform mentees data for the table
   const menteesTableData = mentorMentees.map((mentee, index) => ({
     id: mentee.id,
-    menteeApplicationId: index,
+    menteeApplicationId: mentee.menteeApplicationId,
+    menteeUserId: mentee.menteeUserId,
     identity: {
       avatar: mentee.avatar || '/profile/default-avatar.png',
       firstName: mentee.mentee.split(' ')[0] || '',
@@ -115,7 +116,7 @@ const MentorDashboard = () => {
     email: mentee.email,
     reason: '',
     experience: '',
-    resume: ''
+    resume: mentee.resume || ''
   }));
 
   if (isLoading) {
@@ -238,19 +239,18 @@ const MentorDashboard = () => {
           </MentorshipSection.Header>
           <MentorshipSection.Content>
             <DataTable
-              columns={menteesColumns}
+              columns={createMenteeColumns(async () => {
+                try {
+                  await getMyMentees();
+                  await getMyStatistics();
+                } catch (e) {
+                  console.error(
+                    'Failed to refresh mentees/stats after status update',
+                    e
+                  );
+                }
+              })}
               data={menteesTableData}
-              onRowClick={(rowData) => {
-                setSelectedProfile({
-                  firstName: rowData.identity.firstName,
-                  lastName: rowData.identity.lastName,
-                  profession: rowData.profession,
-                  email: rowData.identity.email,
-                  avatarUrl: rowData.identity.avatar,
-                  isMentor: false
-                });
-                setIsModalOpen(true);
-              }}
             />
           </MentorshipSection.Content>
         </MentorshipSection>

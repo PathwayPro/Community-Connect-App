@@ -17,6 +17,7 @@ import {
   DialogTrigger
 } from '@/shared/components/ui/dialog';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { PdfPreviewModal } from '@/shared/components/pdf/pdf-preview-modal';
 import {
   Select,
@@ -54,10 +55,17 @@ export const AdminMenteeModalCard = ({
   );
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const { showAlert } = useAlertDialog();
+  const router = useRouter();
 
   const handleViewResume = () => {
     if (resume) {
       setIsResumeModalOpen(true);
+    } else {
+      showAlert({
+        type: 'warning',
+        title: 'Resume not available',
+        description: 'This mentee has not uploaded a resume yet.'
+      });
     }
   };
 
@@ -182,7 +190,24 @@ export const AdminMenteeModalCard = ({
               </div>
 
               <div className="flex w-full gap-2">
-                <Button variant="outline" className="h-10 flex-1 gap-2 px-0">
+                <Button
+                  variant="outline"
+                  className="h-10 flex-1 gap-2 px-0"
+                  onClick={() => {
+                    const userId = data.menteeUserId;
+                    if (userId) {
+                      setIsModalOpen(false);
+                      router.push(`/messages/${userId}`);
+                    } else {
+                      showAlert({
+                        type: 'warning',
+                        title: 'Messaging unavailable',
+                        description:
+                          'We could not determine the mentee user account to start a chat.'
+                      });
+                    }
+                  }}
+                >
                   <MessageSquare className="h-5 w-5" />
                   Message
                 </Button>
@@ -190,7 +215,6 @@ export const AdminMenteeModalCard = ({
                   className="h-10 flex-1 gap-2 px-0"
                   onClick={handleViewResume}
                   variant="outline"
-                  disabled={!resume}
                 >
                   <FileText className="h-5 w-5" />
                   View Resume

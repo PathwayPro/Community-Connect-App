@@ -637,6 +637,11 @@ export class MentorService {
               last_name: true,
               email: true,
               profession: true,
+              mentee: {
+                select: {
+                  resume: true,
+                },
+              },
             },
           },
         },
@@ -653,6 +658,10 @@ export class MentorService {
         email: matching.mentee.email,
         profession: matching.mentee.profession || 'Not specified',
         status: matching.status,
+        resume:
+          (Array.isArray(matching.mentee.mentee) && matching.mentee.mentee[0]
+            ? matching.mentee.mentee[0].resume
+            : undefined) || undefined,
       }));
 
       return transformedMentees;

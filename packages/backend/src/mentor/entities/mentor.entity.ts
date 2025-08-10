@@ -163,6 +163,15 @@ export class MyMentees {
   profession?: string;
 
   @ApiProperty({
+    description: 'Resume path or URL from mentees table',
+    example: 'uploads/resumes/abc123.pdf',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  resume?: string;
+
+  @ApiProperty({
     description: 'Status of the matching',
     example: 'APPROVED',
     enum: matching_status,

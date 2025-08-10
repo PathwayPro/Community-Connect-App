@@ -90,6 +90,7 @@ export interface MentorshipAdmin {
 export type Mentee = {
   id: number;
   menteeApplicationId?: number;
+  menteeUserId?: number;
   identity: {
     avatar: string;
     firstName: string;
@@ -132,6 +133,8 @@ export interface MyMentees {
   email: string;
   profession?: string;
   status: string;
+  resume?: string;
+  menteeApplicationId?: number;
 }
 
 export interface MyMentorDashboard {
