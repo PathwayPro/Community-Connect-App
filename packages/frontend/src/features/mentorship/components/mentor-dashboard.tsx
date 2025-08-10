@@ -149,13 +149,13 @@ const MentorDashboard = () => {
             >
               <PlusCircleIcon className="h-4 w-4" /> Create a Session
             </Button>
-            <Button
+            {/* <Button
               variant="outline"
               className="h-10 w-fit"
               onClick={handleViewProfile}
             >
               <UserRoundPlus className="h-4 w-4" /> View Profile
-            </Button>
+            </Button> */}
             <MentorModal
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
