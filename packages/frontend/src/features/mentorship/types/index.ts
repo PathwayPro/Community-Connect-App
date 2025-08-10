@@ -66,7 +66,7 @@ export type RatingsGroup = {
 
 export interface MentorshipAdmin {
   id: number;
-  mentorApplicationId?: number; // Add this field
+  mentorApplicationId?: number;
   identity: {
     avatar: string;
     firstName: string;
@@ -89,7 +89,7 @@ export interface MentorshipAdmin {
 
 export type Mentee = {
   id: number;
-  menteeApplicationId?: number; // Add this field
+  menteeApplicationId?: number;
   identity: {
     avatar: string;
     firstName: string;
@@ -102,7 +102,7 @@ export type Mentee = {
   email: string;
   reason: string;
   experience?: string;
-  resume?: string; // Add this field
+  resume?: string;
 };
 
 // New types for mentor dashboard
@@ -126,6 +126,7 @@ export interface MentorUpcomingSessions {
 
 export interface MyMentees {
   id: number;
+  menteeUserId?: number;
   avatar?: string;
   mentee: string;
   email: string;
@@ -137,4 +138,105 @@ export interface MyMentorDashboard {
   statistics: MentorStatistics;
   upcomingSessions: MentorUpcomingSessions[];
   mentees: MyMentees[];
+}
+
+export interface MenteeNote {
+  title: string;
+  content: string;
+  date: string;
+}
+
+export interface PastMentor {
+  id: number;
+  firstName: string;
+  lastName: string;
+  profession?: string;
+  company?: string;
+  expertise?: string;
+  email: string;
+  avatarUrl?: string;
+}
+
+export interface MenteeUpcomingSession {
+  id: number;
+  dateStart: string;
+  dateEnd: string;
+  link: string;
+  mentor: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    avatarUrl?: string;
+    profession?: string;
+  };
+}
+
+export interface MenteeDashboard {
+  mentor: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    profession?: string;
+    company?: string;
+    expertise?: string;
+    avatarUrl?: string;
+  } | null;
+  mentorshipStarted: string | null;
+  sessionsAttended: number;
+  nextSession: string | null;
+}
+
+// DTO for creating mentorship session (MENTOR only)
+export interface CreateMentorshipSessionDto {
+  menteeId: number;
+  link: string;
+  dateStart: string; // ISO string
+  dateEnd: string; // ISO string
+  description?: string;
+}
+
+// Response types for mentorship sessions
+export interface MentorshipSessionDescription {
+  id: number;
+  sessionId: number;
+  description: string;
+}
+
+export interface MentorshipSessionMenteeNotes {
+  id: number;
+  sessionId: number;
+  notes: string;
+}
+
+export interface MentorshipSessionRating {
+  id: number;
+  sessionId: number;
+  rate: number; // 1-5
+  comment?: string;
+  createdAt: string; // ISO string
+  session?: MentorshipSession;
+}
+
+export interface MentorshipSessionUser {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+export interface MentorshipSession {
+  id: number;
+  mentorId: number;
+  menteeId: number;
+  link?: string;
+  dateStart: string; // ISO string
+  dateEnd: string; // ISO string
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
+  mentor?: MentorshipSessionUser;
+  mentee?: MentorshipSessionUser;
+  description?: MentorshipSessionDescription;
+  menteeNotes?: MentorshipSessionMenteeNotes;
+  mentorRating?: MentorshipSessionRating;
+  menteeRating?: MentorshipSessionRating;
 }

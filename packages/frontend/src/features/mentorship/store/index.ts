@@ -12,7 +12,13 @@ import {
   MyMentorDashboard,
   MentorStatistics,
   MentorUpcomingSessions,
-  MyMentees
+  MyMentees,
+  MenteeDashboard,
+  MenteeNote,
+  PastMentor,
+  MenteeUpcomingSession,
+  CreateMentorshipSessionDto,
+  MentorshipSession
 } from '../types';
 
 interface MentorshipState {
@@ -31,9 +37,17 @@ interface MentorshipState {
   mentorStatistics: MentorStatistics | null;
   mentorUpcomingSessions: MentorUpcomingSessions[];
   mentorMentees: MyMentees[];
+  // Mentee dashboard state
+  menteeDashboard: MenteeDashboard | null;
+  menteeNotes: MenteeNote[];
+  pastMentors: PastMentor[];
+  menteeUpcomingSession: MenteeUpcomingSession | null;
   // Actions
   createMentor: (mentorData: FormData) => Promise<MentorResponse>;
   createMentee: (menteeData: FormData) => Promise<MenteeResponse>;
+  createMentorshipSession: (
+    payload: CreateMentorshipSessionDto
+  ) => Promise<MentorshipSession>;
   fetchInterests: () => Promise<InterestsResponse[]>;
   getMentor: (mentorId: number) => Promise<MentorResponse>;
   getPendingApplications: () => Promise<PendingApplicationResponse>;
@@ -45,6 +59,11 @@ interface MentorshipState {
   getMyStatistics: () => Promise<MentorStatistics>;
   getMyUpcomingSessions: () => Promise<MentorUpcomingSessions[]>;
   getMyMentees: () => Promise<MyMentees[]>;
+  // Mentee dashboard actions
+  getMenteeDashboard: () => Promise<MenteeDashboard>;
+  getMenteeNotes: () => Promise<MenteeNote[]>;
+  getMenteePastMentors: () => Promise<PastMentor[]>;
+  getMenteeUpcomingSession: () => Promise<MenteeUpcomingSession | null>;
 }
 
 export const useMentorshipStore = create<MentorshipState>()(
@@ -59,6 +78,11 @@ export const useMentorshipStore = create<MentorshipState>()(
       mentorStatistics: null,
       mentorUpcomingSessions: [],
       mentorMentees: [],
+      // Mentee
+      menteeDashboard: null,
+      menteeNotes: [],
+      pastMentors: [],
+      menteeUpcomingSession: null,
 
       createMentor: async (mentorData) => {
         set({ isLoading: true, error: null });
@@ -91,6 +115,21 @@ export const useMentorshipStore = create<MentorshipState>()(
             error: error instanceof Error ? error.message : 'An error occurred',
             isLoading: false
           });
+        }
+      },
+
+      createMentorshipSession: async (payload) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await mentorshipApi.createMentorshipSession(payload);
+          set({ isLoading: false });
+          return response.data;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+          throw error;
         }
       },
 
@@ -188,6 +227,67 @@ export const useMentorshipStore = create<MentorshipState>()(
             isLoading: false
           });
           return response;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+          throw error;
+        }
+      },
+
+      // Mentee dashboard actions
+      getMenteeDashboard: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await mentorshipApi.getMenteeDashboard();
+          set({ menteeDashboard: response.data, isLoading: false });
+          return response.data;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+          throw error;
+        }
+      },
+
+      getMenteeNotes: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await mentorshipApi.getMenteeNotes();
+          set({ menteeNotes: response.data, isLoading: false });
+          return response.data;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+          throw error;
+        }
+      },
+
+      getMenteePastMentors: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await mentorshipApi.getMenteePastMentors();
+          set({ pastMentors: response.data, isLoading: false });
+          return response.data;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+          throw error;
+        }
+      },
+
+      getMenteeUpcomingSession: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await mentorshipApi.getMenteeUpcomingSession();
+          set({ menteeUpcomingSession: response.data, isLoading: false });
+          return response.data;
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'An error occurred',

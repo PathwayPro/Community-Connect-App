@@ -180,6 +180,62 @@ export class MenteeController {
     return this.menteeService.updateStatus(+menteeApplicationId, updatedMentee);
   }
 
+  @Get('my-dashboard')
+  @Roles('USER', 'MENTEE', 'ADMIN')
+  @ApiOkResponse({ description: 'Mentee dashboard payload' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Get mentee dashboard',
+    description:
+      'Returns current mentor profile, statistics, and next session info for the logged mentee. REQUIRED ROLES: USER | MENTEE | ADMIN',
+  })
+  @ApiBearerAuth()
+  async getMyDashboard(@GetUser() user: JwtPayload) {
+    return await this.menteeService.getMyDashboard(user.sub);
+  }
+
+  @Get('my-past-mentors')
+  @Roles('USER', 'MENTEE', 'ADMIN')
+  @ApiOkResponse({ description: 'List of past mentors' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Get past mentors',
+    description:
+      'Returns mentors previously matched with the mentee. REQUIRED ROLES: USER | MENTEE | ADMIN',
+  })
+  @ApiBearerAuth()
+  async getMyPastMentors(@GetUser() user: JwtPayload) {
+    return await this.menteeService.getMyPastMentors(user.sub);
+  }
+
+  @Get('my-notes')
+  @Roles('USER', 'MENTEE', 'ADMIN')
+  @ApiOkResponse({ description: 'List of mentee notes across sessions' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Get mentee notes',
+    description:
+      'Returns notes the mentee took for mentorship sessions. REQUIRED ROLES: USER | MENTEE | ADMIN',
+  })
+  @ApiBearerAuth()
+  async getMyNotes(@GetUser() user: JwtPayload) {
+    return await this.menteeService.getMyNotes(user.sub);
+  }
+
+  @Get('my-upcoming-session')
+  @Roles('USER', 'MENTEE', 'ADMIN')
+  @ApiOkResponse({ description: 'Next upcoming session for mentee' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Get mentee upcoming session',
+    description:
+      'Returns the next upcoming session for the mentee. REQUIRED ROLES: USER | MENTEE | ADMIN',
+  })
+  @ApiBearerAuth()
+  async getMyUpcomingSession(@GetUser() user: JwtPayload) {
+    return await this.menteeService.getMyUpcomingSession(user.sub);
+  }
+
   // TO-DO: REMOVE MENTEE INFORMATION? OR CHANGE STATUS TO "REJECTED" OR "DELETED" TO KEEP THE INFORMATION?
 
   @Delete(':id')

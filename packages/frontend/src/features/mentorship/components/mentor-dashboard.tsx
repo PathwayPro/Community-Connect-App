@@ -11,6 +11,7 @@ import { menteesColumns } from './table/mentees-column';
 import MentorCard from './common/mentor-card';
 import { useState, useEffect } from 'react';
 import { MentorModal } from './common/modals/mentor-modal';
+import { CreateSessionModal } from './common/modals/create-session-modal';
 import { useMentorshipStore } from '../store';
 import { MenteeStatus } from '../types';
 
@@ -41,6 +42,7 @@ const MentorDashboard = () => {
   } = useMentorshipStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateSessionOpen, setIsCreateSessionOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<ProfileData | null>(
     null
   );
@@ -140,7 +142,10 @@ const MentorDashboard = () => {
         <MentorshipSection.Header>
           <h6 className="font-semibold">Hey, {user?.firstName}!👋</h6>
           <div className="flex items-center gap-4">
-            <Button className="h-10">
+            <Button
+              className="h-10"
+              onClick={() => setIsCreateSessionOpen(true)}
+            >
               <PlusCircleIcon className="h-4 w-4" /> Create a Session
             </Button>
             <Button
@@ -155,6 +160,10 @@ const MentorDashboard = () => {
               onClose={() => setIsModalOpen(false)}
               profileData={selectedProfile}
               setIsModalOpen={setIsModalOpen}
+            />
+            <CreateSessionModal
+              isOpen={isCreateSessionOpen}
+              setOpen={setIsCreateSessionOpen}
             />
           </div>
         </MentorshipSection.Header>

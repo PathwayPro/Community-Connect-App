@@ -10,7 +10,13 @@ import {
   MyMentorDashboard,
   MentorStatistics,
   MentorUpcomingSessions,
-  MyMentees
+  MyMentees,
+  MenteeDashboard,
+  MenteeNote,
+  PastMentor,
+  MenteeUpcomingSession,
+  CreateMentorshipSessionDto,
+  MentorshipSession
 } from '../types';
 
 export const mentorshipApi = {
@@ -58,5 +64,24 @@ export const mentorshipApi = {
   getMyUpcomingSessions: () =>
     apiMethods.get<MentorUpcomingSessions[]>('/mentors/my-upcoming-sessions'),
 
-  getMyMentees: () => apiMethods.get<MyMentees[]>('/mentors/my-mentees')
+  getMyMentees: () => apiMethods.get<MyMentees[]>('/mentors/my-mentees'),
+
+  // Create mentorship session (mentor only)
+  createMentorshipSession: (body: CreateMentorshipSessionDto) =>
+    apiMethods.post<MentorshipSession>(
+      '/mentorship-sessions/mentorship-session',
+      body
+    ),
+
+  // Mentee dashboard endpoints
+  getMenteeDashboard: () =>
+    apiMethods.get<MenteeDashboard>('/mentees/my-dashboard'),
+
+  getMenteeNotes: () => apiMethods.get<MenteeNote[]>('/mentees/my-notes'),
+
+  getMenteePastMentors: () =>
+    apiMethods.get<PastMentor[]>('/mentees/my-past-mentors'),
+
+  getMenteeUpcomingSession: () =>
+    apiMethods.get<MenteeUpcomingSession | null>('/mentees/my-upcoming-session')
 };
