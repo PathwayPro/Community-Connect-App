@@ -73,6 +73,10 @@ export const mentorshipApi = {
       body
     ),
 
+  // Update matching status (mentor only)
+  updateMatchingStatus: (matchingId: number, status: string) =>
+    apiMethods.patch(`/mentorship-sessions/matching/${matchingId}`, { status }),
+
   // Mentee dashboard endpoints
   getMenteeDashboard: () =>
     apiMethods.get<MenteeDashboard>('/mentees/my-dashboard'),

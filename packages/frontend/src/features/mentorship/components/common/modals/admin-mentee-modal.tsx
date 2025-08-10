@@ -70,14 +70,12 @@ export const AdminMenteeModalCard = ({
   };
 
   const handleStatusUpdate = async () => {
-    if (selectedStatus === status || !menteeApplicationId) return;
+    // Must change and have a valid matching id (data.id)
+    if (selectedStatus === status || !data?.id) return;
 
     setIsUpdatingStatus(true);
     try {
-      await mentorshipApi.updateMenteeStatus(
-        menteeApplicationId,
-        selectedStatus
-      );
+      await mentorshipApi.updateMatchingStatus(data.id, selectedStatus);
 
       showAlert({
         type: 'success',
@@ -85,7 +83,6 @@ export const AdminMenteeModalCard = ({
         description: `Mentee status has been updated to ${selectedStatus}.`
       });
 
-      // Refresh the data
       onStatusUpdate?.();
       setIsModalOpen(false);
     } catch (error) {
