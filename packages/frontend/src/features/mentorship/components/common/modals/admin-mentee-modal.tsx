@@ -257,14 +257,14 @@ export const AdminMenteeModalCard = ({
                 </Button>
               </div>
             </div>
-            {isApproved ? (
+            {/* {isApproved ? (
               <Button
                 className="mx-auto h-10 w-full"
                 onClick={() => console.log('match with mentor')}
               >
                 Match with a Mentor
               </Button>
-            ) : null}
+            ) : null} */}
           </div>
         </DialogContent>
       </Dialog>
