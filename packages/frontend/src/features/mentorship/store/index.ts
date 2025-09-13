@@ -238,9 +238,11 @@ export const useMentorshipStore = create<MentorshipState>()(
 
       // Mentee dashboard actions
       getMenteeDashboard: async () => {
+        console.log('MENTEE DASHBOARD GET');
         set({ isLoading: true, error: null });
         try {
           const response = await mentorshipApi.getMenteeDashboard();
+          console.log('MENTEE DASHBOARD', response.data);
           set({ menteeDashboard: response.data, isLoading: false });
           return response.data;
         } catch (error) {

@@ -357,8 +357,95 @@ export class MenteeService {
   }
 
   async getMyDashboard(menteeId: number) {
+    console.log('MENTEE ACCESSING SERVICE - MY DASHBOARD: ', menteeId);
     try {
-      // Current approved match (mentor)
+      // 1) Find next upcoming session for this mentee (soonest by dateStart)
+      const nextSession = await this.prisma.mentorshipSessions.findFirst({
+        where: { menteeId, dateStart: { gt: new Date() } },
+        orderBy: { dateStart: 'asc' },
+        include: {
+          mentor: {
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+              email: true,
+              profession: true,
+              company_name: true,
+              picture_upload_link: true,
+            },
+          },
+          mentee: { select: { id: true } },
+        },
+      });
+
+      // If we have an upcoming session, tie dashboard to that mentor
+      if (nextSession) {
+        const mentorId = nextSession.mentor?.id;
+
+        // 4) First session with this mentor as mentorshipStarted
+        const firstSessionWithMentor =
+          await this.prisma.mentorshipSessions.findFirst({
+            where: { menteeId, mentorId },
+            orderBy: { dateStart: 'asc' },
+            select: { dateStart: true },
+          });
+
+        // 5) Sessions attended with this mentor from first session until now
+        const sessionsAttended = await this.prisma.mentorshipSessions.count({
+          where: {
+            menteeId,
+            mentorId,
+            dateEnd: { lt: new Date() },
+            ...(firstSessionWithMentor?.dateStart
+              ? { dateStart: { gte: firstSessionWithMentor.dateStart } }
+              : {}),
+          },
+        });
+
+        const mentorUser = nextSession.mentor
+          ? nextSession.mentor
+          : await this.prisma.users.findUnique({
+              where: { id: mentorId! },
+              select: {
+                first_name: true,
+                last_name: true,
+                email: true,
+                profession: true,
+                company_name: true,
+                picture_upload_link: true,
+              },
+            });
+
+        const mentor = mentorUser
+          ? {
+              firstName: mentorUser.first_name,
+              lastName: mentorUser.last_name,
+              email: mentorUser.email,
+              profession: mentorUser.profession ?? undefined,
+              company: mentorUser.company_name ?? undefined,
+              expertise: mentorUser.profession ?? undefined,
+              avatarUrl: mentorUser.picture_upload_link ?? undefined,
+            }
+          : null;
+
+        const menteeDashboard = {
+          mentor,
+          mentorshipStarted:
+            firstSessionWithMentor?.dateStart?.toISOString() ?? null,
+          sessionsAttended,
+          // Keep existing field used by frontend
+          nextSession: nextSession.dateStart?.toISOString() ?? null,
+          // Add link as requested by API spec while keeping compatibility
+          nextSessionLink: nextSession.link ?? null,
+        } as any;
+
+        console.log('MENTEE DASHBOARD', menteeDashboard);
+
+        return menteeDashboard;
+      }
+
+      // Fallback: no upcoming session. Preserve previous behavior based on current approved match.
       const currentMatch = await this.prisma.matchedMentorMentee.findFirst({
         where: { menteeId, status: 'APPROVED' },
         include: {
@@ -376,23 +463,14 @@ export class MenteeService {
         orderBy: { createdAt: 'desc' },
       });
 
-      // Sessions attended
       const sessionsAttended = await this.prisma.mentorshipSessions.count({
         where: { menteeId, dateEnd: { lt: new Date() } },
       });
 
-      // First match date as mentorship started
       const firstMatch = await this.prisma.matchedMentorMentee.findFirst({
         where: { menteeId },
         orderBy: { createdAt: 'asc' },
         select: { createdAt: true },
-      });
-
-      // Next upcoming session
-      const nextSession = await this.prisma.mentorshipSessions.findFirst({
-        where: { menteeId, dateStart: { gt: new Date() } },
-        orderBy: { dateStart: 'asc' },
-        select: { dateStart: true },
       });
 
       const mentor = currentMatch
@@ -411,8 +489,9 @@ export class MenteeService {
         mentor,
         mentorshipStarted: firstMatch?.createdAt?.toISOString() ?? null,
         sessionsAttended,
-        nextSession: nextSession?.dateStart?.toISOString() ?? null,
-      };
+        nextSession: null,
+        nextSessionLink: null,
+      } as any;
     } catch (error) {
       throw new InternalServerErrorException(
         `Error building mentee dashboard: ${error.message}`,

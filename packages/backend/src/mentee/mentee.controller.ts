@@ -51,7 +51,7 @@ export class MenteeController {
     description:
       'Fetch any mentee applications. \n\n REQUIRED ROLES: **ADMIN**',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   findAll(@Body() filters: FilterMenteeDto) {
     return this.menteeService.findAll(filters);
   }
@@ -69,7 +69,7 @@ export class MenteeController {
     description:
       'There is no mentee application for this user (USER ID: #`:id` )',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   findMyApplication(@GetUser() user: JwtPayload) {
     return this.menteeService.findOneByUserId(user.sub);
   }
@@ -88,7 +88,7 @@ export class MenteeController {
     description:
       'There is no mentee application with ID: `:menteeApplicationId`. Make sure you are not using a user ID',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   findOne(@Param('menteeApplicationId') menteeApplicationId: string) {
     return this.menteeService.findOneById(+menteeApplicationId);
   }
@@ -108,7 +108,7 @@ export class MenteeController {
   })
   @ApiBadRequestResponse({ description: 'Mentee already exists' })
   @ApiNotFoundResponse({ description: 'The associated user does not exists' })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   async create(
     @GetUser() user: JwtPayload,
     @Body() createMenteeDto: CreateMenteeDto,
@@ -136,7 +136,7 @@ export class MenteeController {
   @ApiNotFoundResponse({
     description: 'Mentee application for user with ID: `user_id` not found',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   update(
     @GetUser() user: JwtPayload,
     @Body() updateMenteeDto: UpdateMenteeDto,
@@ -169,7 +169,7 @@ export class MenteeController {
   @ApiBadRequestResponse({
     description: 'Error updating mentee application status: `[ERROR MESSAGE]`',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   updateStatus(
     @Param('menteeApplicationId') menteeApplicationId: string,
     @Body() updateMenteeStatusDto: UpdateMenteeStatusDto,
@@ -181,17 +181,16 @@ export class MenteeController {
   }
 
   @Get('my-dashboard')
-  @Roles('USER', 'MENTEE', 'ADMIN')
-  @ApiOkResponse({ description: 'Mentee dashboard payload' })
-  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-  @ApiOperation({
-    summary: 'Get mentee dashboard',
-    description:
-      'Returns current mentor profile, statistics, and next session info for the logged mentee. REQUIRED ROLES: USER | MENTEE | ADMIN',
-  })
-  @ApiBearerAuth()
-  async getMyDashboard(@GetUser() user: JwtPayload) {
-    return await this.menteeService.getMyDashboard(user.sub);
+  // @Roles('MENTEE')
+  // @ApiOkResponse({ description: 'Mentee dashboard payload' })
+  // @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  // @ApiOperation({summary: 'Get mentee dashboard',description:'Returns current mentor profile, statistics, and next session info for the logged mentee. REQUIRED ROLES: MENTEE'})
+  // @ApiBearerAuth('JWT')
+  getMyDashboard() {
+    console.log('MENTEE DASHBOARD');
+    return 'MENTEE DASHBOARD';
+    // console.log('USER ACCESSING: ', user);
+    // return this.menteeService.getMyDashboard(user.sub);
   }
 
   @Get('my-past-mentors')
@@ -203,7 +202,7 @@ export class MenteeController {
     description:
       'Returns mentors previously matched with the mentee. REQUIRED ROLES: USER | MENTEE | ADMIN',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   async getMyPastMentors(@GetUser() user: JwtPayload) {
     return await this.menteeService.getMyPastMentors(user.sub);
   }
@@ -217,7 +216,7 @@ export class MenteeController {
     description:
       'Returns notes the mentee took for mentorship sessions. REQUIRED ROLES: USER | MENTEE | ADMIN',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   async getMyNotes(@GetUser() user: JwtPayload) {
     return await this.menteeService.getMyNotes(user.sub);
   }
@@ -231,7 +230,7 @@ export class MenteeController {
     description:
       'Returns the next upcoming session for the mentee. REQUIRED ROLES: USER | MENTEE | ADMIN',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT')
   async getMyUpcomingSession(@GetUser() user: JwtPayload) {
     return await this.menteeService.getMyUpcomingSession(user.sub);
   }
