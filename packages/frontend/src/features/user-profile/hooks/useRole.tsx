@@ -102,8 +102,15 @@ export const useRole = () => {
       if (requiredRole === 'ADMIN') return role === 'ADMIN';
       if (requiredRole === 'MENTOR')
         return role === 'ADMIN' || role === 'MENTOR';
+      if (requiredRole === 'MENTEE')
+        return role === 'ADMIN' || role === 'MENTOR' || role === 'MENTEE';
       if (requiredRole === 'USER')
-        return role === 'ADMIN' || role === 'MENTOR' || role === 'USER';
+        return (
+          role === 'ADMIN' ||
+          role === 'MENTOR' ||
+          role === 'MENTEE' ||
+          role === 'USER'
+        );
 
       return false;
     },

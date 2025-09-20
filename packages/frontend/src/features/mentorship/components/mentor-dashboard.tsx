@@ -7,10 +7,11 @@ import { MentorshipSection } from './common/mentorship-section';
 import { MentorshipIcons } from './icons';
 import { DataTable } from './table/data-table';
 import { sessionsColumns } from './table/sessions-columns';
-import { menteesColumns } from './table/mentees-column';
+import { createMenteeColumns } from './table/mentees-column';
 import MentorCard from './common/mentor-card';
 import { useState, useEffect } from 'react';
 import { MentorModal } from './common/modals/mentor-modal';
+import { CreateSessionModal } from './common/modals/create-session-modal';
 import { useMentorshipStore } from '../store';
 import { MenteeStatus } from '../types';
 
@@ -41,6 +42,7 @@ const MentorDashboard = () => {
   } = useMentorshipStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateSessionOpen, setIsCreateSessionOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<ProfileData | null>(
     null
   );
@@ -100,7 +102,8 @@ const MentorDashboard = () => {
   // Transform mentees data for the table
   const menteesTableData = mentorMentees.map((mentee, index) => ({
     id: mentee.id,
-    menteeApplicationId: index,
+    menteeApplicationId: mentee.menteeApplicationId,
+    menteeUserId: mentee.menteeUserId,
     identity: {
       avatar: mentee.avatar || '/profile/default-avatar.png',
       firstName: mentee.mentee.split(' ')[0] || '',
@@ -113,7 +116,7 @@ const MentorDashboard = () => {
     email: mentee.email,
     reason: '',
     experience: '',
-    resume: ''
+    resume: mentee.resume || ''
   }));
 
   if (isLoading) {
@@ -140,21 +143,28 @@ const MentorDashboard = () => {
         <MentorshipSection.Header>
           <h6 className="font-semibold">Hey, {user?.firstName}!👋</h6>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-            <Button className="h-10 w-full sm:w-auto">
+            <Button
+              className="h-10 w-full sm:w-auto"
+              onClick={() => setIsCreateSessionOpen(true)}
+            >
               <PlusCircleIcon className="h-4 w-4" /> Create a Session
             </Button>
-            <Button
+            {/* <Button
               variant="outline"
               className="h-10 w-full sm:w-fit"
               onClick={handleViewProfile}
             >
               <UserRoundPlus className="h-4 w-4" /> View Profile
-            </Button>
+            </Button> */}
             <MentorModal
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
               profileData={selectedProfile}
               setIsModalOpen={setIsModalOpen}
+            />
+            <CreateSessionModal
+              isOpen={isCreateSessionOpen}
+              setOpen={setIsCreateSessionOpen}
             />
           </div>
         </MentorshipSection.Header>
@@ -229,19 +239,18 @@ const MentorDashboard = () => {
           </MentorshipSection.Header>
           <MentorshipSection.Content>
             <DataTable
-              columns={menteesColumns}
+              columns={createMenteeColumns(async () => {
+                try {
+                  await getMyMentees();
+                  await getMyStatistics();
+                } catch (e) {
+                  console.error(
+                    'Failed to refresh mentees/stats after status update',
+                    e
+                  );
+                }
+              })}
               data={menteesTableData}
-              onRowClick={(rowData) => {
-                setSelectedProfile({
-                  firstName: rowData.identity.firstName,
-                  lastName: rowData.identity.lastName,
-                  profession: rowData.profession,
-                  email: rowData.identity.email,
-                  avatarUrl: rowData.identity.avatar,
-                  isMentor: false
-                });
-                setIsModalOpen(true);
-              }}
             />
           </MentorshipSection.Content>
         </MentorshipSection>

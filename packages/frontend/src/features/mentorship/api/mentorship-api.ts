@@ -10,7 +10,13 @@ import {
   MyMentorDashboard,
   MentorStatistics,
   MentorUpcomingSessions,
-  MyMentees
+  MyMentees,
+  MenteeDashboard,
+  MenteeNote,
+  PastMentor,
+  MenteeUpcomingSession,
+  CreateMentorshipSessionDto,
+  MentorshipSession
 } from '../types';
 
 export const mentorshipApi = {
@@ -58,5 +64,42 @@ export const mentorshipApi = {
   getMyUpcomingSessions: () =>
     apiMethods.get<MentorUpcomingSessions[]>('/mentors/my-upcoming-sessions'),
 
-  getMyMentees: () => apiMethods.get<MyMentees[]>('/mentors/my-mentees')
+  getMyMentees: () => apiMethods.get<MyMentees[]>('/mentors/my-mentees'),
+
+  // Create mentorship session (mentor only)
+  createMentorshipSession: (body: CreateMentorshipSessionDto) =>
+    apiMethods.post<MentorshipSession>(
+      '/mentorship-sessions/mentorship-session',
+      body
+    ),
+
+  // Update matching status (mentor only)
+  updateMatchingStatus: (matchingId: number, status: string) =>
+    apiMethods.patch(`/mentorship-sessions/matching/${matchingId}`, { status }),
+
+  // Mentee dashboard endpoints
+  getMenteeDashboard: () =>
+    apiMethods.get<MenteeDashboard>('/mentees/my-dashboard'),
+
+  getMenteeNotes: () => apiMethods.get<MenteeNote[]>('/mentees/my-notes'),
+
+  getMenteePastMentors: () =>
+    apiMethods.get<PastMentor[]>('/mentees/my-past-mentors'),
+
+  getMenteeUpcomingSession: () =>
+    apiMethods.get<MenteeUpcomingSession | null>(
+      '/mentees/my-upcoming-session'
+    ),
+  // Mentee notes CRUD
+  createMenteeNote: (sessionId: number, note: string) =>
+    apiMethods.post('/mentorship-sessions/mentee-notes', {
+      sessionId,
+      note
+    }),
+
+  updateMenteeNote: (id: number, note: string) =>
+    apiMethods.put(`/mentorship-sessions/mentee-notes/${id}`, { note }),
+
+  deleteMenteeNote: (id: number) =>
+    apiMethods.delete(`/mentorship-sessions/mentee-notes/${id}`)
 };

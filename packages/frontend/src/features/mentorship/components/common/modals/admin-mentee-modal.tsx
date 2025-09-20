@@ -17,6 +17,7 @@ import {
   DialogTrigger
 } from '@/shared/components/ui/dialog';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { PdfPreviewModal } from '@/shared/components/pdf/pdf-preview-modal';
 import {
   Select,
@@ -54,22 +55,27 @@ export const AdminMenteeModalCard = ({
   );
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const { showAlert } = useAlertDialog();
+  const router = useRouter();
 
   const handleViewResume = () => {
     if (resume) {
       setIsResumeModalOpen(true);
+    } else {
+      showAlert({
+        type: 'warning',
+        title: 'Resume not available',
+        description: 'This mentee has not uploaded a resume yet.'
+      });
     }
   };
 
   const handleStatusUpdate = async () => {
-    if (selectedStatus === status || !menteeApplicationId) return;
+    // Must change and have a valid matching id (data.id)
+    if (selectedStatus === status || !data?.id) return;
 
     setIsUpdatingStatus(true);
     try {
-      await mentorshipApi.updateMenteeStatus(
-        menteeApplicationId,
-        selectedStatus
-      );
+      await mentorshipApi.updateMatchingStatus(data.id, selectedStatus);
 
       showAlert({
         type: 'success',
@@ -77,7 +83,6 @@ export const AdminMenteeModalCard = ({
         description: `Mentee status has been updated to ${selectedStatus}.`
       });
 
-      // Refresh the data
       onStatusUpdate?.();
       setIsModalOpen(false);
     } catch (error) {
@@ -182,7 +187,24 @@ export const AdminMenteeModalCard = ({
               </div>
 
               <div className="flex w-full gap-2">
-                <Button variant="outline" className="h-10 flex-1 gap-2 px-0">
+                <Button
+                  variant="outline"
+                  className="h-10 flex-1 gap-2 px-0"
+                  onClick={() => {
+                    const userId = data.menteeUserId;
+                    if (userId) {
+                      setIsModalOpen(false);
+                      router.push(`/messages/${userId}`);
+                    } else {
+                      showAlert({
+                        type: 'warning',
+                        title: 'Messaging unavailable',
+                        description:
+                          'We could not determine the mentee user account to start a chat.'
+                      });
+                    }
+                  }}
+                >
                   <MessageSquare className="h-5 w-5" />
                   Message
                 </Button>
@@ -190,7 +212,6 @@ export const AdminMenteeModalCard = ({
                   className="h-10 flex-1 gap-2 px-0"
                   onClick={handleViewResume}
                   variant="outline"
-                  disabled={!resume}
                 >
                   <FileText className="h-5 w-5" />
                   View Resume
@@ -236,14 +257,14 @@ export const AdminMenteeModalCard = ({
                 </Button>
               </div>
             </div>
-            {isApproved ? (
+            {/* {isApproved ? (
               <Button
                 className="mx-auto h-10 w-full"
                 onClick={() => console.log('match with mentor')}
               >
                 Match with a Mentor
               </Button>
-            ) : null}
+            ) : null} */}
           </div>
         </DialogContent>
       </Dialog>

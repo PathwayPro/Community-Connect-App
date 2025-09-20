@@ -109,9 +109,7 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
       }
 
       if (data.interests) {
-        data.interests.forEach((interest) => {
-          formData.append('interests[]', String(interest));
-        });
+        formData.append('interests', JSON.stringify(data.interests));
       }
       if (data.experience_details) {
         const experienceParam = isMentor ? 'experience_details' : 'reason';
