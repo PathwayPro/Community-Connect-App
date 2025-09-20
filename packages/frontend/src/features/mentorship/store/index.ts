@@ -48,6 +48,10 @@ interface MentorshipState {
   createMentorshipSession: (
     payload: CreateMentorshipSessionDto
   ) => Promise<MentorshipSession>;
+  // Mentee notes actions
+  createMenteeNote: (sessionId: number, note: string) => Promise<void>;
+  updateMenteeNote: (id: number, note: string) => Promise<void>;
+  deleteMenteeNote: (id: number) => Promise<void>;
   fetchInterests: () => Promise<InterestsResponse[]>;
   getMentor: (mentorId: number) => Promise<MentorResponse>;
   getPendingApplications: () => Promise<PendingApplicationResponse>;
@@ -83,6 +87,56 @@ export const useMentorshipStore = create<MentorshipState>()(
       menteeNotes: [],
       pastMentors: [],
       menteeUpcomingSession: null,
+      createMenteeNote: async (sessionId, note) => {
+        set({ isLoading: true, error: null });
+        try {
+          await mentorshipApi.createMenteeNote(sessionId, note);
+          await mentorshipApi
+            .getMenteeNotes()
+            .then((res) => set({ menteeNotes: res.data }));
+          set({ isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+          throw error;
+        }
+      },
+
+      updateMenteeNote: async (id, note) => {
+        set({ isLoading: true, error: null });
+        try {
+          await mentorshipApi.updateMenteeNote(id, note);
+          await mentorshipApi
+            .getMenteeNotes()
+            .then((res) => set({ menteeNotes: res.data }));
+          set({ isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+          throw error;
+        }
+      },
+
+      deleteMenteeNote: async (id) => {
+        set({ isLoading: true, error: null });
+        try {
+          await mentorshipApi.deleteMenteeNote(id);
+          await mentorshipApi
+            .getMenteeNotes()
+            .then((res) => set({ menteeNotes: res.data }));
+          set({ isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          });
+          throw error;
+        }
+      },
 
       createMentor: async (mentorData) => {
         set({ isLoading: true, error: null });

@@ -408,6 +408,7 @@ export class MenteeService {
           : await this.prisma.users.findUnique({
               where: { id: mentorId! },
               select: {
+                id: true,
                 first_name: true,
                 last_name: true,
                 email: true,
@@ -419,6 +420,7 @@ export class MenteeService {
 
         const mentor = mentorUser
           ? {
+              id: (mentorUser as any).id,
               firstName: mentorUser.first_name,
               lastName: mentorUser.last_name,
               email: mentorUser.email,
@@ -451,6 +453,7 @@ export class MenteeService {
         include: {
           mentor: {
             select: {
+              id: true,
               first_name: true,
               last_name: true,
               email: true,
@@ -475,6 +478,7 @@ export class MenteeService {
 
       const mentor = currentMatch
         ? {
+            id: currentMatch.mentor.id,
             firstName: currentMatch.mentor.first_name,
             lastName: currentMatch.mentor.last_name,
             email: currentMatch.mentor.email,

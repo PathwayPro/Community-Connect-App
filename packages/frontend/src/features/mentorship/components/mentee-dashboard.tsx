@@ -24,9 +24,12 @@ const MenteeDashboard = () => {
     menteeDashboard,
     menteeNotes,
     pastMentors,
+    menteeUpcomingSession,
     getMenteeDashboard,
     getMenteeNotes,
-    getMenteePastMentors
+    getMenteePastMentors,
+    getMenteeUpcomingSession,
+    createMenteeNote
   } = useMentorshipStore();
 
   useEffect(() => {
@@ -34,7 +37,13 @@ const MenteeDashboard = () => {
     getMenteeDashboard().catch(() => {});
     getMenteeNotes().catch(() => {});
     getMenteePastMentors().catch(() => {});
-  }, [getMenteeDashboard, getMenteeNotes, getMenteePastMentors]);
+    getMenteeUpcomingSession().catch(() => {});
+  }, [
+    getMenteeDashboard,
+    getMenteeNotes,
+    getMenteePastMentors,
+    getMenteeUpcomingSession
+  ]);
 
   const mentor = useMemo(() => {
     const m = menteeDashboard?.mentor;
@@ -97,6 +106,14 @@ const MenteeDashboard = () => {
                         {mentor?.profession}
                       </span>
                     </p>
+                    {mentor?.email && (
+                      <p className="text-lg font-medium text-neutral-dark-100">
+                        Email:{' '}
+                        <span className="font-normal text-neutral-dark-600">
+                          {mentor.email}
+                        </span>
+                      </p>
+                    )}
                     <p className="text-lg font-medium text-neutral-dark-100">
                       Company:{' '}
                       <span className="font-normal text-neutral-dark-600">
@@ -111,12 +128,16 @@ const MenteeDashboard = () => {
                       </span>
                     </p>
 
-                    <p className="text-lg font-medium text-neutral-dark-100">
-                      Email:{' '}
-                      <span className="font-normal text-neutral-dark-600">
-                        {mentor?.email}
-                      </span>
-                    </p>
+                    {menteeDashboard?.nextSession && (
+                      <p className="text-lg font-medium text-neutral-dark-100">
+                        Next Session:{' '}
+                        <span className="font-normal text-neutral-dark-600">
+                          {new Date(
+                            menteeDashboard.nextSession
+                          ).toLocaleString()}
+                        </span>
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -125,14 +146,25 @@ const MenteeDashboard = () => {
                 <Button
                   className="flex h-10 w-full items-center gap-2"
                   variant="outline"
+                  disabled={!menteeDashboard?.mentor?.id}
                 >
                   <MessageSquare className="h-5 w-5" />
                   Message
                 </Button>
 
-                <Button className="flex h-10 w-full items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Book a Session
+                <Button
+                  className="flex h-10 w-full items-center gap-2"
+                  asChild
+                  disabled={!menteeDashboard?.nextSessionLink}
+                >
+                  <a
+                    href={menteeDashboard?.nextSessionLink || '#'}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Calendar className="h-5 w-5" />
+                    Book a Session
+                  </a>
                 </Button>
               </div>
             </div>
@@ -196,7 +228,14 @@ const MenteeDashboard = () => {
             </MentorshipSection.Header>
 
             <MentorshipSection.Content>
-              <NoteEditor onSubmit={() => {}} />
+              <NoteEditor
+                onSubmit={async ({ title, content }) => {
+                  const sessionId = menteeUpcomingSession?.id;
+                  if (!sessionId) return;
+                  const note = title ? `${title}: ${content}` : content;
+                  await createMenteeNote(sessionId, note);
+                }}
+              />
             </MentorshipSection.Content>
           </div>
         </div>

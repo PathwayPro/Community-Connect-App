@@ -181,16 +181,17 @@ export class MenteeController {
   }
 
   @Get('my-dashboard')
-  // @Roles('MENTEE')
-  // @ApiOkResponse({ description: 'Mentee dashboard payload' })
-  // @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-  // @ApiOperation({summary: 'Get mentee dashboard',description:'Returns current mentor profile, statistics, and next session info for the logged mentee. REQUIRED ROLES: MENTEE'})
-  // @ApiBearerAuth('JWT')
-  getMyDashboard() {
-    console.log('MENTEE DASHBOARD');
-    return 'MENTEE DASHBOARD';
-    // console.log('USER ACCESSING: ', user);
-    // return this.menteeService.getMyDashboard(user.sub);
+  @Roles('USER', 'MENTEE', 'ADMIN')
+  @ApiOkResponse({ description: 'Mentee dashboard payload' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({
+    summary: 'Get mentee dashboard',
+    description:
+      'Returns current mentor profile, statistics, and next session info for the logged mentee. REQUIRED ROLES: USER | MENTEE | ADMIN',
+  })
+  @ApiBearerAuth('JWT')
+  getMyDashboard(@GetUser() user: JwtPayload) {
+    return this.menteeService.getMyDashboard(user.sub);
   }
 
   @Get('my-past-mentors')

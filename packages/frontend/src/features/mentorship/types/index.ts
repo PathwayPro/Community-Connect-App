@@ -176,6 +176,7 @@ export interface MenteeUpcomingSession {
 
 export interface MenteeDashboard {
   mentor: {
+    id?: number;
     firstName: string;
     lastName: string;
     email: string;
@@ -187,6 +188,7 @@ export interface MenteeDashboard {
   mentorshipStarted: string | null;
   sessionsAttended: number;
   nextSession: string | null;
+  nextSessionLink?: string | null;
 }
 
 // DTO for creating mentorship session (MENTOR only)

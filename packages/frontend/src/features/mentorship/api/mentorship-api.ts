@@ -87,5 +87,19 @@ export const mentorshipApi = {
     apiMethods.get<PastMentor[]>('/mentees/my-past-mentors'),
 
   getMenteeUpcomingSession: () =>
-    apiMethods.get<MenteeUpcomingSession | null>('/mentees/my-upcoming-session')
+    apiMethods.get<MenteeUpcomingSession | null>(
+      '/mentees/my-upcoming-session'
+    ),
+  // Mentee notes CRUD
+  createMenteeNote: (sessionId: number, note: string) =>
+    apiMethods.post('/mentorship-sessions/mentee-notes', {
+      sessionId,
+      note
+    }),
+
+  updateMenteeNote: (id: number, note: string) =>
+    apiMethods.put(`/mentorship-sessions/mentee-notes/${id}`, { note }),
+
+  deleteMenteeNote: (id: number) =>
+    apiMethods.delete(`/mentorship-sessions/mentee-notes/${id}`)
 };
