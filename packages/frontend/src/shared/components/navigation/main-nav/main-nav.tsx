@@ -35,18 +35,20 @@ export const MainNav = () => {
   };
 
   return (
-    <div className="sticky top-0 z-30 w-full border-b bg-white py-4">
-      <div className="flex h-full items-center justify-between px-8">
+    <div className="sticky top-0 z-30 w-full bg-white">
+      <div className="flex h-full items-center justify-between px-4 md:px-8">
         <BreadcrumbNav />
         <div className="flex items-center gap-2">
-          <IconInput
-            leftIcon="search"
-            className="h-10 w-[250px] rounded-full bg-neutral-light-100"
-            placeholder="Search"
-            onChange={(e) => {
-              console.log(e.target.value);
-            }}
-          />
+          <div className="hidden sm:block">
+            <IconInput
+              leftIcon="search"
+              className="h-10 w-[220px] rounded-full bg-neutral-light-100 md:w-[250px]"
+              placeholder="Search"
+              onChange={(e) => {
+                console.log(e.target.value);
+              }}
+            />
+          </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

@@ -269,10 +269,10 @@ export const Home = () => {
   };
 
   return (
-    <div className="container-wide px-0" onClick={handleOutsideClick}>
-      <div className="grid grid-cols-12 gap-8">
+    <div className="container-wide px-4 md:px-0" onClick={handleOutsideClick}>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
         {/* Left column - 1 part */}
-        <div className="sticky top-0 col-span-3 h-fit rounded-2xl border bg-card p-4">
+        <div className="order-1 col-span-1 h-fit rounded-2xl border bg-card p-4 md:sticky md:top-0 md:order-1 md:col-span-3">
           <HomeSidebar
             activeTab={activeTab}
             handleActiveTab={handleActiveTab}
@@ -280,7 +280,7 @@ export const Home = () => {
         </div>
 
         {/* Middle column */}
-        <div className="relative col-span-7 min-h-screen gap-4 overflow-y-auto rounded-2xl border bg-muted bg-neutral-light-100 p-4">
+        <div className="relative order-2 col-span-1 min-h-[60vh] gap-4 overflow-visible rounded-2xl border bg-neutral-light-100 p-4 md:order-2 md:col-span-7 md:overflow-y-auto">
           {viewThreads && selectedThread ? (
             <div className="flex flex-col gap-4">
               <IconButton

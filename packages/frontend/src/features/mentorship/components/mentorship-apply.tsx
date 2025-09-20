@@ -6,7 +6,7 @@ import { MentorshipIcons } from './icons';
 
 export const MentorshipApply = () => {
   return (
-    <Card className="mx-auto h-auto w-auto px-8 py-12">
+    <Card className="mx-auto h-auto w-full max-w-5xl overflow-hidden px-4 py-8 sm:px-8 sm:py-12">
       <div className="flex w-full flex-col items-center space-y-8">
         <h3 className="text-center font-semibold">Apply for Mentorship</h3>
 
@@ -16,7 +16,7 @@ export const MentorshipApply = () => {
           meaningful connections.
         </p>
 
-        <div className="flex w-full items-center justify-between gap-8 px-4 md:px-12">
+        <div className="flex w-full flex-col items-stretch justify-between gap-8 px-2 sm:px-4 md:flex-row md:items-center md:px-8">
           <div className="flex h-full flex-1 flex-col items-center space-y-6">
             <h5 className="min-h-[60px] px-4 text-center font-medium">
               Looking for guidance to achieve your goals?
@@ -29,7 +29,11 @@ export const MentorshipApply = () => {
             </Button>
           </div>
 
-          <Separator orientation="vertical" className="h-[400px] border-2" />
+          <Separator className="my-2 md:hidden" />
+          <Separator
+            orientation="vertical"
+            className="hidden h-[400px] border-2 md:block"
+          />
 
           <div className="flex h-full flex-1 flex-col items-center space-y-6">
             <h5 className="min-h-[60px] px-4 text-center font-medium">

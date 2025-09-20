@@ -199,7 +199,7 @@ export const NewsList = () => {
   );
 
   const renderLoadingState = () => (
-    <div className="grid grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}
@@ -210,11 +210,11 @@ export const NewsList = () => {
   );
 
   return (
-    <div className="container-wide w-full space-y-6">
+    <div className="container-wide w-full space-y-6 px-4 md:px-0">
       <div className="flex items-center justify-between">
         <Tabs value={activeTab} defaultValue="news" className="w-full">
-          <div className="mb-6 flex items-center justify-between">
-            <TabsList className="h-12 w-fit">
+          <div className="mb-6 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
+            <TabsList className="h-12 w-full max-w-full md:w-fit">
               <TabsTrigger
                 value="news"
                 className={`h-10`}
@@ -255,7 +255,7 @@ export const NewsList = () => {
           {/* News Tab Content */}
           <TabsContent value="news">
             {activeTab === 'news' && (
-              <div className="flex w-full gap-8">
+              <div className="flex w-full flex-col gap-6">
                 <div className="flex w-full flex-col gap-6">
                   <div className="relative w-full">
                     {isNewsLoading ? (
@@ -285,7 +285,7 @@ export const NewsList = () => {
                     defaultValue="recent"
                     className="w-full rounded-3xl bg-white p-6"
                   >
-                    <div className="flex justify-between">
+                    <div className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
                       <h3 className="font-semibold">
                         {newsSubTab === 'recent'
                           ? 'Recent News'
@@ -293,7 +293,7 @@ export const NewsList = () => {
                             ? "Editor's Pick"
                             : 'Most Read'}
                       </h3>
-                      <TabsList className="mb-6">
+                      <TabsList className="mb-6 flex w-full max-w-full gap-2 md:w-auto md:gap-0">
                         {/* Recent News */}
                         <TabsTrigger
                           value="recent"
@@ -324,7 +324,7 @@ export const NewsList = () => {
                         renderNewsEmptyState()
                       ) : (
                         <>
-                          <div className="grid grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {paginatedRecentNews.map((item) => (
                               <NewsCard key={item.id} {...item} />
                             ))}
@@ -351,7 +351,7 @@ export const NewsList = () => {
                         renderNewsEmptyState()
                       ) : (
                         <>
-                          <div className="grid grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {paginatedEditorsPickNews.map((item) => (
                               <NewsCard key={item.id} {...item} />
                             ))}
@@ -375,11 +375,11 @@ export const NewsList = () => {
           {/* Content Library Tab Content */}
           <TabsContent value="contentLibrary">
             {activeTab === 'contentLibrary' && (
-              <div className="flex w-full flex-col gap-6 rounded-2xl bg-white p-6">
-                <div className="flex items-center justify-between">
+              <div className="flex w-full flex-col gap-6 rounded-2xl bg-white p-4 sm:p-6">
+                <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                   <h2>Templates and Files</h2>
                   {resourceItems.length > 0 && (
-                    <div className="flex w-fit">
+                    <div className="flex w-full md:w-fit">
                       <Select
                         value={selectedResourceType}
                         onValueChange={setSelectedResourceType}
@@ -405,7 +405,7 @@ export const NewsList = () => {
                   renderResourcesEmptyState()
                 ) : (
                   <>
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                       {paginatedResources.map((item) => (
                         <ResourceCard
                           key={item.id}

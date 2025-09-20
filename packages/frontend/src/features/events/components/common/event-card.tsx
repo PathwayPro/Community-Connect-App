@@ -104,12 +104,12 @@ export const EventCard = ({
   };
 
   return (
-    <Card className="overflow-hidden rounded-2xl border border-neutral-light-300 bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl">
+    <Card className="overflow-hidden rounded-2xl border border-neutral-light-300 bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl md:mx-0">
       <AlertDialogUI />
       <div className="flex h-full flex-col md:flex-row">
         {/* Image Section */}
-        <div className="flex w-full items-center justify-center p-4 md:w-2/5 md:p-6">
-          <div className="group aspect-[16/9] w-full overflow-hidden rounded-xl border border-neutral-light-400 bg-neutral-light-100">
+        <div className="flex w-full items-center justify-center p-3 sm:p-4 md:w-2/5 md:p-6">
+          <div className="group aspect-[16/9] w-full max-w-md overflow-hidden rounded-xl border border-neutral-light-400 bg-neutral-light-100 sm:max-w-none">
             <ImagePreview
               imagePath={image}
               fallbackImage={'/event/placeholder.jpg'}
@@ -123,11 +123,11 @@ export const EventCard = ({
         </div>
 
         {/* Content Section */}
-        <div className="flex flex-1 flex-col justify-between gap-4 p-4 md:p-6">
+        <div className="flex flex-1 flex-col justify-between gap-3 p-4 md:gap-4 md:p-6">
           <div className="flex flex-col gap-2">
             {/* Title and Icon */}
             <div className="flex items-center justify-between gap-2">
-              <h2 className="line-clamp-1 text-heading-h4 font-semibold text-neutral-dark-700">
+              <h2 className="line-clamp-1 text-lg font-semibold text-neutral-dark-700 sm:text-xl md:text-2xl">
                 {title}
               </h2>
               <span className="flex items-center rounded-full bg-primary-300 p-2">
@@ -142,11 +142,11 @@ export const EventCard = ({
               </span>
             </div>
             {/* Description */}
-            <p className="line-clamp-3 text-paragraph-base text-neutral-dark-300">
+            <p className="line-clamp-3 text-sm text-neutral-dark-300 sm:text-base">
               {description}
             </p>
             {/* Info Row */}
-            <div className="mt-2 flex flex-wrap gap-4 text-primary-700">
+            <div className="mt-2 flex flex-wrap gap-3 text-primary-700 sm:gap-4">
               <EventInfo
                 icon={<Calendar className="h-4 w-4" />}
                 text={
@@ -164,18 +164,18 @@ export const EventCard = ({
             </div>
           </div>
           {/* Buttons Row */}
-          <div className="mt-4 flex w-full gap-3">
+          <div className="mt-3 flex w-full flex-col gap-3 sm:flex-row">
             <IconButton
               label="Learn More"
               rightIcon="arrowRight"
-              className="flex-1 transition-transform duration-200 hover:scale-105"
+              className="w-full flex-1 transition-transform duration-200 hover:scale-105"
               onClick={handleLearnMore}
             />
             {canEdit && (
               <IconButton
                 label="Edit Details"
                 rightIcon="pencil"
-                className="flex-1 transition-transform duration-200 hover:scale-105"
+                className="w-full flex-1 transition-transform duration-200 hover:scale-105"
                 onClick={handleEdit}
               />
             )}
@@ -184,7 +184,7 @@ export const EventCard = ({
                 label="Delete Event"
                 rightIcon="delete"
                 variant="outline"
-                className="flex-1 transition-transform duration-200 hover:scale-105 hover:border-destructive hover:bg-destructive hover:text-white"
+                className="w-full flex-1 transition-transform duration-200 hover:scale-105 hover:border-destructive hover:bg-destructive hover:text-white"
                 onClick={() => setIsDeleteModalOpen(true)}
               />
             )}

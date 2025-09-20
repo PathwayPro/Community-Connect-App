@@ -9,7 +9,7 @@ interface MenteeCardProps {
 
 const MenteeCard = ({ title, value, icon }: MenteeCardProps) => {
   return (
-    <div className="flex h-[112px] w-full min-w-[664px] justify-between rounded-2xl border border-neutral-light-400 bg-neutral-light-200 p-4 shadow-sm">
+    <div className="flex h-[112px] w-full min-w-0 justify-between rounded-2xl border border-neutral-light-400 bg-neutral-light-200 p-4 shadow-sm sm:min-w-[220px]">
       <div className="flex w-full flex-col gap-2">
         <h5 className="font-normal">{title}</h5>
         <h4 className="font-bold">{value}</h4>

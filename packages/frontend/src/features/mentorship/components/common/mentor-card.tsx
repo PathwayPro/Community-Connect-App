@@ -32,7 +32,7 @@ const MentorCard = ({
   return (
     <div
       className={cn(
-        'flex h-[156px] w-full min-w-[380px] justify-between rounded-2xl border border-neutral-light-400 p-4 shadow-sm',
+        'flex h-[156px] w-full min-w-0 max-w-full justify-between rounded-2xl border border-neutral-light-400 p-4 shadow-sm sm:min-w-[340px]',
         className
       )}
     >

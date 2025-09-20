@@ -119,7 +119,7 @@ export const Messages = ({ userId }: { userId: string | undefined }) => {
   // Display loading state
   if (isLoading && chatList.length === 0) {
     return (
-      <div className="flex h-screen w-full items-center justify-center rounded-2xl bg-white">
+      <div className="flex min-h-[60vh] w-full items-center justify-center rounded-2xl bg-white p-4">
         <div className="text-center">
           <div className="mx-auto mb-4 h-8 w-32 animate-pulse rounded bg-gray-200" />
           <div className="mx-auto h-4 w-48 animate-pulse rounded bg-gray-200" />
@@ -131,7 +131,7 @@ export const Messages = ({ userId }: { userId: string | undefined }) => {
   // Display error state
   if (error) {
     return (
-      <div className="flex h-screen w-full items-center justify-center rounded-2xl bg-white">
+      <div className="flex min-h-[60vh] w-full items-center justify-center rounded-2xl bg-white p-4">
         <EmptyStateCard
           icon={AlertCircle}
           title="Could not load messages"
@@ -149,10 +149,10 @@ export const Messages = ({ userId }: { userId: string | undefined }) => {
   }
 
   return (
-    <div className="flex h-screen w-full rounded-2xl bg-white">
+    <div className="flex h-[100dvh] w-full flex-col rounded-2xl bg-white md:h-screen md:flex-row">
       {/* Sidebar */}
-      <div className="w-80 border-r px-6">
-        <div className="relative top-4 mb-4 flex items-center gap-2">
+      <div className="h-1/2 w-full overflow-y-auto border-b px-4 md:h-auto md:w-80 md:overflow-visible md:border-b-0 md:border-r md:px-6">
+        <div className="mb-4 mt-4 flex items-center gap-2 md:mt-6">
           <IconInput
             leftIcon="search"
             className="w-full rounded-full bg-neutral-light-200"
@@ -170,7 +170,7 @@ export const Messages = ({ userId }: { userId: string | undefined }) => {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex h-1/2 flex-col overflow-y-auto md:h-auto md:flex-1 md:overflow-visible">
         {selectedUserId ? (
           <>
             <ChatHeader

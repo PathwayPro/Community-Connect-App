@@ -157,8 +157,8 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
   // loading state
   if (isLoading) {
     return (
-      <Card className="flex w-[840px] flex-col rounded-[24px]">
-        <CardContent className="flex items-center justify-center p-8">
+      <Card className="mx-auto flex w-full max-w-3xl flex-col rounded-[24px]">
+        <CardContent className="flex items-center justify-center p-6 sm:p-8">
           Loading {title} form...
         </CardContent>
       </Card>
@@ -168,8 +168,8 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
   // error state
   if (error) {
     return (
-      <Card className="flex w-[840px] flex-col rounded-[24px]">
-        <CardContent className="flex items-center justify-center p-8">
+      <Card className="mx-auto flex w-full max-w-3xl flex-col rounded-[24px]">
+        <CardContent className="flex items-center justify-center p-6 sm:p-8">
           Error loading {title} form: {error.message}
         </CardContent>
       </Card>
@@ -178,9 +178,9 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
 
   // success state
   return (
-    <Card className="flex w-[840px] flex-col rounded-[24px]">
-      <CardHeader className="justify-center p-8">
-        <CardTitle className="flex flex-col space-y-6 text-center">
+    <Card className="mx-auto flex w-full max-w-3xl flex-col rounded-[24px]">
+      <CardHeader className="justify-center p-6 sm:p-8">
+        <CardTitle className="flex flex-col space-y-4 text-center sm:space-y-6">
           <div className="relative flex items-center justify-center gap-2">
             <IconButton
               leftIcon="arrowLeft"
@@ -192,7 +192,7 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col justify-center gap-4">
+      <CardContent className="flex flex-col justify-center gap-4 p-4 sm:p-6">
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
             <BaseForm
@@ -206,8 +206,16 @@ export const MentorshipForm = ({ title, description }: MentorshipFormProps) => {
                 variant="link"
                 onClick={() => setIsModalOpen(true)}
                 type="button"
+                className="w-full whitespace-normal break-words text-left sm:w-auto sm:whitespace-nowrap sm:text-center"
               >
-                View Mentorship Program Agreement to Proceed
+                <span className="sm:hidden">
+                  View Mentorship Program
+                  <br />
+                  Agreement to Proceed
+                </span>
+                <span className="hidden sm:inline">
+                  View Mentorship Program Agreement to Proceed
+                </span>
               </Button>
               <IconButton
                 className="w-full"

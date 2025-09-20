@@ -108,7 +108,7 @@ export const PersonalInfoForm = ({
         />
       </div>
 
-      <div className="flex w-full gap-4">
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
         <FormInput
           name="firstName"
           label="First Name"
@@ -124,7 +124,7 @@ export const PersonalInfoForm = ({
           required
         />
       </div>
-      <div className="flex w-full gap-4">
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex-1">
           <FormSelect
             name="province"
@@ -144,7 +144,7 @@ export const PersonalInfoForm = ({
           />
         </div>
       </div>
-      <div className="flex w-full gap-4">
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex-1">
           <FormDatePicker
             name="dob"
@@ -164,7 +164,7 @@ export const PersonalInfoForm = ({
           />
         </div>
       </div>
-      <div className="flex w-full gap-4">
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
         <FormInput
           name="countryOfOrigin"
           label="Country of Origin"

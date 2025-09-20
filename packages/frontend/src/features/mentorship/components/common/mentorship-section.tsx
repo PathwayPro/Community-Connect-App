@@ -20,7 +20,7 @@ const MentorshipSection = ({ children, className }: MentorshipSectionProps) => {
   return (
     <div
       className={cn(
-        'flex h-[252px] w-full flex-col items-center gap-6 rounded-2xl bg-neutral-light-100 p-4 shadow-sm',
+        'flex w-full flex-col items-center gap-4 rounded-2xl bg-neutral-light-100 p-4 shadow-sm',
         className
       )}
     >

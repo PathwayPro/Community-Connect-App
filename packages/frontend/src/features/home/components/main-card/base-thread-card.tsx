@@ -78,8 +78,8 @@ BaseThreadCard.Author = function ThreadCardAuthor({
           </AvatarFallback>
         )}
       </Avatar>
-      <div className="flex flex-col">
-        <span className="font-semibold">{name}</span>
+      <div className="flex min-w-0 flex-col">
+        <span className="truncate font-semibold">{name}</span>
         <span className="text-gray-500">
           {transformDateTimeToTimeAgo(timeAgo)}
         </span>

@@ -72,7 +72,7 @@ export const ThreadSearchbar = ({
             </div>
           </Button>
           <div className="absolute right-4 top-1/2 flex -translate-y-1/2 gap-1">
-            <button
+            {/* <button
               type="button"
               className="rounded-md p-1 hover:bg-muted-foreground/10 focus:outline-none focus:ring-2 focus:ring-muted-foreground/20"
               aria-label="Add image"
@@ -85,7 +85,7 @@ export const ThreadSearchbar = ({
               aria-label="Add emoji"
             >
               <SmileIcon className="h-6 w-6 text-muted-foreground" />
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

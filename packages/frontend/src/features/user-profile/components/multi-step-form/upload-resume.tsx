@@ -104,7 +104,7 @@ export const UploadResume = ({
       />
 
       <div className="mt-6 flex w-full flex-col gap-4">
-        <div className="flex w-full gap-4">
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
           <FormInput
             name="profession"
             label="Profession"
@@ -120,7 +120,7 @@ export const UploadResume = ({
             required
           />
         </div>
-        <div className="flex w-full gap-4">
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex-1">
             <FormSelect
               name="workStatus"

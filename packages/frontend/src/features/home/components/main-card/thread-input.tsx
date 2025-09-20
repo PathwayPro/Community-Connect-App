@@ -1,6 +1,6 @@
 import { Button } from '@/shared/components/ui/button';
 import { Textarea } from '@/shared/components/ui/textarea';
-import { ImageIcon, SmileIcon } from 'lucide-react';
+import { ImageIcon, SmileIcon, X, Send } from 'lucide-react';
 import { useState } from 'react';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { SharedIcons } from '@/shared/components/icons';
@@ -59,8 +59,8 @@ export const ThreadInput = ({
         className
       )}
     >
-      <div className="flex gap-6">
-        <Avatar className="h-11 w-11 bg-warning-500">
+      <div className="flex gap-4 sm:gap-6">
+        <Avatar className="h-10 w-10 bg-warning-500 sm:h-11 sm:w-11">
           {user?.pictureUploadLink && (
             <ImagePreview
               imagePath={user?.pictureUploadLink}
@@ -71,7 +71,7 @@ export const ThreadInput = ({
             />
           )}
           {!user?.pictureUploadLink && (
-            <AvatarFallback className="bg-warning-500">
+            <AvatarFallback className="bg-warning-500 text-sm sm:text-base">
               {user?.firstName
                 ?.split(' ')
                 ?.map((n) => n[0])
@@ -89,10 +89,10 @@ export const ThreadInput = ({
               placeholder="What's on your mind?"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="min-h-[400px] resize-none rounded-lg text-base"
+              className="min-h-[200px] resize-none rounded-lg text-base sm:min-h-[400px]"
               maxLength={characterLimit}
             />
-            <div className="absolute bottom-14 right-4 flex items-center gap-1 text-sm text-muted-foreground">
+            <div className="absolute bottom-14 right-3 flex items-center gap-1 text-xs text-muted-foreground sm:right-4 sm:text-sm">
               <SharedIcons.info className="h-4 w-4" />
               <span className={isOverLimit ? 'text-destructive' : ''}>
                 {remainingCharacters} / {characterLimit} characters
@@ -103,38 +103,48 @@ export const ThreadInput = ({
               <div className="flex gap-1">
                 <button
                   type="button"
-                  className="rounded-md p-1 hover:bg-muted-foreground/10 focus:outline-none focus:ring-2 focus:ring-muted-foreground/20"
+                  className="cursor-not-allowed rounded-md p-1 opacity-50"
                   aria-label="Add image"
+                  disabled
+                  aria-disabled="true"
+                  title="Disabled"
                 >
                   <ImageIcon className="h-6 w-6 text-muted-foreground" />
                 </button>
                 <button
                   type="button"
-                  className="rounded-md p-1 hover:bg-muted-foreground/10 focus:outline-none focus:ring-2 focus:ring-muted-foreground/20"
+                  className="cursor-not-allowed rounded-md p-1 opacity-50"
                   aria-label="Add emoji"
+                  disabled
+                  aria-disabled="true"
+                  title="Disabled"
                 >
                   <SmileIcon className="h-6 w-6 text-muted-foreground" />
                 </button>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <Button
                   onClick={handleCancel}
                   variant="outline"
-                  className="h-10 w-fit rounded-xl"
+                  className="h-9 w-9 rounded-full p-0 sm:h-10 sm:w-fit sm:rounded-xl sm:px-4"
+                  aria-label="Cancel"
                 >
-                  Cancel
+                  <X className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Cancel</span>
                 </Button>
                 <Button
                   onClick={handleSubmit}
-                  className="h-10 w-fit rounded-xl"
+                  className="h-9 w-9 rounded-full p-0 sm:h-10 sm:w-fit sm:rounded-xl sm:px-4"
                   disabled={
                     isSubmitting ||
                     (!content.trim() && attachments.length === 0) ||
                     isOverLimit
                   }
+                  aria-label="Post thread"
                 >
-                  Post Thread
+                  <Send className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Post Thread</span>
                 </Button>
               </div>
             </div>
