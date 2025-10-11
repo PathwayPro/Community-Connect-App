@@ -20,6 +20,17 @@ export class CreateEventDto {
   @IsString()
   title: string;
 
+  @IsBoolean()
+  @IsOptional()
+  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.toLowerCase() === 'true';
+    }
+    return value;
+  })
+  removeEventImage?: boolean;
+
   @ApiProperty({
     description: 'Event description',
     example: 'Event full description',

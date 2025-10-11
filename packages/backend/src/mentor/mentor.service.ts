@@ -632,10 +632,16 @@ export class MentorService {
         include: {
           mentee: {
             select: {
+              id: true,
               first_name: true,
               last_name: true,
               email: true,
               profession: true,
+              mentee: {
+                select: {
+                  resume: true,
+                },
+              },
             },
           },
         },
@@ -647,10 +653,15 @@ export class MentorService {
       // Transform the data to match the MyMentees entity
       const transformedMentees = mentees.map((matching) => ({
         id: matching.id,
+        menteeUserId: matching.mentee.id,
         mentee: `${matching.mentee.first_name} ${matching.mentee.last_name}`,
         email: matching.mentee.email,
         profession: matching.mentee.profession || 'Not specified',
         status: matching.status,
+        resume:
+          (Array.isArray(matching.mentee.mentee) && matching.mentee.mentee[0]
+            ? matching.mentee.mentee[0].resume
+            : undefined) || undefined,
       }));
 
       return transformedMentees;

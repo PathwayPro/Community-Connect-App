@@ -356,6 +356,260 @@ export class MenteeService {
     }
   }
 
+  async getMyDashboard(menteeId: number) {
+    console.log('MENTEE ACCESSING SERVICE - MY DASHBOARD: ', menteeId);
+    try {
+      // 1) Find next upcoming session for this mentee (soonest by dateStart)
+      const nextSession = await this.prisma.mentorshipSessions.findFirst({
+        where: { menteeId, dateStart: { gt: new Date() } },
+        orderBy: { dateStart: 'asc' },
+        include: {
+          mentor: {
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+              email: true,
+              profession: true,
+              company_name: true,
+              picture_upload_link: true,
+            },
+          },
+          mentee: { select: { id: true } },
+        },
+      });
+
+      // If we have an upcoming session, tie dashboard to that mentor
+      if (nextSession) {
+        const mentorId = nextSession.mentor?.id;
+
+        // 4) First session with this mentor as mentorshipStarted
+        const firstSessionWithMentor =
+          await this.prisma.mentorshipSessions.findFirst({
+            where: { menteeId, mentorId },
+            orderBy: { dateStart: 'asc' },
+            select: { dateStart: true },
+          });
+
+        // 5) Sessions attended with this mentor from first session until now
+        const sessionsAttended = await this.prisma.mentorshipSessions.count({
+          where: {
+            menteeId,
+            mentorId,
+            dateEnd: { lt: new Date() },
+            ...(firstSessionWithMentor?.dateStart
+              ? { dateStart: { gte: firstSessionWithMentor.dateStart } }
+              : {}),
+          },
+        });
+
+        const mentorUser = nextSession.mentor
+          ? nextSession.mentor
+          : await this.prisma.users.findUnique({
+              where: { id: mentorId! },
+              select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+                profession: true,
+                company_name: true,
+                picture_upload_link: true,
+              },
+            });
+
+        const mentor = mentorUser
+          ? {
+              id: (mentorUser as any).id,
+              firstName: mentorUser.first_name,
+              lastName: mentorUser.last_name,
+              email: mentorUser.email,
+              profession: mentorUser.profession ?? undefined,
+              company: mentorUser.company_name ?? undefined,
+              expertise: mentorUser.profession ?? undefined,
+              avatarUrl: mentorUser.picture_upload_link ?? undefined,
+            }
+          : null;
+
+        const menteeDashboard = {
+          mentor,
+          mentorshipStarted:
+            firstSessionWithMentor?.dateStart?.toISOString() ?? null,
+          sessionsAttended,
+          // Keep existing field used by frontend
+          nextSession: nextSession.dateStart?.toISOString() ?? null,
+          // Add link as requested by API spec while keeping compatibility
+          nextSessionLink: nextSession.link ?? null,
+        } as any;
+
+        console.log('MENTEE DASHBOARD', menteeDashboard);
+
+        return menteeDashboard;
+      }
+
+      // Fallback: no upcoming session. Preserve previous behavior based on current approved match.
+      const currentMatch = await this.prisma.matchedMentorMentee.findFirst({
+        where: { menteeId, status: 'APPROVED' },
+        include: {
+          mentor: {
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+              email: true,
+              profession: true,
+              company_name: true,
+              picture_upload_link: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      const sessionsAttended = await this.prisma.mentorshipSessions.count({
+        where: { menteeId, dateEnd: { lt: new Date() } },
+      });
+
+      const firstMatch = await this.prisma.matchedMentorMentee.findFirst({
+        where: { menteeId },
+        orderBy: { createdAt: 'asc' },
+        select: { createdAt: true },
+      });
+
+      const mentor = currentMatch
+        ? {
+            id: currentMatch.mentor.id,
+            firstName: currentMatch.mentor.first_name,
+            lastName: currentMatch.mentor.last_name,
+            email: currentMatch.mentor.email,
+            profession: currentMatch.mentor.profession ?? undefined,
+            company: currentMatch.mentor.company_name ?? undefined,
+            expertise: currentMatch.mentor.profession ?? undefined,
+            avatarUrl: currentMatch.mentor.picture_upload_link ?? undefined,
+          }
+        : null;
+
+      return {
+        mentor,
+        mentorshipStarted: firstMatch?.createdAt?.toISOString() ?? null,
+        sessionsAttended,
+        nextSession: null,
+        nextSessionLink: null,
+      } as any;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error building mentee dashboard: ${error.message}`,
+      );
+    }
+  }
+
+  async getMyPastMentors(menteeId: number) {
+    try {
+      const matches = await this.prisma.matchedMentorMentee.findMany({
+        where: { menteeId },
+        include: {
+          mentor: {
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+              email: true,
+              profession: true,
+              company_name: true,
+              picture_upload_link: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      });
+
+      return matches.map((m) => ({
+        id: m.mentor.id,
+        firstName: m.mentor.first_name,
+        lastName: m.mentor.last_name,
+        profession: m.mentor.profession ?? 'Not specified',
+        company: m.mentor.company_name ?? undefined,
+        expertise: m.mentor.profession ?? undefined,
+        email: m.mentor.email,
+        avatarUrl: m.mentor.picture_upload_link ?? undefined,
+      }));
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error getting past mentors: ${error.message}`,
+      );
+    }
+  }
+
+  async getMyNotes(menteeId: number) {
+    try {
+      // Get recent sessions with mentee notes
+      const sessions = await this.prisma.mentorshipSessions.findMany({
+        where: { menteeId },
+        include: {
+          menteeNotes: true,
+        },
+        orderBy: { dateEnd: 'desc' },
+        take: 50,
+      });
+
+      // Flatten notes
+      const notes = sessions.flatMap((s, idx) =>
+        s.menteeNotes.map((n, noteIdx) => ({
+          title: `Session ${idx + 1}${noteIdx > 0 ? ` - Note ${noteIdx + 1}` : ''}`,
+          content: n.notes,
+          date: s.dateEnd?.toISOString() ?? s.dateStart?.toISOString(),
+        })),
+      );
+
+      return notes;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error getting mentee notes: ${error.message}`,
+      );
+    }
+  }
+
+  async getMyUpcomingSession(menteeId: number) {
+    try {
+      const session = await this.prisma.mentorshipSessions.findFirst({
+        where: { menteeId, dateStart: { gt: new Date() } },
+        orderBy: { dateStart: 'asc' },
+        include: {
+          mentor: {
+            select: {
+              first_name: true,
+              last_name: true,
+              email: true,
+              picture_upload_link: true,
+              profession: true,
+            },
+          },
+        },
+      });
+
+      if (!session) return null;
+
+      return {
+        id: session.id,
+        dateStart: session.dateStart.toISOString(),
+        dateEnd: session.dateEnd.toISOString(),
+        link: session.link ?? '',
+        mentor: {
+          firstName: session.mentor.first_name,
+          lastName: session.mentor.last_name,
+          email: session.mentor.email,
+          avatarUrl: session.mentor.picture_upload_link ?? undefined,
+          profession: session.mentor.profession ?? undefined,
+        },
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error getting upcoming session: ${error.message}`,
+      );
+    }
+  }
+
   remove(id: number) {
     // TO-DO: REMOVE MENTEE INFORMATION? OR CHANGE STATUS TO "REJECTED" OR "DELETED" TO KEEP THE INFORMATION?
     return `This action removes a #${id} mentee`;
