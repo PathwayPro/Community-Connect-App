@@ -54,13 +54,13 @@ export function PartnersSection({ className }: PartnersProps) {
               PARTNER_LOGOS.map((logo) => (
                 <div
                   key={`${logo.name}-track-${trackIndex}`}
-                  className="flex h-16 w-16 shrink-0 items-center justify-center sm:h-20 sm:w-20 md:h-24 md:w-24 lg:h-28 lg:w-28"
+                  className="flex h-20 w-20 shrink-0 items-center justify-center sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-32 lg:w-32"
                 >
                   <Image
                     src={logo.src}
                     alt={`${logo.name} logo`}
-                    width={120}
-                    height={120}
+                    width={200}
+                    height={200}
                     className="h-full w-full object-contain opacity-60 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0"
                     priority={false}
                     loading="lazy"
