@@ -80,7 +80,7 @@ export function MentorshipWaitlist({
             </div>
             <div className="mt-6 border-t pt-6">
               <p className="text-sm text-muted-foreground">
-                Signed by Community Connect Admin
+                Signed by CommuNet Admin
               </p>
             </div>
           </div>

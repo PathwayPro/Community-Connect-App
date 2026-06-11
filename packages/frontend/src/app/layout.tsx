@@ -4,7 +4,7 @@ import { lato } from '../config/fonts/fonts';
 import { RootLayoutClient } from '@/shared/components/layout';
 
 export const metadata: Metadata = {
-  title: 'Community Connect App',
+  title: 'CommuNet',
   description: 'A platform for connecting immigrants in tech'
 };
 
