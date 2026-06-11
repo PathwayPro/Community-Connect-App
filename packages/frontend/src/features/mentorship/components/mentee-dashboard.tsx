@@ -13,138 +13,59 @@ import { MessageSquare, Calendar } from 'lucide-react';
 import { NotesCard } from './common/notes-card';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { NoteEditor } from './common/note-editor';
-import { useState } from 'react';
-
+import { useEffect, useMemo, useState } from 'react';
+import { useMentorshipStore } from '../store';
 import { PastMentorsModal } from './common/modals/past-mentors-modal';
-
-const notes = [
-  {
-    title: 'Session 1',
-    content:
-      'Discussed career goals and created a development plan. Focused on improving system design skills and architectural patterns.',
-    date: new Date()
-  },
-  {
-    title: 'Session 2',
-    content:
-      'Reviewed recent project challenges. Mentor suggested implementing design patterns and improving code documentation practices.',
-    date: new Date()
-  },
-  {
-    title: 'Session 3',
-    content:
-      'Deep dive into microservices architecture. Explored service communication patterns and discussed eventual consistency.',
-    date: new Date()
-  },
-  {
-    title: 'Session 4',
-    content:
-      'Code review session focusing on performance optimization. Identified areas for improvement in database query patterns.',
-    date: new Date()
-  },
-  {
-    title: 'Session 5',
-    content:
-      'Worked on leadership skills and team communication. Discussed strategies for leading technical discussions effectively.',
-    date: new Date()
-  },
-  {
-    title: 'Session 6',
-    content:
-      'Explored advanced TypeScript patterns. Covered generic types, utility types, and best practices for type-safe development.',
-    date: new Date()
-  },
-  {
-    title: 'Session 7',
-    content:
-      'Discussion about career progression and industry trends. Mapped out learning path for cloud-native development skills.',
-    date: new Date()
-  },
-  {
-    title: 'Session 8',
-    content:
-      'Technical deep dive into React performance optimization. Covered memo, useMemo, useCallback, and component structure.',
-    date: new Date()
-  },
-  {
-    title: 'Session 9',
-    content:
-      'Reviewed system design case study. Created architecture diagrams and discussed scalability considerations in detail.',
-    date: new Date()
-  },
-  {
-    title: 'Session 10',
-    content:
-      'Focused on soft skills development. Discussed techniques for effective communication in cross-functional team settings.',
-    date: new Date()
-  }
-];
-
-const pastMentors = [
-  {
-    id: 1,
-    firstName: 'John',
-    lastName: 'Doe',
-    profession: 'Software Engineer',
-    company: 'Microsoft',
-    expertise: 'Software Engineer',
-    email: 'john.doe@example.com',
-    avatarUrl: 'https://github.com/shadcn.png'
-  },
-  {
-    id: 2,
-    firstName: 'Jane',
-    lastName: 'Doe',
-    profession: 'Software Engineer',
-    company: 'Microsoft',
-    expertise: 'Software Engineer',
-    email: 'jane.doe@example.com',
-    avatarUrl: 'https://github.com/shadcn.png'
-  },
-  {
-    id: 3,
-    firstName: 'John',
-    lastName: 'Doe',
-    profession: 'Software Engineer',
-    company: 'Microsoft',
-    expertise: 'Software Engineer',
-    email: 'john.doe@example.com',
-    avatarUrl: 'https://github.com/shadcn.png'
-  },
-  {
-    id: 4,
-    firstName: 'John',
-    lastName: 'Doe',
-    profession: 'Software Engineer',
-    company: 'Microsoft',
-    expertise: 'Software Engineer',
-    email: 'john.doe@example.com',
-    avatarUrl: 'https://github.com/shadcn.png'
-  },
-  {
-    id: 5,
-    firstName: 'John',
-    lastName: 'Doe',
-    profession: 'Software Engineer',
-    company: 'Microsoft',
-    expertise: 'Software Engineer',
-    email: 'john.doe@example.com',
-    avatarUrl: 'https://github.com/shadcn.png'
-  }
-];
 
 const MenteeDashboard = () => {
   const { user } = useUserStore();
   const [isPastMentorsOpen, setIsPastMentorsOpen] = useState(false);
+  const {
+    menteeDashboard,
+    menteeNotes,
+    pastMentors,
+    menteeUpcomingSession,
+    getMenteeDashboard,
+    getMenteeNotes,
+    getMenteePastMentors,
+    getMenteeUpcomingSession,
+    createMenteeNote
+  } = useMentorshipStore();
 
-  const mentor = {
-    fullName: user?.firstName + ' ' + user?.lastName,
-    profession: user?.profession,
-    company: 'Microsoft',
-    expertise: 'Software Engineer',
-    email: user?.email,
-    avatarUrl: 'https://github.com/shadcn.png'
-  };
+  useEffect(() => {
+    // Load mentee dashboard data on mount
+    getMenteeDashboard().catch(() => {});
+    getMenteeNotes().catch(() => {});
+    getMenteePastMentors().catch(() => {});
+    getMenteeUpcomingSession().catch(() => {});
+  }, [
+    getMenteeDashboard,
+    getMenteeNotes,
+    getMenteePastMentors,
+    getMenteeUpcomingSession
+  ]);
+
+  const mentor = useMemo(() => {
+    const m = menteeDashboard?.mentor;
+    if (m) {
+      return {
+        fullName: `${m.firstName} ${m.lastName}`,
+        profession: m.profession,
+        company: m.company,
+        expertise: m.expertise,
+        email: m.email,
+        avatarUrl: m.avatarUrl
+      };
+    }
+    return {
+      fullName: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`,
+      profession: user?.profession,
+      company: undefined,
+      expertise: undefined,
+      email: user?.email,
+      avatarUrl: undefined
+    };
+  }, [menteeDashboard, user]);
 
   return (
     <div className="container-wide flex w-full flex-col gap-6 px-4 md:px-0">
@@ -185,6 +106,14 @@ const MenteeDashboard = () => {
                         {mentor?.profession}
                       </span>
                     </p>
+                    {mentor?.email && (
+                      <p className="text-lg font-medium text-neutral-dark-100">
+                        Email:{' '}
+                        <span className="font-normal text-neutral-dark-600">
+                          {mentor.email}
+                        </span>
+                      </p>
+                    )}
                     <p className="text-lg font-medium text-neutral-dark-100">
                       Company:{' '}
                       <span className="font-normal text-neutral-dark-600">
@@ -199,12 +128,16 @@ const MenteeDashboard = () => {
                       </span>
                     </p>
 
-                    <p className="text-lg font-medium text-neutral-dark-100">
-                      Email:{' '}
-                      <span className="font-normal text-neutral-dark-600">
-                        {mentor?.email}
-                      </span>
-                    </p>
+                    {menteeDashboard?.nextSession && (
+                      <p className="text-lg font-medium text-neutral-dark-100">
+                        Next Session:{' '}
+                        <span className="font-normal text-neutral-dark-600">
+                          {new Date(
+                            menteeDashboard.nextSession
+                          ).toLocaleString()}
+                        </span>
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -213,31 +146,52 @@ const MenteeDashboard = () => {
                 <Button
                   className="flex h-10 w-full items-center gap-2"
                   variant="outline"
+                  disabled={!menteeDashboard?.mentor?.id}
                 >
                   <MessageSquare className="h-5 w-5" />
                   Message
                 </Button>
 
-                <Button className="flex h-10 w-full items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Book a Session
+                <Button
+                  className="flex h-10 w-full items-center gap-2"
+                  asChild
+                  disabled={!menteeDashboard?.nextSessionLink}
+                >
+                  <a
+                    href={menteeDashboard?.nextSessionLink || '#'}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Calendar className="h-5 w-5" />
+                    Book a Session
+                  </a>
                 </Button>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4">
               <MenteeCard
                 title="Mentrorship Started"
-                value="09/01/2025"
+                value={
+                  menteeDashboard?.mentorshipStarted
+                    ? new Date(
+                        menteeDashboard.mentorshipStarted
+                      ).toLocaleDateString()
+                    : '-'
+                }
                 icon="calendar"
               />
               <MenteeCard
                 title="Session Attended"
-                value="64"
+                value={(menteeDashboard?.sessionsAttended ?? 0).toString()}
                 icon="liveSessions"
               />
               <MenteeCard
                 title="Next Session"
-                value="12:00 PM, 12/01/2025"
+                value={
+                  menteeDashboard?.nextSession
+                    ? new Date(menteeDashboard.nextSession).toLocaleString()
+                    : '-'
+                }
                 icon="calendar"
               />
             </div>
@@ -254,12 +208,12 @@ const MenteeDashboard = () => {
             <MentorshipSection.Content>
               <ScrollArea className="h-[260px] pr-2 sm:h-[400px] sm:pr-4">
                 <div className="flex flex-col gap-4">
-                  {notes.map((note) => (
+                  {menteeNotes.map((note) => (
                     <NotesCard
-                      key={note.title}
+                      key={`${note.title}-${note.date}`}
                       title={note.title}
                       content={note.content}
-                      date={note.date}
+                      date={new Date(note.date)}
                       onClick={() => {}}
                     />
                   ))}
@@ -274,7 +228,14 @@ const MenteeDashboard = () => {
             </MentorshipSection.Header>
 
             <MentorshipSection.Content>
-              <NoteEditor onSubmit={() => {}} />
+              <NoteEditor
+                onSubmit={async ({ title, content }) => {
+                  const sessionId = menteeUpcomingSession?.id;
+                  if (!sessionId) return;
+                  const note = title ? `${title}: ${content}` : content;
+                  await createMenteeNote(sessionId, note);
+                }}
+              />
             </MentorshipSection.Content>
           </div>
         </div>

@@ -78,7 +78,6 @@ export class UsersService {
 
   // User Retrieval Methods
   async getUserById(userIdNumber: string): Promise<ReadUserDto> {
-    console.log('| - - - - - - - > USER ID:', userIdNumber);
     const user = await this.prisma.users.findFirst({
       where: {
         id: Number(userIdNumber),

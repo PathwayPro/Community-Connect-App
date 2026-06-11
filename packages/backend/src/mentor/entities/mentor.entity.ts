@@ -136,6 +136,10 @@ export class MyMentees {
   @IsNumber()
   id?: number;
 
+  @ApiProperty({ description: 'User ID of the mentee', example: '25' })
+  @IsNumber()
+  menteeUserId?: number;
+
   @ApiProperty({
     description: 'Full name of the mentee',
     example: 'Jane Smith',
@@ -157,6 +161,15 @@ export class MyMentees {
   @IsOptional()
   @IsString()
   profession?: string;
+
+  @ApiProperty({
+    description: 'Resume path or URL from mentees table',
+    example: 'uploads/resumes/abc123.pdf',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  resume?: string;
 
   @ApiProperty({
     description: 'Status of the matching',
