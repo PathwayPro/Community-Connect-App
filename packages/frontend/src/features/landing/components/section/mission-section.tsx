@@ -13,7 +13,7 @@ const features = [
   {
     title: 'Our Vision',
     description:
-      'We strive to build a united and diverse tech community where immigrant professionals can thrive, collaborate, and make meaningful contributions. CommunityConnect is your go-to platform for networking, mentorship, and growth—regardless of background.',
+      'We strive to build a united and diverse tech community where immigrant professionals can thrive, collaborate, and make meaningful contributions. CommuNet is your go-to platform for networking, mentorship, and growth—regardless of background.',
     icon: 'target',
     bgColor: 'bg-[#FFDEDE]'
   }

@@ -3,7 +3,7 @@ import { AuthForm } from '@/features/auth/components';
 import { AuthCarousel } from '@/features/auth/components';
 import { Separator } from '@/shared/components/ui/separator';
 export const metadata: Metadata = {
-  title: 'Login | Your App Name',
+  title: 'Login | CommuNet',
   description: 'Login to your account to access all features'
 };
 

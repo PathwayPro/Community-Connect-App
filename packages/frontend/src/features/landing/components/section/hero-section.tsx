@@ -14,7 +14,7 @@ export function HeroSection() {
               Support and Community
             </h1>
             <h5 className="mt-4 font-normal">
-              CommuniNet helps immigrants find mentorship, career opportunities,
+              CommuNet helps immigrants find mentorship, career opportunities,
               and a supportive network—your new beginning starts here.
             </h5>
             <div className="mt-8">

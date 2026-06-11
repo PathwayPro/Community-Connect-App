@@ -7,7 +7,7 @@ const steps: ItemCardProps[] = [
   {
     title: 'Sign Up to the Platform',
     description:
-      'Create your profile and become part of the CommuneNet platform for free.',
+      'Create your profile and become part of the CommuNet platform for free.',
     icon: 'pen',
     bgColor: 'bg-[#E3DFFF]'
   },

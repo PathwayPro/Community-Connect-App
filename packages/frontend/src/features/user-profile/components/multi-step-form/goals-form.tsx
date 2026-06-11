@@ -16,7 +16,7 @@ export const GoalsForm = () => {
       />
       <FormSelect
         name="goalId"
-        label="What is your goal for joining Community Connect?"
+        label="What is your goal for joining CommuNet?"
         placeholder="Select option"
         customError="Goals are required"
         options={goalsOptions}

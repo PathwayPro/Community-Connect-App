@@ -5,7 +5,7 @@ import { Separator } from '@/shared/components/ui/separator';
 import { ForgotPasswordForm } from '@/features/auth/components';
 
 export const metadata: Metadata = {
-  title: 'Forgot Password | Community Connect',
+  title: 'Forgot Password | CommuNet',
   description: 'Forgot Password'
 };
 

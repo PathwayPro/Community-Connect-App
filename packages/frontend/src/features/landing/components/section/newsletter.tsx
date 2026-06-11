@@ -46,7 +46,7 @@ export function NewsletterSection() {
 
       toast({
         title: 'Success!',
-        description: "You've been subscribed to Communet's newsletter."
+        description: "You've been subscribed to CommuNet's newsletter."
       });
 
       setTimeout(() => {

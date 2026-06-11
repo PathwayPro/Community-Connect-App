@@ -4,7 +4,7 @@ import { Separator } from '@/shared/components/ui/separator';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Register | Community Connect',
+  title: 'Register | CommuNet',
   description: 'Register to your account to access all features'
 };
 
